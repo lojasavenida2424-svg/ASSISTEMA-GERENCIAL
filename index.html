@@ -9,8 +9,15 @@
       const SUPABASE_URL = 'https://euyrhkusnasgiueefldg.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1eXJoa3VzbmFzZ2l1ZWVmbGRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzY0MTksImV4cCI6MjA5ODk1MjQxOX0.woI5Il3ObKrj8BJfdYz8DcUW08Jl5c458ykh1SrHYr4';
       
-      // Criando o cliente garantindo o escopo da janela do navegador
-      const supabaseclient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      // CORREÇÃO AQUI: Adicionado o objeto de configuração ativando o Realtime via WebSockets
+      const supabaseclient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: { persistSession: false },
+          realtime: {
+              params: {
+                  eventsPerSecond: 10
+              }
+          }
+      });
 
       // 1. Função que busca as tarefas no banco de dados
       async function carregarTarefas() {
@@ -40,7 +47,7 @@
               });
       }
 
-      // Evita falhas de inicialização rodando o código somente após o DOM carregar por completo
+      // Inicialização segura do DOM
       document.addEventListener('DOMContentLoaded', () => {
           carregarTarefas();
           ativarTempoReal();
