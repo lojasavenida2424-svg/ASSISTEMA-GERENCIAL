@@ -29,13 +29,14 @@
       function ativarTempoReal() {
           supabaseclient
               .channel('mudancas_tarefas')
-              .on('postgres_changes', { event: '*', pattern: 'public', table: 'tarefas' }, (payload) => {
+              .on('postgres_changes', { event: '*', schema: 'public', table: 'tarefas' }, (payload) => {
                   console.log('Opa, o banco mudou! Atualizando dados...', payload);
                   carregarTarefas(); // Sempre que mudar algo no celular, roda a busca de novo no notebook
               })
               .subscribe();
       }
 
+      // Executa as duas funções assim que o script terminar de carregar
       carregarTarefas();
       ativarTempoReal();
   </script>
