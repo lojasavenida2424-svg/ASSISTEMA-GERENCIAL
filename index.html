@@ -8,7 +8,9 @@
   <script>
       const SUPABASE_URL = 'https://euyrhkusnasgiueefldg.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1eXJoa3VzbmFzZ2l1ZWVmbGRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzY0MTksImV4cCI6MjA5ODk1MjQxOX0.woI5Il3ObKrj8BJfdYz8DcUW08Jl5c458ykh1SrHYr4';
-      const supabaseclient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      
+      // Criando o cliente garantindo o escopo da janela do navegador
+      const supabaseclient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
       // 1. Função que busca as tarefas no banco de dados
       async function carregarTarefas() {
@@ -20,8 +22,8 @@
               console.error('Erro ao buscar tarefas:', error);
           } else {
               console.log('Tarefas carregadas com sucesso:', data);
-              // Se o seu código original tiver uma função específica para desenhar 
-              // as tarefas na tela, ela precisará ser chamada bem aqui.
+              // Lembrete: se você tiver uma função que renderiza os elementos HTML 
+              // na tela (ex: atualizarListaHTML(data)), chame-a aqui.
           }
       }
 
@@ -31,14 +33,18 @@
               .channel('mudancas_tarefas')
               .on('postgres_changes', { event: '*', schema: 'public', table: 'tarefas' }, (payload) => {
                   console.log('Opa, o banco mudou! Atualizando dados...', payload);
-                  carregarTarefas(); // Sempre que mudar algo no celular, roda a busca de novo no notebook
+                  carregarTarefas(); // Recarrega os dados nos dois dispositivos
               })
-              .subscribe();
+              .subscribe((status) => {
+                  console.log('Status da conexão Realtime:', status);
+              });
       }
 
-      // Executa as duas funções assim que o script terminar de carregar
-      carregarTarefas();
-      ativarTempoReal();
+      // Evita falhas de inicialização rodando o código somente após o DOM carregar por completo
+      document.addEventListener('DOMContentLoaded', () => {
+          carregarTarefas();
+          ativarTempoReal();
+      });
   </script>
   <style>
     :root {
