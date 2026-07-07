@@ -1,0 +1,3105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assistência Gerencial de Loja - Avenida V21</title>
+  <style>
+    :root {
+      --amarelo: #F6C426;
+      --amarelo-escuro: #DEB022;
+      --preto-logo: #291A1E;
+      --bg: #EDF2F7;
+      --page: #FFFFFF;
+      --page-2: #F8FAFC;
+      --text: #111827;
+      --muted: #64748B;
+      --border: #CBD5E1;
+      --soft: #F1F5F9;
+      --shadow: 0 18px 35px rgba(15, 23, 42, .12);
+      --red-bg: #FEE2E2;
+      --red: #991B1B;
+      --green-bg: #DCFCE7;
+      --green: #166534;
+      --orange-bg: #FFEDD5;
+      --orange: #9A3412;
+      --blue-bg: #DBEAFE;
+      --blue: #1D4ED8;
+      --purple-bg: #F3E8FF;
+      --purple: #6B21A8;
+    }
+
+    body.dark-mode {
+      --bg: #2E0D1E;
+      --page: #1E1E1E;
+      --page-2: #2A2A2A;
+      --text: #F8FAFC;
+      --muted: #C9B8C1;
+      --border: #5A263B;
+      --soft: #292929;
+      --shadow: 0 18px 35px rgba(0, 0, 0, .42);
+      --preto-logo: #2E0D1E;
+      --red-bg: #4C1D1D;
+      --red: #FCA5A5;
+      --green-bg: #123A24;
+      --green: #86EFAC;
+      --orange-bg: #432A13;
+      --orange: #FDBA74;
+      --blue-bg: #172554;
+      --blue: #93C5FD;
+      --purple-bg: #3B1327;
+      --purple: #F6C426;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .login-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top left, rgba(246,196,38,.35), transparent 38%), linear-gradient(135deg, #291A1E 0%, #111827 100%);
+      padding: 20px;
+    }
+
+    .login-card {
+      width: min(460px, 100%);
+      background: #FFFFFF;
+      color: #111827;
+      border-radius: 24px;
+      box-shadow: 0 28px 70px rgba(0,0,0,.35);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.35);
+    }
+
+    .login-hero {
+      background: var(--amarelo);
+      padding: 28px 28px 22px;
+      border-bottom: 4px solid var(--preto-logo);
+    }
+
+    .login-hero .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      width: 62px; height: 54px; border-radius: 18px; display: grid; place-items: center;
+      background: var(--preto-logo); color: var(--amarelo); font-size: 1.35rem; font-weight: 1000; letter-spacing: -.04em;
+    }
+    .login-hero h1 { margin: 0; font-size: 1.35rem; color: var(--preto-logo); }
+    .login-hero p { margin: 5px 0 0; color: var(--preto-logo); opacity: .78; font-weight: 700; }
+    .login-body { padding: 26px 28px 30px; }
+    .login-body label { display:block; font-weight: 800; margin: 14px 0 7px; font-size:.88rem; }
+    .login-body input { width:100%; padding: 14px 14px; border: 1px solid #CBD5E1; border-radius: 14px; font-size: 1rem; outline: none; }
+    .login-body input:focus { border-color: var(--amarelo-escuro); box-shadow: 0 0 0 4px rgba(246,196,38,.25); }
+    .login-btn { width:100%; margin-top: 18px; padding: 14px 16px; border:0; border-radius: 14px; background: var(--preto-logo); color: var(--amarelo); font-weight: 900; cursor:pointer; font-size: 1rem; }
+    .login-error { min-height: 24px; margin-top: 12px; color: #B91C1C; font-weight: 800; font-size: .9rem; }
+    .login-hint { margin-top: 14px; padding: 12px; background:#F8FAFC; border-radius: 14px; border:1px dashed #CBD5E1; color:#475569; font-size:.86rem; }
+    .login-user-preview {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(41,26,30,.12);
+      color: var(--preto-logo);
+      font-weight: 900;
+      border: 1px solid rgba(41,26,30,.18);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      line-height: 1.25;
+    }
+    .login-user-preview small {
+      display: block;
+      font-size: .70rem;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      opacity: .72;
+      margin-bottom: 2px;
+    }
+    .login-user-preview b { font-size: .98rem; }
+    .login-user-preview .preview-operator {
+      background: var(--preto-logo);
+      color: var(--amarelo);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: .78rem;
+      white-space: nowrap;
+    }
+    .login-user-preview.not-found {
+      background: rgba(220,38,38,.10);
+      border-color: rgba(220,38,38,.28);
+      color: #7F1D1D;
+    }
+    .login-user-preview.empty {
+      background: rgba(41,26,30,.08);
+      color: rgba(41,26,30,.72);
+    }
+
+    body.dark-mode .login-screen {
+      background: radial-gradient(circle at top left, rgba(255,205,9,.22), transparent 35%), linear-gradient(135deg, #2E0D1E 0%, #1E1E1E 100%);
+    }
+    body.dark-mode .login-card {
+      background: #1E1E1E;
+      color: #F8FAFC;
+      border-color: #5A263B;
+    }
+    body.dark-mode .login-hero {
+      background: #2E0D1E;
+      border-bottom-color: #FFCD09;
+    }
+    body.dark-mode .login-hero h1,
+    body.dark-mode .login-hero p {
+      color: #FFCD09;
+    }
+    body.dark-mode .brand-mark,
+    body.dark-mode .app-loader-mark {
+      background: #FFCD09;
+      color: #2E0D1E;
+    }
+    body.dark-mode .login-body label {
+      color: #F8FAFC;
+    }
+    body.dark-mode .login-body input {
+      background: #2A2A2A;
+      color: #F8FAFC;
+      border-color: #5A263B;
+    }
+    body.dark-mode .login-body input::placeholder {
+      color: #9CA3AF;
+    }
+    body.dark-mode .login-body input:focus {
+      border-color: #FFCD09;
+      box-shadow: 0 0 0 4px rgba(255,205,9,.18);
+    }
+    body.dark-mode .login-btn {
+      background: #FFCD09;
+      color: #2E0D1E;
+    }
+    body.dark-mode .login-error {
+      color: #FCA5A5;
+    }
+    body.dark-mode .login-hint {
+      background: #2A2A2A;
+      color: #C9B8C1;
+      border-color: #5A263B;
+    }
+    body.dark-mode .login-user-preview {
+      background: rgba(255,205,9,.10);
+      color: #F8FAFC;
+      border-color: rgba(255,205,9,.32);
+    }
+    body.dark-mode .login-user-preview .preview-operator {
+      background: #FFCD09;
+      color: #2E0D1E;
+    }
+    body.dark-mode .login-user-preview.not-found {
+      background: rgba(127,29,29,.26);
+      border-color: rgba(252,165,165,.35);
+      color: #FCA5A5;
+    }
+    body.dark-mode .login-user-preview.empty {
+      background: rgba(255,205,9,.08);
+      color: #C9B8C1;
+    }
+    body.dark-mode .sidebar {
+      background: #2E0D1E;
+      color: #FFCD09;
+      border-right: 1px solid #5A263B;
+    }
+    body.dark-mode .logo-box {
+      border-bottom-color: #FFCD09;
+    }
+    body.dark-mode .logo-icon {
+      background: #FFCD09;
+      color: #2E0D1E;
+    }
+    body.dark-mode .user-box {
+      background: rgba(255,205,9,.10);
+      border-color: rgba(255,205,9,.22);
+    }
+    body.dark-mode .nav-btn {
+      color: #FFCD09;
+    }
+    body.dark-mode .nav-btn:hover,
+    body.dark-mode .nav-btn.active {
+      background: rgba(255,205,9,.16);
+      box-shadow: inset 5px 0 0 #FFCD09;
+    }
+    body.dark-mode .theme-btn {
+      background: #FFCD09;
+      color: #2E0D1E;
+    }
+    body.dark-mode .topbar {
+      background: rgba(46,13,30,.90);
+      border-bottom-color: #5A263B;
+    }
+
+
+    .app-loader {
+      position: fixed;
+      inset: 0;
+      z-index: 1400;
+      display: none;
+      place-items: center;
+      background: rgba(17,24,39,.56);
+      backdrop-filter: blur(8px);
+      padding: 20px;
+    }
+    .app-loader.active { display: grid; }
+    .app-loader-card {
+      width: min(420px, 100%);
+      background: var(--page);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      box-shadow: 0 30px 80px rgba(0,0,0,.25);
+      padding: 28px 26px;
+      text-align: center;
+    }
+    .app-loader-mark {
+      width: 72px;
+      height: 56px;
+      margin: 0 auto 16px;
+      border-radius: 18px;
+      background: var(--preto-logo);
+      color: var(--amarelo);
+      display: grid;
+      place-items: center;
+      font-size: 1.4rem;
+      font-weight: 1000;
+      letter-spacing: -.04em;
+    }
+    .app-loader-spinner {
+      width: 54px;
+      height: 54px;
+      margin: 8px auto 14px;
+      border-radius: 50%;
+      border: 5px solid rgba(246,196,38,.28);
+      border-top-color: var(--amarelo-escuro);
+      animation: spinLoader 0.9s linear infinite;
+    }
+    .app-loader-card h3 {
+      margin: 0;
+      font-size: 1.15rem;
+      color: var(--text);
+    }
+    .app-loader-card p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    @keyframes spinLoader { to { transform: rotate(360deg); } }
+
+    .sidebar {
+      width: 278px;
+      background: var(--amarelo);
+      color: var(--preto-logo);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      box-shadow: 2px 0 15px rgba(0,0,0,.18);
+      z-index: 5;
+    }
+
+    .logo-box { padding: 22px; border-bottom: 2px solid var(--preto-logo); }
+    .logo-line { display:flex; gap: 12px; align-items:center; }
+    .logo-icon { width: 58px; height: 48px; border-radius: 16px; background: var(--preto-logo); color: var(--amarelo); display:grid; place-items:center; font-size:1.2rem; font-weight:1000; letter-spacing:-.04em; }
+    .logo-title { font-weight: 1000; letter-spacing: -.02em; }
+    .logo-sub { font-size: .78rem; font-weight: 800; opacity: .78; margin-top: 2px; }
+
+    .user-box { margin: 16px; padding: 14px; border-radius: 18px; background: rgba(41,26,30,.12); border: 1px solid rgba(41,26,30,.18); }
+    .user-name { font-weight: 1000; font-size:.94rem; }
+    .user-role { font-size:.76rem; font-weight:800; opacity:.78; margin-top: 3px; }
+
+    .nav { padding: 4px 12px 14px; overflow-y:auto; }
+    .nav-btn {
+      width:100%; display:flex; align-items:center; gap:10px; padding: 12px 12px; margin: 5px 0;
+      border:0; border-radius: 14px; background: transparent; color: var(--preto-logo); cursor:pointer;
+      font-weight: 900; text-align:left; transition:.2s;
+    }
+    .nav-btn:hover, .nav-btn.active { background: var(--amarelo-escuro); box-shadow: inset 5px 0 0 var(--preto-logo); }
+    .nav-btn .ico { width:24px; text-align:center; }
+
+    .theme-btn { margin: auto 16px 16px; padding: 13px 14px; border:0; border-radius: 16px; background: var(--preto-logo); color: var(--amarelo); font-weight: 900; cursor:pointer; }
+
+    .main { flex:1; min-width:0; }
+    .topbar {
+      position: sticky; top:0; z-index:4; background: rgba(237,242,247,.88); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border); padding: 16px 86px 16px 22px; display:flex; align-items:center; justify-content:space-between; gap:18px;
+    }
+    body.dark-mode .topbar { background: rgba(17,17,17,.88); }
+    .top-left h2 { margin:0; font-size: 1.12rem; }
+    .top-left p { margin:4px 0 0; color: var(--muted); font-size:.86rem; font-weight: 700; }
+    .store-meta { display:flex; align-items:center; gap: 8px; flex-wrap:wrap; justify-content:flex-end; }
+    .pill { border:1px solid var(--border); background: var(--page); padding: 8px 11px; border-radius: 999px; font-weight: 900; font-size:.8rem; white-space:nowrap; }
+    .logout-fixed { position: fixed; top: 15px; right: 18px; width: 44px; height:44px; border-radius: 50%; border: 1px solid var(--border); background: var(--page); color: var(--text); box-shadow: var(--shadow); cursor:pointer; z-index:20; font-size: 1.15rem; display:grid; place-items:center; }
+    .logout-fixed:hover { transform: translateY(-1px); border-color: var(--amarelo-escuro); }
+
+    .content { padding: 22px; }
+    .page { display:none; }
+    .page.active { display:block; animation: fade .18s ease; }
+    @keyframes fade { from { opacity:.4; transform: translateY(5px);} to { opacity:1; transform:translateY(0);} }
+
+    .section-card { background: var(--page); border: 1px solid var(--border); border-radius: 22px; box-shadow: var(--shadow); padding: 20px; margin-bottom: 18px; }
+    .section-title { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom: 16px; }
+    .section-title h1, .section-title h2 { margin:0; font-size: 1.35rem; }
+    .section-title p { margin: 4px 0 0; color: var(--muted); font-weight: 700; }
+
+    .grid { display:grid; gap: 16px; }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .metric { background: var(--page); border: 1px solid var(--border); border-radius: 20px; padding: 18px; box-shadow: 0 8px 24px rgba(15,23,42,.08); position: relative; overflow:hidden; }
+    .metric:before { content:""; position:absolute; top:0; left:0; width:100%; height:5px; background: var(--amarelo); }
+    .metric small { color: var(--muted); font-weight: 900; text-transform: uppercase; font-size: .72rem; }
+    .metric b { display:block; font-size: 2rem; margin-top:8px; }
+    .metric span { color: var(--muted); font-size:.82rem; font-weight:700; }
+
+    .form-grid { display:grid; grid-template-columns: repeat(12, 1fr); gap: 12px; align-items:end; }
+    .field { grid-column: span 3; }
+    .field.w2 { grid-column: span 2; }
+    .field.w4 { grid-column: span 4; }
+    .field.w5 { grid-column: span 5; }
+    .field.w6 { grid-column: span 6; }
+    .field.w8 { grid-column: span 8; }
+    .field.w12 { grid-column: span 12; }
+    label { display:block; font-weight: 900; font-size:.78rem; margin: 0 0 7px; color: var(--text); text-transform: uppercase; letter-spacing:.02em; }
+    input, select, textarea { width:100%; border:1px solid var(--border); background: var(--page); color: var(--text); border-radius: 13px; padding: 11px 12px; outline:none; font: inherit; }
+    input[readonly] { background: var(--soft); color: var(--muted); cursor: not-allowed; font-weight: 900; }
+    textarea { min-height: 104px; resize: vertical; }
+    input:focus, select:focus, textarea:focus { border-color: var(--amarelo-escuro); box-shadow: 0 0 0 4px rgba(246,196,38,.18); }
+
+    .actions { display:flex; gap: 10px; flex-wrap: wrap; align-items:center; }
+    .btn { border:0; padding: 11px 14px; border-radius: 13px; cursor:pointer; font-weight: 900; background: var(--preto-logo); color: var(--amarelo); }
+    .btn.secondary { background: var(--soft); color: var(--text); border:1px solid var(--border); }
+    .btn.danger { background: #DC2626; color:white; }
+    .btn.good { background: #16A34A; color:white; }
+    .btn.warn { background: #EA580C; color:white; }
+    .btn.small { padding: 8px 10px; border-radius: 10px; font-size:.78rem; }
+
+    .filter-row { display:flex; gap: 10px; align-items:center; flex-wrap: wrap; margin-bottom: 14px; }
+    .filter-row select, .filter-row input { max-width: 230px; }
+    .tabs { display:flex; gap: 8px; flex-wrap:wrap; margin-bottom: 16px; }
+    .tab-btn { border:1px solid var(--border); background: var(--page); color: var(--text); border-radius: 999px; padding: 9px 13px; font-weight: 900; cursor:pointer; }
+    .tab-btn.active { background: var(--preto-logo); color: var(--amarelo); border-color: var(--preto-logo); }
+
+    .table-wrap { overflow:auto; border:1px solid var(--border); border-radius: 18px; background: var(--page); }
+    table { width:100%; border-collapse: collapse; min-width: 980px; }
+    th, td { border-bottom: 1px solid var(--border); padding: 10px 10px; text-align:left; vertical-align:top; font-size:.86rem; }
+    th { background: var(--preto-logo); color: var(--amarelo); position: sticky; top:0; z-index:1; }
+    tr:nth-child(even) td { background: rgba(148,163,184,.07); }
+    td.center, th.center { text-align:center; }
+
+    .badge { display:inline-flex; align-items:center; gap:5px; padding: 6px 9px; border-radius: 999px; font-size:.74rem; font-weight: 1000; white-space:nowrap; }
+    .b-vm { background: var(--purple-bg); color: var(--purple); }
+    .b-fiscal { background: var(--red-bg); color: var(--red); }
+    .b-adm { background: var(--blue-bg); color: var(--blue); }
+    .b-pf { background: var(--green-bg); color: var(--green); }
+    .b-geral { background: var(--orange-bg); color: var(--orange); }
+    .b-ok { background: var(--green-bg); color: var(--green); }
+    .b-warn { background: var(--orange-bg); color: var(--orange); }
+    .b-bad { background: var(--red-bg); color: var(--red); }
+    .b-info { background: var(--blue-bg); color: var(--blue); }
+
+    .kanban { display:grid; grid-template-columns: repeat(4, minmax(240px,1fr)); gap: 14px; overflow:auto; padding-bottom: 8px; }
+    .lane { background: var(--page-2); border:1px solid var(--border); border-radius: 18px; padding: 12px; min-height: 220px; }
+    .lane h3 { margin: 0 0 12px; font-size: .95rem; display:flex; justify-content:space-between; align-items:center; }
+    .task-card { background: var(--page); border: 1px solid var(--border); border-radius: 16px; padding: 12px; margin-bottom: 10px; box-shadow: 0 8px 18px rgba(15,23,42,.07); }
+    .task-card h4 { margin: 0 0 7px; }
+    .task-card p { margin: 6px 0; color: var(--muted); font-size:.82rem; font-weight:700; }
+    .task-meta { display:flex; gap:6px; flex-wrap:wrap; margin: 8px 0; }
+
+    .task-summary { display:grid; grid-template-columns: repeat(4, minmax(160px,1fr)); gap: 12px; margin: 12px 0 16px; }
+    .status-card { border:1px solid var(--border); background: var(--page-2); border-radius: 18px; padding: 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .status-card small { display:block; color:var(--muted); font-weight:1000; text-transform:uppercase; font-size:.70rem; }
+    .status-card b { font-size:1.7rem; }
+    .status-card .dot { width: 13px; height: 13px; border-radius:50%; background:var(--blue); box-shadow:0 0 0 5px rgba(29,78,216,.12); }
+    .status-card.pendente .dot { background:#DC2626; box-shadow:0 0 0 5px rgba(220,38,38,.12); }
+    .status-card.andamento .dot { background:#EA580C; box-shadow:0 0 0 5px rgba(234,88,12,.14); }
+    .status-card.aguardando .dot { background:#1D4ED8; box-shadow:0 0 0 5px rgba(29,78,216,.12); }
+    .status-card.concluida .dot { background:#16A34A; box-shadow:0 0 0 5px rgba(22,163,74,.12); }
+    .modal-backdrop { position:fixed; inset:0; background:rgba(15,23,42,.62); display:none; align-items:center; justify-content:center; padding:22px; z-index:60; }
+    .modal-backdrop.active { display:flex; }
+    .modal { width:min(980px, 100%); max-height:92vh; overflow:auto; background:var(--page); color:var(--text); border:1px solid var(--border); border-radius:24px; box-shadow:0 28px 80px rgba(0,0,0,.34); padding:20px; }
+    .modal-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px; }
+    .modal-head h2 { margin:0; }
+    .modal-head p { margin:4px 0 0; color:var(--muted); font-weight:800; }
+    .icon-btn { width:40px; height:40px; border-radius:50%; border:1px solid var(--border); background:var(--soft); color:var(--text); cursor:pointer; font-weight:1000; }
+
+    .sector-board { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; }
+    .sector-card { border:1px solid var(--border); border-radius: 20px; padding: 16px; background: var(--page); box-shadow: 0 8px 22px rgba(15,23,42,.08); }
+    .sector-card h3 { margin:0 0 6px; }
+    .employee-grid { display:grid; grid-template-columns: repeat(4, minmax(180px, 1fr)); gap: 14px; margin-top: 16px; }
+    .employee-card { border:1px solid var(--border); border-radius: 20px; padding: 15px; background: var(--page-2); box-shadow: 0 8px 22px rgba(15,23,42,.08); }
+    .employee-card h3 { margin: 0 0 6px; font-size: 1rem; }
+    .employee-card .role { font-weight: 900; color: var(--preto-logo); background: var(--amarelo); border-radius: 999px; display:inline-block; padding: 5px 9px; font-size:.72rem; margin: 5px 0 8px; }
+    .employee-card p { color: var(--muted); font-weight: 750; font-size:.84rem; line-height:1.45; }
+    .operator-grid { display:grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: 14px; margin-top: 16px; }
+    .operator-card { border:1px solid var(--border); border-radius: 20px; padding: 16px; background: var(--page-2); box-shadow: 0 8px 22px rgba(15,23,42,.08); position:relative; overflow:hidden; }
+    .operator-card::before { content:""; position:absolute; left:0; top:0; bottom:0; width:6px; background: var(--muted); }
+    .operator-card.ativo::before { background:#16A34A; }
+    .operator-card.inativo::before { background:#DC2626; }
+    .operator-card h3 { margin:0 0 6px; font-size:1.05rem; }
+    .operator-card p { color:var(--muted); font-weight:750; line-height:1.5; margin:8px 0 12px; }
+    .operator-status { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:6px 10px; font-weight:1000; font-size:.75rem; }
+    .operator-status.ativo { color:var(--green); background:var(--green-bg); }
+    .operator-status.inativo { color:var(--red); background:var(--red-bg); }
+    body.dark-mode .employee-card .role { color: #291A1E; }
+    .sector-card p { margin: 0 0 12px; color: var(--muted); font-weight:700; font-size:.85rem; }
+    .sector-stat { display:flex; justify-content:space-between; padding: 8px 0; border-top:1px solid var(--border); font-weight:900; }
+
+    .empty { padding: 22px; text-align:center; color: var(--muted); font-weight: 800; }
+    .config-locked { padding: 18px; border-radius: 18px; background: var(--red-bg); color: var(--red); font-weight: 900; }
+
+
+
+    .escala-mode-grid { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; margin-bottom: 16px; }
+    .escala-mode-card { border:1px solid var(--border); background: var(--page); border-radius: 20px; padding: 18px; box-shadow: 0 8px 22px rgba(15,23,42,.08); cursor:pointer; transition:.18s; position:relative; overflow:hidden; }
+    .escala-mode-card:before { content:""; position:absolute; top:0; left:0; right:0; height:5px; background: var(--amarelo); }
+    .escala-mode-card:hover, .escala-mode-card.active { transform: translateY(-1px); border-color: var(--amarelo-escuro); box-shadow: 0 14px 28px rgba(15,23,42,.12); }
+    .escala-mode-card h3 { margin:0 0 8px; font-size:1.18rem; }
+    .escala-mode-card p { margin:0; color:var(--muted); font-weight:700; line-height:1.45; }
+    .escala-step-grid { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin-top: 14px; }
+    .escala-step { border:1px solid var(--border); background: var(--page-2); border-radius: 18px; padding: 14px; }
+    .escala-step h3 { margin:0 0 6px; display:flex; align-items:center; gap:8px; font-size:1rem; }
+    .escala-step p { margin:0 0 12px; color:var(--muted); font-weight:700; font-size:.84rem; line-height:1.45; }
+    .escala-preview-grid { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin-top: 16px; }
+    .escala-preview { border:1px solid var(--border); background: var(--page); border-radius: 18px; overflow:hidden; }
+    .escala-preview h3 { margin:0; padding: 12px 14px; background: var(--preto-logo); color: var(--amarelo); font-size:.95rem; }
+    .escala-list { padding: 12px; display:grid; gap: 10px; }
+    .escala-person { border:1px solid var(--border); background: var(--page-2); border-radius: 14px; padding: 10px; }
+    .escala-person b { display:block; margin-bottom: 5px; }
+    .escala-person small { color: var(--muted); font-weight:800; line-height:1.35; display:block; }
+    .escala-person .actions { margin-top:8px; }
+    .escala-summary { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 16px; }
+    .escala-summary .status-card { background: var(--page); }
+
+    .escala-direct-card {
+      border:1px solid var(--border);
+      background: var(--page);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: 0 8px 22px rgba(15,23,42,.08);
+      margin-bottom: 16px;
+    }
+    .escala-direct-head {
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-bottom: 14px;
+    }
+    .escala-direct-head h3 { margin:0; }
+    .escala-direct-head p { margin:4px 0 0; color:var(--muted); font-weight:700; line-height:1.45; }
+    .escala-turno-panel {
+      border:1px solid var(--border);
+      background: var(--page-2);
+      border-radius: 20px;
+      padding: 16px;
+      margin-top: 14px;
+    }
+    .escala-turno-toolbar {
+      display:grid;
+      grid-template-columns: minmax(190px, 260px) repeat(2, minmax(120px,160px)) minmax(160px,1fr) auto;
+      gap: 12px;
+      align-items:end;
+    }
+    .escala-resumo-turnos {
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .escala-turno-resumo {
+      border:1px solid var(--border);
+      background: var(--page);
+      border-radius: 18px;
+      overflow:hidden;
+    }
+    .escala-turno-resumo h3 {
+      margin:0;
+      padding: 12px 14px;
+      background: var(--preto-logo);
+      color: var(--amarelo);
+      font-size:.95rem;
+    }
+    .escala-pessoas-compactas {
+      padding: 12px;
+      display:flex;
+      flex-wrap:wrap;
+      gap: 8px;
+      min-height: 58px;
+    }
+    .escala-chip-pessoa {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius: 999px;
+      background: var(--page-2);
+      border:1px solid var(--border);
+      font-weight:900;
+      font-size:.82rem;
+    }
+    .escala-chip-pessoa small {
+      color: var(--muted);
+      font-weight:900;
+    }
+    .escala-chip-pessoa button {
+      width:22px;
+      height:22px;
+      border-radius:50%;
+      border:0;
+      background:#DC2626;
+      color:white;
+      font-weight:1000;
+      cursor:pointer;
+      line-height:1;
+    }
+    .escala-folgas-diretas {
+      display:none;
+      margin-top: 16px;
+      border:1px solid var(--border);
+      background: var(--page);
+      border-radius: 20px;
+      overflow:hidden;
+    }
+    .escala-folgas-diretas.active { display:block; }
+    .escala-folgas-diretas .section-mini {
+      padding: 14px 16px;
+      border-bottom:1px solid var(--border);
+      background: var(--page-2);
+    }
+    .escala-folgas-diretas .section-mini h3 { margin:0; }
+    .escala-folgas-diretas .section-mini p { margin:4px 0 0; color:var(--muted); font-weight:700; }
+    .modal-table-actions {
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 14px;
+    }
+    .employee-select-table tr.selected td {
+      background: rgba(246,196,38,.14) !important;
+    }
+    .employee-select-table input[type="checkbox"] {
+      width:18px;
+      height:18px;
+      accent-color: var(--amarelo-escuro);
+    }
+    @media (max-width: 1000px) {
+      .escala-turno-toolbar { grid-template-columns: 1fr 1fr; }
+      .escala-turno-toolbar .actions { grid-column: span 2; }
+      .escala-resumo-turnos { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .escala-turno-toolbar { grid-template-columns: 1fr; }
+      .escala-turno-toolbar .actions { grid-column: auto; }
+    }
+
+
+    .escala-selector-clean {
+      display:grid;
+      grid-template-columns: minmax(260px, 420px) 1fr;
+      gap: 16px;
+      align-items: stretch;
+      margin-bottom: 16px;
+    }
+    .escala-select-card {
+      border:1px solid var(--border);
+      background: var(--page);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: 0 8px 22px rgba(15,23,42,.08);
+    }
+    .escala-select-card h3 { margin:0 0 8px; }
+    .escala-select-card p { margin:0 0 14px; color:var(--muted); font-weight:700; line-height:1.45; }
+    .escala-start-hint {
+      border:1px dashed var(--border);
+      background: var(--page-2);
+      border-radius: 22px;
+      padding: 18px;
+      color: var(--muted);
+      font-weight: 800;
+      line-height: 1.5;
+    }
+    .escala-form-area { display:none; }
+    .escala-form-area.active { display:block; animation: fade .18s ease; }
+    .escala-clean-title {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: var(--page-2);
+      border:1px solid var(--border);
+      margin-bottom: 14px;
+      display:flex;
+      justify-content:space-between;
+      gap: 12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .escala-clean-title h3 { margin:0; }
+    .escala-clean-title p { margin:4px 0 0; color:var(--muted); font-weight:700; }
+    .escala-folga-dia {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 14px;
+      border:1px dashed var(--border);
+      background: var(--page);
+    }
+
+
+    @media (max-width: 1100px) {
+      body { display:block; }
+      .sidebar { position: relative; width:100%; height:auto; }
+      .nav { display:flex; overflow-x:auto; padding: 10px; }
+      .nav-btn { width:auto; white-space:nowrap; }
+      .theme-btn { margin: 8px 16px 16px; }
+      .grid-4, .grid-3, .grid-2, .sector-board, .escala-mode-grid, .escala-step-grid, .escala-preview-grid, .escala-summary, .escala-selector-clean { grid-template-columns: 1fr 1fr; }
+      .field, .field.w2, .field.w4, .field.w5, .field.w6, .field.w8 { grid-column: span 6; }
+      .kanban { grid-template-columns: repeat(2, minmax(240px,1fr)); }
+    }
+    @media (max-width: 720px) {
+      .content { padding: 14px; }
+      .grid-4, .grid-3, .grid-2, .sector-board, .kanban, .task-summary, .escala-mode-grid, .escala-step-grid, .escala-preview-grid, .escala-summary { grid-template-columns: 1fr; }
+      .field, .field.w2, .field.w4, .field.w5, .field.w6, .field.w8, .field.w12 { grid-column: span 12; }
+      .topbar { padding-right: 74px; align-items:flex-start; flex-direction:column; }
+      .store-meta { justify-content:flex-start; }
+    }
+
+    @media print {
+      @page { size: A4 landscape; margin: 8mm; }
+      body { display:block; background:white !important; color:black !important; }
+      .login-screen, .sidebar, .topbar, .logout-fixed, .actions, .filter-row, .tabs, .btn, form, .modal-backdrop, .no-print { display:none !important; }
+      .main, .content { padding:0 !important; margin:0 !important; }
+      .page { display:none !important; }
+      .page.active { display:block !important; }
+      .section-card { box-shadow:none !important; border:1px solid #999 !important; border-radius:0 !important; break-inside: avoid; margin-bottom: 8px; padding: 10px; }
+      table { min-width: 0 !important; font-size: 9px; }
+      th, td { padding: 4px; border:1px solid #bbb !important; }
+      th { background:#291A1E !important; color:#F6C426 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-hero">
+        <div class="brand">
+          <div class="brand-mark">AV</div>
+          <div>
+            <h1>Assistência Gerencial</h1>
+            <p>Caderno inteligente da loja</p>
+          </div>
+        </div>
+        <div id="loginUserPreview" class="login-user-preview empty">
+          <div>
+            <small>Usuário identificado</small>
+            <b>Digite seu operador</b>
+          </div>
+          <span class="preview-operator">--</span>
+        </div>
+      </div>
+      <div class="login-body">
+        <label for="loginUser">Usuário / Nº de Operador</label>
+        <input id="loginUser" type="text" inputmode="numeric" placeholder="Digite seu número de operador" autocomplete="username" onblur="atualizarIdentificacaoLogin(true)" />
+        <label for="loginPass">Senha</label>
+        <input id="loginPass" type="password" placeholder="Digite sua senha" autocomplete="current-password" onfocus="atualizarIdentificacaoLogin(true)" />
+        <button class="login-btn" onclick="login()">Entrar no sistema</button>
+        <div id="loginError" class="login-error"></div>
+        <div class="login-hint">Acesso restrito por número de operador. A senha segue o padrão: operador + 24. Exemplo fictício: 000 / 00024.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="appLoader" class="app-loader" aria-live="polite" aria-hidden="true">
+    <div class="app-loader-card">
+      <div class="app-loader-mark">AV</div>
+      <div class="app-loader-spinner"></div>
+      <h3 id="appLoaderTitle">Carregando sistema</h3>
+      <p id="appLoaderText">Aguarde um instante...</p>
+    </div>
+  </div>
+
+  <button class="logout-fixed" onclick="logout()" title="Sair do sistema" aria-label="Sair do sistema">⏻</button>
+
+  <aside class="sidebar">
+    <div class="logo-box">
+      <div class="logo-line">
+        <div class="logo-icon">AV</div>
+        <div>
+          <div class="logo-title">Assistência Gerencial</div>
+          <div class="logo-sub">Loja 24 • Avenida</div>
+        </div>
+      </div>
+    </div>
+    <div class="user-box">
+      <div class="user-name" id="userNameBox">Usuário</div>
+      <div class="user-role" id="userRoleBox">Cargo</div>
+    </div>
+    <nav class="nav" id="navMenu">
+      <button class="nav-btn active" onclick="showPage('painel', this)"><span class="ico">📊</span>Painel Geral</button>
+      <button class="nav-btn" onclick="showPage('anotacoes', this)"><span class="ico">📝</span>Central de Anotações</button>
+      <button class="nav-btn" onclick="showPage('tarefas', this)"><span class="ico">✅</span>Quadro de Tarefas</button>
+      <button class="nav-btn" onclick="showPage('setores', this)"><span class="ico">🧩</span>Setores</button>
+      <button class="nav-btn" onclick="showPage('funcionarios', this)"><span class="ico">👥</span>Quadro de Funcionários</button>
+      <button class="nav-btn" onclick="showPage('operadores', this)"><span class="ico">💳</span>Operadores</button>
+      <button class="nav-btn" onclick="showPage('escalas', this)"><span class="ico">🗓️</span>Escala de Trabalho</button>
+      <button class="nav-btn" onclick="showPage('acompanhamento', this)"><span class="ico">📌</span>Acompanhamento do Dia</button>
+      <button class="nav-btn" onclick="showPage('relatorios', this)"><span class="ico">📄</span>Relatórios</button>
+      <button id="configNavBtn" class="nav-btn" onclick="showPage('config', this)"><span class="ico">⚙️</span>Configurações</button>
+    </nav>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙 Modo Escuro</button>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="top-left">
+        <h2 id="pageTitle">Painel Geral</h2>
+        <p id="pageSubtitle">Visão rápida das pendências, setores e prioridades da loja.</p>
+      </div>
+      <div class="store-meta">
+        <span class="pill">LOJA: <b>24</b></span>
+        <span class="pill">MÊS: <b id="mesAtual"></b></span>
+        <span class="pill">USUÁRIO: <b id="headerUserName">-</b></span>
+        <span class="pill">OPERADOR: <b id="headerUserOperator">-</b></span>
+        <span class="pill">GERENTE: <b>ALANA</b></span>
+      </div>
+    </header>
+
+    <div class="content">
+      <section id="painel" class="page active">
+        <div class="grid grid-4" style="margin-bottom:16px;">
+          <div class="metric"><small>Pendências abertas</small><b id="mAbertas">0</b><span>Tarefas e anotações não concluídas</span></div>
+          <div class="metric"><small>Alta prioridade</small><b id="mAlta">0</b><span>Itens que exigem atenção gerencial</span></div>
+          <div class="metric"><small>Atrasadas</small><b id="mAtrasadas">0</b><span>Prazo menor que hoje e não concluído</span></div>
+          <div class="metric"><small>Concluídas no mês</small><b id="mConcluidas">0</b><span>Finalizações registradas no mês atual</span></div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">
+            <div><h1>Resumo por setor</h1><p>Mapa rápido de onde a gerência precisa dar atenção.</p></div>
+            <div class="actions no-print"><button class="btn secondary" onclick="printActivePage()">🖨️ Imprimir</button></div>
+          </div>
+          <div class="sector-board" id="dashboardSetores"></div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="section-card">
+            <div class="section-title"><div><h2>Próximas pendências</h2><p>Ordenadas por prazo e prioridade.</p></div></div>
+            <div id="listaProximas"></div>
+          </div>
+          <div class="section-card">
+            <div class="section-title"><div><h2>Recados importantes</h2><p>Anotações marcadas como prioridade alta.</p></div></div>
+            <div id="listaRecados"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="anotacoes" class="page">
+        <div class="section-card">
+          <div class="section-title">
+            <div><h1>Central de Anotações</h1><p>Recados, lembretes e registros rápidos para a gerência.</p></div>
+            <div class="actions no-print"><button class="btn secondary" onclick="printActivePage()">🖨️ Imprimir</button></div>
+          </div>
+          <form id="formNota" onsubmit="salvarNota(event)">
+            <input type="hidden" id="notaId" />
+            <div class="form-grid">
+              <div class="field w4"><label>Título</label><input id="notaTitulo" required placeholder="Ex.: Ajustar exposição da entrada" /></div>
+              <div class="field w2"><label>Setor</label><select id="notaSetor" required></select></div>
+              <div class="field w2"><label>Tipo</label><select id="notaTipo"><option>Recado</option><option>Atenção</option><option>Ideia</option><option>Pendência</option><option>Solicitação</option><option>Alinhamento</option></select></div>
+              <div class="field w2"><label>Prioridade</label><select id="notaPrioridade"><option>Normal</option><option>Alta</option><option>Baixa</option></select></div>
+              <div class="field w2"><label>Prazo</label><input id="notaPrazo" type="date" /></div>
+              <div class="field w4"><label>Responsável</label><select id="notaResponsavel"></select></div>
+              <div class="field w3"><label>Status</label><select id="notaStatus"><option>Aberto</option><option>Em acompanhamento</option><option>Concluído</option><option>Arquivado</option></select></div>
+              <div class="field w5"><label>Observação rápida</label><input id="notaResumo" placeholder="Resumo curto para aparecer na lista" /></div>
+              <div class="field w12"><label>Descrição completa</label><textarea id="notaDescricao" placeholder="Detalhe o que precisa ser lembrado, resolvido ou acompanhado..."></textarea></div>
+              <div class="field w12 actions">
+                <button class="btn" type="submit">💾 Salvar anotação</button>
+                <button class="btn secondary" type="button" onclick="limparFormNota()">Limpar</button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="section-card">
+          <div class="filter-row no-print">
+            <select id="fNotaSetor" onchange="renderAll()"></select>
+            <select id="fNotaStatus" onchange="renderAll()"><option value="TODOS">Todos os status</option><option>Aberto</option><option>Em acompanhamento</option><option>Concluído</option><option>Arquivado</option></select>
+            <select id="fNotaPrioridade" onchange="renderAll()"><option value="TODOS">Todas as prioridades</option><option>Alta</option><option>Normal</option><option>Baixa</option></select>
+            <input id="fNotaBusca" oninput="renderAll()" placeholder="Buscar anotação..." />
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Data</th><th>Setor</th><th>Título</th><th>Tipo</th><th>Prioridade</th><th>Prazo</th><th>Responsável</th><th>Status</th><th>Resumo</th><th class="no-print">Ações</th></tr></thead><tbody id="tbodyNotas"></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="tarefas" class="page">
+        <div class="section-card">
+          <div class="section-title">
+            <div><h1>Quadro de Tarefas</h1><p>Resumo das tarefas por status. A criação da tarefa é feita pelo botão abaixo, escolhendo a área responsável.</p></div>
+            <div class="actions no-print">
+              <button class="btn" onclick="abrirModalTarefa()">➕ Criar tarefa</button>
+              <button class="btn secondary" onclick="printActivePage()">🖨️ Imprimir</button>
+            </div>
+          </div>
+
+          <div class="task-summary" id="taskStatusSummary"></div>
+
+          <div class="filter-row no-print">
+            <select id="fTarefaSetor" onchange="onFiltroTarefaSetorChange()"></select>
+            <select id="fTarefaDepartamento" onchange="renderAll()"><option value="TODOS">Todas as áreas relacionadas</option></select>
+            <select id="fTarefaPrioridade" onchange="renderAll()"><option value="TODOS">Todas prioridades</option><option>Alta</option><option>Normal</option><option>Baixa</option></select>
+            <input id="fTarefaBusca" oninput="renderAll()" placeholder="Buscar por atividade, departamento ou responsável..." />
+          </div>
+          <div class="kanban" id="kanban"></div>
+        </div>
+      </section>
+
+      <div id="modalTarefa" class="modal-backdrop no-print" onclick="fecharModalTarefa(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-head">
+            <div>
+              <h2 id="modalTarefaTitulo">Criar tarefa</h2>
+              <p>Escolha a área e preencha os dados necessários para a tarefa.</p>
+            </div>
+            <button class="icon-btn" type="button" onclick="fecharModalTarefa()">✕</button>
+          </div>
+          <form id="formTarefa" onsubmit="salvarTarefa(event)">
+            <input type="hidden" id="tarefaId" />
+            <div class="form-grid">
+              <div class="field w4"><label>Área da tarefa</label><select id="tarefaSetor" required onchange="ajustarCamposTarefa()"></select></div>
+              <div class="field w4"><label id="lblAtividade">Atividade</label><input id="tarefaAtividade" required placeholder="Ex.: Reorganizar exposição da entrada" /></div>
+              <div class="field w4"><label>Departamento da loja</label><select id="tarefaDepartamento"></select></div>
+              <div class="field w2"><label>Data de início</label><input id="tarefaInicio" type="date" required /></div>
+              <div class="field w2"><label>Data de término</label><input id="tarefaFim" type="date" /></div>
+              <div class="field w4"><label>Pessoa responsável</label><select id="tarefaResponsavel"></select></div>
+              <div class="field w4"><label>Responsável adicional</label><select id="tarefaResponsavel2"></select></div>
+              <div class="field w2"><label>Prioridade</label><select id="tarefaPrioridade"><option>Normal</option><option>Alta</option><option>Baixa</option></select></div>
+              <div class="field w2"><label>Status</label><select id="tarefaStatus"><option>Pendente</option><option>Em andamento</option><option>Aguardando</option><option>Concluída</option></select></div>
+              <div class="field w12"><label>Observação</label><textarea id="tarefaDescricao" placeholder="Detalhe o que precisa ser feito, padrões de VM, observações da gerente, pendências de material ou qualquer ponto importante..."></textarea></div>
+              <div class="field w12 actions">
+                <button class="btn" type="submit">💾 Salvar tarefa</button>
+                <button class="btn secondary" type="button" onclick="limparFormTarefa()">Limpar</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <section id="setores" class="page">
+        <div class="section-card">
+          <div class="section-title">
+            <div><h1>Setores</h1><p>Consulta rápida de pendências e observações por área da loja.</p></div>
+            <div class="actions no-print"><button class="btn secondary" onclick="printActivePage()">🖨️ Imprimir</button></div>
+          </div>
+          <div class="tabs no-print" id="sectorTabs"></div>
+          <div id="sectorDetail"></div>
+        </div>
+      </section>
+
+      <section id="funcionarios" class="page">
+        <div class="section-card">
+          <div class="section-title">
+            <div><h1>Quadro de Funcionários</h1><p>Consulta da equipe por ordem alfabética, cargo, tempo de loja e dados administrativos.</p></div>
+            <div class="actions no-print">
+              <button class="btn" onclick="abrirModalFuncionario()">➕ Adicionar funcionário</button>
+              <button class="btn secondary" onclick="printActivePage()">🖨️ Imprimir</button>
+            </div>
+          </div>
+          <div class="filter-row no-print">
+            <input id="fFuncBusca" oninput="renderAll()" placeholder="Buscar funcionário..." />
+            <select id="fFuncCargo" onchange="renderAll()"><option value="TODOS">Todos os cargos</option></select>
+            <select id="fFuncTempo" onchange="renderAll()">
+              <option value="TODOS">Todos os tempos</option>
+              <option value="ATE_6">Até 6 meses</option>
+              <option value="6_12">6 meses a 1 ano</option>
+              <option value="1_3">1 a 3 anos</option>
+              <option value="3_MAIS">Mais de 3 anos</option>
+              <option value="SEM_DATA">Sem data informada</option>
+            </select>
+            <select id="fFuncOrdenar" onchange="renderAll()">
+              <option value="AZ">Ordem alfabética A-Z</option>
+              <option value="ZA">Ordem alfabética Z-A</option>
+              <option value="CARGO">Cargo</option>
+              <option value="MAIS_TEMPO">Mais tempo de loja</option>
+              <option value="MENOS_TEMPO">Menos tempo de loja</option>
+            </select>
+          </div>
+          <div class="notice privacy-note">🔒 Dados como CPF/RG e data de nascimento são informações pessoais. Eles ficam salvos apenas neste navegador/backup do sistema.<br>🧾 A matrícula é calculada pelo número de operador. Ex.: operador 133 = matrícula AV24-0133.</div>
+          <div class="employee-grid" id="funcCards"></div>
+          <div class="table-wrap" style="margin-top:16px;"><table><thead><tr><th>Funcionário</th><th>Operador</th><th>Matrícula</th><th>Cargo</th><th>Setor</th><th>Entrada</th><th>Tempo</th><th>Nascimento</th><th>Estado civil</th><th>Documento</th><th>Status</th><th>Caixa</th><th>Observação</th><th class="no-print">Ações</th></tr></thead><tbody id="tbodyFuncionarios"></tbody></table></div>
+        </div>
+      </section>
+
+
+      <section id="operadores" class="page">
+        <div class="section-card">
+          <div class="section-title">
+            <div><h1>Operadores</h1><p>Controle de quem possui caixa operacional, com status ativo ou inativo para uso no caixa.</p></div>
+            <div class="actions no-print"><button class="btn secondary" onclick="printActivePage()">🖨️ Imprimir</button></div>
+          </div>
+          <div class="grid grid-3" style="margin-bottom:16px;">
+            <div class="metric"><small>Operadores cadastrados</small><b id="opTotal">0</b><span>Funcionários com número de operador</span></div>
+            <div class="metric"><small>Caixa operacional ativo</small><b id="opAtivos">0</b><span>Disponíveis para operação de caixa</span></div>
+            <div class="metric"><small>Caixa operacional inativo</small><b id="opInativos">0</b><span>Operadores bloqueados/inativos</span></div>
+          </div>
+          <div class="filter-row no-print">
+            <input id="fOpBusca" oninput="renderAll()" placeholder="Buscar operador, nome, matrícula ou cargo..." />
+            <select id="fOpStatus" onchange="renderAll()">
+              <option value="TODOS">Todos os status</option>
+              <option value="ATIVO">Caixa ativo</option>
+              <option value="INATIVO">Caixa inativo</option>
+            </select>
+            <select id="fOpOrdenar" onchange="renderAll()">
+              <option value="OPERADOR">Número de operador</option>
+              <option value="AZ">Ordem alfabética A-Z</option>
+              <option value="CARGO">Cargo</option>
+            </select>
+          </div>
+          <div class="notice privacy-note">💳 O número de operador é o login do caixa. A matrícula é gerada no mesmo padrão: operador 133 = matrícula AV24-0133.</div>
+          <div class="operator-grid" id="operadorCards"></div>
+          <div class="table-wrap" style="margin-top:16px;"><table><thead><tr><th>Operador</th><th>Matrícula</th><th>Funcionário</th><th>Cargo</th><th>Setor</th><th>Caixa operacional</th><th>Status funcionário</th><th class="no-print">Ações</th></tr></thead><tbody id="tbodyOperadores"></tbody></table></div>
+        </div>
+      </section>
+
+      <div id="modalFuncionario" class="modal-backdrop no-print" onclick="fecharModalFuncionario(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-head">
+            <div>
+              <h2 id="modalFuncionarioTitulo">Adicionar funcionário</h2>
+              <p>Cadastre ou atualize a ficha administrativa do funcionário.</p>
+            </div>
+            <button class="icon-btn" type="button" onclick="fecharModalFuncionario()">✕</button>
+          </div>
+          <form id="formFuncionario" onsubmit="salvarFuncionario(event)">
+            <input type="hidden" id="funcId" />
+            <div class="form-grid">
+              <div class="field w4"><label>Nome do funcionário</label><input id="funcNome" required placeholder="Ex.: MARIA SILVA" /></div>
+              <div class="field w2"><label>Nº de operador</label><input id="funcOperador" type="number" min="1" placeholder="Ex.: 133" oninput="atualizarMatriculaPreview()" /></div>
+              <div class="field w2"><label>Matrícula automática</label><input id="funcMatricula" readonly placeholder="Baseada no operador" /></div>
+              <div class="field w2"><label>Data de nascimento</label><input id="funcNascimento" type="date" /></div>
+              <div class="field w4"><label>Estado civil</label><select id="funcEstadoCivil"><option value="">Não informado</option><option>Solteiro(a)</option><option>Casado(a)</option><option>União estável</option><option>Divorciado(a)</option><option>Viúvo(a)</option><option>Outro</option></select></div>
+              <div class="field w4"><label>Cargo</label><select id="funcCargo"><option>GERENTE DE LOJA</option><option>VISUAL MERCHANDISING</option><option>FISCAL</option><option>ADMINISTRATIVO</option><option>PRODUTOS FINANCEIROS</option><option>PF</option><option>LIMPEZA</option><option>ASSESSOR DE CLIENTE</option><option>OPERADOR(A) DE CAIXA</option><option>OUTROS</option></select></div>
+              <div class="field w4"><label>Setor principal</label><select id="funcSetor"><option>GERÊNCIA</option><option>VISUAL MERCHANDISING</option><option>FISCAL</option><option>ADMINISTRATIVO</option><option>PRODUTOS FINANCEIROS</option><option>LIMPEZA</option><option>VENDAS</option><option>LOJA GERAL</option></select></div>
+              <div class="field w2"><label>Data de entrada na loja</label><input id="funcEntrada" type="date" /></div>
+              <div class="field w2"><label>Status</label><select id="funcStatus"><option>ATIVO</option><option>FÉRIAS</option><option>AFASTADO</option><option>DESLIGADO</option></select></div>
+              <div class="field w2"><label>Caixa operacional</label><select id="funcCaixaOperacional"><option>ATIVO</option><option>INATIVO</option></select></div>
+              <div class="field w2"><label>Tipo de documento</label><select id="funcDocTipo"><option value="">Não informado</option><option>CPF</option><option>RG</option><option>CPF/RG</option></select></div>
+              <div class="field w4"><label>Nº do documento</label><input id="funcDocNumero" placeholder="CPF ou RG" /></div>
+              <div class="field w3"><label>Telefone / contato</label><input id="funcTelefone" placeholder="Ex.: (67) 99999-9999" /></div>
+              <div class="field w3"><label>E-mail</label><input id="funcEmail" type="email" placeholder="Ex.: nome@email.com" /></div>
+              <div class="field w12"><label>Observação</label><input id="funcObs" placeholder="Ex.: Apoio em VM e organização de loja" /></div>
+              <div class="field w12 actions"><button class="btn" type="submit">💾 Salvar funcionário</button><button class="btn secondary" type="button" onclick="limparFormFuncionario()">Limpar</button></div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+
+      
+      
+      <section id="escalas" class="page">
+        <div class="section-card">
+          <div class="section-title">
+            <div>
+              <h1>Escala de Trabalho</h1>
+              <p>Monte a escala de forma direta: escolha domingo ou feriado, informe a data, selecione abertura/fechamento e escolha vários funcionários pelo botão +.</p>
+            </div>
+            <div class="actions no-print"><button class="btn secondary" onclick="printActivePage()">🖨️ Imprimir</button></div>
+          </div>
+
+          <input type="hidden" id="escalaId" />
+          <input type="hidden" id="escalaTipo" value="" />
+
+          <div class="escala-direct-card no-print">
+            <div class="escala-direct-head">
+              <div>
+                <h3>Dados principais da escala</h3>
+                <p>Primeiro escolha a operação. O campo de nome do feriado só aparece quando a operação for FERIADO.</p>
+              </div>
+              <span id="escalaBadgeOperacao" class="badge b-info">NÃO SELECIONADO</span>
+            </div>
+
+            <div class="form-grid">
+              <div class="field w3">
+                <label>Operação</label>
+                <select id="escalaOperacaoSelect" onchange="selecionarTipoEscala(this.value)">
+                  <option value="">Selecione</option>
+                  <option value="DOMINGO">DOMINGO</option>
+                  <option value="FERIADO">FERIADO</option>
+                </select>
+              </div>
+              <div class="field w2"><label>Data</label><input id="escalaData" type="date" onchange="atualizarOpcoesFolgaEscala(); renderEscalaPreview();" /></div>
+              <div id="escalaTituloGroup" class="field w3" style="display:none;"><label>Nome do feriado</label><input id="escalaTitulo" placeholder="Ex.: Natal / Tiradentes / Finados" /></div>
+              <div class="field w4"><label>Líder responsável</label><select id="escalaResponsavel"></select></div>
+              <div class="field w12"><label>Observações gerais</label><input id="escalaObs" placeholder="Ex.: Reforçar PF no fechamento, manter apoio fiscal..." /></div>
+            </div>
+
+            <div id="escalaStartHint" class="escala-start-hint" style="margin-top:14px;">
+              Selecione <b>DOMINGO</b> ou <b>FERIADO</b> para liberar a escolha de abertura, fechamento e folgas.
+            </div>
+
+            <div id="escalaFormArea" class="escala-form-area">
+              <div class="escala-turno-panel">
+                <div class="escala-direct-head">
+                  <div>
+                    <h3>Adicionar funcionários no turno</h3>
+                    <p>Escolha ABERTURA ou FECHAMENTO, defina o horário do turno e clique no botão + para selecionar várias pessoas.</p>
+                  </div>
+                </div>
+
+                <div class="escala-turno-toolbar">
+                  <div>
+                    <label>Abertura ou fechamento</label>
+                    <select id="escalaTurnoSelect" onchange="ajustarHorarioTurnoEscala()">
+                      <option value="abertura">ABERTURA</option>
+                      <option value="fechamento">FECHAMENTO</option>
+                    </select>
+                  </div>
+                  <div><label>Entrada</label><input id="escalaEntradaTurno" type="time" value="08:00" /></div>
+                  <div><label>Saída</label><input id="escalaSaidaTurno" type="time" value="14:00" /></div>
+                  <div><label>Observação do turno</label><input id="escalaObsTurno" placeholder="Ex.: Caixa, VM, apoio fiscal..." /></div>
+                  <div class="actions"><button class="btn" type="button" onclick="abrirModalPessoasEscala()">➕ Funcionários</button></div>
+                </div>
+              </div>
+
+              <div class="escala-resumo-turnos">
+                <div class="escala-turno-resumo">
+                  <h3>🌞 Abertura</h3>
+                  <div id="previewAbertura" class="escala-pessoas-compactas"></div>
+                </div>
+                <div class="escala-turno-resumo">
+                  <h3>🌙 Fechamento</h3>
+                  <div id="previewFechamento" class="escala-pessoas-compactas"></div>
+                </div>
+              </div>
+
+              <div id="folgasDiretasBox" class="escala-folgas-diretas">
+                <div class="section-mini">
+                  <h3>🏖️ Folgas após a escala</h3>
+                  <p>As opções de data mostram apenas dias úteis disponíveis depois da data da escala selecionada.</p>
+                </div>
+                <div class="table-wrap" style="border:0;border-radius:0;">
+                  <table>
+                    <thead><tr><th>Funcionário escalado</th><th>Turno</th><th>Data da folga</th><th>Observação</th></tr></thead>
+                    <tbody id="tbodyFolgasEscala"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="actions no-print" style="margin-top:16px;">
+                <button class="btn good" onclick="salvarEscala()">💾 Salvar escala</button>
+                <button class="btn" onclick="enviarEscalaAtualWhatsApp()">📲 Enviar WhatsApp</button>
+                <button class="btn secondary" onclick="limparEscalaAtual()">Limpar escala atual</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="modalEscalaPessoas" class="modal-backdrop no-print" onclick="fecharModalPessoasEscala(event)">
+          <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-head">
+              <div>
+                <h2 id="modalEscalaTitulo">Selecionar funcionários</h2>
+                <p>Marque uma ou mais pessoas para adicionar ao turno selecionado.</p>
+              </div>
+              <button class="icon-btn" type="button" onclick="fecharModalPessoasEscala()">✕</button>
+            </div>
+            <div class="filter-row">
+              <input id="buscaModalEscalaPessoa" oninput="renderModalPessoasEscala()" placeholder="Buscar funcionário..." />
+            </div>
+            <div class="table-wrap">
+              <table class="employee-select-table">
+                <thead><tr><th class="center">Selecionar</th><th>Funcionário</th><th>Operador</th><th>Cargo</th><th>Setor</th><th>Status</th></tr></thead>
+                <tbody id="tbodyModalEscalaPessoas"></tbody>
+              </table>
+            </div>
+            <div class="modal-table-actions">
+              <button class="btn secondary" type="button" onclick="marcarTodosModalEscala(true)">Marcar todos disponíveis</button>
+              <div class="actions">
+                <button class="btn secondary" type="button" onclick="fecharModalPessoasEscala()">Cancelar</button>
+                <button class="btn good" type="button" onclick="confirmarSelecaoPessoasEscala()">Adicionar selecionados</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">
+            <div><h2>Escalas salvas</h2><p>Histórico das escalas de domingo e feriado criadas no sistema.</p></div>
+          </div>
+          <div class="escala-summary">
+            <div class="status-card"><div><small>Total de escalas</small><b id="escTotal">0</b></div><span class="dot"></span></div>
+            <div class="status-card andamento"><div><small>Domingos</small><b id="escDomingos">0</b></div><span class="dot"></span></div>
+            <div class="status-card aguardando"><div><small>Feriados</small><b id="escFeriados">0</b></div><span class="dot"></span></div>
+            <div class="status-card concluida"><div><small>Pessoas escaladas</small><b id="escPessoas">0</b></div><span class="dot"></span></div>
+          </div>
+          <div class="filter-row no-print">
+            <select id="fEscalaTipo" onchange="renderEscalas()"><option value="TODOS">Todos os tipos</option><option>DOMINGO</option><option>FERIADO</option></select>
+            <input id="fEscalaBusca" oninput="renderEscalas()" placeholder="Buscar por data, título ou pessoa..." />
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Identificação</th><th>Abertura</th><th>Fechamento</th><th>Folgas</th><th>Responsável</th><th>Observações</th><th class="no-print">Ações</th></tr></thead><tbody id="tbodyEscalas"></tbody></table></div>
+        </div>
+      </section>
+
+
+
+      <section id="acompanhamento" class="page">
+        <div class="section-card">
+          <div class="section-title">
+            <div><h1>Acompanhamento do Dia</h1><p>Um resumo diário para a gerente visualizar o andamento da loja.</p></div>
+            <div class="actions no-print"><button class="btn secondary" onclick="printActivePage()">🖨️ Imprimir</button></div>
+          </div>
+          <form id="formDiario" onsubmit="salvarDiario(event)">
+            <input type="hidden" id="diarioId" />
+            <div class="form-grid">
+              <div class="field w2"><label>Data</label><input id="diarioData" type="date" required /></div>
+              <div class="field w2"><label>Turno</label><select id="diarioTurno"><option>Dia todo</option><option>Abertura</option><option>Intermediário</option><option>Fechamento</option></select></div>
+              <div class="field w3"><label>Responsável</label><select id="diarioResp"></select></div>
+              <div class="field w5"><label>Resumo do dia</label><input id="diarioResumo" required placeholder="Ex.: Dia focado em precificação e apoio no PF" /></div>
+              <div class="field w3"><label>Status VM</label><select id="diarioVM"><option>OK</option><option>Atenção</option><option>Pendente</option><option>Crítico</option></select></div>
+              <div class="field w3"><label>Status Fiscal</label><select id="diarioFiscal"><option>OK</option><option>Atenção</option><option>Pendente</option><option>Crítico</option></select></div>
+              <div class="field w3"><label>Status ADM</label><select id="diarioADM"><option>OK</option><option>Atenção</option><option>Pendente</option><option>Crítico</option></select></div>
+              <div class="field w3"><label>Status PF</label><select id="diarioPF"><option>OK</option><option>Atenção</option><option>Pendente</option><option>Crítico</option></select></div>
+              <div class="field w12"><label>Observações da gerência</label><textarea id="diarioObs" placeholder="Registre pontos do dia, alinhamentos, cobranças, apoios ou decisões..."></textarea></div>
+              <div class="field w12 actions"><button class="btn" type="submit">📌 Salvar acompanhamento</button><button class="btn secondary" type="button" onclick="limparFormDiario()">Limpar</button></div>
+            </div>
+          </form>
+        </div>
+        <div class="section-card"><div class="table-wrap"><table><thead><tr><th>Data</th><th>Turno</th><th>Responsável</th><th>Resumo</th><th>VM</th><th>Fiscal</th><th>ADM</th><th>PF</th><th>Observações</th><th class="no-print">Ações</th></tr></thead><tbody id="tbodyDiario"></tbody></table></div></div>
+      </section>
+
+      <section id="relatorios" class="page">
+        <div class="section-card">
+          <div class="section-title">
+            <div><h1>Relatórios Gerenciais</h1><p>Resumo organizado por período e setor para impressão ou Excel.</p></div>
+            <div class="actions no-print"><button class="btn secondary" onclick="printActivePage()">🖨️ Imprimir</button><button class="btn" onclick="exportarExcelRelatorio()">📊 Exportar Excel</button><button class="btn secondary" onclick="exportarCSVRelatorio()">CSV</button></div>
+          </div>
+          <div class="filter-row no-print">
+            <select id="relSetor" onchange="renderAll()"></select>
+            <select id="relTipo" onchange="renderAll()"><option value="TODOS">Tudo</option><option value="NOTAS">Anotações</option><option value="TAREFAS">Tarefas</option><option value="DIARIO">Acompanhamento</option></select>
+            <input id="relInicio" type="date" onchange="renderAll()" />
+            <input id="relFim" type="date" onchange="renderAll()" />
+          </div>
+          <div class="grid grid-4" style="margin-bottom:14px;">
+            <div class="metric"><small>Total no período</small><b id="rTotal">0</b><span>Registros filtrados</span></div>
+            <div class="metric"><small>Pendentes</small><b id="rPendentes">0</b><span>Não concluídos</span></div>
+            <div class="metric"><small>Concluídos</small><b id="rConcluidos">0</b><span>Finalizados</span></div>
+            <div class="metric"><small>Alta prioridade</small><b id="rAlta">0</b><span>Itens urgentes</span></div>
+          </div>
+          <div class="table-wrap"><table id="tabelaRelatorio"><thead><tr><th>Data</th><th>Tipo</th><th>Setor</th><th>Título/Resumo</th><th>Responsável</th><th>Prioridade</th><th>Status</th><th>Prazo</th><th>Observação</th><th>Atualizado por</th></tr></thead><tbody id="tbodyRelatorio"></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="config" class="page">
+        <div class="section-card" id="configContent"></div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const STORAGE_KEY = 'adminGerencialLojaV7';
+const SESSION_KEY = 'adminGerencialSessaoV20Operador';
+
+const setores = [
+  { id:'GERAL', nome:'GERAL', desc:'Assuntos gerais da gerência', badge:'b-geral', icon:'⭐' },
+  { id:'VM', nome:'Visual Merchandising', desc:'Visual Merchandising: exposição, vitrine, layout, departamentos e comunicação visual da loja', badge:'b-vm', icon:'🎨' },
+  { id:'FISCAL', nome:'Fiscal', desc:'Fiscalização, prevenção, segurança e controle operacional', badge:'b-fiscal', icon:'🛡️' },
+  { id:'ADM', nome:'Administrativo', desc:'Administrativo: documentos, relatórios, malote e organização interna', badge:'b-adm', icon:'📁' },
+  { id:'PF', nome:'Produtos Financeiros', desc:'Produtos Financeiros: cartão, cadastro, apoio a metas e propostas', badge:'b-pf', icon:'💳' }
+];
+
+
+const areasTarefaPorSetor = {
+  VM: [
+    'Loja toda', 'Vitrine', 'Entrada da loja', 'Departamentos de loja',
+    'Feminino', 'Masculino', 'Infantil', 'Calçados', 'Bolsas e acessórios',
+    'Relógios', 'Malas', 'Capacetes', 'Moda íntima', 'Provadores',
+    'Manequins', 'Paredes / exposição', 'Mesa promocional',
+    'Comunicação visual', 'Campanha / material de marketing', 'Precificação visual'
+  ],
+  FISCAL: [
+    'Loja toda', 'Monitoramento', 'Recebimento', 'Conferência de mercadoria',
+    'Prevenção de perdas', 'Avarias / quebras', 'Divergência de mercadoria',
+    'Abertura / fechamento de loja', 'CFTV / câmeras', 'Entrada e saída de mercadoria',
+    'Depósito / estoque', 'Checklist fiscal', 'Acompanhamento de movimentação'
+  ],
+  ADM: [
+    'Loja toda', 'Administrativo', 'Limpeza', 'Organização interna',
+    'Malote', 'Documentos', 'Notas fiscais', 'Relatórios', 'Arquivos',
+    'Caixa / fechamento', 'Comunicados internos', 'Escala / quadro de horários',
+    'Materiais de escritório', 'Pendências da gerência'
+  ],
+  PF: [
+    'Loja toda', 'Produtos financeiros', 'Cartão Avenida', 'Cadastro de cliente',
+    'Propostas', 'Aprovação / análise', 'Meta de cartão', 'Meta de produtos financeiros',
+    'Ativação / incentivo', 'Treinamento da equipe', 'Abordagem ao cliente',
+    'Acompanhamento de resultado PF'
+  ]
+};
+
+const departamentosLoja = [...new Set(Object.values(areasTarefaPorSetor).flat())];
+
+const usuariosOficiais = [
+  { nome:'ALANA ARAUJO', operadorPadrao:'139', cargo:'GERENTE DE LOJA' },
+  { nome:'JOAO PEDRO', operadorPadrao:'133', cargo:'VISUAL MERCHANDISING' },
+  { nome:'KAILANY', operadorPadrao:'144', cargo:'ADMINISTRATIVO' }
+];
+
+const funcionariosPadrao = [
+  { id:'func_alana', nome:'ALANA ARAUJO', operador:'139', matricula:'AV24-0139', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'ATIVO', cargo:'GERENTE DE LOJA', setor:'GERÊNCIA', entrada:'', obs:'Gerência da loja 24.' },
+  { id:'func_cassio', nome:'CASSIO GABRIEL', operador:'', matricula:'', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'INATIVO', cargo:'FISCAL', setor:'FISCAL', entrada:'', obs:'Apoio fiscal, conferência e prevenção.' },
+  { id:'func_richard', nome:'RICHARD BAPTISTE', operador:'', matricula:'', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'INATIVO', cargo:'FISCAL', setor:'FISCAL', entrada:'', obs:'Apoio fiscal, monitoramento e recebimento.' },
+  { id:'func_joao', nome:'JOAO PEDRO', operador:'133', matricula:'AV24-0133', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'ATIVO', cargo:'VISUAL MERCHANDISING', setor:'VISUAL MERCHANDISING', entrada:'', obs:'Visual Merchandising e organização visual da loja.' },
+  { id:'func_kailany', nome:'KAILANY', operador:'144', matricula:'AV24-0144', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'ATIVO', cargo:'ADMINISTRATIVO', setor:'ADMINISTRATIVO', entrada:'', obs:'Apoio administrativo da loja.' },
+  { id:'func_celio', nome:'CELIO VACARE', operador:'', matricula:'', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'INATIVO', cargo:'PRODUTOS FINANCEIROS', setor:'PRODUTOS FINANCEIROS', entrada:'', obs:'Apoio em produtos financeiros.' },
+  { id:'func_helen', nome:'HELEN CRISTINA', operador:'', matricula:'', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'INATIVO', cargo:'VISUAL MERCHANDISING', setor:'VISUAL MERCHANDISING', entrada:'', obs:'Visual Merchandising e suporte visual.' }
+];
+
+let db = null;
+let usuarioAtual = null;
+let setorAtivo = 'VM';
+let escalaDraft = { abertura: [], fechamento: [], folgas: [] };
+
+const pageInfo = {
+  painel: ['Painel Geral','Visão rápida das pendências, setores e prioridades da loja.'],
+  anotacoes: ['Central de Anotações','Recados, lembretes e registros rápidos para a gerência.'],
+  tarefas: ['Quadro de Tarefas','Resumo por status e criação de tarefas por área.'],
+  setores: ['Setores','Consulta de pendências e anotações por área da loja.'],
+  funcionarios: ['Quadro de Funcionários','Equipe organizada por cargo, setor, tempo de loja e ficha administrativa.'],
+  operadores: ['Operadores','Controle de caixa operacional por número de operador, matrícula e status ativo/inativo.'],
+  escalas: ['Escala de Trabalho','Criação de escalas de domingo e feriado com abertura, fechamento e folgas.'],
+  acompanhamento: ['Acompanhamento do Dia','Resumo diário para apoiar a gerente no controle da loja.'],
+  relatorios: ['Relatórios Gerenciais','Resumo por período e setor para impressão e Excel.'],
+  config: ['Configurações','Ajustes administrativos do sistema.']
+};
+
+function hojeISO(){ return new Date().toISOString().slice(0,10); }
+function agoraBR(){ return new Date().toLocaleString('pt-BR'); }
+function mesAnoBR(){ return new Date().toLocaleDateString('pt-BR', {month:'long', year:'numeric'}).replace(/^./, c => c.toUpperCase()); }
+function norm(s){ return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toUpperCase().replace(/\s+/g,' '); }
+function uid(prefix){ return prefix + '_' + Date.now() + '_' + Math.random().toString(16).slice(2,8); }
+function extrairSeqMatricula(matricula){
+  const m = String(matricula||'').match(/(?:AV\d{2}-)?(\d{4,})$/);
+  return m ? Number(m[1]) : 0;
+}
+function normalizarOperador(v){
+  const n = String(v || '').replace(/\D/g, '');
+  return n ? String(Number(n)) : '';
+}
+function matriculaPorOperador(operador){
+  const op = normalizarOperador(operador);
+  if(!op) return '';
+  const loja = String(db?.meta?.loja || '24').replace(/\D/g,'') || '24';
+  return `AV${loja}-${String(Number(op)).padStart(4,'0')}`;
+}
+function senhaPorOperador(operador){
+  const op = normalizarOperador(operador);
+  return op ? `${op}24` : '';
+}
+function garantirOperadorLoginFuncionario(nome, operadorPadrao){
+  const opPadrao = normalizarOperador(operadorPadrao);
+  const nomeNorm = norm(nome);
+  const f = (db?.funcionarios || []).find(x =>
+    norm(x.nome) === nomeNorm ||
+    (opPadrao && normalizarOperador(x.operador) === opPadrao) ||
+    (opPadrao && String(x.matricula || '').trim() === matriculaPorOperador(opPadrao)) ||
+    (nomeNorm === 'ALANA ARAUJO' && normalizarOperador(x.operador) === '101') ||
+    (nomeNorm === 'ALANA ARAUJO' && String(x.matricula || '').trim() === 'AV24-0101') ||
+    (nomeNorm === 'KAILANY' && normalizarOperador(x.operador) === '102') ||
+    (nomeNorm === 'KAILANY' && String(x.matricula || '').trim() === 'AV24-0102')
+  );
+  if(!f) return null;
+  if(opPadrao && normalizarOperador(f.operador) !== opPadrao){
+    f.operador = opPadrao;
+  }
+  f.matricula = matriculaPorOperador(f.operador);
+  if(f.operador && !['ATIVO','INATIVO'].includes(String(f.caixaOperacional || '').toUpperCase())) f.caixaOperacional = 'ATIVO';
+  return f;
+}
+function operadoresOficiaisLogin(){
+  return usuariosOficiais.map(u => normalizarOperador(u.operadorPadrao)).filter(Boolean);
+}
+function garantirUsuariosPermitidos(){
+  const oficiais = operadoresOficiaisLogin();
+  const existentes = Array.isArray(db?.usuariosPermitidos) ? db.usuariosPermitidos.map(normalizarOperador).filter(Boolean) : [];
+  const herdados = Array.isArray(db?.usuarios) ? db.usuarios.map(u => normalizarOperador(u.operador)).filter(Boolean) : [];
+  db.usuariosPermitidos = [...new Set([...oficiais, ...existentes, ...herdados])];
+}
+function sincronizarUsuariosLogin(){
+  usuariosOficiais.forEach(u => garantirOperadorLoginFuncionario(u.nome, u.operadorPadrao));
+  garantirUsuariosPermitidos();
+  const oficiais = operadoresOficiaisLogin();
+  db.usuarios = db.usuariosPermitidos.map(op => {
+    const operador = normalizarOperador(op);
+    const func = (db.funcionarios || []).find(f => normalizarOperador(f.operador) === operador);
+    const oficial = usuariosOficiais.find(u => normalizarOperador(u.operadorPadrao) === operador);
+    return {
+      nome: func?.nome || oficial?.nome || `OPERADOR ${operador}`,
+      operador,
+      matricula: func?.matricula || matriculaPorOperador(operador),
+      senha: senhaPorOperador(operador),
+      cargo: func?.cargo || oficial?.cargo || 'USUÁRIO DO SISTEMA',
+      perfil: oficial?.nome || 'CUSTOM',
+      custom: !oficiais.includes(operador)
+    };
+  }).filter(u => u.operador);
+}
+function gerarMatriculaAutomatica(){
+  const loja = String(db?.meta?.loja || '24').replace(/\D/g,'') || '24';
+  const usados = new Set((db?.funcionarios || []).map(f => String(f.matricula || '').trim()).filter(Boolean));
+  let prox = Math.max(0, ...(db?.funcionarios || []).map(f => Math.max(Number(normalizarOperador(f.operador)) || 0, extrairSeqMatricula(f.matricula)))) + 1;
+  let codigo = '';
+  do {
+    codigo = `AV${loja}-${String(prox).padStart(4,'0')}`;
+    prox++;
+  } while(usados.has(codigo));
+  return codigo;
+}
+function gerarOperadorAutomatico(){
+  let prox = Math.max(0, ...(db?.funcionarios || []).map(f => Number(normalizarOperador(f.operador)) || extrairSeqMatricula(f.matricula) || 0)) + 1;
+  const usados = new Set((db?.funcionarios || []).map(f => normalizarOperador(f.operador)).filter(Boolean));
+  while(usados.has(String(prox))) prox++;
+  return String(prox);
+}
+function atualizarMatriculaPreview(){
+  const op = document.getElementById('funcOperador')?.value || '';
+  const el = document.getElementById('funcMatricula');
+  if(el) el.value = matriculaPorOperador(op);
+}
+function escapeHTML(s){ return String(s||'').replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m])); }
+function num(v){ return Number(v||0); }
+
+function showAppLoader(title='Carregando sistema', text='Aguarde um instante...'){
+  const el = document.getElementById('appLoader');
+  if(!el) return;
+  document.getElementById('appLoaderTitle').textContent = title;
+  document.getElementById('appLoaderText').textContent = text;
+  el.classList.add('active');
+  el.setAttribute('aria-hidden', 'false');
+}
+function hideAppLoader(){
+  const el = document.getElementById('appLoader');
+  if(!el) return;
+  el.classList.remove('active');
+  el.setAttribute('aria-hidden', 'true');
+}
+
+function funcionarioVazio(valor){
+  return valor === undefined || valor === null || String(valor).trim() === '';
+}
+function mesclarFuncionario(destino, origem){
+  if(!destino || !origem) return destino;
+  Object.keys(origem).forEach(k => {
+    if(k === 'nome'){
+      const nomeAtual = String(destino.nome || '').trim();
+      const nomeNovo = String(origem.nome || '').trim();
+      if(nomeNovo && (!nomeAtual || nomeNovo.length > nomeAtual.length)) destino.nome = norm(nomeNovo);
+      return;
+    }
+    if(funcionarioVazio(destino[k]) && !funcionarioVazio(origem[k])) destino[k] = origem[k];
+  });
+  if(!destino.matricula && normalizarOperador(destino.operador)) destino.matricula = matriculaPorOperador(destino.operador);
+  return destino;
+}
+function chaveFuncionario(f){
+  const op = normalizarOperador(f?.operador);
+  const mat = String(f?.matricula || '').trim();
+  if(f?.id) return 'ID:' + f.id;
+  if(op) return 'OP:' + op;
+  if(mat) return 'MAT:' + mat;
+  return 'NOME:' + norm(f?.nome);
+}
+function localizarFuncionarioPadrao(padrao){
+  const op = normalizarOperador(padrao.operador);
+  const mat = String(padrao.matricula || '').trim();
+  return (db.funcionarios || []).find(f =>
+    (padrao.id && f.id === padrao.id) ||
+    (op && normalizarOperador(f.operador) === op) ||
+    (mat && String(f.matricula || '').trim() === mat) ||
+    norm(f.nome) === norm(padrao.nome)
+  );
+}
+function deduplicarFuncionarios(){
+  const lista = [];
+  const mapa = new Map();
+  (db.funcionarios || []).forEach(f => {
+    const item = {...f};
+    const chaves = [
+      item.id ? 'ID:' + item.id : '',
+      normalizarOperador(item.operador) ? 'OP:' + normalizarOperador(item.operador) : '',
+      item.matricula ? 'MAT:' + String(item.matricula).trim() : ''
+    ].filter(Boolean);
+    let alvo = null;
+    for(const chave of chaves){
+      if(mapa.has(chave)){ alvo = mapa.get(chave); break; }
+    }
+    if(!alvo){
+      alvo = item;
+      lista.push(alvo);
+    } else {
+      mesclarFuncionario(alvo, item);
+    }
+    [
+      alvo.id ? 'ID:' + alvo.id : '',
+      normalizarOperador(alvo.operador) ? 'OP:' + normalizarOperador(alvo.operador) : '',
+      alvo.matricula ? 'MAT:' + String(alvo.matricula).trim() : ''
+    ].filter(Boolean).forEach(chave => mapa.set(chave, alvo));
+  });
+  db.funcionarios = lista;
+}
+
+function defaultDB(){
+  return {
+    meta:{ loja:'24', gerente:'ALANA', criadoEm: agoraBR() },
+    usuariosPermitidos: usuariosOficiais.map(u => normalizarOperador(u.operadorPadrao)).filter(Boolean),
+    usuarios: JSON.parse(JSON.stringify(usuariosOficiais)),
+    funcionarios: JSON.parse(JSON.stringify(funcionariosPadrao)),
+    notas: [], tarefas: [], diario: [], escalas: []
+  };
+}
+
+function aplicarOperadoresLoginFixos(){
+  const fixos = [
+    { nome:'ALANA ARAUJO', operador:'139', oldOperadores:['101'] },
+    { nome:'JOAO PEDRO', operador:'133', oldOperadores:[] },
+    { nome:'KAILANY', operador:'144', oldOperadores:['102'] }
+  ];
+  fixos.forEach(item => {
+    const alvo = (db.funcionarios || []).find(f =>
+      norm(f.nome) === norm(item.nome) ||
+      normalizarOperador(f.operador) === item.operador ||
+      item.oldOperadores.includes(normalizarOperador(f.operador)) ||
+      String(f.matricula || '').trim() === matriculaPorOperador(item.operador) ||
+      item.oldOperadores.some(op => String(f.matricula || '').trim() === matriculaPorOperador(op))
+    );
+    if(!alvo) return;
+    alvo.operador = item.operador;
+    alvo.matricula = matriculaPorOperador(item.operador);
+    alvo.caixaOperacional = 'ATIVO';
+    // Evita que outro cadastro fique preso no mesmo operador oficial.
+    (db.funcionarios || []).forEach(f => {
+      if(f !== alvo && normalizarOperador(f.operador) === item.operador){
+        f.operador = '';
+        f.matricula = '';
+        f.caixaOperacional = 'INATIVO';
+      }
+    });
+  });
+  db.meta.operadoresLoginFixosV19 = true;
+}
+
+function loadDB(){
+  try { db = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultDB(); }
+  catch(e){ db = defaultDB(); }
+  db.funcionarios ||= JSON.parse(JSON.stringify(funcionariosPadrao));
+  deduplicarFuncionarios();
+  funcionariosPadrao.forEach(f => {
+    const existente = localizarFuncionarioPadrao(f);
+    if(existente) mesclarFuncionario(existente, f);
+    else db.funcionarios.push({...f});
+  });
+  deduplicarFuncionarios();
+  db.notas ||= []; db.tarefas ||= []; db.diario ||= []; db.escalas ||= [];
+  db.usuariosPermitidos ||= usuariosOficiais.map(u => normalizarOperador(u.operadorPadrao)).filter(Boolean);
+  db.meta ||= { loja:'24', gerente:'ALANA', criadoEm: agoraBR() };
+  aplicarOperadoresLoginFixos();
+  if(!db.meta.loginOperadorV12){
+    const alana = db.funcionarios.find(f => norm(f.nome) === 'ALANA ARAUJO');
+    if(alana && !normalizarOperador(alana.operador)){ alana.operador = '139'; alana.matricula = matriculaPorOperador('139'); alana.caixaOperacional = 'ATIVO'; }
+    db.meta.loginOperadorV12 = true;
+  }
+  if(!db.meta.operadorMigradoV9){
+    const joao = db.funcionarios.find(f => norm(f.nome) === 'JOAO PEDRO');
+    if(joao){ joao.operador = '133'; joao.matricula = matriculaPorOperador('133'); joao.caixaOperacional = 'ATIVO'; }
+    db.meta.operadorMigradoV9 = true;
+  }
+  garantirCamposFuncionarios();
+  sincronizarUsuariosLogin();
+  saveDB();
+}
+function saveDB(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
+
+function login(){
+  atualizarIdentificacaoLogin(true);
+  sincronizarUsuariosLogin();
+  const operadorInput = normalizarOperador(document.getElementById('loginUser').value);
+  const pass = document.getElementById('loginPass').value.trim();
+  const user = db.usuarios.find(u => normalizarOperador(u.operador) === operadorInput);
+  const err = document.getElementById('loginError');
+  if(!operadorInput){ err.textContent = 'Informe o número de operador.'; return; }
+  if(!user){ err.textContent = 'Operador não autorizado para acessar o sistema.'; return; }
+  if(user.senha !== pass){ err.textContent = 'Senha incorreta. Use o padrão: operador + 24.'; return; }
+  usuarioAtual = user;
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify({nome:user.nome, operador:user.operador, loginEm: agoraBR()}));
+  showAppLoader('Entrando no sistema', 'Preparando seu ambiente de assistência gerencial...');
+  setTimeout(() => {
+    initApp();
+    hideAppLoader();
+  }, 850);
+}
+function ocultarIdentificacaoLogin(){
+  const preview = document.getElementById('loginUserPreview');
+  if(!preview) return;
+  const operador = normalizarOperador(document.getElementById('loginUser')?.value || '');
+  preview.className = 'login-user-preview empty';
+  preview.innerHTML = operador
+    ? `<div><small>Identificação</small><b>Continue para a senha</b><small>O nome aparecerá ao entrar no campo de senha</small></div><span class="preview-operator">OP. ${escapeHTML(operador)}</span>`
+    : `<div><small>Identificação</small><b>Digite seu operador</b><small>Depois vá para a senha</small></div><span class="preview-operator">--</span>`;
+}
+
+function atualizarIdentificacaoLogin(mostrar = false){
+  const preview = document.getElementById('loginUserPreview');
+  if(!preview) return;
+  if(!mostrar) { ocultarIdentificacaoLogin(); return; }
+  const operador = normalizarOperador(document.getElementById('loginUser')?.value || '');
+  if(!operador){
+    preview.className = 'login-user-preview empty';
+    preview.innerHTML = `<div><small>Identificação</small><b>Digite seu operador</b><small>Depois vá para a senha</small></div><span class="preview-operator">--</span>`;
+    return;
+  }
+
+  sincronizarUsuariosLogin();
+  const autorizado = db.usuarios.find(u => normalizarOperador(u.operador) === operador);
+  const funcionario = (db.funcionarios || []).find(f => normalizarOperador(f.operador) === operador);
+  const pessoa = autorizado || funcionario;
+
+  if(pessoa){
+    const nome = pessoa.nome || 'Usuário encontrado';
+    const cargo = pessoa.cargo ? ` • ${pessoa.cargo}` : '';
+    const acesso = autorizado ? '' : ' • sem acesso ao sistema';
+    preview.className = 'login-user-preview';
+    preview.innerHTML = `<div><small>Identificação confirmada</small><b>${escapeHTML(nome)}</b><small>${escapeHTML(cargo.replace(/^ • /,''))}${acesso}</small></div><span class="preview-operator">OP. ${escapeHTML(operador)}</span>`;
+  } else {
+    preview.className = 'login-user-preview not-found';
+    preview.innerHTML = `<div><small>Identificação</small><b>Operador não encontrado</b><small>Confira o número digitado</small></div><span class="preview-operator">OP. ${escapeHTML(operador)}</span>`;
+  }
+}
+
+function limparSessoesAntigas(){
+  [
+    'adminGerencialSessaoV1','adminGerencialSessaoV2','adminGerencialSessaoV3','adminGerencialSessaoV4',
+    'adminGerencialSessaoV5','adminGerencialSessaoV12Operador','adminGerencialSessaoV13Operador',
+    'adminGerencialSessaoV14Operador','adminGerencialSessaoV15Operador','adminGerencialSessaoV16Operador','adminGerencialSessaoV17Operador','adminGerencialSessaoV18Operador','adminGerencialSessaoV19Operador',
+    SESSION_KEY
+  ].forEach(k => localStorage.removeItem(k));
+}
+function trySession(){
+  limparSessoesAntigas();
+  const raw = sessionStorage.getItem(SESSION_KEY);
+  if(!raw) return;
+  try{
+    sincronizarUsuariosLogin();
+    const sess = JSON.parse(raw);
+    usuarioAtual = db.usuarios.find(u => (!sess.operador && u.nome === sess.nome) || (sess.operador && normalizarOperador(u.operador) === normalizarOperador(sess.operador))) || null;
+  }catch(e){ usuarioAtual = null; }
+}
+function logout(){ sessionStorage.removeItem(SESSION_KEY); localStorage.removeItem(SESSION_KEY); location.reload(); }
+
+function initApp(){
+  if(!usuarioAtual) return;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('userNameBox').textContent = usuarioAtual.nome;
+  document.getElementById('userRoleBox').textContent = usuarioAtual.cargo;
+  document.getElementById('mesAtual').textContent = mesAnoBR();
+  document.getElementById('headerUserName').textContent = usuarioAtual.nome;
+  document.getElementById('headerUserOperator').textContent = usuarioAtual.operador || '-';
+  document.getElementById('configNavBtn').style.display = normalizarOperador(usuarioAtual.operador) === '133' ? 'flex' : 'none';
+  popularSelects();
+  setDefaultDates();
+  renderAll();
+}
+
+function popularSelects(){
+  const setorOpts = setores.map(s => `<option value="${s.id}">${s.nome}</option>`).join('');
+  const setorTarefaOpts = setores.filter(s=>s.id!=='GERAL').map(s => `<option value="${s.id}">${s.nome}</option>`).join('');
+  document.getElementById('notaSetor').innerHTML = setorOpts;
+  document.getElementById('tarefaSetor').innerHTML = setorTarefaOpts;
+  ['fNotaSetor','fTarefaSetor','relSetor'].forEach(id => document.getElementById(id).innerHTML = `<option value="TODOS">Todos os setores</option>` + setorOpts);
+  const respOpts = `<option value="">Selecione</option>` + db.funcionarios.map(f => `<option value="${f.nome}">${f.nome} — ${f.cargo || f.setor || 'Equipe'}</option>`).join('');
+  ['notaResponsavel','tarefaResponsavel','tarefaResponsavel2','diarioResp'].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML = respOpts; });
+  popularDepartamentoTarefa('VM');
+  popularFiltroTarefaDepartamento();
+  popularFiltroFuncionarios();
+  ajustarCamposTarefa();
+  renderSectorTabs();
+}
+
+function setDefaultDates(){
+  document.getElementById('diarioData').value = hojeISO();
+  const d = new Date();
+  const ini = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0,10);
+  const fim = new Date(d.getFullYear(), d.getMonth()+1, 0).toISOString().slice(0,10);
+  document.getElementById('relInicio').value = ini;
+  document.getElementById('relFim').value = fim;
+}
+
+function toggleTheme(){
+  document.body.classList.toggle('dark-mode');
+  const dark = document.body.classList.contains('dark-mode');
+  localStorage.setItem('adminGerencialDark', dark ? '1':'0');
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Modo Claro' : '🌙 Modo Escuro';
+}
+
+function showPage(id, btn){
+  if(id === 'config' && normalizarOperador(usuarioAtual?.operador) !== '133'){
+    alert('Configurações disponíveis apenas para JOAO PEDRO.');
+    id = 'painel';
+  }
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const nav = btn || [...document.querySelectorAll('.nav-btn')].find(b => b.getAttribute('onclick')?.includes(`'${id}'`));
+  if(nav) nav.classList.add('active');
+  document.getElementById('pageTitle').textContent = pageInfo[id][0];
+  document.getElementById('pageSubtitle').textContent = pageInfo[id][1];
+  renderAll();
+}
+
+function badgeSetor(sid){ const s = setores.find(x=>x.id===sid) || setores[0]; return `<span class="badge ${s.badge}">${s.icon} ${s.nome}</span>`; }
+function badgeStatus(status){
+  if(['Concluído','Concluída','OK','Arquivado'].includes(status)) return `<span class="badge b-ok">${escapeHTML(status)}</span>`;
+  if(['Alta','Crítico'].includes(status)) return `<span class="badge b-bad">${escapeHTML(status)}</span>`;
+  if(['Atenção','Aguardando','Em acompanhamento','Em andamento'].includes(status)) return `<span class="badge b-warn">${escapeHTML(status)}</span>`;
+  return `<span class="badge b-info">${escapeHTML(status||'Aberto')}</span>`;
+}
+function badgePrioridade(p){
+  if(p === 'Alta') return '<span class="badge b-bad">Alta</span>';
+  if(p === 'Baixa') return '<span class="badge b-info">Baixa</span>';
+  return '<span class="badge b-warn">Normal</span>';
+}
+function isConcluido(item){ return ['Concluído','Concluída','Arquivado'].includes(item.status); }
+function isAtrasado(item){ return item.prazo && item.prazo < hojeISO() && !isConcluido(item); }
+
+function salvarNota(e){
+  e.preventDefault();
+  const id = document.getElementById('notaId').value || uid('nota');
+  const existente = db.notas.find(n => n.id === id);
+  const nota = {
+    id,
+    criadoEm: existente?.criadoEm || agoraBR(),
+    dataISO: existente?.dataISO || hojeISO(),
+    titulo: document.getElementById('notaTitulo').value,
+    setor: document.getElementById('notaSetor').value,
+    tipo: document.getElementById('notaTipo').value,
+    prioridade: document.getElementById('notaPrioridade').value,
+    prazo: document.getElementById('notaPrazo').value,
+    responsavel: document.getElementById('notaResponsavel').value,
+    status: document.getElementById('notaStatus').value,
+    resumo: document.getElementById('notaResumo').value,
+    descricao: document.getElementById('notaDescricao').value,
+    atualizadoPor: usuarioAtual.nome,
+    atualizadoEm: agoraBR()
+  };
+  if(existente) Object.assign(existente, nota); else db.notas.unshift(nota);
+  saveDB(); limparFormNota(); renderAll();
+}
+function editarNota(id){
+  const n = db.notas.find(x=>x.id===id); if(!n) return;
+  showPage('anotacoes');
+  document.getElementById('notaId').value = n.id;
+  document.getElementById('notaTitulo').value = n.titulo;
+  document.getElementById('notaSetor').value = n.setor;
+  document.getElementById('notaTipo').value = n.tipo;
+  document.getElementById('notaPrioridade').value = n.prioridade;
+  document.getElementById('notaPrazo').value = n.prazo || '';
+  document.getElementById('notaResponsavel').value = n.responsavel || '';
+  document.getElementById('notaStatus').value = n.status;
+  document.getElementById('notaResumo').value = n.resumo || '';
+  document.getElementById('notaDescricao').value = n.descricao || '';
+}
+function concluirNota(id){ const n=db.notas.find(x=>x.id===id); if(n){ n.status='Concluído'; n.atualizadoPor=usuarioAtual.nome; n.atualizadoEm=agoraBR(); saveDB(); renderAll(); } }
+function excluirNota(id){ if(confirm('Excluir esta anotação?')){ db.notas=db.notas.filter(x=>x.id!==id); saveDB(); renderAll(); } }
+function limparFormNota(){ document.getElementById('formNota').reset(); document.getElementById('notaId').value=''; }
+
+function abrirModalTarefa(id){
+  if(id) editarTarefa(id, true);
+  else { limparFormTarefa(false); document.getElementById('modalTarefaTitulo').textContent='Criar tarefa'; document.getElementById('tarefaInicio').value = hojeISO(); }
+  document.getElementById('modalTarefa').classList.add('active');
+  ajustarCamposTarefa();
+}
+function fecharModalTarefa(ev){
+  if(ev && ev.target.id !== 'modalTarefa') return;
+  document.getElementById('modalTarefa').classList.remove('active');
+}
+function getAreasTarefa(setor){
+  if(setor && setor !== 'TODOS' && areasTarefaPorSetor[setor]) return areasTarefaPorSetor[setor];
+  return departamentosLoja;
+}
+function popularDepartamentoTarefa(setor, selecionado=''){
+  const el = document.getElementById('tarefaDepartamento');
+  if(!el) return;
+  const areas = getAreasTarefa(setor);
+  el.innerHTML = areas.map(d => `<option value="${d}">${d}</option>`).join('');
+  if(selecionado && areas.includes(selecionado)) el.value = selecionado;
+  else el.value = areas[0] || '';
+}
+function popularFiltroTarefaDepartamento(){
+  const el = document.getElementById('fTarefaDepartamento');
+  if(!el) return;
+  const atual = el.value || 'TODOS';
+  const setor = document.getElementById('fTarefaSetor')?.value || 'TODOS';
+  const areas = getAreasTarefa(setor);
+  el.innerHTML = '<option value="TODOS">Todas as áreas relacionadas</option>' + areas.map(d => `<option value="${d}">${d}</option>`).join('');
+  el.value = (atual !== 'TODOS' && areas.includes(atual)) ? atual : 'TODOS';
+}
+function onFiltroTarefaSetorChange(){
+  popularFiltroTarefaDepartamento();
+  renderAll();
+}
+function ajustarCamposTarefa(selecionado=''){
+  const setor = document.getElementById('tarefaSetor')?.value || 'VM';
+  const s = setores.find(x=>x.id===setor);
+  const lbl = document.getElementById('lblAtividade');
+  const dep = document.getElementById('tarefaDepartamento');
+  if(!lbl || !dep) return;
+  popularDepartamentoTarefa(setor, selecionado || dep.value);
+  dep.parentElement.style.display = '';
+  if(setor === 'VM') {
+    lbl.textContent = 'Atividade de Visual Merchandising';
+    dep.parentElement.querySelector('label').textContent = 'Departamento de loja / Visual Merchandising';
+    document.getElementById('tarefaAtividade').placeholder = 'Ex.: Montar vitrine, revisar departamento, ajustar comunicação visual';
+  } else if(setor === 'FISCAL') {
+    lbl.textContent = 'Atividade Fiscal';
+    dep.parentElement.querySelector('label').textContent = 'Área fiscal relacionada';
+    document.getElementById('tarefaAtividade').placeholder = 'Ex.: Monitoramento, recebimento, conferência ou prevenção de perdas';
+  } else if(setor === 'ADM') {
+    lbl.textContent = 'Atividade Administrativa';
+    dep.parentElement.querySelector('label').textContent = 'Área administrativa / limpeza';
+    document.getElementById('tarefaAtividade').placeholder = 'Ex.: Malote, relatório, documento, limpeza ou organização interna';
+  } else if(setor === 'PF') {
+    lbl.textContent = 'Atividade de Produtos Financeiros';
+    dep.parentElement.querySelector('label').textContent = 'Área de Produtos Financeiros';
+    document.getElementById('tarefaAtividade').placeholder = 'Ex.: Cartão, cadastro, proposta, meta ou treinamento PF';
+  } else {
+    lbl.textContent = `Atividade de ${s?.nome || 'setor'}`;
+    dep.parentElement.querySelector('label').textContent = 'Área relacionada';
+    document.getElementById('tarefaAtividade').placeholder = 'Ex.: Resolver pendência, acompanhar demanda ou registrar ação';
+  }
+}
+function salvarTarefa(e){
+  e.preventDefault();
+  const id = document.getElementById('tarefaId').value || uid('tar');
+  const existente = db.tarefas.find(t=>t.id===id);
+  const setor = document.getElementById('tarefaSetor').value;
+  const atividade = document.getElementById('tarefaAtividade').value;
+  const departamento = document.getElementById('tarefaDepartamento').value;
+  const inicio = document.getElementById('tarefaInicio').value;
+  const fim = document.getElementById('tarefaFim').value;
+  const tarefa = {
+    id,
+    criadoEm: existente?.criadoEm || agoraBR(),
+    dataISO: existente?.dataISO || hojeISO(),
+    titulo: setor === 'VM' ? `${atividade} — ${departamento}` : atividade,
+    atividade,
+    setor,
+    departamento,
+    inicio,
+    fim,
+    prazo: fim,
+    responsavel: document.getElementById('tarefaResponsavel').value,
+    responsavel2: document.getElementById('tarefaResponsavel2').value,
+    prioridade: document.getElementById('tarefaPrioridade').value,
+    status: document.getElementById('tarefaStatus').value,
+    descricao: document.getElementById('tarefaDescricao').value,
+    atualizadoPor: usuarioAtual.nome,
+    atualizadoEm: agoraBR()
+  };
+  if(existente) Object.assign(existente, tarefa); else db.tarefas.unshift(tarefa);
+  saveDB(); limparFormTarefa(); fecharModalTarefa(); renderAll();
+}
+function editarTarefa(id, manterModal){
+  const t = db.tarefas.find(x=>x.id===id); if(!t) return;
+  if(!manterModal) showPage('tarefas');
+  document.getElementById('modalTarefaTitulo').textContent='Editar tarefa';
+  document.getElementById('tarefaId').value=t.id;
+  document.getElementById('tarefaSetor').value=t.setor || 'VM';
+  ajustarCamposTarefa(t.departamento || 'Loja toda');
+  document.getElementById('tarefaAtividade').value=t.atividade || t.titulo || '';
+  if([...document.getElementById('tarefaDepartamento').options].some(o=>o.value === (t.departamento || 'Loja toda'))) document.getElementById('tarefaDepartamento').value=t.departamento || 'Loja toda';
+  document.getElementById('tarefaInicio').value=t.inicio || t.dataISO || hojeISO();
+  document.getElementById('tarefaFim').value=t.fim || t.prazo || '';
+  document.getElementById('tarefaResponsavel').value=t.responsavel||'';
+  document.getElementById('tarefaResponsavel2').value=t.responsavel2||'';
+  document.getElementById('tarefaPrioridade').value=t.prioridade || 'Normal';
+  document.getElementById('tarefaStatus').value=t.status || 'Pendente';
+  document.getElementById('tarefaDescricao').value=t.descricao||'';
+  document.getElementById('modalTarefa').classList.add('active');
+}
+function setTarefaStatus(id,status){ const t=db.tarefas.find(x=>x.id===id); if(t){ t.status=status; t.atualizadoPor=usuarioAtual.nome; t.atualizadoEm=agoraBR(); saveDB(); renderAll(); } }
+function excluirTarefa(id){ if(confirm('Excluir esta tarefa?')){ db.tarefas=db.tarefas.filter(x=>x.id!==id); saveDB(); renderAll(); } }
+function limparFormTarefa(fechar=true){
+  document.getElementById('formTarefa').reset();
+  document.getElementById('tarefaId').value='';
+  document.getElementById('modalTarefaTitulo').textContent='Criar tarefa';
+  document.getElementById('tarefaInicio').value=hojeISO();
+  if(fechar) document.getElementById('modalTarefa').classList.remove('active');
+  ajustarCamposTarefa();
+}
+
+function salvarDiario(e){
+  e.preventDefault();
+  const id = document.getElementById('diarioId').value || uid('dia');
+  const existente = db.diario.find(d=>d.id===id);
+  const item = {
+    id,
+    criadoEm: existente?.criadoEm || agoraBR(),
+    dataISO: document.getElementById('diarioData').value,
+    turno: document.getElementById('diarioTurno').value,
+    responsavel: document.getElementById('diarioResp').value,
+    resumo: document.getElementById('diarioResumo').value,
+    vm: document.getElementById('diarioVM').value,
+    fiscal: document.getElementById('diarioFiscal').value,
+    adm: document.getElementById('diarioADM').value,
+    pf: document.getElementById('diarioPF').value,
+    obs: document.getElementById('diarioObs').value,
+    atualizadoPor: usuarioAtual.nome,
+    atualizadoEm: agoraBR()
+  };
+  if(existente) Object.assign(existente,item); else db.diario.unshift(item);
+  saveDB(); limparFormDiario(); renderAll();
+}
+function editarDiario(id){
+  const d=db.diario.find(x=>x.id===id); if(!d) return;
+  showPage('acompanhamento');
+  document.getElementById('diarioId').value=d.id;
+  document.getElementById('diarioData').value=d.dataISO;
+  document.getElementById('diarioTurno').value=d.turno;
+  document.getElementById('diarioResp').value=d.responsavel||'';
+  document.getElementById('diarioResumo').value=d.resumo;
+  document.getElementById('diarioVM').value=d.vm;
+  document.getElementById('diarioFiscal').value=d.fiscal;
+  document.getElementById('diarioADM').value=d.adm;
+  document.getElementById('diarioPF').value=d.pf;
+  document.getElementById('diarioObs').value=d.obs||'';
+}
+function excluirDiario(id){ if(confirm('Excluir acompanhamento do dia?')){ db.diario=db.diario.filter(x=>x.id!==id); saveDB(); renderAll(); } }
+function limparFormDiario(){ document.getElementById('formDiario').reset(); document.getElementById('diarioId').value=''; document.getElementById('diarioData').value=hojeISO(); }
+
+
+function mesesEmLoja(entrada){
+  if(!entrada) return null;
+  const ini = new Date(entrada + 'T00:00:00');
+  if(isNaN(ini.getTime())) return null;
+  const hoje = new Date();
+  let meses = (hoje.getFullYear() - ini.getFullYear()) * 12 + (hoje.getMonth() - ini.getMonth());
+  if(hoje.getDate() < ini.getDate()) meses--;
+  return Math.max(0, meses);
+}
+function tempoLojaTexto(entrada){
+  const meses = mesesEmLoja(entrada);
+  if(meses === null) return 'Não informado';
+  if(meses < 1) return 'Menos de 1 mês';
+  if(meses < 12) return `${meses} ${meses === 1 ? 'mês' : 'meses'}`;
+  const anos = Math.floor(meses / 12);
+  const resto = meses % 12;
+  return `${anos} ${anos === 1 ? 'ano' : 'anos'}${resto ? ` e ${resto} ${resto === 1 ? 'mês' : 'meses'}` : ''}`;
+}
+function tempoFaixa(entrada){
+  const meses = mesesEmLoja(entrada);
+  if(meses === null) return 'SEM_DATA';
+  if(meses <= 6) return 'ATE_6';
+  if(meses <= 12) return '6_12';
+  if(meses <= 36) return '1_3';
+  return '3_MAIS';
+}
+function garantirCamposFuncionarios(){
+  let alterou = false;
+  (db.funcionarios || []).forEach(f => {
+    f.operador ??= '';
+    if(!String(f.operador || '').trim() && String(f.matricula || '').trim()) { f.operador = String(extrairSeqMatricula(f.matricula)); alterou = true; }
+    const matriculaEsperada = matriculaPorOperador(f.operador);
+    if(matriculaEsperada && f.matricula !== matriculaEsperada) { f.matricula = matriculaEsperada; alterou = true; }
+    f.nascimento ??= '';
+    f.estadoCivil ??= '';
+    f.documentoTipo ??= '';
+    f.documentoNumero ??= '';
+    f.telefone ??= '';
+    f.email ??= '';
+    f.status ??= 'ATIVO';
+    if(!['ATIVO','INATIVO'].includes(String(f.caixaOperacional || '').toUpperCase())) { f.caixaOperacional = normalizarOperador(f.operador) ? 'ATIVO' : 'INATIVO'; alterou = true; }
+    if(!normalizarOperador(f.operador) && f.caixaOperacional !== 'INATIVO') { f.caixaOperacional = 'INATIVO'; alterou = true; }
+    if(['VENDEDOR', 'VENDEDOR(A)'].includes(norm(f.cargo))) { f.cargo = 'ASSESSOR DE CLIENTE'; alterou = true; }
+  });
+  return alterou;
+}
+function idadeTexto(data){
+  if(!data) return 'Não informada';
+  const d = new Date(data+'T00:00:00');
+  if(isNaN(d)) return data;
+  const hoje = new Date();
+  let idade = hoje.getFullYear() - d.getFullYear();
+  const m = hoje.getMonth() - d.getMonth();
+  if(m < 0 || (m === 0 && hoje.getDate() < d.getDate())) idade--;
+  return `${data} (${idade} anos)`;
+}
+function mascararDocumento(tipo, numero){
+  const n = String(numero||'').trim();
+  if(!n) return '-';
+  const limpo = n.replace(/\D/g,'');
+  if((tipo||'').includes('CPF') && limpo.length >= 11){
+    return `CPF ***.${limpo.slice(3,6)}.${limpo.slice(6,9)}-**`;
+  }
+  if(limpo.length > 4) return `${tipo||'Doc.'} ***${limpo.slice(-4)}`;
+  return `${tipo||'Doc.'} ${n}`;
+}
+function popularFiltroFuncionarios(){
+  const el = document.getElementById('fFuncCargo');
+  if(!el || !db?.funcionarios) return;
+  const atual = el.value || 'TODOS';
+  const cargos = [...new Set(db.funcionarios.map(f => f.cargo).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  el.innerHTML = '<option value="TODOS">Todos os cargos</option>' + cargos.map(c => `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join('');
+  el.value = cargos.includes(atual) ? atual : 'TODOS';
+}
+function getFuncionariosFiltrados(){
+  const busca = norm(document.getElementById('fFuncBusca')?.value || '');
+  const cargo = document.getElementById('fFuncCargo')?.value || 'TODOS';
+  const tempo = document.getElementById('fFuncTempo')?.value || 'TODOS';
+  const ordenar = document.getElementById('fFuncOrdenar')?.value || 'AZ';
+  let arr = [...(db.funcionarios || [])].filter(f =>
+    (!busca || norm(`${f.nome} ${f.operador} ${f.matricula} ${f.cargo} ${f.setor} ${f.estadoCivil} ${f.documentoTipo} ${f.documentoNumero} ${f.telefone} ${f.email} ${f.status} ${f.obs}`).includes(busca)) &&
+    (cargo === 'TODOS' || f.cargo === cargo) &&
+    (tempo === 'TODOS' || tempoFaixa(f.entrada) === tempo)
+  );
+  const tempoVal = f => mesesEmLoja(f.entrada) ?? -1;
+  arr.sort((a,b)=>{
+    if(ordenar === 'ZA') return b.nome.localeCompare(a.nome, 'pt-BR');
+    if(ordenar === 'CARGO') return (a.cargo||'').localeCompare(b.cargo||'', 'pt-BR') || a.nome.localeCompare(b.nome, 'pt-BR');
+    if(ordenar === 'MAIS_TEMPO') return tempoVal(b) - tempoVal(a) || a.nome.localeCompare(b.nome, 'pt-BR');
+    if(ordenar === 'MENOS_TEMPO') return tempoVal(a) - tempoVal(b) || a.nome.localeCompare(b.nome, 'pt-BR');
+    return a.nome.localeCompare(b.nome, 'pt-BR');
+  });
+  return arr;
+}
+function renderFuncionarios(){
+  if(!document.getElementById('tbodyFuncionarios')) return;
+  garantirCamposFuncionarios();
+  popularFiltroFuncionarios();
+  const arr = getFuncionariosFiltrados();
+  document.getElementById('funcCards').innerHTML = arr.length ? arr.slice(0, 8).map(f => `<div class="employee-card"><h3>${escapeHTML(f.nome)}</h3><span class="role">${escapeHTML(f.cargo)}</span><p><b>Operador:</b> ${escapeHTML(f.operador || 'Não informado')}<br><b>Matrícula:</b> ${escapeHTML(f.matricula || 'Não informada')}<br><b>Setor:</b> ${escapeHTML(f.setor || '-')}<br><b>Entrada:</b> ${escapeHTML(f.entrada || 'Não informada')}<br><b>Tempo:</b> ${tempoLojaTexto(f.entrada)}<br><b>Status:</b> ${escapeHTML(f.status || 'ATIVO')}</p><p>${escapeHTML(f.obs || '')}</p></div>`).join('') : '<div class="empty">Nenhum funcionário encontrado.</div>';
+  document.getElementById('tbodyFuncionarios').innerHTML = arr.length ? arr.map(f => `<tr><td><b>${escapeHTML(f.nome)}</b><br><small>${escapeHTML(f.telefone || '')}</small></td><td>${escapeHTML(f.operador || '-')}</td><td>${escapeHTML(f.matricula || '-')}</td><td>${escapeHTML(f.cargo || '-')}</td><td>${escapeHTML(f.setor || '-')}</td><td>${escapeHTML(f.entrada || 'Não informada')}</td><td>${tempoLojaTexto(f.entrada)}</td><td>${idadeTexto(f.nascimento)}</td><td>${escapeHTML(f.estadoCivil || '-')}</td><td><span class="masked-doc">${escapeHTML(mascararDocumento(f.documentoTipo, f.documentoNumero))}</span></td><td>${escapeHTML(f.status || 'ATIVO')}</td><td>${badgeCaixaOperacional(f.caixaOperacional)}</td><td>${escapeHTML(f.obs || '-')}</td><td class="no-print"><button class="btn small secondary" onclick="editarFuncionario('${f.id}')">Editar</button> <button class="btn small danger" onclick="excluirFuncionario('${f.id}')">Excluir</button></td></tr>`).join('') : '<tr><td colspan="14" class="empty">Nenhum funcionário encontrado.</td></tr>';
+}
+
+function badgeCaixaOperacional(status){
+  const st = String(status || 'INATIVO').toUpperCase() === 'ATIVO' ? 'ATIVO' : 'INATIVO';
+  return `<span class="operator-status ${st === 'ATIVO' ? 'ativo' : 'inativo'}">${st === 'ATIVO' ? '🟢 ATIVO' : '🔴 INATIVO'}</span>`;
+}
+function getOperadoresFiltrados(){
+  const busca = norm(document.getElementById('fOpBusca')?.value || '');
+  const status = document.getElementById('fOpStatus')?.value || 'TODOS';
+  const ordenar = document.getElementById('fOpOrdenar')?.value || 'OPERADOR';
+  let arr = [...(db.funcionarios || [])].filter(f => normalizarOperador(f.operador));
+  arr = arr.filter(f =>
+    (status === 'TODOS' || String(f.caixaOperacional || 'INATIVO').toUpperCase() === status) &&
+    (!busca || norm(`${f.nome} ${f.operador} ${f.matricula} ${f.cargo} ${f.setor} ${f.status}`).includes(busca))
+  );
+  arr.sort((a,b)=>{
+    if(ordenar === 'AZ') return a.nome.localeCompare(b.nome, 'pt-BR');
+    if(ordenar === 'CARGO') return (a.cargo||'').localeCompare(b.cargo||'', 'pt-BR') || a.nome.localeCompare(b.nome, 'pt-BR');
+    return Number(normalizarOperador(a.operador)) - Number(normalizarOperador(b.operador)) || a.nome.localeCompare(b.nome, 'pt-BR');
+  });
+  return arr;
+}
+function renderOperadores(){
+  if(!document.getElementById('tbodyOperadores')) return;
+  garantirCamposFuncionarios();
+  const todos = (db.funcionarios || []).filter(f => normalizarOperador(f.operador));
+  const ativos = todos.filter(f => String(f.caixaOperacional || 'INATIVO').toUpperCase() === 'ATIVO').length;
+  const inativos = todos.length - ativos;
+  document.getElementById('opTotal').textContent = todos.length;
+  document.getElementById('opAtivos').textContent = ativos;
+  document.getElementById('opInativos').textContent = inativos;
+  const arr = getOperadoresFiltrados();
+  document.getElementById('operadorCards').innerHTML = arr.length ? arr.map(f => {
+    const ativo = String(f.caixaOperacional || 'INATIVO').toUpperCase() === 'ATIVO';
+    return `<div class="operator-card ${ativo ? 'ativo' : 'inativo'}"><h3>${escapeHTML(f.nome)}</h3>${badgeCaixaOperacional(f.caixaOperacional)}<p><b>Operador:</b> ${escapeHTML(f.operador)}<br><b>Matrícula:</b> ${escapeHTML(f.matricula || matriculaPorOperador(f.operador))}<br><b>Cargo:</b> ${escapeHTML(f.cargo || '-')}<br><b>Setor:</b> ${escapeHTML(f.setor || '-')}</p><div class="actions no-print"><button class="btn small ${ativo ? 'danger' : 'good'}" onclick="alternarCaixaOperacional('${f.id}')">${ativo ? 'Inativar caixa' : 'Ativar caixa'}</button><button class="btn small secondary" onclick="showPage('funcionarios'); editarFuncionario('${f.id}')">Editar ficha</button></div></div>`;
+  }).join('') : '<div class="empty">Nenhum operador encontrado.</div>';
+  document.getElementById('tbodyOperadores').innerHTML = arr.length ? arr.map(f => {
+    const ativo = String(f.caixaOperacional || 'INATIVO').toUpperCase() === 'ATIVO';
+    return `<tr><td><b>${escapeHTML(f.operador)}</b></td><td>${escapeHTML(f.matricula || matriculaPorOperador(f.operador))}</td><td><b>${escapeHTML(f.nome)}</b></td><td>${escapeHTML(f.cargo || '-')}</td><td>${escapeHTML(f.setor || '-')}</td><td>${badgeCaixaOperacional(f.caixaOperacional)}</td><td>${escapeHTML(f.status || 'ATIVO')}</td><td class="no-print"><button class="btn small ${ativo ? 'danger' : 'good'}" onclick="alternarCaixaOperacional('${f.id}')">${ativo ? 'Inativar' : 'Ativar'}</button> <button class="btn small secondary" onclick="showPage('funcionarios'); editarFuncionario('${f.id}')">Editar</button></td></tr>`;
+  }).join('') : '<tr><td colspan="8" class="empty">Nenhum operador encontrado.</td></tr>';
+}
+function alternarCaixaOperacional(id){
+  const f = db.funcionarios.find(x => x.id === id);
+  if(!f) return;
+  if(!normalizarOperador(f.operador)){ alert('Este funcionário não possui número de operador.'); return; }
+  f.caixaOperacional = String(f.caixaOperacional || 'INATIVO').toUpperCase() === 'ATIVO' ? 'INATIVO' : 'ATIVO';
+  f.atualizadoPor = usuarioAtual.nome;
+  f.atualizadoEm = agoraBR();
+  saveDB(); renderAll();
+}
+function abrirModalFuncionario(id){
+  if(id) editarFuncionario(id);
+  else {
+    limparFormFuncionario(false);
+    document.getElementById('modalFuncionarioTitulo').textContent = 'Adicionar funcionário';
+    document.getElementById('funcOperador').value = '';
+    document.getElementById('funcMatricula').value = '';
+    document.getElementById('funcMatricula').placeholder = 'Baseada no operador';
+    document.getElementById('modalFuncionario').classList.add('active');
+  }
+}
+function fecharModalFuncionario(ev){
+  if(ev && ev.target.id !== 'modalFuncionario') return;
+  document.getElementById('modalFuncionario').classList.remove('active');
+}
+function editarFuncionario(id){
+  const f = db.funcionarios.find(x => x.id === id); if(!f) return;
+  document.getElementById('modalFuncionarioTitulo').textContent = 'Editar funcionário';
+  document.getElementById('funcId').value = f.id;
+  document.getElementById('funcNome').value = f.nome || '';
+  document.getElementById('funcOperador').value = f.operador || (f.matricula ? String(extrairSeqMatricula(f.matricula)) : '');
+  atualizarMatriculaPreview();
+  document.getElementById('funcMatricula').value = matriculaPorOperador(document.getElementById('funcOperador').value) || f.matricula || '';
+  document.getElementById('funcMatricula').placeholder = 'Matrícula bloqueada';
+  document.getElementById('funcNascimento').value = f.nascimento || '';
+  document.getElementById('funcEstadoCivil').value = [...document.getElementById('funcEstadoCivil').options].some(o=>o.value===f.estadoCivil) ? f.estadoCivil : '';
+  document.getElementById('funcCargo').value = [...document.getElementById('funcCargo').options].some(o=>o.value===f.cargo) ? f.cargo : 'OUTROS';
+  document.getElementById('funcSetor').value = [...document.getElementById('funcSetor').options].some(o=>o.value===f.setor) ? f.setor : 'LOJA GERAL';
+  document.getElementById('funcEntrada').value = f.entrada || '';
+  document.getElementById('funcStatus').value = [...document.getElementById('funcStatus').options].some(o=>o.value===f.status) ? f.status : 'ATIVO';
+  document.getElementById('funcCaixaOperacional').value = String(f.caixaOperacional || 'INATIVO').toUpperCase() === 'ATIVO' ? 'ATIVO' : 'INATIVO';
+  document.getElementById('funcDocTipo').value = [...document.getElementById('funcDocTipo').options].some(o=>o.value===f.documentoTipo) ? f.documentoTipo : '';
+  document.getElementById('funcDocNumero').value = f.documentoNumero || '';
+  document.getElementById('funcTelefone').value = f.telefone || '';
+  document.getElementById('funcEmail').value = f.email || '';
+  document.getElementById('funcObs').value = f.obs || '';
+  document.getElementById('modalFuncionario').classList.add('active');
+}
+function salvarFuncionario(e){
+  e.preventDefault();
+  const rawId = document.getElementById('funcId').value;
+  let operador = normalizarOperador(document.getElementById('funcOperador').value);
+  if(!operador){ alert('Informe o número de operador para gerar a matrícula.'); return; }
+
+  const nomeNormalizado = norm(document.getElementById('funcNome').value);
+  let existente = rawId ? db.funcionarios.find(f => f.id === rawId) : null;
+  const operadorAnterior = normalizarOperador(existente?.operador);
+
+  // Segurança contra duplicação: se o formulário perder o ID, atualiza pelo operador/matrícula/nome em vez de criar outro perfil.
+  if(!existente){
+    const matriculaAtual = matriculaPorOperador(operador);
+    existente = (db.funcionarios || []).find(f =>
+      normalizarOperador(f.operador) === operador ||
+      String(f.matricula || '').trim() === matriculaAtual ||
+      (nomeNormalizado && norm(f.nome) === nomeNormalizado)
+    ) || null;
+  }
+
+  const id = existente?.id || rawId || uid('func');
+  const duplicado = (db.funcionarios || []).find(f => f.id !== id && normalizarOperador(f.operador) === operador);
+  if(duplicado){
+    alert('Este número de operador já está cadastrado para ' + duplicado.nome + '. Abra a ficha existente para editar.');
+    return;
+  }
+
+  const item = {
+    id,
+    nome: nomeNormalizado,
+    operador,
+    matricula: matriculaPorOperador(operador),
+    nascimento: document.getElementById('funcNascimento').value,
+    estadoCivil: document.getElementById('funcEstadoCivil').value,
+    cargo: document.getElementById('funcCargo').value,
+    setor: document.getElementById('funcSetor').value,
+    entrada: document.getElementById('funcEntrada').value,
+    status: document.getElementById('funcStatus').value,
+    caixaOperacional: document.getElementById('funcCaixaOperacional').value,
+    documentoTipo: document.getElementById('funcDocTipo').value,
+    documentoNumero: document.getElementById('funcDocNumero').value.trim(),
+    telefone: document.getElementById('funcTelefone').value.trim(),
+    email: document.getElementById('funcEmail').value.trim(),
+    obs: document.getElementById('funcObs').value,
+    atualizadoPor: usuarioAtual.nome,
+    atualizadoEm: agoraBR()
+  };
+
+  if(operadorAnterior && operadorAnterior !== operador && Array.isArray(db.usuariosPermitidos) && db.usuariosPermitidos.includes(operadorAnterior)){
+    db.usuariosPermitidos = db.usuariosPermitidos.map(op => normalizarOperador(op) === operadorAnterior ? operador : normalizarOperador(op));
+  }
+
+  if(existente) Object.assign(existente, item);
+  else db.funcionarios.push(item);
+
+  deduplicarFuncionarios();
+  sincronizarUsuariosLogin();
+  saveDB();
+  limparFormFuncionario();
+  popularFiltroFuncionarios();
+  renderAll();
+}
+function excluirFuncionario(id){
+  if(confirm('Excluir este funcionário do quadro?')){
+    const removido = db.funcionarios.find(f => f.id === id);
+    const op = normalizarOperador(removido?.operador);
+    db.funcionarios = db.funcionarios.filter(f => f.id !== id);
+    if(op && !operadoresOficiaisLogin().includes(op)){
+      db.usuariosPermitidos = (db.usuariosPermitidos || []).filter(x => normalizarOperador(x) !== op);
+      sincronizarUsuariosLogin();
+    }
+    saveDB(); popularFiltroFuncionarios(); renderAll();
+  }
+}
+function limparFormFuncionario(fechar=true){
+  document.getElementById('formFuncionario').reset();
+  document.getElementById('funcId').value = '';
+  document.getElementById('funcOperador').value = '';
+  document.getElementById('funcMatricula').value = '';
+  document.getElementById('funcMatricula').placeholder = 'Baseada no operador';
+  if(document.getElementById('funcCaixaOperacional')) document.getElementById('funcCaixaOperacional').value = 'ATIVO';
+  document.getElementById('modalFuncionarioTitulo').textContent = 'Adicionar funcionário';
+  if(fechar) document.getElementById('modalFuncionario').classList.remove('active');
+}
+
+function renderAll(){
+  if(!db || !usuarioAtual) return;
+  if(document.getElementById('fTarefaDepartamento')) popularFiltroTarefaDepartamento();
+  renderPainel(); renderNotas(); renderKanban(); renderSetores(); renderFuncionarios(); renderOperadores(); renderEscalas(); renderDiario(); renderRelatorio(); renderConfig();
+}
+
+function renderPainel(){
+  const all = [...db.notas, ...db.tarefas];
+  const abertas = all.filter(x=>!isConcluido(x) && x.status !== 'Arquivado').length;
+  const alta = all.filter(x=>x.prioridade === 'Alta' && !isConcluido(x)).length;
+  const atrasadas = all.filter(isAtrasado).length;
+  const mes = hojeISO().slice(0,7);
+  const concl = all.filter(x=>isConcluido(x) && (x.atualizadoEm||'').includes('/' + String(new Date().getMonth()+1).padStart(2,'0') + '/')).length;
+  document.getElementById('mAbertas').textContent=abertas;
+  document.getElementById('mAlta').textContent=alta;
+  document.getElementById('mAtrasadas').textContent=atrasadas;
+  document.getElementById('mConcluidas').textContent=concl;
+
+  document.getElementById('dashboardSetores').innerHTML = setores.filter(s=>s.id!=='GERAL').map(s=>{
+    const itens = all.filter(x=>x.setor===s.id);
+    const pend = itens.filter(x=>!isConcluido(x)).length;
+    const alt = itens.filter(x=>x.prioridade==='Alta' && !isConcluido(x)).length;
+    const atr = itens.filter(isAtrasado).length;
+    return `<div class="sector-card"><h3>${s.icon} ${s.nome}</h3><p>${s.desc}</p><div class="sector-stat"><span>Pendentes</span><b>${pend}</b></div><div class="sector-stat"><span>Alta prioridade</span><b>${alt}</b></div><div class="sector-stat"><span>Atrasadas</span><b>${atr}</b></div></div>`;
+  }).join('');
+
+  const proximas = all.filter(x=>!isConcluido(x)).sort((a,b)=>(a.prazo||'9999')>(b.prazo||'9999')?1:-1).slice(0,8);
+  document.getElementById('listaProximas').innerHTML = proximas.length ? proximas.map(cardMini).join('') : '<div class="empty">Nenhuma pendência aberta.</div>';
+  const recados = db.notas.filter(x=>x.prioridade==='Alta' && !isConcluido(x)).slice(0,8);
+  document.getElementById('listaRecados').innerHTML = recados.length ? recados.map(cardMini).join('') : '<div class="empty">Nenhum recado urgente.</div>';
+}
+
+function cardMini(x){
+  const resp = [x.responsavel, x.responsavel2].filter(Boolean).join(' + ') || 'Não definido';
+  const prazo = x.fim || x.prazo || 'Sem prazo';
+  const dep = x.departamento ? ` • <b>Depto.:</b> ${escapeHTML(x.departamento)}` : '';
+  return `<div class="task-card"><h4>${escapeHTML(x.atividade||x.titulo||x.resumo)}</h4><div class="task-meta">${badgeSetor(x.setor)} ${badgePrioridade(x.prioridade||'Normal')} ${badgeStatus(x.status)}</div><p><b>Prazo:</b> ${prazo} • <b>Resp.:</b> ${escapeHTML(resp)}${dep}</p><p>${escapeHTML(x.descricao||x.resumo||'')}</p></div>`;
+}
+
+function renderNotas(){
+  const fs = document.getElementById('fNotaSetor').value || 'TODOS';
+  const st = document.getElementById('fNotaStatus').value || 'TODOS';
+  const pr = document.getElementById('fNotaPrioridade').value || 'TODOS';
+  const busca = norm(document.getElementById('fNotaBusca').value);
+  let arr = db.notas.filter(n =>
+    (fs==='TODOS'||n.setor===fs) && (st==='TODOS'||n.status===st) && (pr==='TODOS'||n.prioridade===pr) &&
+    (!busca || norm(n.titulo+' '+n.resumo+' '+n.descricao+' '+n.responsavel).includes(busca))
+  );
+  document.getElementById('tbodyNotas').innerHTML = arr.length ? arr.map(n=>`<tr><td>${escapeHTML(n.criadoEm)}</td><td>${badgeSetor(n.setor)}</td><td><b>${escapeHTML(n.titulo)}</b></td><td>${escapeHTML(n.tipo)}</td><td>${badgePrioridade(n.prioridade)}</td><td>${n.prazo||'-'}</td><td>${escapeHTML(n.responsavel||'-')}</td><td>${badgeStatus(n.status)}</td><td>${escapeHTML(n.resumo||n.descricao||'-')}</td><td class="no-print"><button class="btn small secondary" onclick="editarNota('${n.id}')">Editar</button> <button class="btn small good" onclick="concluirNota('${n.id}')">OK</button> <button class="btn small danger" onclick="excluirNota('${n.id}')">Excluir</button></td></tr>`).join('') : '<tr><td colspan="10" class="empty">Nenhuma anotação encontrada.</td></tr>';
+}
+
+function renderKanban(){
+  const fs = document.getElementById('fTarefaSetor').value || 'TODOS';
+  const fd = document.getElementById('fTarefaDepartamento')?.value || 'TODOS';
+  const pr = document.getElementById('fTarefaPrioridade').value || 'TODOS';
+  const busca = norm(document.getElementById('fTarefaBusca').value);
+  const status = ['Pendente','Em andamento','Aguardando','Concluída'];
+  let arr = db.tarefas.filter(t =>
+    (fs==='TODOS'||t.setor===fs) &&
+    (fd==='TODOS'||t.departamento===fd) &&
+    (pr==='TODOS'||t.prioridade===pr) &&
+    (!busca || norm((t.titulo||'')+' '+(t.atividade||'')+' '+(t.descricao||'')+' '+(t.responsavel||'')+' '+(t.responsavel2||'')+' '+(t.departamento||'')).includes(busca))
+  );
+
+  const classes = {'Pendente':'pendente','Em andamento':'andamento','Aguardando':'aguardando','Concluída':'concluida'};
+  document.getElementById('taskStatusSummary').innerHTML = status.map(st=>`<div class="status-card ${classes[st]}"><div><small>${st.toUpperCase()}</small><b>${arr.filter(t=>t.status===st).length}</b></div><span class="dot"></span></div>`).join('');
+
+  document.getElementById('kanban').innerHTML = status.map(st=>{
+    const itens = arr.filter(t=>t.status===st);
+    return `<div class="lane"><h3>${st.toUpperCase()} <span class="badge b-info">${itens.length}</span></h3>${itens.length?itens.map(t=>{
+      const periodo = `${t.inicio || t.dataISO || '-'} ${t.fim ? 'até ' + t.fim : ''}`;
+      const responsaveis = [t.responsavel, t.responsavel2].filter(Boolean).join(' + ') || 'Não definido';
+      return `<div class="task-card"><h4>${escapeHTML(t.atividade || t.titulo)}</h4><div class="task-meta">${badgeSetor(t.setor)} ${badgePrioridade(t.prioridade)}</div><p><b>Departamento:</b> ${escapeHTML(t.departamento || 'Loja toda')}<br><b>Período:</b> ${escapeHTML(periodo)}<br><b>Resp.:</b> ${escapeHTML(responsaveis)}</p><p>${escapeHTML(t.descricao||'')}</p><div class="actions no-print"><button class="btn small secondary" onclick="abrirModalTarefa('${t.id}')">Editar</button>${st!=='Concluída'?`<button class="btn small good" onclick="setTarefaStatus('${t.id}','Concluída')">Concluir</button>`:''}<button class="btn small danger" onclick="excluirTarefa('${t.id}')">Excluir</button></div></div>`;
+    }).join(''):'<div class="empty">Sem itens</div>'}</div>`;
+  }).join('');
+}
+
+function renderSectorTabs(){
+  document.getElementById('sectorTabs').innerHTML = setores.filter(s=>s.id!=='GERAL').map(s=>`<button class="tab-btn ${setorAtivo===s.id?'active':''}" onclick="setorAtivo='${s.id}'; renderAll();">${s.icon} ${s.nome}</button>`).join('');
+}
+function renderSetores(){
+  renderSectorTabs();
+  const s = setores.find(x=>x.id===setorAtivo);
+  const notas = db.notas.filter(n=>n.setor===setorAtivo).slice(0,10);
+  const tarefas = db.tarefas.filter(t=>t.setor===setorAtivo).slice(0,10);
+  document.getElementById('sectorDetail').innerHTML = `<div class="grid grid-3" style="margin-bottom:16px;"><div class="metric"><small>Pendências ${s.nome}</small><b>${[...notas,...tarefas].filter(x=>!isConcluido(x)).length}</b><span>${s.desc}</span></div><div class="metric"><small>Alta prioridade</small><b>${[...notas,...tarefas].filter(x=>x.prioridade==='Alta'&&!isConcluido(x)).length}</b><span>Itens urgentes do setor</span></div><div class="metric"><small>Atrasadas</small><b>${[...notas,...tarefas].filter(isAtrasado).length}</b><span>Prazo vencido</span></div></div><div class="grid grid-2"><div><h2>Anotações do setor</h2>${notas.length?notas.map(cardMini).join(''):'<div class="empty">Sem anotações.</div>'}</div><div><h2>Tarefas do setor</h2>${tarefas.length?tarefas.map(cardMini).join(''):'<div class="empty">Sem tarefas.</div>'}</div></div>`;
+}
+
+function renderDiario(){
+  document.getElementById('tbodyDiario').innerHTML = db.diario.length ? db.diario.map(d=>`<tr><td>${d.dataISO}</td><td>${escapeHTML(d.turno)}</td><td>${escapeHTML(d.responsavel||'-')}</td><td><b>${escapeHTML(d.resumo)}</b></td><td>${badgeStatus(d.vm)}</td><td>${badgeStatus(d.fiscal)}</td><td>${badgeStatus(d.adm)}</td><td>${badgeStatus(d.pf)}</td><td>${escapeHTML(d.obs||'-')}</td><td class="no-print"><button class="btn small secondary" onclick="editarDiario('${d.id}')">Editar</button> <button class="btn small danger" onclick="excluirDiario('${d.id}')">Excluir</button></td></tr>`).join('') : '<tr><td colspan="10" class="empty">Nenhum acompanhamento registrado.</td></tr>';
+}
+
+function getRelatorio(){
+  const setor = document.getElementById('relSetor').value || 'TODOS';
+  const tipo = document.getElementById('relTipo').value || 'TODOS';
+  const ini = document.getElementById('relInicio').value || '0000-00-00';
+  const fim = document.getElementById('relFim').value || '9999-99-99';
+  let rows=[];
+  if(tipo==='TODOS'||tipo==='NOTAS') db.notas.forEach(n=>rows.push({data:n.dataISO,tipo:'Anotação',setor:n.setor,titulo:n.titulo,responsavel:n.responsavel,prioridade:n.prioridade,status:n.status,prazo:n.prazo,obs:n.resumo||n.descricao,atualizadoPor:n.atualizadoPor}));
+  if(tipo==='TODOS'||tipo==='TAREFAS') db.tarefas.forEach(t=>rows.push({data:t.dataISO,tipo:'Tarefa',setor:t.setor,titulo:t.atividade||t.titulo,responsavel:[t.responsavel,t.responsavel2].filter(Boolean).join(' + '),prioridade:t.prioridade,status:t.status,prazo:t.fim||t.prazo,obs:`Departamento: ${t.departamento||'-'} | Início: ${t.inicio||'-'} | Observação: ${t.descricao||'-'}`,atualizadoPor:t.atualizadoPor}));
+  if(tipo==='TODOS'||tipo==='DIARIO') db.diario.forEach(d=>rows.push({data:d.dataISO,tipo:'Acompanhamento',setor:'GERAL',titulo:d.resumo,responsavel:d.responsavel,prioridade:'-',status:`VM:${d.vm} Fiscal:${d.fiscal} ADM:${d.adm} PF:${d.pf}`,prazo:'-',obs:d.obs,atualizadoPor:d.atualizadoPor}));
+  rows = rows.filter(r => (setor==='TODOS'||r.setor===setor||r.setor==='GERAL') && r.data>=ini && r.data<=fim).sort((a,b)=>a.data<b.data?1:-1);
+  return rows;
+}
+function renderRelatorio(){
+  const rows = getRelatorio();
+  document.getElementById('rTotal').textContent=rows.length;
+  document.getElementById('rPendentes').textContent=rows.filter(r=>!['Concluído','Concluída','Arquivado'].includes(r.status)).length;
+  document.getElementById('rConcluidos').textContent=rows.filter(r=>['Concluído','Concluída','Arquivado'].includes(r.status)).length;
+  document.getElementById('rAlta').textContent=rows.filter(r=>r.prioridade==='Alta').length;
+  document.getElementById('tbodyRelatorio').innerHTML = rows.length ? rows.map(r=>`<tr><td>${r.data}</td><td>${r.tipo}</td><td>${badgeSetor(r.setor)}</td><td><b>${escapeHTML(r.titulo)}</b></td><td>${escapeHTML(r.responsavel||'-')}</td><td>${escapeHTML(r.prioridade||'-')}</td><td>${escapeHTML(r.status||'-')}</td><td>${escapeHTML(r.prazo||'-')}</td><td>${escapeHTML(r.obs||'-')}</td><td>${escapeHTML(r.atualizadoPor||'-')}</td></tr>`).join('') : '<tr><td colspan="10" class="empty">Nenhum registro no filtro selecionado.</td></tr>';
+}
+
+function funcionariosDisponiveisParaLogin(){
+  garantirUsuariosPermitidos();
+  const permitidos = new Set((db.usuariosPermitidos || []).map(normalizarOperador));
+  return (db.funcionarios || [])
+    .filter(f => normalizarOperador(f.operador) && String(f.status || 'ATIVO').toUpperCase() !== 'DESLIGADO')
+    .filter(f => !permitidos.has(normalizarOperador(f.operador)))
+    .sort((a,b) => norm(a.nome).localeCompare(norm(b.nome)));
+}
+function adicionarUsuarioLogin(){
+  const op = normalizarOperador(document.getElementById('configNovoUsuarioLogin')?.value);
+  if(!op){ alert('Selecione um funcionário com número de operador para liberar o login.'); return; }
+  const f = (db.funcionarios || []).find(x => normalizarOperador(x.operador) === op);
+  if(!f){ alert('Funcionário não encontrado para este operador.'); return; }
+  db.usuariosPermitidos ||= operadoresOficiaisLogin();
+  if(!db.usuariosPermitidos.map(normalizarOperador).includes(op)) db.usuariosPermitidos.push(op);
+  sincronizarUsuariosLogin();
+  saveDB();
+  renderAll();
+  alert('Login liberado para ' + f.nome + '. Senha: ' + senhaPorOperador(op));
+}
+function removerUsuarioLogin(op){
+  const operador = normalizarOperador(op);
+  if(operadoresOficiaisLogin().includes(operador)){
+    alert('Este é um usuário padrão do sistema e não pode ser removido por aqui.');
+    return;
+  }
+  const u = (db.usuarios || []).find(x => normalizarOperador(x.operador) === operador);
+  if(!u) return;
+  if(confirm('Remover o acesso de login de ' + u.nome + '?')){
+    db.usuariosPermitidos = (db.usuariosPermitidos || []).filter(x => normalizarOperador(x) !== operador);
+    sincronizarUsuariosLogin();
+    saveDB();
+    renderAll();
+  }
+}
+function renderUsuariosLoginRows(){
+  return (db.usuarios || []).map(u => {
+    const podeRemover = !operadoresOficiaisLogin().includes(normalizarOperador(u.operador));
+    return `<tr><td>${escapeHTML(u.nome)}</td><td><b>${escapeHTML(u.operador)}</b></td><td>${escapeHTML(u.matricula || matriculaPorOperador(u.operador))}</td><td>${escapeHTML(u.cargo)}</td><td><code>${escapeHTML(u.senha)}</code></td><td class="no-print">${podeRemover ? `<button class="btn small danger" onclick="removerUsuarioLogin('${escapeHTML(u.operador)}')">Remover acesso</button>` : '<span class="badge b-ok">Padrão</span>'}</td></tr>`;
+  }).join('');
+}
+function renderSelectNovoUsuarioLogin(){
+  const disponiveis = funcionariosDisponiveisParaLogin();
+  if(!disponiveis.length) return '<option value="">Nenhum funcionário com operador disponível</option>';
+  return '<option value="">Selecione um funcionário</option>' + disponiveis.map(f => `<option value="${escapeHTML(normalizarOperador(f.operador))}">${escapeHTML(f.nome)} — OP. ${escapeHTML(normalizarOperador(f.operador))} — ${escapeHTML(f.cargo || 'Equipe')}</option>`).join('');
+}
+
+
+function funcionariosAtivosEscala(){
+  return (db.funcionarios || [])
+    .filter(f => String(f.status || 'ATIVO').toUpperCase() !== 'DESLIGADO')
+    .slice()
+    .sort((a,b) => norm(a.nome).localeCompare(norm(b.nome)));
+}
+function optionsFuncionariosEscala(){
+  const arr = funcionariosAtivosEscala();
+  if(!arr.length) return '<option value="">Nenhum funcionário cadastrado</option>';
+  return '<option value="">Selecione</option>' + arr.map(f => `<option value="${escapeHTML(f.id)}">${escapeHTML(f.nome)}${f.operador ? ' — OP. ' + escapeHTML(f.operador) : ''}${f.cargo ? ' — ' + escapeHTML(f.cargo) : ''}</option>`).join('');
+}
+function getFuncionarioEscala(id){ return (db.funcionarios || []).find(f => f.id === id); }
+
+function dataBRSimples(dataISO){
+  if(!dataISO) return '';
+  const p = String(dataISO).split('-');
+  if(p.length !== 3) return dataISO;
+  return `${p[2]}/${p[1]}/${p[0]}`;
+}
+function nomeDiaSemanaData(dataISO){
+  if(!dataISO) return '';
+  const [y,m,d] = String(dataISO).split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  return ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'][dt.getDay()] || '';
+}
+function gerarDiasUteisDoMes(dataBaseISO){
+  const base = dataBaseISO || hojeISO();
+  const [ano, mes] = String(base).split('-').map(Number);
+  const y = ano || new Date().getFullYear();
+  const m = mes || (new Date().getMonth() + 1);
+  const ultimo = new Date(y, m, 0).getDate();
+  const dias = [];
+  for(let dia = 1; dia <= ultimo; dia++){
+    const dt = new Date(y, m - 1, dia);
+    const semana = dt.getDay();
+    if(semana >= 1 && semana <= 5){
+      const iso = `${y}-${String(m).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+      dias.push({ value: iso, label: `${nomeDiaSemanaData(iso)} — ${dataBRSimples(iso)}` });
+    }
+  }
+  return dias;
+}
+function atualizarOpcoesFolgaEscala(){
+  const sel = document.getElementById('escalaDiaFolga');
+  if(!sel) return;
+  const atual = sel.value;
+  const dias = gerarDiasUteisDoMes(document.getElementById('escalaData')?.value || hojeISO());
+  sel.innerHTML = '<option value="">Selecione o dia da folga</option>' + dias.map(d => `<option value="${d.value}">${d.label}</option>`).join('');
+  if(atual && dias.some(d => d.value === atual)) sel.value = atual;
+}
+
+function selecionarTipoEscala(tipo){
+  tipo = tipo || '';
+  const tipoInput = document.getElementById('escalaTipo');
+  const select = document.getElementById('escalaOperacaoSelect');
+  const formArea = document.getElementById('escalaFormArea');
+  const hint = document.getElementById('escalaStartHint');
+  const tituloGroup = document.getElementById('escalaTituloGroup');
+  const tituloInput = document.getElementById('escalaTitulo');
+  if(tipoInput) tipoInput.value = tipo;
+  if(select) select.value = tipo;
+  if(!tipo){
+    if(formArea) formArea.classList.remove('active');
+    if(hint) hint.style.display = '';
+    return;
+  }
+  if(formArea) formArea.classList.add('active');
+  if(hint) hint.style.display = 'none';
+  document.getElementById('escalaTituloOperacao').textContent = tipo === 'DOMINGO' ? 'Escala de Domingo' : 'Escala de Feriado';
+  document.getElementById('escalaDescricaoOperacao').textContent = tipo === 'DOMINGO' ? 'Preencha abertura, fechamento e folgas compensatórias. Domingo não precisa de nome de feriado.' : 'Preencha abertura, fechamento, folgas e o nome do feriado.';
+  document.getElementById('escalaBadgeOperacao').textContent = tipo;
+  document.getElementById('escalaBadgeOperacao').className = tipo === 'DOMINGO' ? 'badge b-info' : 'badge b-warn';
+  if(tituloGroup) tituloGroup.style.display = tipo === 'FERIADO' ? '' : 'none';
+  if(tipo === 'DOMINGO'){
+    if(tituloInput) tituloInput.value = 'Domingo de trabalho';
+  } else if(tipo === 'FERIADO' && tituloInput && tituloInput.value === 'Domingo de trabalho'){
+    tituloInput.value = '';
+  }
+  if(!document.getElementById('escalaData').value) document.getElementById('escalaData').value = hojeISO();
+  atualizarOpcoesFolgaEscala();
+}
+function pessoaJaNaEscala(funcId){
+  return ['abertura','fechamento','folgas'].some(k => escalaDraft[k].some(p => p.funcId === funcId));
+}
+function adicionarPessoaEscala(grupo){
+  const tipoAtual = document.getElementById('escalaTipo')?.value || '';
+  if(!tipoAtual){ alert('Selecione DOMINGO ou FERIADO antes de adicionar pessoas.'); return; }
+  const cap = grupo === 'abertura' ? 'Abertura' : grupo === 'fechamento' ? 'Fechamento' : 'Folgas';
+  const pessoaEl = document.getElementById(grupo === 'abertura' ? 'escalaPessoaAbertura' : grupo === 'fechamento' ? 'escalaPessoaFechamento' : 'escalaPessoaFolga');
+  const funcId = pessoaEl.value;
+  if(!funcId){ alert('Selecione uma pessoa para adicionar em ' + cap + '.'); return; }
+  const f = getFuncionarioEscala(funcId);
+  if(!f){ alert('Funcionário não encontrado.'); return; }
+  if(pessoaJaNaEscala(funcId)){ alert('Esta pessoa já foi alocada nesta escala. Remova primeiro para alterar o turno ou folga.'); return; }
+  if(grupo === 'folgas'){
+    const diaEl = document.getElementById('escalaDiaFolga');
+    const diaFolga = diaEl?.value || '';
+    const diaFolgaLabel = diaEl?.options[diaEl.selectedIndex]?.text || '';
+    if(!diaFolga){ alert('Selecione o dia da folga.'); return; }
+    escalaDraft.folgas.push({ id: uid('folga'), funcId, nome:f.nome, cargo:f.cargo || '', diaFolga, diaFolgaLabel, obs: document.getElementById('escalaObsFolga').value.trim() });
+    document.getElementById('escalaObsFolga').value = '';
+    diaEl.value = '';
+  } else {
+    const entrada = document.getElementById(grupo === 'abertura' ? 'escalaEntradaAbertura' : 'escalaEntradaFechamento').value;
+    const saida = document.getElementById(grupo === 'abertura' ? 'escalaSaidaAbertura' : 'escalaSaidaFechamento').value;
+    const obsEl = document.getElementById(grupo === 'abertura' ? 'escalaObsAbertura' : 'escalaObsFechamento');
+    if(!entrada){ alert('Informe o horário de entrada.'); return; }
+    escalaDraft[grupo].push({ id: uid('esc'), funcId, nome:f.nome, cargo:f.cargo || '', entrada, saida, obs: obsEl.value.trim() });
+    obsEl.value = '';
+  }
+  pessoaEl.value = '';
+  renderEscalaPreview();
+}
+function removerPessoaEscala(grupo, id){
+  escalaDraft[grupo] = escalaDraft[grupo].filter(p => p.id !== id);
+  renderEscalaPreview();
+}
+function renderEscalaPessoa(p, grupo){
+  const horario = grupo === 'folgas'
+    ? `${p.diaFolgaLabel || (p.diaFolga ? nomeDiaSemanaData(p.diaFolga) + ' — ' + dataBRSimples(p.diaFolga) : 'Dia não informado')}${p.obs ? '<br>' + escapeHTML(p.obs) : ''}`
+    : `${p.entrada || '--:--'}${p.saida ? ' às ' + p.saida : ''}${p.obs ? '<br>' + escapeHTML(p.obs) : ''}`;
+  return `<div class="escala-person"><b>${escapeHTML(p.nome)}</b><small>${escapeHTML(p.cargo || 'Equipe')}<br>${horario}</small><div class="actions no-print"><button class="btn small danger" onclick="removerPessoaEscala('${grupo}','${p.id}')">Remover</button></div></div>`;
+}
+function renderEscalaPreview(){
+  if(!document.getElementById('previewAbertura')) return;
+  document.getElementById('previewAbertura').innerHTML = escalaDraft.abertura.length ? escalaDraft.abertura.map(p=>renderEscalaPessoa(p,'abertura')).join('') : '<div class="empty">Nenhuma pessoa na abertura.</div>';
+  document.getElementById('previewFechamento').innerHTML = escalaDraft.fechamento.length ? escalaDraft.fechamento.map(p=>renderEscalaPessoa(p,'fechamento')).join('') : '<div class="empty">Nenhuma pessoa no fechamento.</div>';
+  document.getElementById('previewFolgas').innerHTML = escalaDraft.folgas.length ? escalaDraft.folgas.map(p=>renderEscalaPessoa(p,'folgas')).join('') : '<div class="empty">Nenhuma folga alocada.</div>';
+}
+function limparEscalaAtual(){
+  const tipoAtual = document.getElementById('escalaTipo').value || '';
+  document.getElementById('escalaId').value = '';
+  document.getElementById('escalaData').value = hojeISO();
+  document.getElementById('escalaTitulo').value = tipoAtual === 'DOMINGO' ? 'Domingo de trabalho' : '';
+  document.getElementById('escalaObs').value = '';
+  document.getElementById('escalaObsAbertura').value = '';
+  document.getElementById('escalaObsFechamento').value = '';
+  document.getElementById('escalaObsFolga').value = '';
+  escalaDraft = { abertura: [], fechamento: [], folgas: [] };
+  atualizarOpcoesFolgaEscala();
+  renderEscalaPreview();
+}
+function salvarEscala(){
+  const tipo = document.getElementById('escalaTipo').value || '';
+  const data = document.getElementById('escalaData').value;
+  const titulo = document.getElementById('escalaTitulo').value.trim();
+  if(!tipo){ alert('Selecione DOMINGO ou FERIADO.'); return; }
+  if(!data){ alert('Informe a data da escala.'); return; }
+  if(tipo === 'FERIADO' && !titulo){ alert('Informe o nome do feriado.'); return; }
+  const total = escalaDraft.abertura.length + escalaDraft.fechamento.length + escalaDraft.folgas.length;
+  if(total === 0){ alert('Adicione pelo menos uma pessoa na abertura, fechamento ou folga.'); return; }
+  const id = document.getElementById('escalaId').value || uid('escala');
+  const obj = {
+    id, tipo, data,
+    titulo: tipo === 'DOMINGO' ? 'Domingo de trabalho' : titulo,
+    responsavel: document.getElementById('escalaResponsavel').value,
+    obs: document.getElementById('escalaObs').value.trim(),
+    abertura: JSON.parse(JSON.stringify(escalaDraft.abertura)),
+    fechamento: JSON.parse(JSON.stringify(escalaDraft.fechamento)),
+    folgas: JSON.parse(JSON.stringify(escalaDraft.folgas)),
+    atualizadoPor: usuarioAtual?.nome || '',
+    atualizadoEm: agoraBR()
+  };
+  const idx = db.escalas.findIndex(e => e.id === id);
+  if(idx >= 0) db.escalas[idx] = obj; else db.escalas.push(obj);
+  saveDB();
+  renderEscalas();
+  alert('Escala salva com sucesso.');
+}
+function editarEscala(id){
+  const e = db.escalas.find(x => x.id === id); if(!e) return;
+  showPage('escalas');
+  selecionarTipoEscala(e.tipo || 'DOMINGO');
+  document.getElementById('escalaId').value = e.id;
+  document.getElementById('escalaData').value = e.data || hojeISO();
+  document.getElementById('escalaTitulo').value = e.tipo === 'DOMINGO' ? 'Domingo de trabalho' : (e.titulo || '');
+  document.getElementById('escalaResponsavel').value = e.responsavel || '';
+  document.getElementById('escalaObs').value = e.obs || '';
+  escalaDraft = { abertura: JSON.parse(JSON.stringify(e.abertura || [])), fechamento: JSON.parse(JSON.stringify(e.fechamento || [])), folgas: JSON.parse(JSON.stringify(e.folgas || [])) };
+  atualizarOpcoesFolgaEscala();
+  renderEscalaPreview();
+}
+function duplicarEscala(id){
+  const e = db.escalas.find(x => x.id === id); if(!e) return;
+  const novo = JSON.parse(JSON.stringify(e));
+  novo.id = uid('escala'); novo.data = hojeISO(); novo.titulo = (novo.titulo || 'Escala') + ' — cópia'; novo.atualizadoPor = usuarioAtual?.nome || ''; novo.atualizadoEm = agoraBR();
+  db.escalas.push(novo); saveDB(); renderEscalas();
+}
+function excluirEscala(id){
+  if(!confirm('Excluir esta escala?')) return;
+  db.escalas = db.escalas.filter(e => e.id !== id);
+  saveDB(); renderEscalas();
+}
+function resumoGrupoEscala(arr, grupo){
+  if(!arr || !arr.length) return '-';
+  return arr.map(p => {
+    if(grupo === 'folgas'){
+      const dia = p.diaFolgaLabel || (p.diaFolga ? nomeDiaSemanaData(p.diaFolga) + ' — ' + dataBRSimples(p.diaFolga) : 'Dia não informado');
+      return `${escapeHTML(p.nome)}<br><small>${escapeHTML(dia)}</small>`;
+    }
+    return `${escapeHTML(p.nome)} (${escapeHTML(p.entrada || '')}${p.saida ? ' às ' + escapeHTML(p.saida) : ''})`;
+  }).join('<br>');
+}
+function dataEscalaWhatsApp(dataISO){
+  if(!dataISO) return '-';
+  const partes = String(dataISO).split('-');
+  if(partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  return dataISO;
+}
+function linhaPessoaEscalaWhatsApp(p, grupo){
+  const cargo = p.cargo ? ` — ${p.cargo}` : '';
+  if(grupo === 'folgas'){
+    const dia = p.diaFolgaLabel || (p.diaFolga ? `${nomeDiaSemanaData(p.diaFolga)} — ${dataEscalaWhatsApp(p.diaFolga)}` : 'Dia não informado');
+    return `• ${p.nome}${cargo}
+  Folga: ${dia}${p.obs ? `
+  Obs.: ${p.obs}` : ''}`;
+  }
+  const horario = `${p.entrada || '--:--'}${p.saida ? ` às ${p.saida}` : ''}`;
+  return `• ${p.nome}${cargo}
+  Horário: ${horario}${p.obs ? `
+  Obs.: ${p.obs}` : ''}`;
+}
+function grupoEscalaWhatsApp(titulo, arr, grupo){
+  if(!arr || !arr.length) return `\n${titulo}\n- Nenhuma pessoa alocada.`;
+  return `\n${titulo}\n${arr.map(p => linhaPessoaEscalaWhatsApp(p, grupo)).join('\n')}`;
+}
+function montarTextoEscalaWhatsApp(e){
+  const responsavel = nomeFuncionarioPorId(e.responsavel) || e.responsavel || '-';
+  const totalAbertura = e.abertura?.length || 0;
+  const totalFechamento = e.fechamento?.length || 0;
+  const totalFolgas = e.folgas?.length || 0;
+  return [
+    `*ESCALA DE TRABALHO — ${e.tipo || 'DOMINGO'}*`,
+    `*Loja 24 — Avenida*`,
+    ``,
+    `📅 *Data:* ${dataEscalaWhatsApp(e.data)}`,
+    e.tipo === 'FERIADO' ? `🏷️ *Feriado:* ${e.titulo || '-'}` : '',
+    `👤 *Responsável:* ${responsavel}`,
+    ``,
+    `📌 *Resumo:* ${totalAbertura} abertura · ${totalFechamento} fechamento · ${totalFolgas} folga(s)`,
+    grupoEscalaWhatsApp('🌞 *ABERTURA*', e.abertura || [], 'abertura'),
+    grupoEscalaWhatsApp('🌙 *FECHAMENTO*', e.fechamento || [], 'fechamento'),
+    grupoEscalaWhatsApp('🏖️ *FOLGAS*', e.folgas || [], 'folgas'),
+    e.obs ? `\n📝 *Observações gerais:*\n${e.obs}` : '',
+    `\nGerado pelo Sistema Gerencial — Loja 24.`
+  ].filter(Boolean).join('\n');
+}
+function escalaAtualComoObjetoWhatsApp(){
+  const tipo = document.getElementById('escalaTipo')?.value || '';
+  const data = document.getElementById('escalaData')?.value || '';
+  const titulo = tipo === 'DOMINGO' ? 'Domingo de trabalho' : (document.getElementById('escalaTitulo')?.value.trim() || '');
+  return {
+    id: document.getElementById('escalaId')?.value || '',
+    tipo,
+    data,
+    titulo,
+    responsavel: document.getElementById('escalaResponsavel')?.value || '',
+    obs: document.getElementById('escalaObs')?.value.trim() || '',
+    abertura: JSON.parse(JSON.stringify(escalaDraft.abertura || [])),
+    fechamento: JSON.parse(JSON.stringify(escalaDraft.fechamento || [])),
+    folgas: JSON.parse(JSON.stringify(escalaDraft.folgas || []))
+  };
+}
+function abrirWhatsAppComTexto(texto){
+  const url = 'https://wa.me/?text=' + encodeURIComponent(texto);
+  window.open(url, '_blank');
+}
+function enviarEscalaAtualWhatsApp(){
+  const e = escalaAtualComoObjetoWhatsApp();
+  const total = (e.abertura?.length || 0) + (e.fechamento?.length || 0) + (e.folgas?.length || 0);
+  if(!e.tipo){ alert('Selecione DOMINGO ou FERIADO antes de enviar para o WhatsApp.'); return; }
+  if(!e.data){ alert('Informe a data da escala antes de enviar para o WhatsApp.'); return; }
+  if(e.tipo === 'FERIADO' && !e.titulo){ alert('Informe o nome/identificação do feriado antes de enviar.'); return; }
+  if(total === 0){ alert('Adicione pelo menos uma pessoa na abertura, fechamento ou folga antes de enviar.'); return; }
+  abrirWhatsAppComTexto(montarTextoEscalaWhatsApp(e));
+}
+function enviarEscalaWhatsApp(id){
+  const e = db.escalas.find(x => x.id === id);
+  if(!e){ alert('Escala não encontrada.'); return; }
+  abrirWhatsAppComTexto(montarTextoEscalaWhatsApp(e));
+}
+function renderEscalas(){
+  if(!document.getElementById('tbodyEscalas')) return;
+  db.escalas ||= [];
+  const opts = optionsFuncionariosEscala();
+  ['escalaPessoaAbertura','escalaPessoaFechamento','escalaPessoaFolga','escalaResponsavel'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el){ const atual = el.value; el.innerHTML = opts; if(atual) el.value = atual; }
+  });
+  if(!document.getElementById('escalaData').value) document.getElementById('escalaData').value = hojeISO();
+  const tipoAtual = document.getElementById('escalaTipo')?.value || '';
+  selecionarTipoEscala(tipoAtual);
+  renderEscalaPreview();
+  const filtroTipo = document.getElementById('fEscalaTipo')?.value || 'TODOS';
+  const busca = norm(document.getElementById('fEscalaBusca')?.value || '');
+  const arr = db.escalas.filter(e => (filtroTipo === 'TODOS' || e.tipo === filtroTipo) && (!busca || norm(`${e.data} ${e.tipo} ${e.titulo} ${e.responsavel} ${e.obs} ${(e.abertura||[]).map(p=>p.nome).join(' ')} ${(e.fechamento||[]).map(p=>p.nome).join(' ')} ${(e.folgas||[]).map(p=>p.nome).join(' ')}`).includes(busca))).sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+  const totalPessoas = db.escalas.reduce((acc,e)=>acc+(e.abertura?.length||0)+(e.fechamento?.length||0)+(e.folgas?.length||0),0);
+  document.getElementById('escTotal').textContent = db.escalas.length;
+  document.getElementById('escDomingos').textContent = db.escalas.filter(e=>e.tipo==='DOMINGO').length;
+  document.getElementById('escFeriados').textContent = db.escalas.filter(e=>e.tipo==='FERIADO').length;
+  document.getElementById('escPessoas').textContent = totalPessoas;
+  document.getElementById('tbodyEscalas').innerHTML = arr.length ? arr.map(e => `<tr><td><b>${escapeHTML(e.data || '')}</b><br><small>${escapeHTML(e.atualizadoEm || '')}</small></td><td>${e.tipo === 'DOMINGO' ? '<span class="badge b-info">DOMINGO</span>' : '<span class="badge b-warn">FERIADO</span>'}</td><td><b>${e.tipo === 'DOMINGO' ? '-' : escapeHTML(e.titulo || '')}</b></td><td>${resumoGrupoEscala(e.abertura,'abertura')}</td><td>${resumoGrupoEscala(e.fechamento,'fechamento')}</td><td>${resumoGrupoEscala(e.folgas,'folgas')}</td><td>${escapeHTML(nomeFuncionarioPorId(e.responsavel) || e.responsavel || '-')}</td><td>${escapeHTML(e.obs || '-')}</td><td class="no-print"><div class="actions"><button class="btn small good" onclick="enviarEscalaWhatsApp('${e.id}')">WhatsApp</button><button class="btn small secondary" onclick="editarEscala('${e.id}')">Editar</button><button class="btn small" onclick="duplicarEscala('${e.id}')">Duplicar</button><button class="btn small danger" onclick="excluirEscala('${e.id}')">Excluir</button></div></td></tr>`).join('') : '<tr><td colspan="9" class="empty">Nenhuma escala cadastrada.</td></tr>';
+}
+function nomeFuncionarioPorId(id){
+  const f = (db.funcionarios || []).find(x => x.id === id);
+  return f ? f.nome : '';
+}
+
+function renderConfig(){
+  const el = document.getElementById('configContent');
+  if(normalizarOperador(usuarioAtual?.operador) !== '133') { el.innerHTML = '<div class="config-locked">Configurações disponíveis apenas para JOAO PEDRO.</div>'; return; }
+  sincronizarUsuariosLogin();
+  el.innerHTML = `<div class="section-title"><div><h1>Configurações</h1><p>Ajustes e manutenção do sistema.</p></div></div>
+  <div class="grid grid-2">
+    <div class="section-card" style="box-shadow:none;margin:0;">
+      <div class="section-title" style="margin-bottom:12px;"><div><h2>Usuários com login</h2><p>Libere acesso ao sistema para funcionários que já possuem número de operador.</p></div></div>
+      <div class="form-grid" style="margin-bottom:14px;">
+        <div class="field w8"><label>Adicionar usuário de login</label><select id="configNovoUsuarioLogin">${renderSelectNovoUsuarioLogin()}</select></div>
+        <div class="field w4 actions"><button class="btn" type="button" onclick="adicionarUsuarioLogin()">➕ Liberar login</button></div>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Nome</th><th>Operador</th><th>Matrícula</th><th>Cargo</th><th>Senha</th><th class="no-print">Ações</th></tr></thead><tbody>${renderUsuariosLoginRows()}</tbody></table></div>
+      <p style="color:var(--muted);font-weight:700;margin-top:10px;">A senha é gerada automaticamente pelo padrão: número de operador + 24. Exemplo fictício: 000 / 00024.</p>
+    </div>
+    <div class="section-card" style="box-shadow:none;margin:0;"><h2>Backup</h2><p style="color:var(--muted);font-weight:700;">Use backup para guardar ou transferir os dados deste HTML.</p><div class="actions"><button class="btn" onclick="baixarBackup()">⬇️ Baixar backup JSON</button><label class="btn secondary" style="display:inline-flex;cursor:pointer;">⬆️ Importar backup<input type="file" accept="application/json" onchange="importarBackup(event)" style="display:none;"></label><button class="btn danger" onclick="limparTudo()">⚠️ Limpar sistema</button></div></div>
+  </div>`;
+}
+
+function printActivePage(){ showAppLoader('Preparando impressão', 'Organizando a página para impressão em A4...'); setTimeout(() => { window.print(); hideAppLoader(); }, 320); }
+function baixarBackup(){ const blob = new Blob([JSON.stringify(db,null,2)], {type:'application/json'}); downloadBlob(blob, `backup_assistencia_gerencial_${hojeISO()}.json`); }
+function importarBackup(e){ const f=e.target.files[0]; if(!f) return; showAppLoader('Importando backup', 'Atualizando dados e registros da loja...'); const r=new FileReader(); r.onload=()=>{ try{ const imported=JSON.parse(r.result); db = {...defaultDB(), ...imported}; db.funcionarios ||= JSON.parse(JSON.stringify(funcionariosPadrao)); garantirCamposFuncionarios(); sincronizarUsuariosLogin(); saveDB(); popularFiltroFuncionarios(); renderAll(); alert('Backup importado.'); }catch(err){ alert('Arquivo inválido.'); } finally { hideAppLoader(); if(e?.target) e.target.value=''; } }; r.onerror=()=>{ hideAppLoader(); alert('Não foi possível ler o arquivo de backup.'); if(e?.target) e.target.value=''; }; r.readAsText(f); }
+function limparTudo(){ if(confirm('Apagar todos os dados administrativos?')){ db=defaultDB(); sincronizarUsuariosLogin(); saveDB(); renderAll(); } }
+function downloadBlob(blob, filename){ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href); }
+function exportarCSVRelatorio(){ showAppLoader('Gerando CSV', 'Preparando o relatório completo da loja...'); setTimeout(() => { const rows=getRelatorio(); const head=['Data','Tipo','Setor','Titulo','Responsavel','Prioridade','Status','Prazo','Observacao','Atualizado por']; const csv=[head.join(';'), ...rows.map(r=>[r.data,r.tipo,r.setor,r.titulo,r.responsavel,r.prioridade,r.status,r.prazo,r.obs,r.atualizadoPor].map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(';'))].join('\n'); downloadBlob(new Blob([csv], {type:'text/csv;charset=utf-8'}), `relatorio_gerencial_${hojeISO()}.csv`); hideAppLoader(); }, 260); }
+function exportarExcelRelatorio(){ showAppLoader('Gerando Excel', 'Montando o arquivo do relatório gerencial...'); setTimeout(() => { const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>table{border-collapse:collapse;width:100%;font-family:Segoe UI,Arial}th{background:#291A1E;color:#F6C426}td,th{border:1px solid #999;padding:7px;text-align:left}h1{font-family:Segoe UI,Arial}</style></head><body><h1>Relatório Gerencial - Loja 24</h1><p>Gerente: ALANA • Exportado em ${agoraBR()}</p>${document.getElementById('tabelaRelatorio').outerHTML}</body></html>`; downloadBlob(new Blob([html], {type:'application/vnd.ms-excel'}), `relatorio_gerencial_${hojeISO()}.xls`); hideAppLoader(); }, 260); }
+
+
+/* ===== ESCALA DIRETA V2 ===== */
+let escalaTurnoModalAtual = 'abertura';
+
+function selecionarTipoEscala(tipo){
+  tipo = tipo || '';
+  const tipoInput = document.getElementById('escalaTipo');
+  const select = document.getElementById('escalaOperacaoSelect');
+  const formArea = document.getElementById('escalaFormArea');
+  const hint = document.getElementById('escalaStartHint');
+  const tituloGroup = document.getElementById('escalaTituloGroup');
+  const tituloInput = document.getElementById('escalaTitulo');
+  const badge = document.getElementById('escalaBadgeOperacao');
+
+  if(tipoInput) tipoInput.value = tipo;
+  if(select) select.value = tipo;
+
+  if(!tipo){
+    if(formArea) formArea.classList.remove('active');
+    if(hint) hint.style.display = '';
+    if(tituloGroup) tituloGroup.style.display = 'none';
+    if(badge){ badge.textContent = 'NÃO SELECIONADO'; badge.className = 'badge b-info'; }
+    return;
+  }
+
+  if(formArea) formArea.classList.add('active');
+  if(hint) hint.style.display = 'none';
+  if(tituloGroup) tituloGroup.style.display = tipo === 'FERIADO' ? '' : 'none';
+  if(badge){ badge.textContent = tipo; badge.className = tipo === 'DOMINGO' ? 'badge b-info' : 'badge b-warn'; }
+
+  if(tipo === 'DOMINGO'){
+    if(tituloInput) tituloInput.value = 'Domingo de trabalho';
+  } else if(tipo === 'FERIADO' && tituloInput && tituloInput.value === 'Domingo de trabalho'){
+    tituloInput.value = '';
+  }
+
+  if(!document.getElementById('escalaData').value) document.getElementById('escalaData').value = hojeISO();
+  atualizarOpcoesFolgaEscala();
+  renderEscalaPreview();
+}
+
+function ajustarHorarioTurnoEscala(){
+  const turno = document.getElementById('escalaTurnoSelect')?.value || 'abertura';
+  const entrada = document.getElementById('escalaEntradaTurno');
+  const saida = document.getElementById('escalaSaidaTurno');
+  if(!entrada || !saida) return;
+  if(turno === 'abertura'){
+    entrada.value = '08:00';
+    saida.value = '14:00';
+  } else {
+    entrada.value = '14:00';
+    saida.value = '20:00';
+  }
+}
+
+function gerarDiasUteisDoMes(dataBaseISO){
+  const base = dataBaseISO || hojeISO();
+  const partes = String(base).split('-').map(Number);
+  const inicio = partes.length === 3 ? new Date(partes[0], partes[1] - 1, partes[2]) : new Date();
+  const dias = [];
+  for(let i = 1; i <= 35 && dias.length < 12; i++){
+    const dt = new Date(inicio);
+    dt.setDate(inicio.getDate() + i);
+    const semana = dt.getDay();
+    if(semana >= 1 && semana <= 5){
+      const iso = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+      dias.push({ value: iso, label: `${nomeDiaSemanaData(iso)} — ${dataBRSimples(iso)}` });
+    }
+  }
+  return dias;
+}
+
+function atualizarOpcoesFolgaEscala(){
+  document.querySelectorAll('.selectFolgaEscala').forEach(sel => {
+    const atual = sel.value;
+    const dias = gerarDiasUteisDoMes(document.getElementById('escalaData')?.value || hojeISO());
+    sel.innerHTML = '<option value="">Sem folga definida</option>' + dias.map(d => `<option value="${d.value}">${d.label}</option>`).join('');
+    if(atual && dias.some(d => d.value === atual)) sel.value = atual;
+  });
+}
+
+function funcionariosJaNoTurno(turno){
+  return new Set((escalaDraft[turno] || []).map(p => p.funcId));
+}
+
+function turnoDaPessoaNaEscala(funcId){
+  if((escalaDraft.abertura || []).some(p => p.funcId === funcId)) return 'abertura';
+  if((escalaDraft.fechamento || []).some(p => p.funcId === funcId)) return 'fechamento';
+  return '';
+}
+
+function abrirModalPessoasEscala(){
+  const tipo = document.getElementById('escalaTipo')?.value || '';
+  if(!tipo){ alert('Selecione DOMINGO ou FERIADO antes de adicionar funcionários.'); return; }
+  escalaTurnoModalAtual = document.getElementById('escalaTurnoSelect')?.value || 'abertura';
+  const titulo = document.getElementById('modalEscalaTitulo');
+  if(titulo) titulo.textContent = escalaTurnoModalAtual === 'abertura' ? 'Selecionar funcionários — Abertura' : 'Selecionar funcionários — Fechamento';
+  const busca = document.getElementById('buscaModalEscalaPessoa');
+  if(busca) busca.value = '';
+  renderModalPessoasEscala();
+  document.getElementById('modalEscalaPessoas')?.classList.add('active');
+}
+
+function fecharModalPessoasEscala(ev){
+  if(ev && ev.target && ev.target.id !== 'modalEscalaPessoas') return;
+  document.getElementById('modalEscalaPessoas')?.classList.remove('active');
+}
+
+function renderModalPessoasEscala(){
+  const tbody = document.getElementById('tbodyModalEscalaPessoas');
+  if(!tbody) return;
+  const busca = norm(document.getElementById('buscaModalEscalaPessoa')?.value || '');
+  const arr = funcionariosAtivosEscala().filter(f => !busca || norm(`${f.nome} ${f.operador} ${f.cargo} ${f.setor}`).includes(busca));
+  const atual = funcionariosJaNoTurno(escalaTurnoModalAtual);
+  tbody.innerHTML = arr.length ? arr.map(f => {
+    const outroTurno = turnoDaPessoaNaEscala(f.id);
+    const bloqueado = outroTurno && outroTurno !== escalaTurnoModalAtual;
+    const checked = atual.has(f.id) ? 'checked' : '';
+    return `<tr class="${checked ? 'selected' : ''}">
+      <td class="center"><input type="checkbox" class="chkEscalaPessoa" value="${escapeHTML(f.id)}" ${checked} ${bloqueado ? 'disabled' : ''} onchange="this.closest('tr').classList.toggle('selected', this.checked)"></td>
+      <td><b>${escapeHTML(f.nome)}</b></td>
+      <td>${escapeHTML(f.operador || '-')}</td>
+      <td>${escapeHTML(f.cargo || '-')}</td>
+      <td>${escapeHTML(f.setor || '-')}</td>
+      <td>${bloqueado ? `<span class="badge b-warn">Já no ${outroTurno === 'abertura' ? 'ABERTURA' : 'FECHAMENTO'}</span>` : '<span class="badge b-ok">Disponível</span>'}</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="6" class="empty">Nenhum funcionário encontrado.</td></tr>';
+}
+
+function marcarTodosModalEscala(marcar){
+  document.querySelectorAll('.chkEscalaPessoa:not(:disabled)').forEach(chk => {
+    chk.checked = !!marcar;
+    chk.closest('tr')?.classList.toggle('selected', chk.checked);
+  });
+}
+
+function confirmarSelecaoPessoasEscala(){
+  const turno = escalaTurnoModalAtual || 'abertura';
+  const entrada = document.getElementById('escalaEntradaTurno')?.value || '';
+  const saida = document.getElementById('escalaSaidaTurno')?.value || '';
+  const obs = document.getElementById('escalaObsTurno')?.value.trim() || '';
+  if(!entrada){ alert('Informe o horário de entrada do turno.'); return; }
+
+  const ids = Array.from(document.querySelectorAll('.chkEscalaPessoa:checked')).map(chk => chk.value);
+  escalaDraft[turno] = ids.map(funcId => {
+    const f = getFuncionarioEscala(funcId);
+    const existente = (escalaDraft[turno] || []).find(p => p.funcId === funcId);
+    return {
+      id: existente?.id || uid('esc'),
+      funcId,
+      nome: f?.nome || '',
+      cargo: f?.cargo || '',
+      entrada,
+      saida,
+      obs
+    };
+  });
+
+  escalaDraft.folgas = (escalaDraft.folgas || []).filter(f => ids.includes(f.funcId) || turnoDaPessoaNaEscala(f.funcId));
+  fecharModalPessoasEscala();
+  document.getElementById('escalaObsTurno').value = '';
+  renderEscalaPreview();
+}
+
+function renderPessoaChipEscala(p, grupo){
+  const horario = `${p.entrada || '--:--'}${p.saida ? ' às ' + p.saida : ''}`;
+  return `<span class="escala-chip-pessoa"><span>${escapeHTML(p.nome)} <small>${escapeHTML(horario)}</small></span><button type="button" class="no-print" onclick="removerPessoaEscala('${grupo}','${p.id}')">×</button></span>`;
+}
+
+function removerPessoaEscala(grupo, id){
+  escalaDraft[grupo] = escalaDraft[grupo].filter(p => p.id !== id);
+  const ativos = new Set([...(escalaDraft.abertura || []), ...(escalaDraft.fechamento || [])].map(p => p.funcId));
+  escalaDraft.folgas = (escalaDraft.folgas || []).filter(f => ativos.has(f.funcId));
+  renderEscalaPreview();
+}
+
+function renderEscalaPreview(){
+  const a = document.getElementById('previewAbertura');
+  const f = document.getElementById('previewFechamento');
+  if(!a || !f) return;
+  a.innerHTML = escalaDraft.abertura.length ? escalaDraft.abertura.map(p => renderPessoaChipEscala(p,'abertura')).join('') : '<div class="empty">Nenhuma pessoa na abertura.</div>';
+  f.innerHTML = escalaDraft.fechamento.length ? escalaDraft.fechamento.map(p => renderPessoaChipEscala(p,'fechamento')).join('') : '<div class="empty">Nenhuma pessoa no fechamento.</div>';
+  renderFolgasEscala();
+}
+
+function renderFolgasEscala(){
+  const box = document.getElementById('folgasDiretasBox');
+  const tbody = document.getElementById('tbodyFolgasEscala');
+  if(!box || !tbody) return;
+  const pessoas = [...(escalaDraft.abertura || []).map(p => ({...p, turno:'Abertura'})), ...(escalaDraft.fechamento || []).map(p => ({...p, turno:'Fechamento'}))];
+  box.classList.toggle('active', pessoas.length > 0);
+  if(!pessoas.length){ tbody.innerHTML = ''; return; }
+  const dias = gerarDiasUteisDoMes(document.getElementById('escalaData')?.value || hojeISO());
+  tbody.innerHTML = pessoas.map(p => {
+    const folga = (escalaDraft.folgas || []).find(x => x.funcId === p.funcId) || {};
+    const opts = '<option value="">Sem folga definida</option>' + dias.map(d => `<option value="${d.value}" ${folga.diaFolga === d.value ? 'selected' : ''}>${d.label}</option>`).join('');
+    return `<tr class="folga-row" data-func-id="${escapeHTML(p.funcId)}" data-nome="${escapeHTML(p.nome)}" data-cargo="${escapeHTML(p.cargo || '')}" data-turno="${escapeHTML(p.turno)}">
+      <td><b>${escapeHTML(p.nome)}</b><br><small>${escapeHTML(p.cargo || 'Equipe')}</small></td>
+      <td>${escapeHTML(p.turno)}</td>
+      <td><select class="selectFolgaEscala">${opts}</select></td>
+      <td><input class="obsFolgaEscala" value="${escapeHTML(folga.obs || '')}" placeholder="Observação da folga..." /></td>
+    </tr>`;
+  }).join('');
+}
+
+function sincronizarFolgasDaTela(){
+  const folgas = [];
+  document.querySelectorAll('#tbodyFolgasEscala .folga-row').forEach(row => {
+    const sel = row.querySelector('.selectFolgaEscala');
+    const obs = row.querySelector('.obsFolgaEscala')?.value.trim() || '';
+    if(sel && sel.value){
+      folgas.push({
+        id: uid('folga'),
+        funcId: row.dataset.funcId,
+        nome: row.dataset.nome,
+        cargo: row.dataset.cargo || '',
+        turno: row.dataset.turno || '',
+        diaFolga: sel.value,
+        diaFolgaLabel: sel.options[sel.selectedIndex]?.text || '',
+        obs
+      });
+    }
+  });
+  escalaDraft.folgas = folgas;
+}
+
+function limparEscalaAtual(){
+  const tipoAtual = document.getElementById('escalaTipo').value || '';
+  document.getElementById('escalaId').value = '';
+  document.getElementById('escalaData').value = hojeISO();
+  document.getElementById('escalaTitulo').value = tipoAtual === 'DOMINGO' ? 'Domingo de trabalho' : '';
+  document.getElementById('escalaObs').value = '';
+  document.getElementById('escalaObsTurno').value = '';
+  escalaDraft = { abertura: [], fechamento: [], folgas: [] };
+  renderEscalaPreview();
+}
+
+function salvarEscala(){
+  const tipo = document.getElementById('escalaTipo').value || '';
+  const data = document.getElementById('escalaData').value;
+  const titulo = document.getElementById('escalaTitulo').value.trim();
+  if(!tipo){ alert('Selecione DOMINGO ou FERIADO.'); return; }
+  if(!data){ alert('Informe a data da escala.'); return; }
+  if(tipo === 'FERIADO' && !titulo){ alert('Informe o nome do feriado.'); return; }
+  sincronizarFolgasDaTela();
+  const totalTurnos = escalaDraft.abertura.length + escalaDraft.fechamento.length;
+  if(totalTurnos === 0){ alert('Adicione pelo menos uma pessoa na abertura ou no fechamento.'); return; }
+  const id = document.getElementById('escalaId').value || uid('escala');
+  const obj = {
+    id, tipo, data,
+    titulo: tipo === 'DOMINGO' ? 'Domingo de trabalho' : titulo,
+    responsavel: document.getElementById('escalaResponsavel').value,
+    obs: document.getElementById('escalaObs').value.trim(),
+    abertura: JSON.parse(JSON.stringify(escalaDraft.abertura)),
+    fechamento: JSON.parse(JSON.stringify(escalaDraft.fechamento)),
+    folgas: JSON.parse(JSON.stringify(escalaDraft.folgas)),
+    atualizadoPor: usuarioAtual?.nome || '',
+    atualizadoEm: agoraBR()
+  };
+  const idx = db.escalas.findIndex(e => e.id === id);
+  if(idx >= 0) db.escalas[idx] = obj; else db.escalas.push(obj);
+  saveDB();
+  renderEscalas();
+  alert('Escala salva com sucesso.');
+}
+
+function editarEscala(id){
+  const e = db.escalas.find(x => x.id === id); if(!e) return;
+  showPage('escalas');
+  selecionarTipoEscala(e.tipo || 'DOMINGO');
+  document.getElementById('escalaId').value = e.id;
+  document.getElementById('escalaData').value = e.data || hojeISO();
+  document.getElementById('escalaTitulo').value = e.tipo === 'DOMINGO' ? 'Domingo de trabalho' : (e.titulo || '');
+  document.getElementById('escalaResponsavel').value = e.responsavel || '';
+  document.getElementById('escalaObs').value = e.obs || '';
+  escalaDraft = { abertura: JSON.parse(JSON.stringify(e.abertura || [])), fechamento: JSON.parse(JSON.stringify(e.fechamento || [])), folgas: JSON.parse(JSON.stringify(e.folgas || [])) };
+  renderEscalaPreview();
+}
+
+function resumoGrupoEscala(arr, grupo){
+  if(!arr || !arr.length) return '-';
+  return arr.map(p => {
+    if(grupo === 'folgas'){
+      const dia = p.diaFolgaLabel || (p.diaFolga ? nomeDiaSemanaData(p.diaFolga) + ' — ' + dataBRSimples(p.diaFolga) : 'Dia não informado');
+      return `${escapeHTML(p.nome)}<br><small>${escapeHTML(dia)}</small>`;
+    }
+    return `${escapeHTML(p.nome)} (${escapeHTML(p.entrada || '')}${p.saida ? ' às ' + escapeHTML(p.saida) : ''})`;
+  }).join('<br>');
+}
+
+function linhaPessoaEscalaWhatsApp(p, grupo){
+  const cargo = p.cargo ? ` — ${p.cargo}` : '';
+  if(grupo === 'folgas'){
+    const dia = p.diaFolgaLabel || (p.diaFolga ? `${nomeDiaSemanaData(p.diaFolga)} — ${dataEscalaWhatsApp(p.diaFolga)}` : 'Dia não informado');
+    return `• ${p.nome}${cargo}\n  Folga: ${dia}${p.turno ? `\n  Turno trabalhado: ${p.turno}` : ''}${p.obs ? `\n  Obs.: ${p.obs}` : ''}`;
+  }
+  const horario = `${p.entrada || '--:--'}${p.saida ? ` às ${p.saida}` : ''}`;
+  return `• ${p.nome}${cargo}\n  Horário: ${horario}${p.obs ? `\n  Obs.: ${p.obs}` : ''}`;
+}
+
+function escalaAtualComoObjetoWhatsApp(){
+  sincronizarFolgasDaTela();
+  const tipo = document.getElementById('escalaTipo')?.value || '';
+  const data = document.getElementById('escalaData')?.value || '';
+  const titulo = tipo === 'DOMINGO' ? 'Domingo de trabalho' : (document.getElementById('escalaTitulo')?.value.trim() || '');
+  return {
+    id: document.getElementById('escalaId')?.value || '',
+    tipo,
+    data,
+    titulo,
+    responsavel: document.getElementById('escalaResponsavel')?.value || '',
+    obs: document.getElementById('escalaObs')?.value.trim() || '',
+    abertura: JSON.parse(JSON.stringify(escalaDraft.abertura || [])),
+    fechamento: JSON.parse(JSON.stringify(escalaDraft.fechamento || [])),
+    folgas: JSON.parse(JSON.stringify(escalaDraft.folgas || []))
+  };
+}
+
+function enviarEscalaAtualWhatsApp(){
+  const e = escalaAtualComoObjetoWhatsApp();
+  const total = (e.abertura?.length || 0) + (e.fechamento?.length || 0);
+  if(!e.tipo){ alert('Selecione DOMINGO ou FERIADO antes de enviar para o WhatsApp.'); return; }
+  if(!e.data){ alert('Informe a data da escala antes de enviar para o WhatsApp.'); return; }
+  if(e.tipo === 'FERIADO' && !e.titulo){ alert('Informe o nome do feriado antes de enviar.'); return; }
+  if(total === 0){ alert('Adicione pelo menos uma pessoa na abertura ou fechamento antes de enviar.'); return; }
+  abrirWhatsAppComTexto(montarTextoEscalaWhatsApp(e));
+}
+
+function montarTextoEscalaWhatsApp(e){
+  const responsavel = nomeFuncionarioPorId(e.responsavel) || e.responsavel || '-';
+  const totalAbertura = e.abertura?.length || 0;
+  const totalFechamento = e.fechamento?.length || 0;
+  const totalFolgas = e.folgas?.length || 0;
+  return [
+    `*ESCALA DE TRABALHO — ${e.tipo || 'DOMINGO'}*`,
+    `*Loja 24 — Avenida*`,
+    ``,
+    `📅 *Data:* ${dataEscalaWhatsApp(e.data)}`,
+    e.tipo === 'FERIADO' ? `🏷️ *Feriado:* ${e.titulo || '-'}` : '',
+    `👤 *Líder responsável:* ${responsavel}`,
+    ``,
+    `📌 *Resumo:* ${totalAbertura} abertura · ${totalFechamento} fechamento · ${totalFolgas} folga(s)`,
+    grupoEscalaWhatsApp('🌞 *ABERTURA*', e.abertura || [], 'abertura'),
+    grupoEscalaWhatsApp('🌙 *FECHAMENTO*', e.fechamento || [], 'fechamento'),
+    grupoEscalaWhatsApp('🏖️ *FOLGAS*', e.folgas || [], 'folgas'),
+    e.obs ? `\n📝 *Observações gerais:*\n${e.obs}` : '',
+    `\nGerado pelo Sistema Gerencial — Loja 24.`
+  ].filter(Boolean).join('\n');
+}
+
+
+/* ===== MODELO FINAL WHATSAPP — ESCALA ===== */
+function linhaPessoaEscalaWhatsApp(p, grupo){
+  if(grupo === 'folgas'){
+    const dia = p.diaFolgaLabel || (p.diaFolga ? `${nomeDiaSemanaData(p.diaFolga)} — ${dataEscalaWhatsApp(p.diaFolga)}` : 'Dia não informado');
+    return `• ${p.nome} — ${dia}`;
+  }
+  return `• ${p.nome}`;
+}
+
+function grupoEscalaWhatsApp(titulo, arr, grupo){
+  if(!arr || !arr.length) return `\n${titulo}\n- Nenhuma pessoa alocada.`;
+  return `\n${titulo}\n${arr.map(p => linhaPessoaEscalaWhatsApp(p, grupo)).join('\n')}`;
+}
+
+function montarTextoEscalaWhatsApp(e){
+  const responsavel = nomeFuncionarioPorId(e.responsavel) || e.responsavel || '-';
+  const totalAbertura = e.abertura?.length || 0;
+  const totalFechamento = e.fechamento?.length || 0;
+  const totalFolgas = e.folgas?.length || 0;
+
+  return [
+    `*ESCALA DE TRABALHO — ${e.tipo || 'DOMINGO'}*`,
+    `*Loja 24 — Avenida*`,
+    `📅 *Data:* ${dataEscalaWhatsApp(e.data)}`,
+    `👤 *Líder responsável:* ${responsavel}`,
+    `🧾 *Resumo:* ${totalAbertura} abertura · ${totalFechamento} fechamento · ${totalFolgas} folga(s)`,
+    grupoEscalaWhatsApp('🕑 *ABERTURA*', e.abertura || [], 'abertura'),
+    grupoEscalaWhatsApp('🕗 *FECHAMENTO*', e.fechamento || [], 'fechamento'),
+    grupoEscalaWhatsApp('🎉 *FOLGAS*', e.folgas || [], 'folgas'),
+    e.obs ? `\n📝 *Observações gerais:*\n${e.obs}` : '',
+    `\nGerado pelo Sistema Gerencial — Loja 24.`
+  ].filter(Boolean).join('\n');
+}
+
+
+/* ===== WHATSAPP — MODELO AJUSTADO COM HORÁRIO NO CABEÇALHO ===== */
+function horarioGrupoEscala(arr){
+  if(!arr || !arr.length) return '';
+  const primeiro = arr[0] || {};
+  const entrada = primeiro.entrada || '';
+  const saida = primeiro.saida || '';
+  if(!entrada && !saida) return '';
+  return ` (${entrada}${saida ? ' às ' + saida : ''})`;
+}
+
+function somenteDiaSemanaFolga(p){
+  const data = p.diaFolga || '';
+  if(!data) return 'Dia não informado';
+  return nomeDiaSemanaData(data);
+}
+
+function linhaPessoaEscalaWhatsApp(p, grupo){
+  if(grupo === 'folgas'){
+    return `• ${p.nome} - ${somenteDiaSemanaFolga(p)}`;
+  }
+  return `• ${p.nome}`;
+}
+
+function grupoEscalaWhatsApp(titulo, arr, grupo){
+  if(!arr || !arr.length) return `\n${titulo}\n- Nenhuma pessoa alocada.`;
+  return `\n${titulo}\n${arr.map(p => linhaPessoaEscalaWhatsApp(p, grupo)).join('\n')}`;
+}
+
+function montarTextoEscalaWhatsApp(e){
+  const responsavel = nomeFuncionarioPorId(e.responsavel) || e.responsavel || '-';
+  const totalAbertura = e.abertura?.length || 0;
+  const totalFechamento = e.fechamento?.length || 0;
+  const totalFolgas = e.folgas?.length || 0;
+
+  return [
+    `*ESCALA DE TRABALHO — ${e.tipo || 'DOMINGO'}*`,
+    `*Loja 24 — Avenida*`,
+    `📅 *Data:* ${dataEscalaWhatsApp(e.data)}`,
+    `👤 *Líder responsável:* ${responsavel}`,
+    `🧾 *Resumo:* ${totalAbertura} abertura · ${totalFechamento} fechamento · ${totalFolgas} folga(s)`,
+    grupoEscalaWhatsApp(`🕑 *ABERTURA*${horarioGrupoEscala(e.abertura || [])}`, e.abertura || [], 'abertura'),
+    grupoEscalaWhatsApp(`🕗 *FECHAMENTO*${horarioGrupoEscala(e.fechamento || [])}`, e.fechamento || [], 'fechamento'),
+    grupoEscalaWhatsApp('🎉 *FOLGAS*', e.folgas || [], 'folgas'),
+    `\nGerado pelo Sistema Gerencial — Loja 24.`
+  ].filter(Boolean).join('\n');
+}
+
+window.addEventListener('load', () => {
+  ['adminGerencialSessaoV1','adminGerencialSessaoV2','adminGerencialSessaoV3','adminGerencialSessaoV4','adminGerencialSessaoV5','adminGerencialSessaoV6','adminGerencialSessaoV7','adminGerencialSessaoV12Operador','adminGerencialSessaoV13Operador','adminGerencialSessaoV14Operador','adminGerencialSessaoV15Operador','adminGerencialSessaoV16Operador','adminGerencialSessaoV17Operador','adminGerencialSessaoV18Operador','adminGerencialSessaoV19Operador'].forEach(k => localStorage.removeItem(k));
+  loadDB();
+  if(localStorage.getItem('adminGerencialDark')==='1') { document.body.classList.add('dark-mode'); document.getElementById('themeBtn').textContent='☀️ Modo Claro'; }
+  document.getElementById('mesAtual').textContent = mesAnoBR();
+  ocultarIdentificacaoLogin();
+  trySession();
+  if(usuarioAtual) initApp();
+  document.getElementById('loginUser').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); document.getElementById('loginPass').focus(); } });
+  document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
+});
+</script>
+</body>
+</html>
