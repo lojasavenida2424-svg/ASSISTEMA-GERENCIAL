@@ -9,6 +9,35 @@
       const SUPABASE_URL = 'https://euyrhkusnasgiueefldg.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1eXJoa3VzbmFzZ2l1ZWVmbGRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzY0MTksImV4cCI6MjA5ODk1MjQxOX0.woI5Il3ObKrj8BJfdYz8DcUW08Jl5c458ykh1SrHYr4';
       const supabaseclient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      // 1. Função que busca as tarefas no banco de dados
+      async function carregarTarefas() {
+          const { data, error } = await supabaseclient
+              .from('tarefas')
+              .select('*');
+              
+          if (error) {
+              console.error('Erro ao buscar tarefas:', error);
+          } else {
+              console.log('Tarefas carregadas com sucesso:', data);
+              // Se o seu código original tiver uma função específica para desenhar 
+              // as tarefas na tela, ela precisará ser chamada bem aqui.
+          }
+      }
+
+      // 2. Função que escuta o Supabase Realtime (Sincronização Automática)
+      function ativarTempoReal() {
+          supabaseclient
+              .channel('mudancas_tarefas')
+              .on('postgres_changes', { event: '*', pattern: 'public', table: 'tarefas' }, (payload) => {
+                  console.log('Opa, o banco mudou! Atualizando dados...', payload);
+                  carregarTarefas(); // Sempre que mudar algo no celular, roda a busca de novo no notebook
+              })
+              .subscribe();
+      }
+
+      carregarTarefas();
+      ativarTempoReal();
   </script>
   <style>
     :root {
