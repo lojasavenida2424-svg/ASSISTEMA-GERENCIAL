@@ -761,7 +761,7 @@
         <input id="loginPass" type="password" placeholder="Digite sua senha" autocomplete="current-password" onfocus="atualizarIdentificacaoLogin(true)" />
         <button class="login-btn" onclick="login()">Entrar no sistema</button>
         <div id="loginError" class="login-error"></div>
-        <div class="login-hint">Acesso restrito por número de operador. A senha segue o padrão: operador + 24. Exemplo fictício: 000 / 00024.</div>
+        <div class="login-hint">Acesso restrito por número de operador. A senha inicial segue o padrão operador + 24, mas poderá ser alterada quando houver permissão.</div>
       </div>
     </div>
   </div>
@@ -1368,6 +1368,11 @@ function senhaPorOperador(operador){
   const op = normalizarOperador(operador);
   return op ? `${op}24` : '';
 }
+function senhaDoUsuario(operador){
+  const op = normalizarOperador(operador);
+  const usuario = (globalConfig?.usuarios || []).find(u => normalizarOperador(u.operador) === op);
+  return String(usuario?.senha || senhaPorOperador(op));
+}
 function garantirOperadorLoginFuncionario(nome, operadorPadrao){
   const opPadrao = normalizarOperador(operadorPadrao);
   const nomeNorm = norm(nome);
@@ -1523,8 +1528,8 @@ function deduplicarFuncionarios(){
 
 function permissoesPadrao(operador){
   const op = normalizarOperador(operador);
-  if(op === '133') return Object.fromEntries(MODULOS.map(([id]) => [id,true]));
-  return {painel:true,anotacoes:true,tarefas:true,setores:true,funcionarios:true,operadores:false,escalas:false,acompanhamento:true,relatorios:true,config:false};
+  if(op === '133') return {...Object.fromEntries(MODULOS.map(([id]) => [id,true])), alterarSenha:true};
+  return {painel:true,anotacoes:true,tarefas:true,setores:true,funcionarios:true,operadores:false,escalas:false,acompanhamento:true,relatorios:true,config:false,alterarSenha:false};
 }
 function configGlobalPadrao(){
   const usuarios = usuariosOficiais.map(u => ({
@@ -1542,11 +1547,11 @@ function normalizarConfigGlobal(raw){
     const op=normalizarOperador(of.operadorPadrao);
     let u=cfg.usuarios.find(x=>normalizarOperador(x.operador)===op);
     if(!u){ cfg.usuarios.push(base.usuarios.find(x=>x.operador===op)); }
-    else { u.nome=of.nome; u.cargo=u.cargo||of.cargo; u.operador=op; u.senha=senhaPorOperador(op); u.matricula=u.matricula||`AV24-${String(Number(op)).padStart(4,'0')}`; }
+    else { u.nome=u.nome||of.nome; u.cargo=u.cargo||of.cargo; u.operador=op; u.senha=String(u.senha||senhaPorOperador(op)); u.matricula=u.matricula||`AV24-${String(Number(op)).padStart(4,'0')}`; }
   });
   cfg.permissoes=cfg.permissoes||{};
   cfg.usuarios.forEach(u=>{
-    const op=normalizarOperador(u.operador); u.operador=op; u.senha=senhaPorOperador(op);
+    const op=normalizarOperador(u.operador); u.operador=op; u.senha=String(u.senha||senhaPorOperador(op));
     cfg.permissoes[op]={...permissoesPadrao(op),...(cfg.permissoes[op]||{})};
   });
   cfg.permissoes['133']=permissoesPadrao('133');
@@ -1586,7 +1591,32 @@ async function salvarConfigGlobalOnline(){
   const {error}=await supabaseclient.from(ONLINE_TABLE).upsert({id:GLOBAL_ROW_ID,dados:globalConfig,updated_at:new Date().toISOString()},{onConflict:'id'});
   if(error) throw error;
 }
-function usuarioGlobalPorOperador(op){ return (globalConfig?.usuarios||[]).find(u=>normalizarOperador(u.operador)===normalizarOperador(op))||null; }
+function usuarioGlobalPorOperador(op){
+  const operador=normalizarOperador(op);
+  const acesso=(globalConfig?.usuarios||[]).find(u=>normalizarOperador(u.operador)===operador)||null;
+  if(!acesso) return null;
+  // O nome, cargo e matrícula exibidos no sistema seguem o cadastro oficial do Quadro de Funcionários.
+  const registro=(db?.funcionarios||[]).find(f=>normalizarOperador(f.operador)===operador);
+  return {
+    ...acesso,
+    nome: registro?.nome || acesso.nome || `OPERADOR ${operador}`,
+    cargo: registro?.cargo || acesso.cargo || 'USUÁRIO',
+    matricula: registro?.matricula || acesso.matricula || matriculaPorOperador(operador),
+    operador
+  };
+}
+function atualizarIdentidadeUsuarioAtual(){
+  if(!usuarioAtual) return;
+  const atualizado=usuarioGlobalPorOperador(usuarioAtual.operador);
+  if(atualizado) usuarioAtual={...usuarioAtual,...atualizado,senha:senhaDoUsuario(atualizado.operador)};
+}
+function atualizarIdentidadeNaTela(){
+  if(!usuarioAtual) return;
+  const nome=document.getElementById('userNameBox'); if(nome) nome.textContent=usuarioAtual.nome;
+  const cargo=document.getElementById('userRoleBox'); if(cargo) cargo.textContent=usuarioAtual.cargo;
+  const cab=document.getElementById('headerUserName'); if(cab) cab.textContent=usuarioAtual.nome;
+  const op=document.getElementById('headerUserOperator'); if(op) op.textContent=usuarioAtual.operador||'-';
+}
 function permissoesUsuario(op){ return normalizarOperador(op)==='133'?permissoesPadrao('133'):{...permissoesPadrao(op),...(globalConfig?.permissoes?.[normalizarOperador(op)]||{})}; }
 function temPermissao(modulo){ return !!permissoesUsuario(usuarioAtual?.operador)[modulo]; }
 function aplicarPermissoes(){
@@ -1720,10 +1750,10 @@ function ativarRealtimeUsuario(){
         aplicarDadosCompartilhados(data.dados);
         prepararDBCarregado();
         localStorage.setItem(`${STORAGE_KEY}_compartilhado`,JSON.stringify(data.dados));
-        popularSelects(); renderAll(); aplicandoRemoto=false; setSyncStatus('ONLINE • dados da loja atualizados','online');
+        atualizarIdentidadeUsuarioAtual(); atualizarIdentidadeNaTela(); popularSelects(); renderAll(); aplicandoRemoto=false; setSyncStatus('ONLINE • dados da loja atualizados','online');
       }
    })
-   .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${GLOBAL_ROW_ID}`},async()=>{ await carregarConfigGlobalOnline(); usuarioAtual=usuarioGlobalPorOperador(op)||usuarioAtual; aplicarPermissoes(); renderAll(); })
+   .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${GLOBAL_ROW_ID}`},async()=>{ await carregarConfigGlobalOnline(); atualizarIdentidadeUsuarioAtual(); atualizarIdentidadeNaTela(); aplicarPermissoes(); renderAll(); })
    .subscribe();
 }
 
@@ -1790,10 +1820,11 @@ async function login(){
     await carregarConfigGlobalOnline();
     const user=usuarioGlobalPorOperador(operadorInput);
     if(!user){err.textContent='Operador não autorizado para acessar o sistema.';return;}
-    if(senhaPorOperador(operadorInput)!==pass){err.textContent='Senha incorreta. Use o padrão: operador + 24.';return;}
-    usuarioAtual={...user,senha:senhaPorOperador(operadorInput)};
+    if(senhaDoUsuario(operadorInput)!==pass){err.textContent='Senha incorreta.';return;}
+    usuarioAtual={...user,senha:senhaDoUsuario(operadorInput)};
     sessionStorage.setItem(SESSION_KEY,JSON.stringify({nome:user.nome,operador:user.operador,loginEm:agoraBR()}));
     await carregarDadosUsuarioOnline(operadorInput);
+    atualizarIdentidadeUsuarioAtual();
     initApp();
     ativarRealtimeUsuario();
     atualizarStatusConexao();
@@ -1852,7 +1883,7 @@ function limparSessoesAntigas(){
 }
 async function trySession(){
   const raw=sessionStorage.getItem(SESSION_KEY); if(!raw)return false;
-  try{ const sess=JSON.parse(raw); await carregarConfigGlobalOnline(); usuarioAtual=usuarioGlobalPorOperador(sess.operador); if(!usuarioAtual)return false; await carregarDadosUsuarioOnline(sess.operador); return true; }
+  try{ const sess=JSON.parse(raw); await carregarConfigGlobalOnline(); usuarioAtual=usuarioGlobalPorOperador(sess.operador); if(!usuarioAtual)return false; await carregarDadosUsuarioOnline(sess.operador); atualizarIdentidadeUsuarioAtual(); return true; }
   catch(e){usuarioAtual=null;return false;}
 }
 
@@ -1860,6 +1891,7 @@ function logout(){ sessionStorage.removeItem(SESSION_KEY); localStorage.removeIt
 
 function initApp(){
   if(!usuarioAtual) return;
+  atualizarIdentidadeUsuarioAtual();
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('userNameBox').textContent = usuarioAtual.nome;
   document.getElementById('userRoleBox').textContent = usuarioAtual.cargo;
@@ -2922,17 +2954,53 @@ async function removerUsuarioLogin(op){
   const u=usuarioGlobalPorOperador(operador); if(u&&confirm('Remover o acesso de '+u.nome+'?')){ globalConfig.usuarios=globalConfig.usuarios.filter(x=>normalizarOperador(x.operador)!==operador); delete globalConfig.permissoes[operador]; await salvarConfigGlobalOnline(); renderAll(); }
 }
 function renderUsuariosLoginRows(){
-  return (globalConfig?.usuarios||[]).map(u=>{const op=normalizarOperador(u.operador),dev=op==='133',pode=!operadoresOficiaisLogin().includes(op);return `<tr><td>${escapeHTML(u.nome)} ${dev?'<span class="badge b-vm">&lt;/&gt; DESENVOLVEDOR</span>':''}</td><td><b>${escapeHTML(op)}</b></td><td>${escapeHTML(u.matricula||matriculaPorOperador(op))}</td><td>${escapeHTML(u.cargo||'')}</td><td><code>${escapeHTML(senhaPorOperador(op))}</code></td><td class="no-print"><button class="btn small secondary" onclick="editarPermissoesUsuario('${op}')">Permissões</button> ${pode?`<button class="btn small danger" onclick="removerUsuarioLogin('${op}')">Remover</button>`:'<span class="badge b-ok">Padrão</span>'}</td></tr>`}).join('');
+  return (globalConfig?.usuarios||[]).map(u=>{const op=normalizarOperador(u.operador),dev=op==='133',pode=!operadoresOficiaisLogin().includes(op);return `<tr><td>${escapeHTML(u.nome)} ${dev?'<span class="badge b-vm">&lt;/&gt; DESENVOLVEDOR</span>':''}</td><td><b>${escapeHTML(op)}</b></td><td>${escapeHTML(u.matricula||matriculaPorOperador(op))}</td><td>${escapeHTML(u.cargo||'')}</td><td><code>${escapeHTML(senhaDoUsuario(op))}</code></td><td class="no-print"><div class="actions"><button class="btn small secondary" onclick="editarPermissoesUsuario('${op}')">Permissões</button><button class="btn small" onclick="abrirAlteracaoSenha('${op}')">🔑 Alterar senha</button>${pode?`<button class="btn small danger" onclick="removerUsuarioLogin('${op}')">Remover</button>`:'<span class="badge b-ok">Padrão</span>'}</div></td></tr>`}).join('');
 }
 function renderSelectNovoUsuarioLogin(){ const a=funcionariosDisponiveisParaLogin(); return a.length?'<option value="">Selecione um funcionário</option>'+a.map(f=>`<option value="${escapeHTML(normalizarOperador(f.operador))}">${escapeHTML(f.nome)} — OP. ${escapeHTML(normalizarOperador(f.operador))}</option>`).join(''):'<option value="">Nenhum funcionário disponível</option>'; }
 function editarPermissoesUsuario(op){
   const operador=normalizarOperador(op),u=usuarioGlobalPorOperador(operador); if(!u)return; const p=permissoesUsuario(operador),dev=operador==='133';
-  const html=`<div class="modal-head"><div><h2>Permissões de ${escapeHTML(u.nome)}</h2><p>Defina quais abas aparecem no painel deste usuário.</p></div><button class="icon-btn" onclick="fecharModalPermissoes()">✕</button></div>${dev?'<div class="developer-panel section-card"><h2>&lt;/&gt; DESENVOLVEDOR</h2><p>Acesso integral permanente. Estas permissões não podem ser removidas.</p></div>':''}<div class="permission-grid">${MODULOS.map(([id,nome])=>`<label class="permission-item"><input type="checkbox" data-perm="${id}" ${p[id]?'checked':''} ${dev?'disabled':''}>${nome}</label>`).join('')}</div><div class="actions" style="margin-top:16px;"><button class="btn" onclick="salvarPermissoesUsuario('${operador}')" ${dev?'disabled':''}>💾 Salvar permissões</button><button class="btn secondary" onclick="fecharModalPermissoes()">Fechar</button></div>`;
+  const html=`<div class="modal-head"><div><h2>Permissões de ${escapeHTML(u.nome)}</h2><p>Defina quais abas e recursos aparecem para este usuário.</p></div><button class="icon-btn" onclick="fecharModalPermissoes()">✕</button></div>${dev?'<div class="developer-panel section-card"><h2>&lt;/&gt; DESENVOLVEDOR</h2><p>Acesso integral permanente. Estas permissões não podem ser removidas.</p></div>':''}<div class="permission-grid">${MODULOS.map(([id,nome])=>`<label class="permission-item"><input type="checkbox" data-perm="${id}" ${p[id]?'checked':''} ${dev?'disabled':''}>${nome}</label>`).join('')}<label class="permission-item"><input type="checkbox" data-perm="alterarSenha" ${p.alterarSenha?'checked':''} ${dev?'disabled':''}>🔑 Alterar a própria senha</label></div><p style="color:var(--muted);font-weight:750;margin:12px 0 0;">Ao liberar a alteração de senha, a aba Configurações também será habilitada automaticamente.</p><div class="actions" style="margin-top:16px;"><button class="btn" onclick="salvarPermissoesUsuario('${operador}')" ${dev?'disabled':''}>💾 Salvar permissões</button><button class="btn secondary" onclick="fecharModalPermissoes()">Fechar</button></div>`;
   document.getElementById('modalPermissoesConteudo').innerHTML=html; document.getElementById('modalPermissoes').classList.add('active');
 }
 async function salvarPermissoesUsuario(op){
   const operador=normalizarOperador(op); if(operador==='133')return; const perms={}; document.querySelectorAll('#modalPermissoesConteudo [data-perm]').forEach(x=>perms[x.dataset.perm]=x.checked); perms.painel=true;
-  globalConfig.permissoes[operador]=perms; await salvarConfigGlobalOnline(); fecharModalPermissoes(); renderAll(); alert('Permissões atualizadas.');
+  if(perms.alterarSenha) perms.config=true; globalConfig.permissoes[operador]=perms; await salvarConfigGlobalOnline(); fecharModalPermissoes(); renderAll(); alert('Permissões atualizadas.');
+}
+function abrirAlteracaoSenha(op){
+  const operador=normalizarOperador(op);
+  const dev=normalizarOperador(usuarioAtual?.operador)==='133';
+  const proprio=normalizarOperador(usuarioAtual?.operador)===operador;
+  if(!dev && !(proprio && temPermissao('alterarSenha'))){ alert('Você não possui permissão para alterar esta senha.'); return; }
+  const u=usuarioGlobalPorOperador(operador); if(!u) return;
+  const html=`<div class="modal-head"><div><h2>🔑 Alterar senha</h2><p>${escapeHTML(u.nome)} • Operador ${escapeHTML(operador)}</p></div><button class="icon-btn" onclick="fecharModalPermissoes()">✕</button></div>
+  <div class="section-card" style="box-shadow:none;margin:0;"><div class="form-grid">
+    <div class="field w6"><label>Nova senha</label><input id="novaSenhaUsuario" type="password" minlength="4" placeholder="Mínimo de 4 caracteres"></div>
+    <div class="field w6"><label>Confirmar nova senha</label><input id="confirmarSenhaUsuario" type="password" minlength="4" placeholder="Repita a nova senha"></div>
+    <div class="field w12 actions"><button class="btn" onclick="salvarNovaSenha('${operador}')">💾 Salvar nova senha</button><button class="btn secondary" onclick="redefinirSenhaPadrao('${operador}')">↺ Restaurar padrão</button></div>
+  </div><p style="color:var(--muted);font-weight:750;margin:12px 0 0;">A senha padrão deste operador é <code>${escapeHTML(senhaPorOperador(operador))}</code>.</p></div>`;
+  document.getElementById('modalPermissoesConteudo').innerHTML=html;
+  document.getElementById('modalPermissoes').classList.add('active');
+}
+async function salvarNovaSenha(op){
+  const operador=normalizarOperador(op);
+  const nova=String(document.getElementById('novaSenhaUsuario')?.value||'').trim();
+  const confirma=String(document.getElementById('confirmarSenhaUsuario')?.value||'').trim();
+  if(nova.length<4){alert('A nova senha deve ter pelo menos 4 caracteres.');return;}
+  if(nova!==confirma){alert('As senhas informadas não são iguais.');return;}
+  const u=(globalConfig?.usuarios||[]).find(x=>normalizarOperador(x.operador)===operador); if(!u)return;
+  u.senha=nova;
+  await salvarConfigGlobalOnline();
+  if(normalizarOperador(usuarioAtual?.operador)===operador) usuarioAtual.senha=nova;
+  fecharModalPermissoes(); renderAll(); alert('Senha alterada com sucesso.');
+}
+async function redefinirSenhaPadrao(op){
+  const operador=normalizarOperador(op);
+  if(!confirm('Restaurar a senha padrão deste operador?')) return;
+  const u=(globalConfig?.usuarios||[]).find(x=>normalizarOperador(x.operador)===operador); if(!u)return;
+  u.senha=senhaPorOperador(operador);
+  await salvarConfigGlobalOnline();
+  if(normalizarOperador(usuarioAtual?.operador)===operador) usuarioAtual.senha=u.senha;
+  fecharModalPermissoes(); renderAll(); alert('Senha padrão restaurada.');
 }
 function fecharModalPermissoes(){document.getElementById('modalPermissoes')?.classList.remove('active');}
 
@@ -2944,7 +3012,7 @@ function nomeFuncionarioPorId(id){
 function renderConfig(){
   const el=document.getElementById('configContent'),dev=normalizarOperador(usuarioAtual?.operador)==='133';
   if(!temPermissao('config')){el.innerHTML='<div class="config-locked">Configurações não liberadas para este usuário.</div>';return;}
-  if(!dev){ el.innerHTML=`<div class="section-title"><div><h1>Configurações</h1><p>Informações da sua sessão.</p></div></div><div class="section-card" style="box-shadow:none"><h2>${escapeHTML(usuarioAtual.nome)}</h2><p><b>Operador:</b> ${escapeHTML(usuarioAtual.operador)}<br><b>Perfil:</b> Usuário autorizado</p><div class="permission-grid">${MODULOS.filter(([id])=>temPermissao(id)).map(([id,n])=>`<div class="permission-item">✅ ${n}</div>`).join('')}</div></div>`; return; }
+  if(!dev){ const podeSenha=temPermissao('alterarSenha'); el.innerHTML=`<div class="section-title"><div><h1>Configurações</h1><p>Informações e recursos autorizados para sua sessão.</p></div></div><div class="section-card" style="box-shadow:none"><h2>${escapeHTML(usuarioAtual.nome)}</h2><p><b>Operador:</b> ${escapeHTML(usuarioAtual.operador)}<br><b>Perfil:</b> Usuário autorizado</p><div class="permission-grid">${MODULOS.filter(([id])=>temPermissao(id)).map(([id,n])=>`<div class="permission-item">✅ ${n}</div>`).join('')}${podeSenha?'<div class="permission-item">✅ Alterar a própria senha</div>':''}</div>${podeSenha?`<div class="actions" style="margin-top:16px;"><button class="btn" onclick="abrirAlteracaoSenha('${escapeHTML(usuarioAtual.operador)}')">🔑 Alterar minha senha</button></div>`:'<p style="color:var(--muted);font-weight:750;margin-top:16px;">A alteração de senha não foi liberada pelo desenvolvedor.</p>'}</div>`; return; }
   globalConfig=normalizarConfigGlobal(globalConfig);
   const usuariosPermissao=(globalConfig.usuarios||[]).filter(u=>normalizarOperador(u.operador)!=='133');
   const opcoesPermissao=usuariosPermissao.length
@@ -2953,7 +3021,7 @@ function renderConfig(){
   el.innerHTML=`<div class="developer-panel section-card" style="box-shadow:none"><div class="section-title"><div><h1>&lt;/&gt; DESENVOLVEDOR</h1><p>JOÃO PEDRO • Operador 133 • Acesso integral permanente ao sistema.</p></div><span class="badge b-vm">NÍVEL MÁXIMO</span></div></div>
 
   <div class="section-card" style="border:2px solid var(--amarelo-escuro);">
-    <div class="section-title"><div><h2>🔐 Gerenciar permissões de acesso</h2><p>Escolha um operador e determine quais abas e funções ficarão visíveis no painel dele.</p></div></div>
+    <div class="section-title"><div><h2>🔐 Gerenciar permissões de acesso</h2><p>Escolha um operador e determine quais abas e recursos, incluindo a alteração da própria senha, ficarão disponíveis.</p></div></div>
     <div class="form-grid">
       <div class="field w8"><label>Usuário que será configurado</label><select id="configUsuarioPermissoes">${opcoesPermissao}</select></div>
       <div class="field w4 actions"><button class="btn" type="button" onclick="abrirPermissoesSelecionadas()">⚙️ Editar permissões</button></div>
