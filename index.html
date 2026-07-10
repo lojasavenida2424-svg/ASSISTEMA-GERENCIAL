@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Assistência Gerencial de Loja - Avenida V21</title>
+  <title>Assistência Gerencial de Loja - Avenida V28</title>
   <script>
     /* Aplica o tema antes da primeira pintura para impedir o clarão ao abrir ou sair. */
     (() => {
@@ -2148,6 +2148,13 @@
             <small>Aguardando verificação...</small>
           </div>
         </div>
+        <div id="appCheckEstoque" class="app-loader-check" data-status="pending">
+          <div class="app-loader-check-icon">○</div>
+          <div class="app-loader-check-content">
+            <strong>Sistema de Estoque</strong>
+            <small>Aguardando verificação...</small>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -2709,6 +2716,16 @@
               <p>Atendimento e suporte técnico.</p>
               <span class="sistema-av-open">ABRIR SISTEMA ↗</span>
             </a>
+
+
+            <a class="sistema-av-button" href="https://lojasavenida2424-svg.github.io/avenida-estoque/" target="_blank" rel="noopener noreferrer" aria-label="Abrir Sistema de Estoque Avenida">
+              <div class="sistema-av-logo">
+                <span class="logo-fallback" aria-hidden="true">📦</span>
+              </div>
+              <h2>SISTEMA DE ESTOQUE</h2>
+              <p>Recebimentos, DRM, inventários, check lists e relatórios de estoque.</p>
+              <span class="sistema-av-open">ABRIR SISTEMA ↗</span>
+            </a>
           </div>
         </div>
       </section>
@@ -2948,6 +2965,8 @@ function atualizarMatriculaPreview(){
 function escapeHTML(s){ return String(s||'').replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m])); }
 function num(v){ return Number(v||0); }
 
+const SISTEMA_ESTOQUE_URL = 'https://lojasavenida2424-svg.github.io/avenida-estoque/';
+
 function showAppLoader(title='Carregando sistema', text='Aguarde um instante...', mostrarChecks=false){
   const el = document.getElementById('appLoader');
   if(!el) return;
@@ -2975,7 +2994,7 @@ function toggleAppLoaderChecks(visivel=false){
   box.classList.toggle('active', !!visivel);
 }
 function resetAppLoaderChecks(){
-  ['appCheckInternet','appCheckIA','appCheckSync'].forEach(id => {
+  ['appCheckInternet','appCheckIA','appCheckSync','appCheckEstoque'].forEach(id => {
     const item = document.getElementById(id);
     if(!item) return;
     item.setAttribute('data-status','pending');
@@ -2989,13 +3008,13 @@ function resetAppLoaderChecks(){
 function updateAppLoaderProgress(){
   const bar = document.getElementById('appLoaderProgressBar');
   if(!bar) return;
-  const itens = ['appCheckInternet','appCheckIA','appCheckSync'].map(id => document.getElementById(id)).filter(Boolean);
+  const itens = ['appCheckInternet','appCheckIA','appCheckSync','appCheckEstoque'].map(id => document.getElementById(id)).filter(Boolean);
   const concluidos = itens.filter(item => ['success','error'].includes(item.getAttribute('data-status'))).length;
   const pct = itens.length ? Math.round((concluidos / itens.length) * 100) : 0;
   bar.style.width = pct + '%';
 }
 function setAppLoaderCheck(chave, status='pending', detalhe=''){
-  const mapa = { internet:'appCheckInternet', ia:'appCheckIA', sync:'appCheckSync' };
+  const mapa = { internet:'appCheckInternet', ia:'appCheckIA', sync:'appCheckSync', estoque:'appCheckEstoque' };
   const item = document.getElementById(mapa[chave] || chave);
   if(!item) return;
   item.setAttribute('data-status', status);
@@ -3048,6 +3067,50 @@ async function verificarDadosSincronizados(){
     return { ok:false, detalhe:'Não foi possível validar a sincronização online agora.' };
   }
 }
+async function verificarSistemaEstoque(){
+  if(!navigator.onLine){
+    return { ok:false, detalhe:'Sem internet: não foi possível consultar o Sistema de Estoque.' };
+  }
+
+  const urlTeste = `${SISTEMA_ESTOQUE_URL}?verificacao=${Date.now()}`;
+
+  try{
+    const resposta = await comTimeout(fetch(urlTeste, {
+      method:'GET',
+      mode:'cors',
+      cache:'no-store',
+      redirect:'follow'
+    }), 5500);
+
+    if(!resposta.ok){
+      throw new Error(`O endereço respondeu com HTTP ${resposta.status}.`);
+    }
+
+    const conteudo = await resposta.text();
+    const paginaValida = /Avenida Estoque|Assistência Gerencial de Estoque|Entrar no Sistema/i.test(conteudo);
+    if(!paginaValida){
+      throw new Error('A página respondeu, mas o conteúdo esperado não foi identificado.');
+    }
+
+    return { ok:true, detalhe:'Sistema de Estoque online e respondendo normalmente.' };
+  }catch(erroCors){
+    try{
+      // Fallback para navegadores que bloqueiam a leitura cross-origin do GitHub Pages.
+      // A requisição ainda confirma que o endereço publicado respondeu na rede.
+      await comTimeout(fetch(urlTeste, {
+        method:'GET',
+        mode:'no-cors',
+        cache:'no-store',
+        redirect:'follow'
+      }), 5500);
+      return { ok:true, detalhe:'Sistema de Estoque respondeu no endereço publicado.' };
+    }catch(erroRede){
+      console.error('Falha ao verificar o Sistema de Estoque:', erroCors, erroRede);
+      return { ok:false, detalhe:'Sistema de Estoque indisponível ou sem resposta no momento.' };
+    }
+  }
+}
+
 async function executarVerificacoesPosLogin(){
   showAppLoader('Preparando o ambiente', 'Validação de serviços antes de abrir o painel.', true);
   resetAppLoaderChecks();
@@ -3067,10 +3130,16 @@ async function executarVerificacoesPosLogin(){
   const sync = await verificarDadosSincronizados();
   setAppLoaderCheck('sync', sync.ok ? 'success' : 'error', sync.detalhe);
 
+  setAppLoaderCheck('estoque','checking','Consultando o Sistema de Estoque publicado...');
+  await esperar(180);
+  const estoque = await verificarSistemaEstoque();
+  setAppLoaderCheck('estoque', estoque.ok ? 'success' : 'error', estoque.detalhe);
+
   const textEl = document.getElementById('appLoaderText');
-  if(textEl) textEl.textContent = sync.ok || internet.ok ? 'Ambiente validado. Abrindo o painel...' : 'Validação concluída. Abrindo com os recursos disponíveis...';
+  const essenciaisOk = internet.ok && sync.ok;
+  if(textEl) textEl.textContent = essenciaisOk ? 'Ambiente validado. Abrindo o painel...' : 'Validação concluída. Abrindo com os recursos disponíveis...';
   await esperar(820);
-  return { internet, ia, sync };
+  return { internet, ia, sync, estoque };
 }
 
 function funcionarioVazio(valor){
