@@ -5,6 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Assistência Gerencial de Loja - Avenida V21</title>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+      const SUPABASE_URL = 'https://euyrhkusnasgiueefldg.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1eXJoa3VzbmFzZ2l1ZWVmbGRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzY0MTksImV4cCI6MjA5ODk1MjQxOX0.woI5Il3ObKrj8BJfdYz8DcUW08Jl5c458ykh1SrHYr4';
+      
+      // CORREÇÃO AQUI: Adicionado o objeto de configuração ativando o Realtime via WebSockets
+      const supabaseclient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: { persistSession: false },
+          realtime: {
+              params: {
+                  eventsPerSecond: 10
+              }
+          }
+      });
+
+      // A sincronização online por usuário é inicializada após o login.
+  </script>
   <style>
     :root {
       --amarelo: #F6C426;
@@ -242,6 +258,20 @@
       border-bottom-color: #5A263B;
     }
 
+
+
+    .developer-badge {
+      margin-top: 10px; display:inline-flex; align-items:center; gap:7px; padding:7px 10px;
+      border-radius:999px; background:linear-gradient(135deg,#291A1E,#5A263B); color:#F6C426;
+      font-weight:1000; font-size:.72rem; letter-spacing:.08em; box-shadow:0 0 0 1px rgba(246,196,38,.35),0 8px 20px rgba(41,26,30,.22);
+    }
+    .developer-panel { position:relative; overflow:hidden; border:1px solid rgba(246,196,38,.55); background:linear-gradient(135deg,rgba(246,196,38,.16),var(--page)); }
+    .developer-panel:before { content:"</>"; position:absolute; right:18px; top:8px; font-size:4rem; font-weight:1000; opacity:.08; }
+    .permission-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:12px; }
+    .permission-item { display:flex; align-items:center; gap:10px; padding:11px 12px; border:1px solid var(--border); border-radius:14px; background:var(--page-2); font-weight:850; }
+    .permission-item input { width:18px; height:18px; accent-color:var(--amarelo-escuro); }
+    .sync-pill { font-size:.72rem; color:var(--muted); font-weight:800; margin-top:7px; }
+    @media(max-width:720px){ .permission-grid{grid-template-columns:1fr;} }
 
     .app-loader {
       position: fixed;
@@ -746,6 +776,8 @@
     <div class="user-box">
       <div class="user-name" id="userNameBox">Usuário</div>
       <div class="user-role" id="userRoleBox">Cargo</div>
+      <div id="developerBadge" class="developer-badge" style="display:none;"><span>&lt;/&gt;</span> DESENVOLVEDOR</div>
+      <div id="syncStatus" class="sync-pill">Aguardando login</div>
     </div>
     <nav class="nav" id="navMenu">
       <button class="nav-btn active" onclick="showPage('painel', this)"><span class="ico">📊</span>Painel Geral</button>
@@ -884,8 +916,8 @@
               <div class="field w2"><label>Data de término</label><input id="tarefaFim" type="date" /></div>
               <div class="field w4"><label>Pessoa responsável</label><select id="tarefaResponsavel"></select></div>
               <div class="field w4"><label>Responsável adicional</label><select id="tarefaResponsavel2"></select></div>
-              <div class="field w2"><label>Prioridade</label><select id="tarefaPrioridade"><option>Normal</option><option>Alta</option><option>Baixa</option></select></div>
-              <div class="field w2"><label>Status</label><select id="tarefaStatus"><option value="PADRAO">Padrão</option><option value="Concluída">Concluída</option></select></div>
+              <div class="field w2"><label>Prioridade</label><select id="tarefaPrioridade"><option>MuitoAlto</option><option>Normal</option><option>Alta</option><option>Baixa</option></select></div>
+              <div class="field w2"><label>Status</label><select id="tarefaStatus"><option value="Aguardando">Aguardando</option><option value="Em andamento">Em andamento</option><option value="Pendente">Pendente</option><option value="Concluída">Concluída</option></select></div>
               <div class="field w12"><label>Observação</label><textarea id="tarefaDescricao" placeholder="Detalhe o que precisa ser feito, padrões de VM, observações da gerente, pendências de material ou qualquer ponto importante..."></textarea></div>
               <div class="field w12 actions">
                 <button class="btn" type="submit">💾 Salvar tarefa</button>
@@ -1201,6 +1233,9 @@
         </div>
       </section>
 
+
+      <div id="modalPermissoes" class="modal-backdrop no-print" onclick="fecharModalPermissoes()"><div id="modalPermissoesConteudo" class="modal" onclick="event.stopPropagation()"></div></div>
+
       <section id="config" class="page">
         <div class="section-card" id="configContent"></div>
       </section>
@@ -1209,23 +1244,14 @@
 
 <script>
 const STORAGE_KEY = 'adminGerencialLojaV7';
-const SESSION_KEY = 'adminGerencialSessaoV20Operador';
-
-// ===== ARMAZENAMENTO ONLINE — SUPABASE =====
-const SUPABASE_URL = 'https://euyrhkusnasgiueefldg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1eXJoa3VzbmFzZ2l1ZWVmbGRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzY0MTksImV4cCI6MjA5ODk1MjQxOX0.woI5Il3ObKrj8BJfdYz8DcUW08Jl5c458ykh1SrHYr4';
-const SUPABASE_TABLE = 'assistencia_gerencial';
-const SUPABASE_ROW_ID = 'loja_24';
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: { persistSession: false },
-  realtime: { params: { eventsPerSecond: 5 } }
-});
-let syncTimer = null;
-let syncEmAndamento = false;
-let syncPendente = false;
-let realtimeChannel = null;
-let ultimaAtualizacaoRemota = '';
-
+const SESSION_KEY = 'adminGerencialSessaoV21Individual';
+const ONLINE_TABLE = 'assistencia_gerencial';
+const GLOBAL_ROW_ID = 'config_global_v1';
+const MODULOS = [
+  ['painel','Painel Geral'],['anotacoes','Central de Anotações'],['tarefas','Quadro de Tarefas'],
+  ['setores','Setores'],['funcionarios','Quadro de Funcionários'],['operadores','Operadores'],
+  ['escalas','Escala de Trabalho'],['acompanhamento','Acompanhamento do Dia'],['relatorios','Relatórios'],['config','Configurações']
+];
 
 const setores = [
   { id:'GERAL', nome:'GERAL', desc:'Assuntos gerais da gerência', badge:'b-geral', icon:'⭐' },
@@ -1286,6 +1312,10 @@ let db = null;
 let usuarioAtual = null;
 let setorAtivo = 'VM';
 let escalaDraft = { abertura: [], fechamento: [], folgas: [] };
+let globalConfig = null;
+let realtimeChannel = null;
+let salvamentoTimer = null;
+let aplicandoRemoto = false;
 
 const pageInfo = {
   painel: ['Painel Geral','Visão rápida das pendências, setores e prioridades da loja.'],
@@ -1475,6 +1505,121 @@ function deduplicarFuncionarios(){
   db.funcionarios = lista;
 }
 
+
+function permissoesPadrao(operador){
+  const op = normalizarOperador(operador);
+  if(op === '133') return Object.fromEntries(MODULOS.map(([id]) => [id,true]));
+  return {painel:true,anotacoes:true,tarefas:true,setores:true,funcionarios:true,operadores:false,escalas:false,acompanhamento:true,relatorios:true,config:false};
+}
+function configGlobalPadrao(){
+  const usuarios = usuariosOficiais.map(u => ({
+    nome:u.nome, operador:normalizarOperador(u.operadorPadrao), cargo:u.cargo,
+    matricula:`AV24-${String(Number(u.operadorPadrao)).padStart(4,'0')}`,
+    senha:senhaPorOperador(u.operadorPadrao)
+  }));
+  return { versao:1, usuarios, permissoes:Object.fromEntries(usuarios.map(u => [u.operador,permissoesPadrao(u.operador)])), atualizadoEm:agoraBR() };
+}
+function normalizarConfigGlobal(raw){
+  const base=configGlobalPadrao();
+  const cfg=raw && typeof raw==='object' ? raw : {};
+  cfg.usuarios=Array.isArray(cfg.usuarios)?cfg.usuarios:base.usuarios;
+  usuariosOficiais.forEach(of=>{
+    const op=normalizarOperador(of.operadorPadrao);
+    let u=cfg.usuarios.find(x=>normalizarOperador(x.operador)===op);
+    if(!u){ cfg.usuarios.push(base.usuarios.find(x=>x.operador===op)); }
+    else { u.nome=of.nome; u.cargo=u.cargo||of.cargo; u.operador=op; u.senha=senhaPorOperador(op); u.matricula=u.matricula||`AV24-${String(Number(op)).padStart(4,'0')}`; }
+  });
+  cfg.permissoes=cfg.permissoes||{};
+  cfg.usuarios.forEach(u=>{
+    const op=normalizarOperador(u.operador); u.operador=op; u.senha=senhaPorOperador(op);
+    cfg.permissoes[op]={...permissoesPadrao(op),...(cfg.permissoes[op]||{})};
+  });
+  cfg.permissoes['133']=permissoesPadrao('133');
+  return cfg;
+}
+function chaveLocalUsuario(op){ return `${STORAGE_KEY}_usuario_${normalizarOperador(op)||'bootstrap'}`; }
+function setSyncStatus(texto){ const el=document.getElementById('syncStatus'); if(el) el.textContent=texto; }
+async function carregarConfigGlobalOnline(){
+  try{
+    const {data,error}=await supabaseclient.from(ONLINE_TABLE).select('dados').eq('id',GLOBAL_ROW_ID).maybeSingle();
+    if(error) throw error;
+    globalConfig=normalizarConfigGlobal(data?.dados);
+    if(!data) await salvarConfigGlobalOnline();
+    return true;
+  }catch(err){
+    console.error('Falha ao carregar configuração global:',err);
+    globalConfig=normalizarConfigGlobal(JSON.parse(localStorage.getItem(`${STORAGE_KEY}_config_global`)||'null'));
+    return false;
+  }
+}
+async function salvarConfigGlobalOnline(){
+  globalConfig=normalizarConfigGlobal(globalConfig);
+  globalConfig.atualizadoEm=agoraBR();
+  localStorage.setItem(`${STORAGE_KEY}_config_global`,JSON.stringify(globalConfig));
+  const {error}=await supabaseclient.from(ONLINE_TABLE).upsert({id:GLOBAL_ROW_ID,dados:globalConfig,updated_at:new Date().toISOString()},{onConflict:'id'});
+  if(error) throw error;
+}
+function usuarioGlobalPorOperador(op){ return (globalConfig?.usuarios||[]).find(u=>normalizarOperador(u.operador)===normalizarOperador(op))||null; }
+function permissoesUsuario(op){ return normalizarOperador(op)==='133'?permissoesPadrao('133'):{...permissoesPadrao(op),...(globalConfig?.permissoes?.[normalizarOperador(op)]||{})}; }
+function temPermissao(modulo){ return !!permissoesUsuario(usuarioAtual?.operador)[modulo]; }
+function aplicarPermissoes(){
+  if(!usuarioAtual) return;
+  const perms=permissoesUsuario(usuarioAtual.operador);
+  document.querySelectorAll('#navMenu .nav-btn').forEach(btn=>{
+    const m=(btn.getAttribute('onclick')||'').match(/showPage\('([^']+)'/); if(!m) return;
+    btn.style.display=perms[m[1]]?'flex':'none';
+  });
+  const ativa=document.querySelector('.page.active')?.id;
+  if(ativa && !perms[ativa]) showPage('painel');
+}
+async function carregarDadosUsuarioOnline(op){
+  const operador=normalizarOperador(op); const rowId=`usuario_${operador}`;
+  setSyncStatus('Sincronizando dados...');
+  try{
+    const {data,error}=await supabaseclient.from(ONLINE_TABLE).select('dados').eq('id',rowId).maybeSingle();
+    if(error) throw error;
+    if(data?.dados){ db={...defaultDB(),...data.dados}; }
+    else {
+      const legado=localStorage.getItem(STORAGE_KEY);
+      db=(operador==='133'&&legado)?{...defaultDB(),...JSON.parse(legado)}:defaultDB();
+      await salvarDadosUsuarioOnline(true);
+    }
+    localStorage.setItem(chaveLocalUsuario(operador),JSON.stringify(db));
+    prepararDBCarregado(); setSyncStatus('Online • dados individuais'); return true;
+  }catch(err){
+    console.error('Falha ao carregar dados individuais:',err);
+    try{ db=JSON.parse(localStorage.getItem(chaveLocalUsuario(operador)))||defaultDB(); }catch(e){ db=defaultDB(); }
+    prepararDBCarregado(); setSyncStatus('Offline • cache deste aparelho'); return false;
+  }
+}
+function prepararDBCarregado(){
+  db.funcionarios ||= JSON.parse(JSON.stringify(funcionariosPadrao)); deduplicarFuncionarios();
+  funcionariosPadrao.forEach(f=>{ const existente=localizarFuncionarioPadrao(f); if(existente) mesclarFuncionario(existente,f); else db.funcionarios.push({...f}); });
+  deduplicarFuncionarios(); db.notas||=[];db.tarefas||=[];db.diario||=[];db.escalas||=[];db.meta||={loja:'24',gerente:'ALANA',criadoEm:agoraBR()};
+  garantirCamposFuncionarios(); sincronizarUsuariosLogin();
+}
+async function salvarDadosUsuarioOnline(silencioso=false){
+  if(!usuarioAtual||aplicandoRemoto) return;
+  const op=normalizarOperador(usuarioAtual.operador); localStorage.setItem(chaveLocalUsuario(op),JSON.stringify(db));
+  try{
+    if(!silencioso)setSyncStatus('Salvando online...');
+    const {error}=await supabaseclient.from(ONLINE_TABLE).upsert({id:`usuario_${op}`,dados:db,updated_at:new Date().toISOString()},{onConflict:'id'});
+    if(error) throw error; setSyncStatus('Online • salvo agora');
+  }catch(err){ console.error(err); setSyncStatus('Pendente • salvo no aparelho'); if(!silencioso) alert('Não foi possível salvar online agora. Os dados ficaram no cache deste aparelho.\n\nDetalhe: '+err.message); }
+}
+function agendarSalvamentoOnline(){ clearTimeout(salvamentoTimer); salvamentoTimer=setTimeout(()=>salvarDadosUsuarioOnline(),450); }
+function ativarRealtimeUsuario(){
+  if(realtimeChannel) supabaseclient.removeChannel(realtimeChannel);
+  const op=normalizarOperador(usuarioAtual?.operador); if(!op)return;
+  realtimeChannel=supabaseclient.channel(`assistencia_${op}_${Date.now()}`)
+   .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.usuario_${op}`},async()=>{
+      const {data}=await supabaseclient.from(ONLINE_TABLE).select('dados').eq('id',`usuario_${op}`).maybeSingle();
+      if(data?.dados){ aplicandoRemoto=true; db={...defaultDB(),...data.dados}; prepararDBCarregado(); localStorage.setItem(chaveLocalUsuario(op),JSON.stringify(db)); renderAll(); aplicandoRemoto=false; setSyncStatus('Online • atualizado em tempo real'); }
+   })
+   .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${GLOBAL_ROW_ID}`},async()=>{ await carregarConfigGlobalOnline(); usuarioAtual=usuarioGlobalPorOperador(op)||usuarioAtual; aplicarPermissoes(); renderAll(); })
+   .subscribe();
+}
+
 function defaultDB(){
   return {
     meta:{ loja:'24', gerente:'ALANA', criadoEm: agoraBR() },
@@ -1515,148 +1660,32 @@ function aplicarOperadoresLoginFixos(){
   db.meta.operadoresLoginFixosV19 = true;
 }
 
-async function buscarDBOnline(){
-  const { data, error } = await supabaseClient
-    .from(SUPABASE_TABLE)
-    .select('dados, updated_at')
-    .eq('id', SUPABASE_ROW_ID)
-    .maybeSingle();
-  if(error) throw error;
-  if(data?.dados && typeof data.dados === 'object'){
-    ultimaAtualizacaoRemota = data.updated_at || '';
-    return data.dados;
-  }
-  return null;
+function loadDB(){
+  try { db = JSON.parse(localStorage.getItem(chaveLocalUsuario('bootstrap'))) || JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultDB(); }
+  catch(e){ db = defaultDB(); }
+  prepararDBCarregado();
 }
-
-function normalizarDBCarregada(){
-  db.funcionarios ||= JSON.parse(JSON.stringify(funcionariosPadrao));
-  deduplicarFuncionarios();
-  funcionariosPadrao.forEach(f => {
-    const existente = localizarFuncionarioPadrao(f);
-    if(existente) mesclarFuncionario(existente, f);
-    else db.funcionarios.push({...f});
-  });
-  deduplicarFuncionarios();
-  db.notas ||= []; db.tarefas ||= []; db.diario ||= []; db.escalas ||= [];
-  db.usuariosPermitidos ||= usuariosOficiais.map(u => normalizarOperador(u.operadorPadrao)).filter(Boolean);
-  db.meta ||= { loja:'24', gerente:'ALANA', criadoEm: agoraBR() };
-  aplicarOperadoresLoginFixos();
-  if(!db.meta.loginOperadorV12){
-    const alana = db.funcionarios.find(f => norm(f.nome) === 'ALANA ARAUJO');
-    if(alana && !normalizarOperador(alana.operador)){ alana.operador = '139'; alana.matricula = matriculaPorOperador('139'); alana.caixaOperacional = 'ATIVO'; }
-    db.meta.loginOperadorV12 = true;
-  }
-  if(!db.meta.operadorMigradoV9){
-    const joao = db.funcionarios.find(f => norm(f.nome) === 'JOAO PEDRO');
-    if(joao){ joao.operador = '133'; joao.matricula = matriculaPorOperador('133'); joao.caixaOperacional = 'ATIVO'; }
-    db.meta.operadorMigradoV9 = true;
-  }
-  garantirCamposFuncionarios();
-  sincronizarUsuariosLogin();
-}
-
-async function loadDB(){
-  showAppLoader('Sincronizando dados', 'Buscando a versão mais recente no Supabase...');
-  let remoto = null;
-  try {
-    remoto = await buscarDBOnline();
-  } catch(error){
-    console.error('Falha ao carregar do Supabase:', error);
-  }
-
-  if(remoto){
-    db = remoto;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); // cache de emergência
-  } else {
-    try { db = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultDB(); }
-    catch(e){ db = defaultDB(); }
-  }
-
-  normalizarDBCarregada();
-  await salvarDBOnlineAgora();
-  ativarSincronizacaoTempoReal();
-}
-
-async function salvarDBOnlineAgora(){
-  if(!db) return;
-  if(syncEmAndamento){ syncPendente = true; return; }
-  syncEmAndamento = true;
-  try{
-    db.meta ||= {};
-    db.meta.ultimaSincronizacao = new Date().toISOString();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); // somente cache/fallback
-    const { data, error } = await supabaseClient
-      .from(SUPABASE_TABLE)
-      .upsert({ id: SUPABASE_ROW_ID, dados: db, updated_at: new Date().toISOString() }, { onConflict: 'id' })
-      .select('updated_at')
-      .single();
-    if(error) throw error;
-    ultimaAtualizacaoRemota = data?.updated_at || ultimaAtualizacaoRemota;
-  } catch(error){
-    console.error('Falha ao salvar no Supabase:', error);
-    const msg = String(error?.message || error || 'Erro desconhecido');
-    if(!window.__avisoSupabaseMostrado){
-      window.__avisoSupabaseMostrado = true;
-      alert('Não foi possível salvar online no Supabase. Os dados ficaram no cache deste aparelho.\n\nDetalhe: ' + msg + '\n\nConfira se a tabela assistencia_gerencial e as políticas de acesso foram criadas.');
-    }
-  } finally {
-    syncEmAndamento = false;
-    if(syncPendente){ syncPendente = false; salvarDBOnlineAgora(); }
-  }
-}
-
 function saveDB(){
-  if(!db) return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); // cache imediato
-  clearTimeout(syncTimer);
-  syncTimer = setTimeout(() => salvarDBOnlineAgora(), 350);
+  const op=normalizarOperador(usuarioAtual?.operador);
+  localStorage.setItem(op?chaveLocalUsuario(op):chaveLocalUsuario('bootstrap'),JSON.stringify(db));
+  if(op) agendarSalvamentoOnline();
 }
 
-function ativarSincronizacaoTempoReal(){
-  if(realtimeChannel) return;
-  realtimeChannel = supabaseClient
-    .channel('assistencia_gerencial_loja_24')
-    .on('postgres_changes', {
-      event: '*', schema: 'public', table: SUPABASE_TABLE,
-      filter: `id=eq.${SUPABASE_ROW_ID}`
-    }, async payload => {
-      const remoto = payload.new?.dados;
-      const atualizadoEm = payload.new?.updated_at || '';
-      if(!remoto || atualizadoEm === ultimaAtualizacaoRemota) return;
-      ultimaAtualizacaoRemota = atualizadoEm;
-      db = remoto;
-      normalizarDBCarregada();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
-      if(usuarioAtual){
-        sincronizarUsuariosLogin();
-        const op = normalizarOperador(usuarioAtual.operador);
-        usuarioAtual = db.usuarios.find(u => normalizarOperador(u.operador) === op) || usuarioAtual;
-        popularSelects();
-        renderAll();
-      }
-    })
-    .subscribe(status => console.log('Supabase Realtime:', status));
-}
-
-function login(){
+async function login(){
   atualizarIdentificacaoLogin(true);
-  sincronizarUsuariosLogin();
-  const operadorInput = normalizarOperador(document.getElementById('loginUser').value);
-  const pass = document.getElementById('loginPass').value.trim();
-  const user = db.usuarios.find(u => normalizarOperador(u.operador) === operadorInput);
-  const err = document.getElementById('loginError');
-  if(!operadorInput){ err.textContent = 'Informe o número de operador.'; return; }
-  if(!user){ err.textContent = 'Operador não autorizado para acessar o sistema.'; return; }
-  if(user.senha !== pass){ err.textContent = 'Senha incorreta. Use o padrão: operador + 24.'; return; }
-  usuarioAtual = user;
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify({nome:user.nome, operador:user.operador, loginEm: agoraBR()}));
-  showAppLoader('Entrando no sistema', 'Preparando seu ambiente de assistência gerencial...');
-  setTimeout(() => {
-    initApp();
-    hideAppLoader();
-  }, 850);
+  const operadorInput=normalizarOperador(document.getElementById('loginUser').value);
+  const pass=document.getElementById('loginPass').value.trim(); const err=document.getElementById('loginError');
+  if(!operadorInput){err.textContent='Informe o número de operador.';return;}
+  showAppLoader('Entrando no sistema','Validando acesso e carregando sua sessão individual...');
+  await carregarConfigGlobalOnline();
+  const user=usuarioGlobalPorOperador(operadorInput);
+  if(!user){hideAppLoader();err.textContent='Operador não autorizado para acessar o sistema.';return;}
+  if(senhaPorOperador(operadorInput)!==pass){hideAppLoader();err.textContent='Senha incorreta. Use o padrão: operador + 24.';return;}
+  usuarioAtual={...user,senha:senhaPorOperador(operadorInput)};
+  sessionStorage.setItem(SESSION_KEY,JSON.stringify({nome:user.nome,operador:user.operador,loginEm:agoraBR()}));
+  await carregarDadosUsuarioOnline(operadorInput); initApp(); ativarRealtimeUsuario(); hideAppLoader();
 }
+
 function ocultarIdentificacaoLogin(){
   const preview = document.getElementById('loginUserPreview');
   if(!preview) return;
@@ -1678,8 +1707,7 @@ function atualizarIdentificacaoLogin(mostrar = false){
     return;
   }
 
-  sincronizarUsuariosLogin();
-  const autorizado = db.usuarios.find(u => normalizarOperador(u.operador) === operador);
+  const autorizado = usuarioGlobalPorOperador(operador) || (db.usuarios||[]).find(u => normalizarOperador(u.operador) === operador);
   const funcionario = (db.funcionarios || []).find(f => normalizarOperador(f.operador) === operador);
   const pessoa = autorizado || funcionario;
 
@@ -1703,16 +1731,12 @@ function limparSessoesAntigas(){
     SESSION_KEY
   ].forEach(k => localStorage.removeItem(k));
 }
-function trySession(){
-  limparSessoesAntigas();
-  const raw = sessionStorage.getItem(SESSION_KEY);
-  if(!raw) return;
-  try{
-    sincronizarUsuariosLogin();
-    const sess = JSON.parse(raw);
-    usuarioAtual = db.usuarios.find(u => (!sess.operador && u.nome === sess.nome) || (sess.operador && normalizarOperador(u.operador) === normalizarOperador(sess.operador))) || null;
-  }catch(e){ usuarioAtual = null; }
+async function trySession(){
+  const raw=sessionStorage.getItem(SESSION_KEY); if(!raw)return false;
+  try{ const sess=JSON.parse(raw); await carregarConfigGlobalOnline(); usuarioAtual=usuarioGlobalPorOperador(sess.operador); if(!usuarioAtual)return false; await carregarDadosUsuarioOnline(sess.operador); return true; }
+  catch(e){usuarioAtual=null;return false;}
 }
+
 function logout(){ sessionStorage.removeItem(SESSION_KEY); localStorage.removeItem(SESSION_KEY); location.reload(); }
 
 function initApp(){
@@ -1723,7 +1747,9 @@ function initApp(){
   document.getElementById('mesAtual').textContent = mesAnoBR();
   document.getElementById('headerUserName').textContent = usuarioAtual.nome;
   document.getElementById('headerUserOperator').textContent = usuarioAtual.operador || '-';
-  document.getElementById('configNavBtn').style.display = normalizarOperador(usuarioAtual.operador) === '133' ? 'flex' : 'none';
+  const dev=normalizarOperador(usuarioAtual.operador)==='133';
+  document.getElementById('developerBadge').style.display=dev?'inline-flex':'none';
+  aplicarPermissoes();
   popularSelects();
   setDefaultDates();
   renderAll();
@@ -1761,10 +1787,7 @@ function toggleTheme(){
 }
 
 function showPage(id, btn){
-  if(id === 'config' && normalizarOperador(usuarioAtual?.operador) !== '133'){
-    alert('Configurações disponíveis apenas para JOAO PEDRO.');
-    id = 'painel';
-  }
+  if(!temPermissao(id)){ alert('Esta função não está liberada para o seu usuário.'); id='painel'; }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -1788,27 +1811,6 @@ function badgePrioridade(p){
   return '<span class="badge b-warn">Normal</span>';
 }
 function isConcluido(item){ return ['Concluído','Concluída','Arquivado'].includes(item.status); }
-function calcularStatusTarefa(tarefa){
-  if(!tarefa) return 'Aguardando';
-  if(tarefa.status === 'Concluída' || tarefa.status === 'Concluído') return 'Concluída';
-  const hoje = hojeISO();
-  const inicio = tarefa.inicio || tarefa.dataISO || '';
-  const fim = tarefa.fim || tarefa.prazo || '';
-  if(inicio && hoje < inicio) return 'Aguardando';
-  if(fim && hoje > fim) return 'Pendente';
-  return 'Em andamento';
-}
-function atualizarStatusTarefasAutomaticos(){
-  let alterou = false;
-  (db?.tarefas || []).forEach(t => {
-    const calculado = calcularStatusTarefa(t);
-    if(t.status !== calculado){
-      t.status = calculado;
-      alterou = true;
-    }
-  });
-  return alterou;
-}
 function isAtrasado(item){ return item.prazo && item.prazo < hojeISO() && !isConcluido(item); }
 
 function salvarNota(e){
@@ -1940,12 +1942,11 @@ function salvarTarefa(e){
     responsavel: document.getElementById('tarefaResponsavel').value,
     responsavel2: document.getElementById('tarefaResponsavel2').value,
     prioridade: document.getElementById('tarefaPrioridade').value,
-    status: document.getElementById('tarefaStatus').value === 'Concluída' ? 'Concluída' : 'Em andamento',
+    status: document.getElementById('tarefaStatus').value,
     descricao: document.getElementById('tarefaDescricao').value,
     atualizadoPor: usuarioAtual.nome,
     atualizadoEm: agoraBR()
   };
-  tarefa.status = calcularStatusTarefa(tarefa);
   if(existente) Object.assign(existente, tarefa); else db.tarefas.unshift(tarefa);
   saveDB(); limparFormTarefa(); fecharModalTarefa(); renderAll();
 }
@@ -1963,19 +1964,11 @@ function editarTarefa(id, manterModal){
   document.getElementById('tarefaResponsavel').value=t.responsavel||'';
   document.getElementById('tarefaResponsavel2').value=t.responsavel2||'';
   document.getElementById('tarefaPrioridade').value=t.prioridade || 'Normal';
-  document.getElementById('tarefaStatus').value=isConcluido(t) ? 'Concluída' : 'PADRAO';
+  document.getElementById('tarefaStatus').value=t.status || 'Pendente';
   document.getElementById('tarefaDescricao').value=t.descricao||'';
   document.getElementById('modalTarefa').classList.add('active');
 }
-function setTarefaStatus(id,status){
-  const t = db.tarefas.find(x=>x.id===id);
-  if(!t) return;
-  t.status = status === 'Concluída' ? 'Concluída' : calcularStatusTarefa({...t, status:'PADRAO'});
-  t.atualizadoPor = usuarioAtual.nome;
-  t.atualizadoEm = agoraBR();
-  saveDB();
-  renderAll();
-}
+function setTarefaStatus(id,status){ const t=db.tarefas.find(x=>x.id===id); if(t){ t.status=status; t.atualizadoPor=usuarioAtual.nome; t.atualizadoEm=agoraBR(); saveDB(); renderAll(); } }
 function excluirTarefa(id){ if(confirm('Excluir esta tarefa?')){ db.tarefas=db.tarefas.filter(x=>x.id!==id); saveDB(); renderAll(); } }
 function limparFormTarefa(fechar=true){
   document.getElementById('formTarefa').reset();
@@ -2302,7 +2295,6 @@ function limparFormFuncionario(fechar=true){
 
 function renderAll(){
   if(!db || !usuarioAtual) return;
-  if(atualizarStatusTarefasAutomaticos()) saveDB();
   if(document.getElementById('fTarefaDepartamento')) popularFiltroTarefaDepartamento();
   renderPainel(); renderNotas(); renderKanban(); renderSetores(); renderFuncionarios(); renderOperadores(); renderEscalas(); renderDiario(); renderRelatorio(); renderConfig();
 }
@@ -2373,7 +2365,7 @@ function renderKanban(){
     return `<div class="lane"><h3>${st.toUpperCase()} <span class="badge b-info">${itens.length}</span></h3>${itens.length?itens.map(t=>{
       const periodo = `${t.inicio || t.dataISO || '-'} ${t.fim ? 'até ' + t.fim : ''}`;
       const responsaveis = [t.responsavel, t.responsavel2].filter(Boolean).join(' + ') || 'Não definido';
-      return `<div class="task-card"><h4>${escapeHTML(t.atividade || t.titulo)}</h4><div class="task-meta">${badgeSetor(t.setor)} ${badgePrioridade(t.prioridade)}</div><p><b>Departamento:</b> ${escapeHTML(t.departamento || 'Loja toda')}<br><b>Período:</b> ${escapeHTML(periodo)}<br><b>Resp.:</b> ${escapeHTML(responsaveis)}</p><p>${escapeHTML(t.descricao||'')}</p><div class="actions no-print"><button class="btn small secondary" onclick="abrirModalTarefa('${t.id}')">Editar</button>${st!=='Concluída'?`<button class="btn small good" onclick="setTarefaStatus('${t.id}','Concluída')">Concluir</button>`:`<button class="btn small secondary" onclick="setTarefaStatus('${t.id}','PADRAO')">Reabrir</button>`}<button class="btn small danger" onclick="excluirTarefa('${t.id}')">Excluir</button></div></div>`;
+      return `<div class="task-card"><h4>${escapeHTML(t.atividade || t.titulo)}</h4><div class="task-meta">${badgeSetor(t.setor)} ${badgePrioridade(t.prioridade)}</div><p><b>Departamento:</b> ${escapeHTML(t.departamento || 'Loja toda')}<br><b>Período:</b> ${escapeHTML(periodo)}<br><b>Resp.:</b> ${escapeHTML(responsaveis)}</p><p>${escapeHTML(t.descricao||'')}</p><div class="actions no-print"><button class="btn small secondary" onclick="abrirModalTarefa('${t.id}')">Editar</button>${st!=='Concluída'?`<button class="btn small good" onclick="setTarefaStatus('${t.id}','Concluída')">Concluir</button>`:''}<button class="btn small danger" onclick="excluirTarefa('${t.id}')">Excluir</button></div></div>`;
     }).join(''):'<div class="empty">Sem itens</div>'}</div>`;
   }).join('');
 }
@@ -2415,378 +2407,49 @@ function renderRelatorio(){
 }
 
 function funcionariosDisponiveisParaLogin(){
-  garantirUsuariosPermitidos();
-  const permitidos = new Set((db.usuariosPermitidos || []).map(normalizarOperador));
-  return (db.funcionarios || [])
-    .filter(f => normalizarOperador(f.operador) && String(f.status || 'ATIVO').toUpperCase() !== 'DESLIGADO')
-    .filter(f => !permitidos.has(normalizarOperador(f.operador)))
-    .sort((a,b) => norm(a.nome).localeCompare(norm(b.nome)));
+  const permitidos=new Set((globalConfig?.usuarios||[]).map(u=>normalizarOperador(u.operador)));
+  return (db.funcionarios||[]).filter(f=>normalizarOperador(f.operador)&&String(f.status||'ATIVO').toUpperCase()!=='DESLIGADO'&&!permitidos.has(normalizarOperador(f.operador))).sort((a,b)=>norm(a.nome).localeCompare(norm(b.nome)));
 }
-function adicionarUsuarioLogin(){
-  const op = normalizarOperador(document.getElementById('configNovoUsuarioLogin')?.value);
-  if(!op){ alert('Selecione um funcionário com número de operador para liberar o login.'); return; }
-  const f = (db.funcionarios || []).find(x => normalizarOperador(x.operador) === op);
-  if(!f){ alert('Funcionário não encontrado para este operador.'); return; }
-  db.usuariosPermitidos ||= operadoresOficiaisLogin();
-  if(!db.usuariosPermitidos.map(normalizarOperador).includes(op)) db.usuariosPermitidos.push(op);
-  sincronizarUsuariosLogin();
-  saveDB();
-  renderAll();
-  alert('Login liberado para ' + f.nome + '. Senha: ' + senhaPorOperador(op));
+async function adicionarUsuarioLogin(){
+  if(normalizarOperador(usuarioAtual?.operador)!=='133')return;
+  const op=normalizarOperador(document.getElementById('configNovoUsuarioLogin')?.value); if(!op){alert('Selecione um funcionário com número de operador.');return;}
+  const f=(db.funcionarios||[]).find(x=>normalizarOperador(x.operador)===op); if(!f)return;
+  globalConfig=normalizarConfigGlobal(globalConfig); globalConfig.usuarios.push({nome:f.nome,operador:op,matricula:f.matricula||matriculaPorOperador(op),cargo:f.cargo,senha:senhaPorOperador(op)}); globalConfig.permissoes[op]=permissoesPadrao(op);
+  await salvarConfigGlobalOnline(); renderAll(); alert(`Login liberado para ${f.nome}. Senha: ${senhaPorOperador(op)}`);
 }
-function removerUsuarioLogin(op){
-  const operador = normalizarOperador(op);
-  if(operadoresOficiaisLogin().includes(operador)){
-    alert('Este é um usuário padrão do sistema e não pode ser removido por aqui.');
-    return;
-  }
-  const u = (db.usuarios || []).find(x => normalizarOperador(x.operador) === operador);
-  if(!u) return;
-  if(confirm('Remover o acesso de login de ' + u.nome + '?')){
-    db.usuariosPermitidos = (db.usuariosPermitidos || []).filter(x => normalizarOperador(x) !== operador);
-    sincronizarUsuariosLogin();
-    saveDB();
-    renderAll();
-  }
+async function removerUsuarioLogin(op){
+  if(normalizarOperador(usuarioAtual?.operador)!=='133')return; const operador=normalizarOperador(op);
+  if(operadoresOficiaisLogin().includes(operador)){alert('Usuário padrão não pode ser removido.');return;}
+  const u=usuarioGlobalPorOperador(operador); if(u&&confirm('Remover o acesso de '+u.nome+'?')){ globalConfig.usuarios=globalConfig.usuarios.filter(x=>normalizarOperador(x.operador)!==operador); delete globalConfig.permissoes[operador]; await salvarConfigGlobalOnline(); renderAll(); }
 }
 function renderUsuariosLoginRows(){
-  return (db.usuarios || []).map(u => {
-    const podeRemover = !operadoresOficiaisLogin().includes(normalizarOperador(u.operador));
-    return `<tr><td>${escapeHTML(u.nome)}</td><td><b>${escapeHTML(u.operador)}</b></td><td>${escapeHTML(u.matricula || matriculaPorOperador(u.operador))}</td><td>${escapeHTML(u.cargo)}</td><td><code>${escapeHTML(u.senha)}</code></td><td class="no-print">${podeRemover ? `<button class="btn small danger" onclick="removerUsuarioLogin('${escapeHTML(u.operador)}')">Remover acesso</button>` : '<span class="badge b-ok">Padrão</span>'}</td></tr>`;
-  }).join('');
+  return (globalConfig?.usuarios||[]).map(u=>{const op=normalizarOperador(u.operador),dev=op==='133',pode=!operadoresOficiaisLogin().includes(op);return `<tr><td>${escapeHTML(u.nome)} ${dev?'<span class="badge b-vm">&lt;/&gt; DESENVOLVEDOR</span>':''}</td><td><b>${escapeHTML(op)}</b></td><td>${escapeHTML(u.matricula||matriculaPorOperador(op))}</td><td>${escapeHTML(u.cargo||'')}</td><td><code>${escapeHTML(senhaPorOperador(op))}</code></td><td class="no-print"><button class="btn small secondary" onclick="editarPermissoesUsuario('${op}')">Permissões</button> ${pode?`<button class="btn small danger" onclick="removerUsuarioLogin('${op}')">Remover</button>`:'<span class="badge b-ok">Padrão</span>'}</td></tr>`}).join('');
 }
-function renderSelectNovoUsuarioLogin(){
-  const disponiveis = funcionariosDisponiveisParaLogin();
-  if(!disponiveis.length) return '<option value="">Nenhum funcionário com operador disponível</option>';
-  return '<option value="">Selecione um funcionário</option>' + disponiveis.map(f => `<option value="${escapeHTML(normalizarOperador(f.operador))}">${escapeHTML(f.nome)} — OP. ${escapeHTML(normalizarOperador(f.operador))} — ${escapeHTML(f.cargo || 'Equipe')}</option>`).join('');
+function renderSelectNovoUsuarioLogin(){ const a=funcionariosDisponiveisParaLogin(); return a.length?'<option value="">Selecione um funcionário</option>'+a.map(f=>`<option value="${escapeHTML(normalizarOperador(f.operador))}">${escapeHTML(f.nome)} — OP. ${escapeHTML(normalizarOperador(f.operador))}</option>`).join(''):'<option value="">Nenhum funcionário disponível</option>'; }
+function editarPermissoesUsuario(op){
+  const operador=normalizarOperador(op),u=usuarioGlobalPorOperador(operador); if(!u)return; const p=permissoesUsuario(operador),dev=operador==='133';
+  const html=`<div class="modal-head"><div><h2>Permissões de ${escapeHTML(u.nome)}</h2><p>Defina quais abas aparecem no painel deste usuário.</p></div><button class="icon-btn" onclick="fecharModalPermissoes()">✕</button></div>${dev?'<div class="developer-panel section-card"><h2>&lt;/&gt; DESENVOLVEDOR</h2><p>Acesso integral permanente. Estas permissões não podem ser removidas.</p></div>':''}<div class="permission-grid">${MODULOS.map(([id,nome])=>`<label class="permission-item"><input type="checkbox" data-perm="${id}" ${p[id]?'checked':''} ${dev?'disabled':''}>${nome}</label>`).join('')}</div><div class="actions" style="margin-top:16px;"><button class="btn" onclick="salvarPermissoesUsuario('${operador}')" ${dev?'disabled':''}>💾 Salvar permissões</button><button class="btn secondary" onclick="fecharModalPermissoes()">Fechar</button></div>`;
+  document.getElementById('modalPermissoesConteudo').innerHTML=html; document.getElementById('modalPermissoes').classList.add('active');
 }
+async function salvarPermissoesUsuario(op){
+  const operador=normalizarOperador(op); if(operador==='133')return; const perms={}; document.querySelectorAll('#modalPermissoesConteudo [data-perm]').forEach(x=>perms[x.dataset.perm]=x.checked); perms.painel=true;
+  globalConfig.permissoes[operador]=perms; await salvarConfigGlobalOnline(); fecharModalPermissoes(); renderAll(); alert('Permissões atualizadas.');
+}
+function fecharModalPermissoes(){document.getElementById('modalPermissoes')?.classList.remove('active');}
 
-
-function funcionariosAtivosEscala(){
-  return (db.funcionarios || [])
-    .filter(f => String(f.status || 'ATIVO').toUpperCase() !== 'DESLIGADO')
-    .slice()
-    .sort((a,b) => norm(a.nome).localeCompare(norm(b.nome)));
-}
-function optionsFuncionariosEscala(){
-  const arr = funcionariosAtivosEscala();
-  if(!arr.length) return '<option value="">Nenhum funcionário cadastrado</option>';
-  return '<option value="">Selecione</option>' + arr.map(f => `<option value="${escapeHTML(f.id)}">${escapeHTML(f.nome)}${f.operador ? ' — OP. ' + escapeHTML(f.operador) : ''}${f.cargo ? ' — ' + escapeHTML(f.cargo) : ''}</option>`).join('');
-}
-function getFuncionarioEscala(id){ return (db.funcionarios || []).find(f => f.id === id); }
-
-function dataBRSimples(dataISO){
-  if(!dataISO) return '';
-  const p = String(dataISO).split('-');
-  if(p.length !== 3) return dataISO;
-  return `${p[2]}/${p[1]}/${p[0]}`;
-}
-function nomeDiaSemanaData(dataISO){
-  if(!dataISO) return '';
-  const [y,m,d] = String(dataISO).split('-').map(Number);
-  const dt = new Date(y, m - 1, d);
-  return ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'][dt.getDay()] || '';
-}
-function gerarDiasUteisDoMes(dataBaseISO){
-  const base = dataBaseISO || hojeISO();
-  const [ano, mes] = String(base).split('-').map(Number);
-  const y = ano || new Date().getFullYear();
-  const m = mes || (new Date().getMonth() + 1);
-  const ultimo = new Date(y, m, 0).getDate();
-  const dias = [];
-  for(let dia = 1; dia <= ultimo; dia++){
-    const dt = new Date(y, m - 1, dia);
-    const semana = dt.getDay();
-    if(semana >= 1 && semana <= 5){
-      const iso = `${y}-${String(m).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
-      dias.push({ value: iso, label: `${nomeDiaSemanaData(iso)} — ${dataBRSimples(iso)}` });
-    }
-  }
-  return dias;
-}
-function atualizarOpcoesFolgaEscala(){
-  const sel = document.getElementById('escalaDiaFolga');
-  if(!sel) return;
-  const atual = sel.value;
-  const dias = gerarDiasUteisDoMes(document.getElementById('escalaData')?.value || hojeISO());
-  sel.innerHTML = '<option value="">Selecione o dia da folga</option>' + dias.map(d => `<option value="${d.value}">${d.label}</option>`).join('');
-  if(atual && dias.some(d => d.value === atual)) sel.value = atual;
-}
-
-function selecionarTipoEscala(tipo){
-  tipo = tipo || '';
-  const tipoInput = document.getElementById('escalaTipo');
-  const select = document.getElementById('escalaOperacaoSelect');
-  const formArea = document.getElementById('escalaFormArea');
-  const hint = document.getElementById('escalaStartHint');
-  const tituloGroup = document.getElementById('escalaTituloGroup');
-  const tituloInput = document.getElementById('escalaTitulo');
-  if(tipoInput) tipoInput.value = tipo;
-  if(select) select.value = tipo;
-  if(!tipo){
-    if(formArea) formArea.classList.remove('active');
-    if(hint) hint.style.display = '';
-    return;
-  }
-  if(formArea) formArea.classList.add('active');
-  if(hint) hint.style.display = 'none';
-  document.getElementById('escalaTituloOperacao').textContent = tipo === 'DOMINGO' ? 'Escala de Domingo' : 'Escala de Feriado';
-  document.getElementById('escalaDescricaoOperacao').textContent = tipo === 'DOMINGO' ? 'Preencha abertura, fechamento e folgas compensatórias. Domingo não precisa de nome de feriado.' : 'Preencha abertura, fechamento, folgas e o nome do feriado.';
-  document.getElementById('escalaBadgeOperacao').textContent = tipo;
-  document.getElementById('escalaBadgeOperacao').className = tipo === 'DOMINGO' ? 'badge b-info' : 'badge b-warn';
-  if(tituloGroup) tituloGroup.style.display = tipo === 'FERIADO' ? '' : 'none';
-  if(tipo === 'DOMINGO'){
-    if(tituloInput) tituloInput.value = 'Domingo de trabalho';
-  } else if(tipo === 'FERIADO' && tituloInput && tituloInput.value === 'Domingo de trabalho'){
-    tituloInput.value = '';
-  }
-  if(!document.getElementById('escalaData').value) document.getElementById('escalaData').value = hojeISO();
-  atualizarOpcoesFolgaEscala();
-}
-function pessoaJaNaEscala(funcId){
-  return ['abertura','fechamento','folgas'].some(k => escalaDraft[k].some(p => p.funcId === funcId));
-}
-function adicionarPessoaEscala(grupo){
-  const tipoAtual = document.getElementById('escalaTipo')?.value || '';
-  if(!tipoAtual){ alert('Selecione DOMINGO ou FERIADO antes de adicionar pessoas.'); return; }
-  const cap = grupo === 'abertura' ? 'Abertura' : grupo === 'fechamento' ? 'Fechamento' : 'Folgas';
-  const pessoaEl = document.getElementById(grupo === 'abertura' ? 'escalaPessoaAbertura' : grupo === 'fechamento' ? 'escalaPessoaFechamento' : 'escalaPessoaFolga');
-  const funcId = pessoaEl.value;
-  if(!funcId){ alert('Selecione uma pessoa para adicionar em ' + cap + '.'); return; }
-  const f = getFuncionarioEscala(funcId);
-  if(!f){ alert('Funcionário não encontrado.'); return; }
-  if(pessoaJaNaEscala(funcId)){ alert('Esta pessoa já foi alocada nesta escala. Remova primeiro para alterar o turno ou folga.'); return; }
-  if(grupo === 'folgas'){
-    const diaEl = document.getElementById('escalaDiaFolga');
-    const diaFolga = diaEl?.value || '';
-    const diaFolgaLabel = diaEl?.options[diaEl.selectedIndex]?.text || '';
-    if(!diaFolga){ alert('Selecione o dia da folga.'); return; }
-    escalaDraft.folgas.push({ id: uid('folga'), funcId, nome:f.nome, cargo:f.cargo || '', diaFolga, diaFolgaLabel, obs: document.getElementById('escalaObsFolga').value.trim() });
-    document.getElementById('escalaObsFolga').value = '';
-    diaEl.value = '';
-  } else {
-    const entrada = document.getElementById(grupo === 'abertura' ? 'escalaEntradaAbertura' : 'escalaEntradaFechamento').value;
-    const saida = document.getElementById(grupo === 'abertura' ? 'escalaSaidaAbertura' : 'escalaSaidaFechamento').value;
-    const obsEl = document.getElementById(grupo === 'abertura' ? 'escalaObsAbertura' : 'escalaObsFechamento');
-    if(!entrada){ alert('Informe o horário de entrada.'); return; }
-    escalaDraft[grupo].push({ id: uid('esc'), funcId, nome:f.nome, cargo:f.cargo || '', entrada, saida, obs: obsEl.value.trim() });
-    obsEl.value = '';
-  }
-  pessoaEl.value = '';
-  renderEscalaPreview();
-}
-function removerPessoaEscala(grupo, id){
-  escalaDraft[grupo] = escalaDraft[grupo].filter(p => p.id !== id);
-  renderEscalaPreview();
-}
-function renderEscalaPessoa(p, grupo){
-  const horario = grupo === 'folgas'
-    ? `${p.diaFolgaLabel || (p.diaFolga ? nomeDiaSemanaData(p.diaFolga) + ' — ' + dataBRSimples(p.diaFolga) : 'Dia não informado')}${p.obs ? '<br>' + escapeHTML(p.obs) : ''}`
-    : `${p.entrada || '--:--'}${p.saida ? ' às ' + p.saida : ''}${p.obs ? '<br>' + escapeHTML(p.obs) : ''}`;
-  return `<div class="escala-person"><b>${escapeHTML(p.nome)}</b><small>${escapeHTML(p.cargo || 'Equipe')}<br>${horario}</small><div class="actions no-print"><button class="btn small danger" onclick="removerPessoaEscala('${grupo}','${p.id}')">Remover</button></div></div>`;
-}
-function renderEscalaPreview(){
-  if(!document.getElementById('previewAbertura')) return;
-  document.getElementById('previewAbertura').innerHTML = escalaDraft.abertura.length ? escalaDraft.abertura.map(p=>renderEscalaPessoa(p,'abertura')).join('') : '<div class="empty">Nenhuma pessoa na abertura.</div>';
-  document.getElementById('previewFechamento').innerHTML = escalaDraft.fechamento.length ? escalaDraft.fechamento.map(p=>renderEscalaPessoa(p,'fechamento')).join('') : '<div class="empty">Nenhuma pessoa no fechamento.</div>';
-  document.getElementById('previewFolgas').innerHTML = escalaDraft.folgas.length ? escalaDraft.folgas.map(p=>renderEscalaPessoa(p,'folgas')).join('') : '<div class="empty">Nenhuma folga alocada.</div>';
-}
-function limparEscalaAtual(){
-  const tipoAtual = document.getElementById('escalaTipo').value || '';
-  document.getElementById('escalaId').value = '';
-  document.getElementById('escalaData').value = hojeISO();
-  document.getElementById('escalaTitulo').value = tipoAtual === 'DOMINGO' ? 'Domingo de trabalho' : '';
-  document.getElementById('escalaObs').value = '';
-  document.getElementById('escalaObsAbertura').value = '';
-  document.getElementById('escalaObsFechamento').value = '';
-  document.getElementById('escalaObsFolga').value = '';
-  escalaDraft = { abertura: [], fechamento: [], folgas: [] };
-  atualizarOpcoesFolgaEscala();
-  renderEscalaPreview();
-}
-function salvarEscala(){
-  const tipo = document.getElementById('escalaTipo').value || '';
-  const data = document.getElementById('escalaData').value;
-  const titulo = document.getElementById('escalaTitulo').value.trim();
-  if(!tipo){ alert('Selecione DOMINGO ou FERIADO.'); return; }
-  if(!data){ alert('Informe a data da escala.'); return; }
-  if(tipo === 'FERIADO' && !titulo){ alert('Informe o nome do feriado.'); return; }
-  const total = escalaDraft.abertura.length + escalaDraft.fechamento.length + escalaDraft.folgas.length;
-  if(total === 0){ alert('Adicione pelo menos uma pessoa na abertura, fechamento ou folga.'); return; }
-  const id = document.getElementById('escalaId').value || uid('escala');
-  const obj = {
-    id, tipo, data,
-    titulo: tipo === 'DOMINGO' ? 'Domingo de trabalho' : titulo,
-    responsavel: document.getElementById('escalaResponsavel').value,
-    obs: document.getElementById('escalaObs').value.trim(),
-    abertura: JSON.parse(JSON.stringify(escalaDraft.abertura)),
-    fechamento: JSON.parse(JSON.stringify(escalaDraft.fechamento)),
-    folgas: JSON.parse(JSON.stringify(escalaDraft.folgas)),
-    atualizadoPor: usuarioAtual?.nome || '',
-    atualizadoEm: agoraBR()
-  };
-  const idx = db.escalas.findIndex(e => e.id === id);
-  if(idx >= 0) db.escalas[idx] = obj; else db.escalas.push(obj);
-  saveDB();
-  renderEscalas();
-  alert('Escala salva com sucesso.');
-}
-function editarEscala(id){
-  const e = db.escalas.find(x => x.id === id); if(!e) return;
-  showPage('escalas');
-  selecionarTipoEscala(e.tipo || 'DOMINGO');
-  document.getElementById('escalaId').value = e.id;
-  document.getElementById('escalaData').value = e.data || hojeISO();
-  document.getElementById('escalaTitulo').value = e.tipo === 'DOMINGO' ? 'Domingo de trabalho' : (e.titulo || '');
-  document.getElementById('escalaResponsavel').value = e.responsavel || '';
-  document.getElementById('escalaObs').value = e.obs || '';
-  escalaDraft = { abertura: JSON.parse(JSON.stringify(e.abertura || [])), fechamento: JSON.parse(JSON.stringify(e.fechamento || [])), folgas: JSON.parse(JSON.stringify(e.folgas || [])) };
-  atualizarOpcoesFolgaEscala();
-  renderEscalaPreview();
-}
-function duplicarEscala(id){
-  const e = db.escalas.find(x => x.id === id); if(!e) return;
-  const novo = JSON.parse(JSON.stringify(e));
-  novo.id = uid('escala'); novo.data = hojeISO(); novo.titulo = (novo.titulo || 'Escala') + ' — cópia'; novo.atualizadoPor = usuarioAtual?.nome || ''; novo.atualizadoEm = agoraBR();
-  db.escalas.push(novo); saveDB(); renderEscalas();
-}
-function excluirEscala(id){
-  if(!confirm('Excluir esta escala?')) return;
-  db.escalas = db.escalas.filter(e => e.id !== id);
-  saveDB(); renderEscalas();
-}
-function resumoGrupoEscala(arr, grupo){
-  if(!arr || !arr.length) return '-';
-  return arr.map(p => {
-    if(grupo === 'folgas'){
-      const dia = p.diaFolgaLabel || (p.diaFolga ? nomeDiaSemanaData(p.diaFolga) + ' — ' + dataBRSimples(p.diaFolga) : 'Dia não informado');
-      return `${escapeHTML(p.nome)}<br><small>${escapeHTML(dia)}</small>`;
-    }
-    return `${escapeHTML(p.nome)} (${escapeHTML(p.entrada || '')}${p.saida ? ' às ' + escapeHTML(p.saida) : ''})`;
-  }).join('<br>');
-}
-function dataEscalaWhatsApp(dataISO){
-  if(!dataISO) return '-';
-  const partes = String(dataISO).split('-');
-  if(partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
-  return dataISO;
-}
-function linhaPessoaEscalaWhatsApp(p, grupo){
-  const cargo = p.cargo ? ` — ${p.cargo}` : '';
-  if(grupo === 'folgas'){
-    const dia = p.diaFolgaLabel || (p.diaFolga ? `${nomeDiaSemanaData(p.diaFolga)} — ${dataEscalaWhatsApp(p.diaFolga)}` : 'Dia não informado');
-    return `• ${p.nome}${cargo}
-  Folga: ${dia}${p.obs ? `
-  Obs.: ${p.obs}` : ''}`;
-  }
-  const horario = `${p.entrada || '--:--'}${p.saida ? ` às ${p.saida}` : ''}`;
-  return `• ${p.nome}${cargo}
-  Horário: ${horario}${p.obs ? `
-  Obs.: ${p.obs}` : ''}`;
-}
-function grupoEscalaWhatsApp(titulo, arr, grupo){
-  if(!arr || !arr.length) return `\n${titulo}\n- Nenhuma pessoa alocada.`;
-  return `\n${titulo}\n${arr.map(p => linhaPessoaEscalaWhatsApp(p, grupo)).join('\n')}`;
-}
-function montarTextoEscalaWhatsApp(e){
-  const responsavel = nomeFuncionarioPorId(e.responsavel) || e.responsavel || '-';
-  const totalAbertura = e.abertura?.length || 0;
-  const totalFechamento = e.fechamento?.length || 0;
-  const totalFolgas = e.folgas?.length || 0;
-  return [
-    `*ESCALA DE TRABALHO — ${e.tipo || 'DOMINGO'}*`,
-    `*Loja 24 — Avenida*`,
-    ``,
-    `📅 *Data:* ${dataEscalaWhatsApp(e.data)}`,
-    e.tipo === 'FERIADO' ? `🏷️ *Feriado:* ${e.titulo || '-'}` : '',
-    `👤 *Responsável:* ${responsavel}`,
-    ``,
-    `📌 *Resumo:* ${totalAbertura} abertura · ${totalFechamento} fechamento · ${totalFolgas} folga(s)`,
-    grupoEscalaWhatsApp('🌞 *ABERTURA*', e.abertura || [], 'abertura'),
-    grupoEscalaWhatsApp('🌙 *FECHAMENTO*', e.fechamento || [], 'fechamento'),
-    grupoEscalaWhatsApp('🏖️ *FOLGAS*', e.folgas || [], 'folgas'),
-    e.obs ? `\n📝 *Observações gerais:*\n${e.obs}` : '',
-    `\nGerado pelo Sistema Gerencial — Loja 24.`
-  ].filter(Boolean).join('\n');
-}
-function escalaAtualComoObjetoWhatsApp(){
-  const tipo = document.getElementById('escalaTipo')?.value || '';
-  const data = document.getElementById('escalaData')?.value || '';
-  const titulo = tipo === 'DOMINGO' ? 'Domingo de trabalho' : (document.getElementById('escalaTitulo')?.value.trim() || '');
-  return {
-    id: document.getElementById('escalaId')?.value || '',
-    tipo,
-    data,
-    titulo,
-    responsavel: document.getElementById('escalaResponsavel')?.value || '',
-    obs: document.getElementById('escalaObs')?.value.trim() || '',
-    abertura: JSON.parse(JSON.stringify(escalaDraft.abertura || [])),
-    fechamento: JSON.parse(JSON.stringify(escalaDraft.fechamento || [])),
-    folgas: JSON.parse(JSON.stringify(escalaDraft.folgas || []))
-  };
-}
-function abrirWhatsAppComTexto(texto){
-  const url = 'https://wa.me/?text=' + encodeURIComponent(texto);
-  window.open(url, '_blank');
-}
-function enviarEscalaAtualWhatsApp(){
-  const e = escalaAtualComoObjetoWhatsApp();
-  const total = (e.abertura?.length || 0) + (e.fechamento?.length || 0) + (e.folgas?.length || 0);
-  if(!e.tipo){ alert('Selecione DOMINGO ou FERIADO antes de enviar para o WhatsApp.'); return; }
-  if(!e.data){ alert('Informe a data da escala antes de enviar para o WhatsApp.'); return; }
-  if(e.tipo === 'FERIADO' && !e.titulo){ alert('Informe o nome/identificação do feriado antes de enviar.'); return; }
-  if(total === 0){ alert('Adicione pelo menos uma pessoa na abertura, fechamento ou folga antes de enviar.'); return; }
-  abrirWhatsAppComTexto(montarTextoEscalaWhatsApp(e));
-}
-function enviarEscalaWhatsApp(id){
-  const e = db.escalas.find(x => x.id === id);
-  if(!e){ alert('Escala não encontrada.'); return; }
-  abrirWhatsAppComTexto(montarTextoEscalaWhatsApp(e));
-}
-function renderEscalas(){
-  if(!document.getElementById('tbodyEscalas')) return;
-  db.escalas ||= [];
-  const opts = optionsFuncionariosEscala();
-  ['escalaPessoaAbertura','escalaPessoaFechamento','escalaPessoaFolga','escalaResponsavel'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el){ const atual = el.value; el.innerHTML = opts; if(atual) el.value = atual; }
-  });
-  if(!document.getElementById('escalaData').value) document.getElementById('escalaData').value = hojeISO();
-  const tipoAtual = document.getElementById('escalaTipo')?.value || '';
-  selecionarTipoEscala(tipoAtual);
-  renderEscalaPreview();
-  const filtroTipo = document.getElementById('fEscalaTipo')?.value || 'TODOS';
-  const busca = norm(document.getElementById('fEscalaBusca')?.value || '');
-  const arr = db.escalas.filter(e => (filtroTipo === 'TODOS' || e.tipo === filtroTipo) && (!busca || norm(`${e.data} ${e.tipo} ${e.titulo} ${e.responsavel} ${e.obs} ${(e.abertura||[]).map(p=>p.nome).join(' ')} ${(e.fechamento||[]).map(p=>p.nome).join(' ')} ${(e.folgas||[]).map(p=>p.nome).join(' ')}`).includes(busca))).sort((a,b)=>(b.data||'').localeCompare(a.data||''));
-  const totalPessoas = db.escalas.reduce((acc,e)=>acc+(e.abertura?.length||0)+(e.fechamento?.length||0)+(e.folgas?.length||0),0);
-  document.getElementById('escTotal').textContent = db.escalas.length;
-  document.getElementById('escDomingos').textContent = db.escalas.filter(e=>e.tipo==='DOMINGO').length;
-  document.getElementById('escFeriados').textContent = db.escalas.filter(e=>e.tipo==='FERIADO').length;
-  document.getElementById('escPessoas').textContent = totalPessoas;
-  document.getElementById('tbodyEscalas').innerHTML = arr.length ? arr.map(e => `<tr><td><b>${escapeHTML(e.data || '')}</b><br><small>${escapeHTML(e.atualizadoEm || '')}</small></td><td>${e.tipo === 'DOMINGO' ? '<span class="badge b-info">DOMINGO</span>' : '<span class="badge b-warn">FERIADO</span>'}</td><td><b>${e.tipo === 'DOMINGO' ? '-' : escapeHTML(e.titulo || '')}</b></td><td>${resumoGrupoEscala(e.abertura,'abertura')}</td><td>${resumoGrupoEscala(e.fechamento,'fechamento')}</td><td>${resumoGrupoEscala(e.folgas,'folgas')}</td><td>${escapeHTML(nomeFuncionarioPorId(e.responsavel) || e.responsavel || '-')}</td><td>${escapeHTML(e.obs || '-')}</td><td class="no-print"><div class="actions"><button class="btn small good" onclick="enviarEscalaWhatsApp('${e.id}')">WhatsApp</button><button class="btn small secondary" onclick="editarEscala('${e.id}')">Editar</button><button class="btn small" onclick="duplicarEscala('${e.id}')">Duplicar</button><button class="btn small danger" onclick="excluirEscala('${e.id}')">Excluir</button></div></td></tr>`).join('') : '<tr><td colspan="9" class="empty">Nenhuma escala cadastrada.</td></tr>';
-}
 function nomeFuncionarioPorId(id){
   const f = (db.funcionarios || []).find(x => x.id === id);
   return f ? f.nome : '';
 }
 
 function renderConfig(){
-  const el = document.getElementById('configContent');
-  if(normalizarOperador(usuarioAtual?.operador) !== '133') { el.innerHTML = '<div class="config-locked">Configurações disponíveis apenas para JOAO PEDRO.</div>'; return; }
-  sincronizarUsuariosLogin();
-  el.innerHTML = `<div class="section-title"><div><h1>Configurações</h1><p>Ajustes e manutenção do sistema.</p></div></div>
-  <div class="grid grid-2">
-    <div class="section-card" style="box-shadow:none;margin:0;">
-      <div class="section-title" style="margin-bottom:12px;"><div><h2>Usuários com login</h2><p>Libere acesso ao sistema para funcionários que já possuem número de operador.</p></div></div>
-      <div class="form-grid" style="margin-bottom:14px;">
-        <div class="field w8"><label>Adicionar usuário de login</label><select id="configNovoUsuarioLogin">${renderSelectNovoUsuarioLogin()}</select></div>
-        <div class="field w4 actions"><button class="btn" type="button" onclick="adicionarUsuarioLogin()">➕ Liberar login</button></div>
-      </div>
-      <div class="table-wrap"><table><thead><tr><th>Nome</th><th>Operador</th><th>Matrícula</th><th>Cargo</th><th>Senha</th><th class="no-print">Ações</th></tr></thead><tbody>${renderUsuariosLoginRows()}</tbody></table></div>
-      <p style="color:var(--muted);font-weight:700;margin-top:10px;">A senha é gerada automaticamente pelo padrão: número de operador + 24. Exemplo fictício: 000 / 00024.</p>
-    </div>
-    <div class="section-card" style="box-shadow:none;margin:0;"><h2>Backup</h2><p style="color:var(--muted);font-weight:700;">Use backup para guardar ou transferir os dados deste HTML.</p><div class="actions"><button class="btn" onclick="baixarBackup()">⬇️ Baixar backup JSON</button><label class="btn secondary" style="display:inline-flex;cursor:pointer;">⬆️ Importar backup<input type="file" accept="application/json" onchange="importarBackup(event)" style="display:none;"></label><button class="btn danger" onclick="limparTudo()">⚠️ Limpar sistema</button></div></div>
-  </div>`;
+  const el=document.getElementById('configContent'),dev=normalizarOperador(usuarioAtual?.operador)==='133';
+  if(!temPermissao('config')){el.innerHTML='<div class="config-locked">Configurações não liberadas para este usuário.</div>';return;}
+  if(!dev){ el.innerHTML=`<div class="section-title"><div><h1>Configurações</h1><p>Informações da sua sessão.</p></div></div><div class="section-card" style="box-shadow:none"><h2>${escapeHTML(usuarioAtual.nome)}</h2><p><b>Operador:</b> ${escapeHTML(usuarioAtual.operador)}<br><b>Perfil:</b> Usuário autorizado</p><div class="permission-grid">${MODULOS.filter(([id])=>temPermissao(id)).map(([id,n])=>`<div class="permission-item">✅ ${n}</div>`).join('')}</div></div>`; return; }
+  globalConfig=normalizarConfigGlobal(globalConfig);
+  el.innerHTML=`<div class="developer-panel section-card" style="box-shadow:none"><div class="section-title"><div><h1>&lt;/&gt; DESENVOLVEDOR</h1><p>JOÃO PEDRO • Operador 133 • Acesso integral permanente ao sistema.</p></div><span class="badge b-vm">NÍVEL MÁXIMO</span></div></div>
+  <div class="grid grid-2"><div class="section-card" style="box-shadow:none;margin:0;"><div class="section-title"><div><h2>Usuários e permissões</h2><p>Libere logins e escolha exatamente quais abas aparecem para cada operador.</p></div></div><div class="form-grid" style="margin-bottom:14px;"><div class="field w8"><label>Adicionar usuário</label><select id="configNovoUsuarioLogin">${renderSelectNovoUsuarioLogin()}</select></div><div class="field w4 actions"><button class="btn" onclick="adicionarUsuarioLogin()">➕ Liberar login</button></div></div><div class="table-wrap"><table><thead><tr><th>Nome</th><th>Operador</th><th>Matrícula</th><th>Cargo</th><th>Senha</th><th>Ações</th></tr></thead><tbody>${renderUsuariosLoginRows()}</tbody></table></div></div>
+  <div class="section-card" style="box-shadow:none;margin:0;"><h2>Dados individuais</h2><p style="color:var(--muted);font-weight:700">Cada operador possui um banco de dados separado. As informações do usuário 133 não aparecem para o usuário 139.</p><div class="actions"><button class="btn" onclick="baixarBackup()">⬇️ Backup deste usuário</button><label class="btn secondary">⬆️ Importar para este usuário<input type="file" accept="application/json" onchange="importarBackup(event)" style="display:none"></label><button class="btn danger" onclick="limparTudo()">⚠️ Limpar dados deste usuário</button></div></div></div>`;
 }
 
 function printActivePage(){ showAppLoader('Preparando impressão', 'Organizando a página para impressão em A4...'); setTimeout(() => { window.print(); hideAppLoader(); }, 320); }
@@ -3231,18 +2894,14 @@ function montarTextoEscalaWhatsApp(e){
 }
 
 window.addEventListener('load', async () => {
-  ['adminGerencialSessaoV1','adminGerencialSessaoV2','adminGerencialSessaoV3','adminGerencialSessaoV4','adminGerencialSessaoV5','adminGerencialSessaoV6','adminGerencialSessaoV7','adminGerencialSessaoV12Operador','adminGerencialSessaoV13Operador','adminGerencialSessaoV14Operador','adminGerencialSessaoV15Operador','adminGerencialSessaoV16Operador','adminGerencialSessaoV17Operador','adminGerencialSessaoV18Operador','adminGerencialSessaoV19Operador'].forEach(k => localStorage.removeItem(k));
-  await loadDB();
-  hideAppLoader();
-  if(localStorage.getItem('adminGerencialDark')==='1') { document.body.classList.add('dark-mode'); document.getElementById('themeBtn').textContent='☀️ Modo Claro'; }
-  document.getElementById('mesAtual').textContent = mesAnoBR();
-  ocultarIdentificacaoLogin();
-  trySession();
-  if(usuarioAtual) initApp();
-  document.getElementById('loginUser').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); document.getElementById('loginPass').focus(); } });
-  document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
+  ['adminGerencialSessaoV1','adminGerencialSessaoV2','adminGerencialSessaoV3','adminGerencialSessaoV4','adminGerencialSessaoV5','adminGerencialSessaoV6','adminGerencialSessaoV7','adminGerencialSessaoV12Operador','adminGerencialSessaoV13Operador','adminGerencialSessaoV14Operador','adminGerencialSessaoV15Operador','adminGerencialSessaoV16Operador','adminGerencialSessaoV17Operador','adminGerencialSessaoV18Operador','adminGerencialSessaoV19Operador','adminGerencialSessaoV20Operador'].forEach(k=>localStorage.removeItem(k));
+  loadDB(); await carregarConfigGlobalOnline();
+  if(localStorage.getItem('adminGerencialDark')==='1'){document.body.classList.add('dark-mode');document.getElementById('themeBtn').textContent='☀️ Modo Claro';}
+  document.getElementById('mesAtual').textContent=mesAnoBR(); ocultarIdentificacaoLogin();
+  const restaurada=await trySession(); if(restaurada){initApp();ativarRealtimeUsuario();}
+  document.getElementById('loginUser').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('loginPass').focus();}});
+  document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
 });
-window.addEventListener('beforeunload', () => { if(db) localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); });
 </script>
 </body>
 </html>
