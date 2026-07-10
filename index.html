@@ -354,7 +354,7 @@
     .logo-title { font-weight: 1000; letter-spacing: -.02em; }
     .logo-sub { font-size: .78rem; font-weight: 800; opacity: .78; margin-top: 2px; }
 
-    .user-box { margin: 16px; padding: 14px; border-radius: 18px; background: rgba(41,26,30,.12); border: 1px solid rgba(41,26,30,.18); }
+    .user-box { margin: 16px; padding: 14px 58px 14px 14px; border-radius: 18px; background: rgba(41,26,30,.12); border: 1px solid rgba(41,26,30,.18); position:relative; }
     .user-name { font-weight: 1000; font-size:.94rem; }
     .user-role { font-size:.76rem; font-weight:800; opacity:.78; margin-top: 3px; }
 
@@ -374,7 +374,11 @@
     .nav-btn:hover, .nav-btn.active { background: var(--amarelo-escuro); box-shadow: inset 5px 0 0 var(--preto-logo); }
     .nav-btn .ico { width:24px; text-align:center; }
 
-    .theme-btn { margin: auto 16px 16px; padding: 13px 14px; border:0; border-radius: 16px; background: var(--preto-logo); color: var(--amarelo); font-weight: 900; cursor:pointer; }
+    .theme-btn { position:absolute; top:12px; right:12px; width:38px; height:38px; padding:0; border:1px solid rgba(41,26,30,.20); border-radius:50%; background:var(--preto-logo); color:var(--amarelo); display:grid; place-items:center; font-size:1rem; cursor:pointer; box-shadow:0 7px 16px rgba(41,26,30,.18); transition:transform .18s ease, box-shadow .18s ease, background .18s ease; }
+    .theme-btn:hover { transform:translateY(-2px) rotate(-8deg); box-shadow:0 10px 22px rgba(41,26,30,.24); }
+    .theme-btn:active { transform:scale(.95); }
+    .theme-btn:focus-visible { outline:3px solid rgba(246,196,38,.42); outline-offset:2px; }
+    body.dark-mode .theme-btn { background:#FFCD09; color:#2E0D1E; border-color:rgba(255,205,9,.45); box-shadow:0 7px 18px rgba(0,0,0,.28); }
 
     .main { flex:1; min-width:0; }
     .topbar {
@@ -454,6 +458,35 @@
     .b-warn { background: var(--orange-bg); color: var(--orange); }
     .b-bad { background: var(--red-bg); color: var(--red); }
     .b-info { background: var(--blue-bg); color: var(--blue); }
+
+    /* Visual compacto para tarefas e anotações */
+    .task-list-groups { display:grid; gap:14px; }
+    .task-group { border:1px solid var(--border); border-radius:20px; overflow:hidden; background:var(--page-2); }
+    .task-group-head { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:13px 16px; background:var(--page); border-bottom:1px solid var(--border); }
+    .task-group-head h3 { margin:0; font-size:.92rem; letter-spacing:.02em; }
+    .task-group-body { display:grid; gap:10px; padding:12px; }
+    .task-row { border:1px solid var(--border); background:var(--page); border-radius:16px; padding:13px 14px; display:grid; grid-template-columns:minmax(220px,1.6fr) minmax(160px,1fr) auto; gap:14px; align-items:center; box-shadow:0 6px 16px rgba(15,23,42,.06); }
+    .task-row-main h4 { margin:0 0 7px; font-size:.98rem; }
+    .task-row-main p, .task-row-meta p { margin:4px 0; color:var(--muted); font-size:.80rem; font-weight:750; line-height:1.4; }
+    .task-row-details { grid-column:1 / -1; border-top:1px dashed var(--border); padding-top:10px; }
+    .task-row-details summary { cursor:pointer; font-weight:900; color:var(--muted); font-size:.80rem; }
+    .task-row-details p { margin:8px 0 0; color:var(--text); font-size:.84rem; line-height:1.5; }
+    .task-row-actions { justify-content:flex-end; }
+
+    .notes-timeline { position:relative; display:grid; gap:12px; padding-left:26px; }
+    .notes-timeline::before { content:""; position:absolute; left:8px; top:4px; bottom:4px; width:3px; border-radius:999px; background:var(--border); }
+    .note-item { position:relative; border:1px solid var(--border); background:var(--page); border-radius:18px; padding:14px 15px; box-shadow:0 7px 18px rgba(15,23,42,.06); }
+    .note-item::before { content:""; position:absolute; left:-24px; top:20px; width:13px; height:13px; border-radius:50%; background:var(--blue); box-shadow:0 0 0 5px var(--page), 0 0 0 6px var(--border); }
+    .note-item.priority-alta::before { background:#DC2626; }
+    .note-item.priority-baixa::before { background:#16A34A; }
+    .note-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+    .note-head h3 { margin:0 0 7px; font-size:1rem; }
+    .note-date { min-width:88px; text-align:center; border:1px solid var(--border); background:var(--page-2); border-radius:13px; padding:7px 9px; font-weight:1000; font-size:.75rem; }
+    .note-meta { display:flex; gap:6px; flex-wrap:wrap; margin:8px 0; }
+    .note-summary { margin:8px 0; color:var(--muted); font-weight:750; line-height:1.5; }
+    .note-details { margin-top:8px; border-top:1px dashed var(--border); padding-top:8px; }
+    .note-details summary { cursor:pointer; font-weight:900; color:var(--muted); font-size:.80rem; }
+    .note-actions { margin-top:12px; }
 
     .kanban { display:grid; grid-template-columns: repeat(4, minmax(240px,1fr)); gap: 14px; overflow:auto; padding-bottom: 8px; }
     .lane { background: var(--page-2); border:1px solid var(--border); border-radius: 18px; padding: 12px; min-height: 220px; }
@@ -703,12 +736,19 @@
     }
 
 
+    @media (max-width: 850px) {
+      .task-row { grid-template-columns:1fr; align-items:start; }
+      .task-row-actions { justify-content:flex-start; }
+      .note-head { flex-direction:column-reverse; }
+      .note-date { text-align:left; min-width:0; }
+    }
+
     @media (max-width: 1100px) {
       body { display:block; }
       .sidebar { position: relative; width:100%; height:auto; }
       .nav { display:flex; overflow-x:auto; padding: 10px; }
       .nav-btn { width:auto; white-space:nowrap; }
-      .theme-btn { margin: 8px 16px 16px; }
+      .theme-btn { margin:0; }
       .grid-4, .grid-3, .grid-2, .sector-board, .escala-mode-grid, .escala-step-grid, .escala-preview-grid, .escala-summary, .escala-selector-clean { grid-template-columns: 1fr 1fr; }
       .field, .field.w2, .field.w4, .field.w5, .field.w6, .field.w8 { grid-column: span 6; }
       .kanban { grid-template-columns: repeat(2, minmax(240px,1fr)); }
@@ -721,6 +761,47 @@
       .store-meta { justify-content:flex-start; }
     }
 
+
+    /* ===== V10: Escalas e setores com visual limpo ===== */
+    .escala-create-panel { display:none; margin-top:16px; }
+    .escala-create-panel.active { display:block; animation: fade .18s ease; }
+    .nota-create-panel { display:none; margin-top:16px; }
+    .nota-create-panel.active { display:block; animation: fade .18s ease; }
+    .nota-create-card { border:1px solid var(--border); background:var(--page-2); border-radius:20px; padding:18px; }
+    .nota-create-toolbar { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+    .nota-create-toolbar h3 { margin:0; }
+    .nota-create-toolbar p { margin:4px 0 0; color:var(--muted); font-weight:700; }
+    .escala-saved-list { display:grid; gap:12px; }
+    .escala-saved-card {
+      border:1px solid var(--border); background:var(--page); border-radius:20px;
+      overflow:hidden; box-shadow:0 8px 22px rgba(15,23,42,.07);
+    }
+    .escala-saved-main {
+      display:grid; grid-template-columns:minmax(125px,.75fr) minmax(190px,1.3fr) minmax(180px,1fr) auto;
+      gap:14px; align-items:center; padding:15px 16px;
+    }
+    .escala-saved-date b { display:block; font-size:1.05rem; }
+    .escala-saved-date small, .escala-saved-meta small { color:var(--muted); font-weight:800; }
+    .escala-saved-meta b { display:block; margin-bottom:5px; }
+    .escala-saved-counts { display:flex; flex-wrap:wrap; gap:7px; }
+    .escala-count-chip { padding:6px 9px; border-radius:999px; background:var(--soft); border:1px solid var(--border); font-size:.76rem; font-weight:900; }
+    .escala-saved-details { border-top:1px solid var(--border); padding:14px 16px; background:var(--page-2); }
+    .escala-saved-details summary { cursor:pointer; font-weight:1000; color:var(--text); }
+    .escala-detail-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:12px; }
+    .escala-detail-box { border:1px solid var(--border); background:var(--page); border-radius:15px; padding:12px; min-width:0; }
+    .escala-detail-box h4 { margin:0 0 8px; }
+    .escala-detail-box p { margin:5px 0; color:var(--muted); font-size:.82rem; font-weight:750; overflow-wrap:anywhere; }
+    .sector-content-stack { display:grid; gap:16px; }
+    .sector-content-panel { border:1px solid var(--border); background:var(--page); border-radius:20px; overflow:hidden; box-shadow:0 8px 22px rgba(15,23,42,.07); }
+    .sector-content-head { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:14px 16px; background:var(--page-2); border-bottom:1px solid var(--border); }
+    .sector-content-head h2 { margin:0; font-size:1.08rem; }
+    .sector-content-body { padding:14px 16px; }
+    .sector-content-body .task-mini { margin-bottom:10px; }
+    .section-toolbar-clean { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    @media (max-width: 900px) {
+      .escala-saved-main { grid-template-columns:1fr; }
+      .escala-detail-grid { grid-template-columns:1fr; }
+    }
     @media print {
       @page { size: A4 landscape; margin: 8mm; }
       body { display:block; background:white !important; color:black !important; }
@@ -733,6 +814,53 @@
       th, td { padding: 4px; border:1px solid #bbb !important; }
       th { background:#291A1E !important; color:#F6C426 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     }
+
+    .sistema-av-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
+    .sistema-av-button {
+      min-height:190px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:14px;
+      padding:22px 18px;
+      border:1px solid var(--border);
+      border-radius:24px;
+      background:var(--page);
+      color:var(--text);
+      text-decoration:none;
+      text-align:center;
+      box-shadow:var(--shadow);
+      position:relative;
+      overflow:hidden;
+      transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+    .sistema-av-button::before { content:""; position:absolute; left:0; top:0; right:0; height:6px; background:var(--amarelo); }
+    .sistema-av-button:hover { transform:translateY(-3px); border-color:var(--amarelo-escuro); box-shadow:0 20px 38px rgba(15,23,42,.16); }
+    .sistema-av-logo {
+      width:84px;
+      height:84px;
+      border-radius:22px;
+      display:grid;
+      place-items:center;
+      position:relative;
+      overflow:hidden;
+      background:var(--soft);
+      border:1px solid var(--border);
+      font-size:1.05rem;
+      font-weight:1000;
+      color:var(--preto-logo);
+      letter-spacing:.02em;
+    }
+    .sistema-av-logo img { width:64px; height:64px; object-fit:contain; position:relative; z-index:2; background:transparent; }
+    .sistema-av-logo .logo-fallback { position:absolute; inset:0; display:grid; place-items:center; z-index:1; }
+    .sistema-av-button h2 { margin:0; font-size:1.08rem; }
+    .sistema-av-button p { margin:0; color:var(--muted); font-weight:750; line-height:1.4; font-size:.84rem; }
+    .sistema-av-open { display:inline-flex; align-items:center; gap:6px; color:var(--preto-logo); background:var(--amarelo); border-radius:999px; padding:8px 12px; font-size:.78rem; font-weight:1000; }
+    body.dark-mode .sistema-av-logo { color:#FFCD09; }
+    body.dark-mode .sistema-av-open { color:#2E0D1E; }
+    @media (max-width:1000px) { .sistema-av-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:720px) { .sistema-av-grid { grid-template-columns:1fr; } .sistema-av-button { min-height:170px; } }
   </style>
 </head>
 <body>
@@ -788,6 +916,7 @@
       </div>
     </div>
     <div class="user-box">
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Ativar modo escuro" aria-label="Ativar modo escuro">🌙</button>
       <div class="user-name" id="userNameBox">Usuário</div>
       <div class="user-role" id="userRoleBox">Cargo</div>
       <div id="developerBadge" class="developer-badge" style="display:none;"><span>&lt;/&gt;</span> DESENVOLVEDOR</div>
@@ -803,9 +932,9 @@
       <button class="nav-btn" onclick="showPage('escalas', this)"><span class="ico">🗓️</span>Escala de Trabalho</button>
       <button class="nav-btn" onclick="showPage('acompanhamento', this)"><span class="ico">📌</span>Acompanhamento do Dia</button>
       <button class="nav-btn" onclick="showPage('relatorios', this)"><span class="ico">📄</span>Relatórios</button>
+      <button class="nav-btn" onclick="showPage('sistemaav', this)"><span class="ico">🌐</span>SISTEMA AV</button>
       <button id="configNavBtn" class="nav-btn" onclick="showPage('config', this)"><span class="ico">⚙️</span>Configurações</button>
     </nav>
-    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙 Modo Escuro</button>
   </aside>
 
   <main class="main">
@@ -856,8 +985,20 @@
         <div class="section-card">
           <div class="section-title">
             <div><h1>Central de Anotações</h1><p>Recados, lembretes e registros rápidos para a gerência.</p></div>
-            <div class="actions no-print"><button class="btn secondary" onclick="printActivePage()">🖨️ Imprimir</button></div>
+            <div class="actions no-print">
+              <button class="btn" type="button" onclick="abrirCriadorNota()">➕ Criar</button>
+              <button class="btn secondary" onclick="printActivePage()">🖨️ Imprimir</button>
+            </div>
           </div>
+          <div id="notaCreatorPanel" class="nota-create-panel no-print">
+            <div class="nota-create-card">
+              <div class="nota-create-toolbar">
+                <div>
+                  <h3 id="notaCreatorTitle">Nova anotação</h3>
+                  <p>Preencha somente quando precisar criar ou editar um registro.</p>
+                </div>
+                <button class="btn secondary small" type="button" onclick="fecharCriadorNota()">✕ Fechar criação</button>
+              </div>
           <form id="formNota" onsubmit="salvarNota(event)">
             <input type="hidden" id="notaId" />
             <div class="form-grid">
@@ -876,6 +1017,8 @@
               </div>
             </div>
           </form>
+            </div>
+          </div>
         </div>
 
         <div class="section-card">
@@ -885,7 +1028,7 @@
             <select id="fNotaPrioridade" onchange="renderAll()"><option value="TODOS">Todas as prioridades</option><option>Alta</option><option>Normal</option><option>Baixa</option></select>
             <input id="fNotaBusca" oninput="renderAll()" placeholder="Buscar anotação..." />
           </div>
-          <div class="table-wrap"><table><thead><tr><th>Data</th><th>Setor</th><th>Título</th><th>Tipo</th><th>Prioridade</th><th>Prazo</th><th>Responsável</th><th>Status</th><th>Resumo</th><th class="no-print">Ações</th></tr></thead><tbody id="tbodyNotas"></tbody></table></div>
+          <div id="notasTimeline" class="notes-timeline"></div>
         </div>
       </section>
 
@@ -907,7 +1050,7 @@
             <select id="fTarefaPrioridade" onchange="renderAll()"><option value="TODOS">Todas prioridades</option><option>Alta</option><option>Normal</option><option>Baixa</option></select>
             <input id="fTarefaBusca" oninput="renderAll()" placeholder="Buscar por atividade, departamento ou responsável..." />
           </div>
-          <div class="kanban" id="kanban"></div>
+          <div class="task-list-groups" id="kanban"></div>
         </div>
       </section>
 
@@ -1061,13 +1204,20 @@
               <h1>Escala de Trabalho</h1>
               <p>Monte a escala de forma direta: escolha domingo ou feriado, informe a data, selecione abertura/fechamento e escolha vários funcionários pelo botão +.</p>
             </div>
-            <div class="actions no-print"><button class="btn secondary" onclick="printActivePage()">🖨️ Imprimir</button></div>
+            <div class="actions no-print">
+              <button class="btn" type="button" onclick="abrirCriadorEscala()">➕ Criar</button>
+              <button class="btn secondary" onclick="printActivePage()">🖨️ Imprimir</button>
+            </div>
           </div>
 
           <input type="hidden" id="escalaId" />
           <input type="hidden" id="escalaTipo" value="" />
 
-          <div class="escala-direct-card no-print">
+          <div id="escalaCreatorPanel" class="escala-create-panel no-print">
+          <div class="escala-direct-card">
+            <div class="actions" style="justify-content:flex-end;margin-bottom:10px;">
+              <button class="btn secondary small" type="button" onclick="fecharCriadorEscala()">✕ Fechar criação</button>
+            </div>
             <div class="escala-direct-head">
               <div>
                 <h3>Dados principais da escala</h3>
@@ -1150,6 +1300,7 @@
               </div>
             </div>
           </div>
+          </div>
         </div>
 
         <div id="modalEscalaPessoas" class="modal-backdrop no-print" onclick="fecharModalPessoasEscala(event)">
@@ -1194,7 +1345,7 @@
             <select id="fEscalaTipo" onchange="renderEscalas()"><option value="TODOS">Todos os tipos</option><option>DOMINGO</option><option>FERIADO</option></select>
             <input id="fEscalaBusca" oninput="renderEscalas()" placeholder="Buscar por data, título ou pessoa..." />
           </div>
-          <div class="table-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Identificação</th><th>Abertura</th><th>Fechamento</th><th>Folgas</th><th>Responsável</th><th>Observações</th><th class="no-print">Ações</th></tr></thead><tbody id="tbodyEscalas"></tbody></table></div>
+          <div id="escalaSavedList" class="escala-saved-list"></div>
         </div>
       </section>
 
@@ -1248,6 +1399,45 @@
       </section>
 
 
+      <section id="sistemaav" class="page">
+        <div class="section-card">
+          <div class="section-title">
+            <div><h1>SISTEMA AV</h1><p>Acesso rápido aos sistemas oficiais da Avenida.</p></div>
+          </div>
+          <div class="sistema-av-grid">
+            <a class="sistema-av-button" href="https://siga.avenida.com.br/compromissos" target="_blank" rel="noopener noreferrer" aria-label="Abrir Sistema SIGA">
+              <div class="sistema-av-logo">
+                <span class="logo-fallback">SIGA</span>
+                <img src="https://siga.avenida.com.br/favicon.ico" alt="Logo do Sistema SIGA" onerror="this.style.display='none'" />
+              </div>
+              <h2>SISTEMA SIGA</h2>
+              <p>Ranking e comparativo de desempenho.</p>
+              <span class="sistema-av-open">ABRIR SISTEMA ↗</span>
+            </a>
+
+            <a class="sistema-av-button" href="https://conexao.avenida.com.br/" target="_blank" rel="noopener noreferrer" aria-label="Abrir Sistema Conexão AV">
+              <div class="sistema-av-logo">
+                <span class="logo-fallback">AV</span>
+                <img src="https://conexao.avenida.com.br/favicon.ico" alt="Logo do Sistema Conexão AV" onerror="this.style.display='none'" />
+              </div>
+              <h2>SISTEMA CONEXÃO AV</h2>
+              <p>Portal interno e comunicação da Avenida.</p>
+              <span class="sistema-av-open">ABRIR SISTEMA ↗</span>
+            </a>
+
+            <a class="sistema-av-button" href="https://atendimento.acc.rpe.tech/" target="_blank" rel="noopener noreferrer" aria-label="Abrir Sistema RPE">
+              <div class="sistema-av-logo">
+                <span class="logo-fallback">RPE</span>
+                <img src="https://atendimento.acc.rpe.tech/favicon.ico" alt="Logo do Sistema RPE" onerror="this.style.display='none'" />
+              </div>
+              <h2>SISTEMA RPE</h2>
+              <p>Atendimento e suporte técnico.</p>
+              <span class="sistema-av-open">ABRIR SISTEMA ↗</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
       <div id="modalPermissoes" class="modal-backdrop no-print" onclick="fecharModalPermissoes()"><div id="modalPermissoesConteudo" class="modal" onclick="event.stopPropagation()"></div></div>
 
       <section id="config" class="page">
@@ -1265,7 +1455,7 @@ const SHARED_ROW_ID = 'dados_compartilhados_v1';
 const MODULOS = [
   ['painel','Painel Geral'],['anotacoes','Central de Anotações'],['tarefas','Quadro de Tarefas'],
   ['setores','Setores'],['funcionarios','Quadro de Funcionários'],['operadores','Operadores'],
-  ['escalas','Escala de Trabalho'],['acompanhamento','Acompanhamento do Dia'],['relatorios','Relatórios'],['config','Configurações']
+  ['escalas','Escala de Trabalho'],['acompanhamento','Acompanhamento do Dia'],['relatorios','Relatórios'],['sistemaav','SISTEMA AV'],['config','Configurações']
 ];
 
 const setores = [
@@ -1342,6 +1532,7 @@ const pageInfo = {
   escalas: ['Escala de Trabalho','Criação de escalas de domingo e feriado com abertura, fechamento e folgas.'],
   acompanhamento: ['Acompanhamento do Dia','Resumo diário para apoiar a gerente no controle da loja.'],
   relatorios: ['Relatórios Gerenciais','Resumo por período e setor para impressão e Excel.'],
+  sistemaav: ['SISTEMA AV','Acesso rápido aos sistemas oficiais da Avenida.'],
   config: ['Configurações','Ajustes administrativos do sistema.']
 };
 
@@ -1529,7 +1720,7 @@ function deduplicarFuncionarios(){
 function permissoesPadrao(operador){
   const op = normalizarOperador(operador);
   if(op === '133') return {...Object.fromEntries(MODULOS.map(([id]) => [id,true])), alterarSenha:true};
-  return {painel:true,anotacoes:true,tarefas:true,setores:true,funcionarios:true,operadores:false,escalas:false,acompanhamento:true,relatorios:true,config:false,alterarSenha:false};
+  return {painel:true,anotacoes:true,tarefas:true,setores:true,funcionarios:true,operadores:false,escalas:false,acompanhamento:true,relatorios:true,sistemaav:true,config:false,alterarSenha:false};
 }
 function configGlobalPadrao(){
   const usuarios = usuariosOficiais.map(u => ({
@@ -1934,7 +2125,10 @@ function toggleTheme(){
   document.body.classList.toggle('dark-mode');
   const dark = document.body.classList.contains('dark-mode');
   localStorage.setItem('adminGerencialDark', dark ? '1':'0');
-  document.getElementById('themeBtn').textContent = dark ? '☀️ Modo Claro' : '🌙 Modo Escuro';
+  const themeBtn = document.getElementById('themeBtn');
+  themeBtn.textContent = dark ? '☀️' : '🌙';
+  themeBtn.title = dark ? 'Ativar modo claro' : 'Ativar modo escuro';
+  themeBtn.setAttribute('aria-label', themeBtn.title);
 }
 
 function showPage(id, btn){
@@ -1985,11 +2179,12 @@ function salvarNota(e){
     atualizadoEm: agoraBR()
   };
   if(existente) Object.assign(existente, nota); else db.notas.unshift(nota);
-  saveDB(); limparFormNota(); renderAll();
+  saveDB(); limparFormNota(); fecharCriadorNota(); renderAll();
 }
 function editarNota(id){
   const n = db.notas.find(x=>x.id===id); if(!n) return;
   showPage('anotacoes');
+  abrirCriadorNota(true);
   document.getElementById('notaId').value = n.id;
   document.getElementById('notaTitulo').value = n.titulo;
   document.getElementById('notaSetor').value = n.setor;
@@ -2003,7 +2198,26 @@ function editarNota(id){
 }
 function concluirNota(id){ const n=db.notas.find(x=>x.id===id); if(n){ n.status='Concluído'; n.atualizadoPor=usuarioAtual.nome; n.atualizadoEm=agoraBR(); saveDB(); renderAll(); } }
 function excluirNota(id){ if(confirm('Excluir esta anotação?')){ db.notas=db.notas.filter(x=>x.id!==id); saveDB(); renderAll(); } }
-function limparFormNota(){ document.getElementById('formNota').reset(); document.getElementById('notaId').value=''; }
+function limparFormNota(){
+  document.getElementById('formNota').reset();
+  document.getElementById('notaId').value='';
+  const titulo = document.getElementById('notaCreatorTitle');
+  if(titulo) titulo.textContent = 'Nova anotação';
+}
+function abrirCriadorNota(editando=false){
+  const painel = document.getElementById('notaCreatorPanel');
+  if(!painel) return;
+  if(!editando) limparFormNota();
+  const titulo = document.getElementById('notaCreatorTitle');
+  if(titulo) titulo.textContent = editando ? 'Editar anotação' : 'Nova anotação';
+  painel.classList.add('active');
+  setTimeout(()=>painel.scrollIntoView({behavior:'smooth', block:'start'}),30);
+}
+function fecharCriadorNota(){
+  const painel = document.getElementById('notaCreatorPanel');
+  if(painel) painel.classList.remove('active');
+  limparFormNota();
+}
 
 function abrirModalTarefa(id){
   if(id) editarTarefa(id, true);
@@ -2491,8 +2705,28 @@ function renderNotas(){
   let arr = db.notas.filter(n =>
     (fs==='TODOS'||n.setor===fs) && (st==='TODOS'||n.status===st) && (pr==='TODOS'||n.prioridade===pr) &&
     (!busca || norm(n.titulo+' '+n.resumo+' '+n.descricao+' '+n.responsavel).includes(busca))
-  );
-  document.getElementById('tbodyNotas').innerHTML = arr.length ? arr.map(n=>`<tr><td>${escapeHTML(n.criadoEm)}</td><td>${badgeSetor(n.setor)}</td><td><b>${escapeHTML(n.titulo)}</b></td><td>${escapeHTML(n.tipo)}</td><td>${badgePrioridade(n.prioridade)}</td><td>${n.prazo||'-'}</td><td>${escapeHTML(n.responsavel||'-')}</td><td>${badgeStatus(n.status)}</td><td>${escapeHTML(n.resumo||n.descricao||'-')}</td><td class="no-print"><button class="btn small secondary" onclick="editarNota('${n.id}')">Editar</button> <button class="btn small good" onclick="concluirNota('${n.id}')">OK</button> <button class="btn small danger" onclick="excluirNota('${n.id}')">Excluir</button></td></tr>`).join('') : '<tr><td colspan="10" class="empty">Nenhuma anotação encontrada.</td></tr>';
+  ).sort((a,b)=>(b.dataISO||b.criadoEm||'').localeCompare(a.dataISO||a.criadoEm||''));
+
+  const alvo = document.getElementById('notasTimeline');
+  if(!alvo) return;
+  alvo.innerHTML = arr.length ? arr.map(n=>{
+    const prioridadeClasse = n.prioridade==='Alta' ? 'priority-alta' : (n.prioridade==='Baixa' ? 'priority-baixa' : '');
+    const dataExibida = n.criadoEm || n.dataISO || '-';
+    const detalhe = n.descricao && n.descricao !== n.resumo ? n.descricao : '';
+    return `<article class="note-item ${prioridadeClasse}">
+      <div class="note-head">
+        <div>
+          <h3>${escapeHTML(n.titulo)}</h3>
+          <div class="note-meta">${badgeSetor(n.setor)} ${badgePrioridade(n.prioridade)} ${badgeStatus(n.status)} <span class="badge b-info">${escapeHTML(n.tipo||'Recado')}</span></div>
+        </div>
+        <div class="note-date">${escapeHTML(dataExibida)}</div>
+      </div>
+      <p class="note-summary">${escapeHTML(n.resumo||n.descricao||'Sem observação.')}</p>
+      <p style="margin:5px 0;color:var(--muted);font-size:.82rem;font-weight:800;"><b>Responsável:</b> ${escapeHTML(n.responsavel||'-')} ${n.prazo?`• <b>Prazo:</b> ${escapeHTML(n.prazo)}`:''}</p>
+      ${detalhe?`<details class="note-details"><summary>Ver descrição completa</summary><p>${escapeHTML(detalhe)}</p></details>`:''}
+      <div class="actions note-actions no-print"><button class="btn small secondary" onclick="editarNota('${n.id}')">Editar</button><button class="btn small good" onclick="concluirNota('${n.id}')">Concluir</button><button class="btn small danger" onclick="excluirNota('${n.id}')">Excluir</button></div>
+    </article>`;
+  }).join('') : '<div class="empty">Nenhuma anotação encontrada.</div>';
 }
 
 function renderKanban(){
@@ -2512,12 +2746,20 @@ function renderKanban(){
   document.getElementById('taskStatusSummary').innerHTML = status.map(st=>`<div class="status-card ${classes[st]}"><div><small>${st.toUpperCase()}</small><b>${arr.filter(t=>t.status===st).length}</b></div><span class="dot"></span></div>`).join('');
 
   document.getElementById('kanban').innerHTML = status.map(st=>{
-    const itens = arr.filter(t=>t.status===st);
-    return `<div class="lane"><h3>${st.toUpperCase()} <span class="badge b-info">${itens.length}</span></h3>${itens.length?itens.map(t=>{
-      const periodo = `${t.inicio || t.dataISO || '-'} ${t.fim ? 'até ' + t.fim : ''}`;
-      const responsaveis = [t.responsavel, t.responsavel2].filter(Boolean).join(' + ') || 'Não definido';
-      return `<div class="task-card"><h4>${escapeHTML(t.atividade || t.titulo)}</h4><div class="task-meta">${badgeSetor(t.setor)} ${badgePrioridade(t.prioridade)}</div><p><b>Departamento:</b> ${escapeHTML(t.departamento || 'Loja toda')}<br><b>Período:</b> ${escapeHTML(periodo)}<br><b>Resp.:</b> ${escapeHTML(responsaveis)}</p><p>${escapeHTML(t.descricao||'')}</p><div class="actions no-print"><button class="btn small secondary" onclick="abrirModalTarefa('${t.id}')">Editar</button>${st!=='Concluída'?`<button class="btn small good" onclick="setTarefaStatus('${t.id}','Concluída')">Concluir</button>`:''}<button class="btn small danger" onclick="excluirTarefa('${t.id}')">Excluir</button></div></div>`;
-    }).join(''):'<div class="empty">Sem itens</div>'}</div>`;
+    const itens = arr.filter(t=>t.status===st).sort((a,b)=>(a.fim||'9999-99-99').localeCompare(b.fim||'9999-99-99'));
+    return `<section class="task-group">
+      <div class="task-group-head"><h3>${st.toUpperCase()}</h3><span class="badge b-info">${itens.length}</span></div>
+      <div class="task-group-body">${itens.length?itens.map(t=>{
+        const periodo = `${t.inicio || t.dataISO || '-'}${t.fim ? ' até ' + t.fim : ''}`;
+        const responsaveis = [t.responsavel, t.responsavel2].filter(Boolean).join(' + ') || 'Não definido';
+        return `<article class="task-row">
+          <div class="task-row-main"><h4>${escapeHTML(t.atividade || t.titulo)}</h4><div class="task-meta">${badgeSetor(t.setor)} ${badgePrioridade(t.prioridade)}</div><p><b>Departamento:</b> ${escapeHTML(t.departamento || 'Loja toda')}</p></div>
+          <div class="task-row-meta"><p><b>Período:</b> ${escapeHTML(periodo)}</p><p><b>Responsável:</b> ${escapeHTML(responsaveis)}</p></div>
+          <div class="actions task-row-actions no-print"><button class="btn small secondary" onclick="abrirModalTarefa('${t.id}')">Editar</button>${st!=='Concluída'?`<button class="btn small good" onclick="setTarefaStatus('${t.id}','Concluída')">Concluir</button>`:''}<button class="btn small danger" onclick="excluirTarefa('${t.id}')">Excluir</button></div>
+          ${t.descricao?`<details class="task-row-details"><summary>Ver detalhes da tarefa</summary><p>${escapeHTML(t.descricao)}</p></details>`:''}
+        </article>`;
+      }).join(''):'<div class="empty">Sem itens neste status.</div>'}</div>
+    </section>`;
   }).join('');
 }
 
@@ -2529,7 +2771,25 @@ function renderSetores(){
   const s = setores.find(x=>x.id===setorAtivo);
   const notas = db.notas.filter(n=>n.setor===setorAtivo).slice(0,10);
   const tarefas = db.tarefas.filter(t=>t.setor===setorAtivo).slice(0,10);
-  document.getElementById('sectorDetail').innerHTML = `<div class="grid grid-3" style="margin-bottom:16px;"><div class="metric"><small>Pendências ${s.nome}</small><b>${[...notas,...tarefas].filter(x=>!isConcluido(x)).length}</b><span>${s.desc}</span></div><div class="metric"><small>Alta prioridade</small><b>${[...notas,...tarefas].filter(x=>x.prioridade==='Alta'&&!isConcluido(x)).length}</b><span>Itens urgentes do setor</span></div><div class="metric"><small>Atrasadas</small><b>${[...notas,...tarefas].filter(isAtrasado).length}</b><span>Prazo vencido</span></div></div><div class="grid grid-2"><div><h2>Anotações do setor</h2>${notas.length?notas.map(cardMini).join(''):'<div class="empty">Sem anotações.</div>'}</div><div><h2>Tarefas do setor</h2>${tarefas.length?tarefas.map(cardMini).join(''):'<div class="empty">Sem tarefas.</div>'}</div></div>`;
+  const totalPendencias = [...notas,...tarefas].filter(x=>!isConcluido(x)).length;
+  const totalAlta = [...notas,...tarefas].filter(x=>x.prioridade==='Alta'&&!isConcluido(x)).length;
+  const totalAtrasadas = [...notas,...tarefas].filter(isAtrasado).length;
+  document.getElementById('sectorDetail').innerHTML = `
+    <div class="grid grid-3" style="margin-bottom:16px;">
+      <div class="metric"><small>Pendências ${s.nome}</small><b>${totalPendencias}</b><span>${s.desc}</span></div>
+      <div class="metric"><small>Alta prioridade</small><b>${totalAlta}</b><span>Itens urgentes do setor</span></div>
+      <div class="metric"><small>Atrasadas</small><b>${totalAtrasadas}</b><span>Prazo vencido</span></div>
+    </div>
+    <div class="sector-content-stack">
+      <section class="sector-content-panel">
+        <div class="sector-content-head"><h2>📝 Anotações do setor</h2><span class="badge b-info">${notas.length}</span></div>
+        <div class="sector-content-body">${notas.length?notas.map(cardMini).join(''):'<div class="empty">Sem anotações neste setor.</div>'}</div>
+      </section>
+      <section class="sector-content-panel">
+        <div class="sector-content-head"><h2>✅ Tarefas do setor</h2><span class="badge b-ok">${tarefas.length}</span></div>
+        <div class="sector-content-body">${tarefas.length?tarefas.map(cardMini).join(''):'<div class="empty">Sem tarefas neste setor.</div>'}</div>
+      </section>
+    </div>`;
 }
 
 function renderDiario(){
@@ -2777,6 +3037,7 @@ function salvarEscala(){
   alert('Escala salva com sucesso.');
 }
 function editarEscala(id){
+  abrirCriadorEscala();
   const e = db.escalas.find(x => x.id === id); if(!e) return;
   showPage('escalas');
   selecionarTipoEscala(e.tipo || 'DOMINGO');
@@ -2888,8 +3149,20 @@ function enviarEscalaWhatsApp(id){
   if(!e){ alert('Escala não encontrada.'); return; }
   abrirWhatsAppComTexto(montarTextoEscalaWhatsApp(e));
 }
+function abrirCriadorEscala(){
+  const painel = document.getElementById('escalaCreatorPanel');
+  if(!painel) return;
+  painel.classList.add('active');
+  setTimeout(()=>painel.scrollIntoView({behavior:'smooth', block:'start'}),30);
+}
+function fecharCriadorEscala(){
+  const painel = document.getElementById('escalaCreatorPanel');
+  if(painel) painel.classList.remove('active');
+}
+
 function renderEscalas(){
-  if(!document.getElementById('tbodyEscalas')) return;
+  const listEl = document.getElementById('escalaSavedList');
+  if(!listEl) return;
   db.escalas ||= [];
   const opts = optionsFuncionariosEscala();
   ['escalaPessoaAbertura','escalaPessoaFechamento','escalaPessoaFolga','escalaResponsavel'].forEach(id => {
@@ -2908,7 +3181,39 @@ function renderEscalas(){
   document.getElementById('escDomingos').textContent = db.escalas.filter(e=>e.tipo==='DOMINGO').length;
   document.getElementById('escFeriados').textContent = db.escalas.filter(e=>e.tipo==='FERIADO').length;
   document.getElementById('escPessoas').textContent = totalPessoas;
-  document.getElementById('tbodyEscalas').innerHTML = arr.length ? arr.map(e => `<tr><td><b>${escapeHTML(e.data || '')}</b><br><small>${escapeHTML(e.atualizadoEm || '')}</small></td><td>${e.tipo === 'DOMINGO' ? '<span class="badge b-info">DOMINGO</span>' : '<span class="badge b-warn">FERIADO</span>'}</td><td><b>${e.tipo === 'DOMINGO' ? '-' : escapeHTML(e.titulo || '')}</b></td><td>${resumoGrupoEscala(e.abertura,'abertura')}</td><td>${resumoGrupoEscala(e.fechamento,'fechamento')}</td><td>${resumoGrupoEscala(e.folgas,'folgas')}</td><td>${escapeHTML(nomeFuncionarioPorId(e.responsavel) || e.responsavel || '-')}</td><td>${escapeHTML(e.obs || '-')}</td><td class="no-print"><div class="actions"><button class="btn small good" onclick="enviarEscalaWhatsApp('${e.id}')">WhatsApp</button><button class="btn small secondary" onclick="editarEscala('${e.id}')">Editar</button><button class="btn small" onclick="duplicarEscala('${e.id}')">Duplicar</button><button class="btn small danger" onclick="excluirEscala('${e.id}')">Excluir</button></div></td></tr>`).join('') : '<tr><td colspan="9" class="empty">Nenhuma escala cadastrada.</td></tr>';
+  const pessoasDetalhe = (lista, vazio) => (lista||[]).length ? (lista||[]).map(p=>`<p><b>${escapeHTML(p.nome||nomeFuncionarioPorId(p.id)||'-')}</b><br>${escapeHTML([p.entrada,p.saida].filter(Boolean).join(' às ')||'Horário não informado')}${p.folgaData?` • Folga: ${escapeHTML(p.folgaData)}`:''}${p.obs?`<br>${escapeHTML(p.obs)}`:''}</p>`).join('') : `<p>${vazio}</p>`;
+  listEl.innerHTML = arr.length ? arr.map(e => `
+    <article class="escala-saved-card">
+      <div class="escala-saved-main">
+        <div class="escala-saved-date"><b>${escapeHTML(e.data || '')}</b><small>${escapeHTML(e.atualizadoEm || '')}</small></div>
+        <div class="escala-saved-meta">
+          <b>${e.tipo === 'DOMINGO' ? 'DOMINGO' : escapeHTML(e.titulo || 'FERIADO')}</b>
+          <small>${e.tipo === 'DOMINGO' ? 'Escala de domingo' : 'Escala de feriado'} • Responsável: ${escapeHTML(nomeFuncionarioPorId(e.responsavel) || e.responsavel || '-')}</small>
+        </div>
+        <div class="escala-saved-counts">
+          <span class="escala-count-chip">🌞 ${(e.abertura||[]).length} abertura</span>
+          <span class="escala-count-chip">🌙 ${(e.fechamento||[]).length} fechamento</span>
+          <span class="escala-count-chip">🏖️ ${(e.folgas||[]).length} folgas</span>
+        </div>
+        <div class="actions no-print">
+          <button class="btn small good" onclick="enviarEscalaWhatsApp('${e.id}')">WhatsApp</button>
+          <button class="btn small secondary" onclick="editarEscala('${e.id}')">Editar</button>
+          <button class="btn small" onclick="duplicarEscala('${e.id}')">Duplicar</button>
+          <button class="btn small danger" onclick="excluirEscala('${e.id}')">Excluir</button>
+        </div>
+      </div>
+      <div class="escala-saved-details">
+        <details>
+          <summary>Ver equipe e informações completas</summary>
+          <div class="escala-detail-grid">
+            <div class="escala-detail-box"><h4>🌞 Abertura</h4>${pessoasDetalhe(e.abertura,'Nenhuma pessoa na abertura.')}</div>
+            <div class="escala-detail-box"><h4>🌙 Fechamento</h4>${pessoasDetalhe(e.fechamento,'Nenhuma pessoa no fechamento.')}</div>
+            <div class="escala-detail-box"><h4>🏖️ Folgas</h4>${pessoasDetalhe(e.folgas,'Nenhuma folga registrada.')}</div>
+          </div>
+          ${e.obs?`<div class="escala-detail-box" style="margin-top:12px;"><h4>Observações gerais</h4><p>${escapeHTML(e.obs)}</p></div>`:''}
+        </details>
+      </div>
+    </article>`).join('') : '<div class="empty">Nenhuma escala cadastrada.</div>';
 }
 function nomeFuncionarioPorId(id){
   const f = (db.funcionarios || []).find(x => x.id === id);
@@ -3482,7 +3787,13 @@ function montarTextoEscalaWhatsApp(e){
 window.addEventListener('load', async () => {
   ['adminGerencialSessaoV1','adminGerencialSessaoV2','adminGerencialSessaoV3','adminGerencialSessaoV4','adminGerencialSessaoV5','adminGerencialSessaoV6','adminGerencialSessaoV7','adminGerencialSessaoV12Operador','adminGerencialSessaoV13Operador','adminGerencialSessaoV14Operador','adminGerencialSessaoV15Operador','adminGerencialSessaoV16Operador','adminGerencialSessaoV17Operador','adminGerencialSessaoV18Operador','adminGerencialSessaoV19Operador','adminGerencialSessaoV20Operador'].forEach(k=>localStorage.removeItem(k));
   loadDB(); await carregarConfigGlobalOnline();
-  if(localStorage.getItem('adminGerencialDark')==='1'){document.body.classList.add('dark-mode');document.getElementById('themeBtn').textContent='☀️ Modo Claro';}
+  if(localStorage.getItem('adminGerencialDark')==='1'){
+    document.body.classList.add('dark-mode');
+    const themeBtn = document.getElementById('themeBtn');
+    themeBtn.textContent='☀️';
+    themeBtn.title='Ativar modo claro';
+    themeBtn.setAttribute('aria-label','Ativar modo claro');
+  }
   document.getElementById('mesAtual').textContent=mesAnoBR(); ocultarIdentificacaoLogin();
   const restaurada=await trySession(); if(restaurada){ try{initApp();ativarRealtimeUsuario();} finally{hideAppLoader();} }
   document.getElementById('loginUser').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('loginPass').focus();}});
