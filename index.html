@@ -4,6 +4,25 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Assistência Gerencial de Loja - Avenida V21</title>
+  <script>
+    /* Aplica o tema antes da primeira pintura para impedir o clarão ao abrir ou sair. */
+    (() => {
+      const root = document.documentElement;
+      root.classList.add('theme-booting');
+      try {
+        root.dataset.theme = localStorage.getItem('adminGerencialDark') === '1' ? 'dark' : 'light';
+      } catch (_) {
+        root.dataset.theme = 'light';
+      }
+    })();
+  </script>
+  <style id="theme-bootstrap-style">
+    html { background: #FFFDF5; }
+    html[data-theme="dark"] { background: #0F1013; color-scheme: dark; }
+    html.theme-booting *,
+    html.theme-booting *::before,
+    html.theme-booting *::after { transition: none !important; }
+  </style>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script>
       const SUPABASE_URL = 'https://euyrhkusnasgiueefldg.supabase.co';
@@ -286,52 +305,166 @@
       z-index: 1400;
       display: none;
       place-items: center;
-      background: rgba(17,24,39,.56);
-      backdrop-filter: blur(8px);
       padding: 20px;
+      background: rgba(15, 17, 21, .46);
+      -webkit-backdrop-filter: blur(10px) saturate(112%);
+      backdrop-filter: blur(10px) saturate(112%);
     }
     .app-loader.active { display: grid; }
     .app-loader-card {
-      width: min(420px, 100%);
-      background: var(--page);
+      width: min(470px, 100%);
+      background: color-mix(in srgb, var(--page) 94%, transparent);
       color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 26px;
-      box-shadow: 0 30px 80px rgba(0,0,0,.25);
-      padding: 28px 26px;
-      text-align: center;
+      border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+      border-radius: 20px;
+      box-shadow: 0 22px 62px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.08);
+      padding: 22px;
+      text-align: left;
+      -webkit-backdrop-filter: blur(18px) saturate(118%);
+      backdrop-filter: blur(18px) saturate(118%);
+    }
+    .app-loader-head {
+      display: grid;
+      grid-template-columns: 44px minmax(0,1fr) 26px;
+      align-items: center;
+      gap: 13px;
     }
     .app-loader-mark {
-      width: 72px;
-      height: 56px;
-      margin: 0 auto 16px;
-      border-radius: 18px;
-      background: var(--preto-logo);
-      color: var(--amarelo);
+      width: 44px;
+      height: 44px;
+      margin: 0;
+      border-radius: 13px;
+      background: var(--amarelo);
+      color: #241F14;
       display: grid;
       place-items: center;
-      font-size: 1.4rem;
+      font-size: .98rem;
       font-weight: 1000;
       letter-spacing: -.04em;
+      box-shadow: 0 7px 18px rgba(0,0,0,.14);
     }
     .app-loader-spinner {
-      width: 54px;
-      height: 54px;
-      margin: 8px auto 14px;
+      width: 22px;
+      height: 22px;
+      margin: 0;
       border-radius: 50%;
-      border: 5px solid rgba(246,196,38,.28);
-      border-top-color: var(--amarelo-escuro);
-      animation: spinLoader 0.9s linear infinite;
+      border: 2px solid color-mix(in srgb, var(--border) 70%, transparent);
+      border-top-color: var(--amarelo);
+      animation: spinLoader .82s linear infinite;
     }
     .app-loader-card h3 {
       margin: 0;
-      font-size: 1.15rem;
+      font-size: 1rem;
+      line-height: 1.25;
       color: var(--text);
     }
     .app-loader-card p {
-      margin: 8px 0 0;
+      margin: 4px 0 0;
       color: var(--muted);
-      font-weight: 700;
+      font-size: .82rem;
+      line-height: 1.35;
+      font-weight: 650;
+    }
+    .app-loader-checks {
+      display: none;
+      margin-top: 18px;
+      text-align: left;
+      border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+      padding-top: 15px;
+    }
+    .app-loader-checks.active { display: block; }
+    .app-loader-progress {
+      width: 100%;
+      height: 4px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--soft) 82%, transparent);
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .app-loader-progress span {
+      display: block;
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--amarelo), var(--amarelo-escuro));
+      transition: width .28s ease;
+    }
+    .app-loader-check {
+      display: grid;
+      grid-template-columns: 24px minmax(0,1fr);
+      align-items: center;
+      gap: 11px;
+      min-height: 54px;
+      padding: 9px 4px;
+      border-bottom: 1px solid color-mix(in srgb, var(--border) 58%, transparent);
+      background: transparent;
+    }
+    .app-loader-check:last-child { border-bottom: 0; padding-bottom: 2px; }
+    .app-loader-check-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: .73rem;
+      font-weight: 1000;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+    }
+    .app-loader-check-content strong {
+      display: block;
+      font-size: .87rem;
+      line-height: 1.25;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .app-loader-check-content small {
+      display: block;
+      font-size: .75rem;
+      color: var(--muted);
+      line-height: 1.3;
+      font-weight: 650;
+    }
+    .app-loader-check[data-status="checking"] .app-loader-check-icon {
+      color: var(--amarelo-escuro);
+      border-color: color-mix(in srgb, var(--amarelo) 48%, var(--border));
+      background: color-mix(in srgb, var(--amarelo) 9%, transparent);
+      animation: loaderPulse 1.05s ease-in-out infinite;
+    }
+    .app-loader-check[data-status="success"] .app-loader-check-icon {
+      background: var(--green-bg);
+      color: var(--green);
+      border-color: color-mix(in srgb, var(--green) 30%, var(--green-bg));
+      animation: none;
+    }
+    .app-loader-check[data-status="error"] .app-loader-check-icon {
+      background: var(--red-bg);
+      color: var(--red);
+      border-color: color-mix(in srgb, var(--red) 30%, var(--red-bg));
+      animation: none;
+    }
+    body.dark-mode .app-loader {
+      background: rgba(8, 9, 12, .58);
+    }
+    body.dark-mode .app-loader-card {
+      background: rgba(25, 27, 32, .92);
+      border-color: rgba(255,205,9,.15);
+      box-shadow: 0 24px 70px rgba(0,0,0,.46), inset 0 1px 0 rgba(255,255,255,.04);
+    }
+    body.dark-mode .app-loader-checks,
+    body.dark-mode .app-loader-check {
+      border-color: rgba(255,255,255,.075);
+    }
+    @media (max-width: 520px) {
+      .app-loader-card { padding: 19px; border-radius: 18px; }
+      .app-loader-head { grid-template-columns: 40px minmax(0,1fr) 22px; gap: 11px; }
+      .app-loader-mark { width: 40px; height: 40px; border-radius: 12px; }
+      .app-loader-check-content small { font-size: .72rem; }
+    }
+    @keyframes loaderPulse {
+      0%, 100% { opacity: .62; transform: scale(.94); }
+      50% { opacity: 1; transform: scale(1); }
     }
     @keyframes spinLoader { to { transform: rotate(360deg); } }
 
@@ -743,6 +876,57 @@
       .note-date { text-align:left; min-width:0; }
     }
 
+
+
+    /* ===== SOPHIA — ASSISTENTE INTELIGENTE ===== */
+    .sophia-shell { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:16px; min-height:640px; }
+    .sophia-chat { background:var(--page); border:1px solid var(--border); border-radius:24px; box-shadow:var(--shadow); overflow:hidden; display:flex; flex-direction:column; height:min(720px, calc(100vh - 150px)); min-height:560px; }
+    .sophia-head { padding:18px 20px; background:linear-gradient(135deg,var(--preto-logo),#4A2632); color:white; display:flex; align-items:center; justify-content:space-between; gap:14px; }
+    .sophia-identity { display:flex; align-items:center; gap:12px; }
+    .sophia-avatar { width:48px; height:48px; border-radius:16px; display:grid; place-items:center; background:var(--amarelo); color:var(--preto-logo); font-weight:1000; font-size:1.15rem; box-shadow:0 8px 22px rgba(0,0,0,.22); }
+    .sophia-head h1 { margin:0; font-size:1.12rem; }
+    .sophia-head p { margin:3px 0 0; opacity:.78; font-weight:700; font-size:.82rem; }
+    .sophia-mode { display:inline-flex; align-items:center; gap:6px; padding:7px 10px; border-radius:999px; background:rgba(255,255,255,.12); font-size:.74rem; font-weight:900; white-space:nowrap; }
+    .sophia-mode-dot { width:8px; height:8px; border-radius:50%; background:#22C55E; box-shadow:0 0 0 4px rgba(34,197,94,.16); }
+    .sophia-messages { flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; padding:20px; display:flex; flex-direction:column; gap:14px; background:linear-gradient(180deg,var(--page-2),var(--page)); scrollbar-width:thin; scrollbar-color:#94A3B8 transparent; }
+    .sophia-messages::-webkit-scrollbar { width:9px; }
+    .sophia-messages::-webkit-scrollbar-track { background:transparent; }
+    .sophia-messages::-webkit-scrollbar-thumb { background:#94A3B8; border-radius:999px; border:2px solid transparent; background-clip:padding-box; }
+    .sophia-messages::-webkit-scrollbar-thumb:hover { background:#64748B; background-clip:padding-box; }
+    body.dark-mode .sophia-messages { scrollbar-color:#A8A8A8 transparent; }
+    body.dark-mode .sophia-messages::-webkit-scrollbar-thumb { background:#A8A8A8; background-clip:padding-box; }
+    body.dark-mode .sophia-messages::-webkit-scrollbar-thumb:hover { background:#D1D5DB; background-clip:padding-box; }
+    .sophia-message { display:flex; gap:9px; align-items:flex-end; max-width:84%; }
+    .sophia-message.user { align-self:flex-end; flex-direction:row-reverse; }
+    .sophia-mini-avatar { width:30px; height:30px; border-radius:10px; display:grid; place-items:center; flex:0 0 auto; background:var(--preto-logo); color:white; font-size:.72rem; font-weight:1000; }
+    .sophia-message.user .sophia-mini-avatar { background:var(--amarelo); color:var(--preto-logo); }
+    .sophia-bubble { padding:11px 13px; border-radius:17px 17px 17px 5px; border:1px solid var(--preto-logo); background:var(--preto-logo); color:white; line-height:1.5; font-size:.9rem; box-shadow:0 6px 16px rgba(15,23,42,.12); white-space:pre-wrap; }
+    .sophia-message.user .sophia-bubble { border-radius:17px 17px 5px 17px; background:var(--amarelo); color:var(--preto-logo); border-color:var(--amarelo-escuro); }
+    .sophia-time { display:block; margin-top:5px; color:rgba(255,255,255,.72); font-size:.66rem; font-weight:800; }
+    .sophia-message.user .sophia-time { color:rgba(41,26,30,.66); }
+    .sophia-message.typing .sophia-bubble { min-width:66px; padding:13px 16px; }
+    .sophia-typing-dots { display:inline-flex; align-items:center; gap:5px; height:14px; }
+    .sophia-typing-dots i { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.90); display:block; animation:sophiaTyping 1.15s infinite ease-in-out; }
+    .sophia-typing-dots i:nth-child(2){ animation-delay:.16s; }
+    .sophia-typing-dots i:nth-child(3){ animation-delay:.32s; }
+    @keyframes sophiaTyping { 0%,60%,100%{transform:translateY(0);opacity:.45} 30%{transform:translateY(-5px);opacity:1} }
+    .sophia-compose { padding:14px; border-top:1px solid var(--border); background:var(--page); display:grid; grid-template-columns:1fr auto; gap:10px; }
+    .sophia-compose textarea { min-height:50px; max-height:130px; resize:none; padding:13px 14px; }
+    .sophia-send { width:50px; height:50px; border-radius:16px; border:0; background:var(--amarelo); color:var(--preto-logo); font-size:1.1rem; font-weight:1000; cursor:pointer; }
+    .sophia-side { display:flex; flex-direction:column; gap:14px; }
+    .sophia-panel { background:var(--page); border:1px solid var(--border); border-radius:22px; padding:16px; box-shadow:0 8px 22px rgba(15,23,42,.08); }
+    .sophia-panel h2 { margin:0 0 5px; font-size:1rem; }
+    .sophia-panel p { margin:0 0 12px; color:var(--muted); font-weight:700; font-size:.82rem; line-height:1.45; }
+    .sophia-quick { width:100%; text-align:left; border:1px solid var(--border); background:var(--page-2); color:var(--text); border-radius:14px; padding:11px 12px; margin-top:8px; cursor:pointer; font-weight:850; transition:.18s; }
+    .sophia-quick:hover { border-color:var(--amarelo-escuro); transform:translateY(-1px); }
+    .sophia-stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .sophia-stat { background:var(--page-2); border:1px solid var(--border); border-radius:14px; padding:11px; }
+    .sophia-stat small { color:var(--muted); font-weight:900; font-size:.68rem; text-transform:uppercase; }
+    .sophia-stat b { display:block; font-size:1.35rem; margin-top:4px; }
+    body.dark-mode .sophia-head { background:linear-gradient(135deg,#2E0D1E,#1E1E1E); }
+    @media(max-width:900px){ .sophia-shell{grid-template-columns:1fr;} .sophia-side{grid-row:1;} .sophia-chat{height:min(680px, calc(100vh - 120px)); min-height:540px;} }
+    @media(max-width:600px){ .sophia-head{align-items:flex-start;} .sophia-mode{display:none;} .sophia-message{max-width:94%;} .sophia-messages{padding:14px;} .sophia-chat{height:calc(100vh - 105px); min-height:500px;} }
+
     @media (max-width: 1100px) {
       body { display:block; }
       .sidebar { position: relative; width:100%; height:auto; }
@@ -802,6 +986,72 @@
       .escala-saved-main { grid-template-columns:1fr; }
       .escala-detail-grid { grid-template-columns:1fr; }
     }
+
+    /* ===== SOPHIA FLUTUANTE ===== */
+    .sophia-launcher {
+      position:fixed; right:22px; bottom:22px; z-index:45; display:none; align-items:center; gap:10px;
+      border:1px solid rgba(255,255,255,.18); border-radius:999px; padding:9px 15px 9px 9px;
+      background:var(--preto-logo); color:#fff; box-shadow:0 16px 38px rgba(15,23,42,.30); cursor:pointer;
+      font-weight:1000; letter-spacing:.02em; transition:transform .18s, box-shadow .18s;
+    }
+    .sophia-launcher:hover { transform:translateY(-2px); box-shadow:0 20px 46px rgba(15,23,42,.36); }
+    .sophia-launcher-icon { width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background:var(--amarelo); color:var(--preto-logo); font-size:1rem; }
+    .sophia-launcher-label { font-size:.82rem; }
+    .sophia-launcher-status { width:9px; height:9px; border-radius:50%; background:#22C55E; box-shadow:0 0 0 4px rgba(34,197,94,.15); }
+    .sophia-widget {
+      position:fixed; right:22px; bottom:82px; z-index:46; width:min(410px, calc(100vw - 28px)); height:min(620px, calc(100vh - 110px));
+      display:none; flex-direction:column; overflow:hidden;
+      border:1px solid rgba(255,255,255,.44); border-radius:28px;
+      background:linear-gradient(145deg,rgba(255,255,255,.58),rgba(255,255,255,.26));
+      -webkit-backdrop-filter:blur(26px) saturate(165%); backdrop-filter:blur(26px) saturate(165%);
+      box-shadow:0 30px 85px rgba(15,23,42,.30), inset 0 1px 0 rgba(255,255,255,.70), inset 0 -1px 0 rgba(255,255,255,.18);
+      transform-origin:bottom right;
+    }
+    .sophia-widget::before {
+      content:""; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
+      background:linear-gradient(125deg,rgba(255,255,255,.38),transparent 34%,transparent 68%,rgba(246,196,38,.10));
+      z-index:0;
+    }
+    .sophia-widget > * { position:relative; z-index:1; }
+    .sophia-widget.open { display:flex; animation:sophiaPop .2s ease; }
+    .sophia-widget.minimized { height:72px; }
+    .sophia-widget.minimized .sophia-floating-body { display:none; }
+    @keyframes sophiaPop { from{opacity:0;transform:translateY(12px) scale(.97)} to{opacity:1;transform:none} }
+    .sophia-floating-head { min-height:72px; padding:12px 14px; background:linear-gradient(135deg,rgba(46,13,30,.90),rgba(74,38,50,.72)); color:#fff; display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:default; border-bottom:1px solid rgba(255,255,255,.18); -webkit-backdrop-filter:blur(18px); backdrop-filter:blur(18px); }
+    .sophia-floating-head .sophia-avatar { width:42px; height:42px; border-radius:14px; }
+    .sophia-floating-head h1 { margin:0; font-size:1rem; }
+    .sophia-floating-head p { margin:2px 0 0; opacity:.76; font-size:.72rem; font-weight:750; }
+    .sophia-window-actions { display:flex; gap:6px; }
+    .sophia-window-actions button { width:34px; height:34px; border-radius:11px; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.10); color:#fff; cursor:pointer; font-weight:1000; }
+    .sophia-window-actions button:hover { background:rgba(255,255,255,.20); }
+    .sophia-floating-body { flex:1; min-height:0; display:flex; flex-direction:column; background:rgba(255,255,255,.16); }
+    .sophia-floating-shortcuts { display:flex; gap:7px; overflow-x:auto; padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.30); background:rgba(255,255,255,.24); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); scrollbar-width:thin; scrollbar-color:rgba(246,196,38,.90) rgba(41,26,30,.16); }
+    .sophia-floating-shortcuts::-webkit-scrollbar { height:7px; }
+    .sophia-floating-shortcuts::-webkit-scrollbar-track { background:rgba(41,26,30,.12); border-radius:999px; margin:0 10px; }
+    .sophia-floating-shortcuts::-webkit-scrollbar-thumb { background:linear-gradient(90deg,var(--amarelo-escuro),var(--amarelo)); border-radius:999px; border:1px solid rgba(255,255,255,.35); }
+    .sophia-floating-shortcuts::-webkit-scrollbar-thumb:hover { background:var(--amarelo); }
+    .sophia-floating-shortcuts .sophia-quick { width:auto; flex:0 0 auto; margin:0; padding:8px 10px; border-radius:999px; font-size:.74rem; }
+    .sophia-widget .sophia-messages { padding:14px; gap:11px; background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.08)); scrollbar-color:rgba(100,116,139,.70) transparent; }
+    .sophia-widget .sophia-messages::-webkit-scrollbar-thumb { background:rgba(100,116,139,.66); border:2px solid transparent; background-clip:padding-box; }
+    .sophia-widget .sophia-message { max-width:91%; }
+    .sophia-widget .sophia-compose { padding:10px; background:rgba(255,255,255,.30); border-top:1px solid rgba(255,255,255,.38); -webkit-backdrop-filter:blur(18px); backdrop-filter:blur(18px); }
+    .sophia-widget .sophia-compose textarea { background:rgba(255,255,255,.54); border-color:rgba(255,255,255,.60); box-shadow:inset 0 1px 0 rgba(255,255,255,.72); }
+    .sophia-widget .sophia-compose textarea { min-height:46px; max-height:96px; }
+    .sophia-widget .sophia-send { width:46px; height:46px; border-radius:14px; }
+    body.dark-mode .sophia-widget { border-color:rgba(255,255,255,.16); background:linear-gradient(145deg,rgba(46,13,30,.68),rgba(30,30,30,.48)); box-shadow:0 30px 85px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.14); }
+    body.dark-mode .sophia-floating-head { background:linear-gradient(135deg,rgba(46,13,30,.88),rgba(30,30,30,.72)); }
+    body.dark-mode .sophia-floating-body { background:rgba(20,20,20,.16); }
+    body.dark-mode .sophia-floating-shortcuts { background:rgba(46,13,30,.30); border-bottom-color:rgba(255,255,255,.12); scrollbar-color:rgba(255,205,9,.92) rgba(255,255,255,.10); }
+    body.dark-mode .sophia-floating-shortcuts::-webkit-scrollbar-track { background:rgba(255,255,255,.08); }
+    body.dark-mode .sophia-widget .sophia-messages { background:linear-gradient(180deg,rgba(46,13,30,.18),rgba(20,20,20,.12)); }
+    body.dark-mode .sophia-widget .sophia-compose { background:rgba(30,30,30,.34); border-top-color:rgba(255,255,255,.12); }
+    body.dark-mode .sophia-widget .sophia-compose textarea { background:rgba(42,42,42,.62); border-color:rgba(255,255,255,.14); }
+    @media (max-width:720px){
+      .sophia-launcher { right:14px; bottom:14px; padding-right:12px; }
+      .sophia-launcher-label { display:none; }
+      .sophia-widget { right:10px; bottom:72px; width:calc(100vw - 20px); height:min(72vh, 590px); border-radius:20px; }
+    }
+
     @media print {
       @page { size: A4 landscape; margin: 8mm; }
       body { display:block; background:white !important; color:black !important; }
@@ -862,8 +1112,979 @@
     @media (max-width:1000px) { .sistema-av-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     @media (max-width:720px) { .sistema-av-grid { grid-template-columns:1fr; } .sistema-av-button { min-height:170px; } }
   </style>
+
+  <style id="visual-premium-v20">
+    /* =========================================================
+       V20 — Visual premium Avenida / Liquid Glass
+       ========================================================= */
+    :root {
+      --av-yellow: #FFCD09;
+      --av-yellow-2: #F6C426;
+      --av-wine: #3A071D;
+      --av-wine-2: #5A1631;
+      --av-red: #D83B55;
+      --av-ink: #131113;
+      --av-card: rgba(29, 28, 29, .84);
+      --av-line: rgba(134, 49, 76, .58);
+      --av-glow: 0 14px 34px rgba(0, 0, 0, .22);
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 78% 8%, rgba(246,196,38,.10), transparent 30%),
+        radial-gradient(circle at 92% 72%, rgba(90,22,49,.12), transparent 32%),
+        var(--bg);
+    }
+    body.dark-mode {
+      background:
+        radial-gradient(circle at 77% 0%, rgba(255,205,9,.075), transparent 29%),
+        radial-gradient(circle at 94% 62%, rgba(120,19,53,.20), transparent 34%),
+        linear-gradient(145deg, #171416 0%, #120F11 52%, #200812 100%);
+    }
+
+    /* Sidebar premium */
+    .sidebar {
+      width: 278px;
+      background:
+        linear-gradient(180deg, rgba(57,7,29,.985), rgba(43,5,22,.99)),
+        var(--av-wine);
+      color: var(--av-yellow);
+      border-right: 1px solid rgba(255,205,9,.18);
+      box-shadow: 12px 0 38px rgba(13,2,7,.22);
+    }
+    .logo-box {
+      padding: 20px 20px 18px;
+      border-bottom: 1px solid rgba(255,205,9,.42);
+      background: linear-gradient(135deg, rgba(255,205,9,.035), transparent 65%);
+    }
+    .logo-icon {
+      width: 60px;
+      height: 50px;
+      border-radius: 17px;
+      background: linear-gradient(145deg, #FFD928, #F5B900);
+      color: #2E0D1E;
+      box-shadow: 0 9px 24px rgba(255,205,9,.20), inset 0 1px 0 rgba(255,255,255,.7);
+    }
+    .logo-title, .logo-sub { color: var(--av-yellow); }
+    .logo-sub { opacity: .84; }
+    .user-box {
+      position: relative;
+      margin: 16px;
+      padding: 16px;
+      border-radius: 20px;
+      color: var(--av-yellow);
+      background:
+        linear-gradient(145deg, rgba(255,205,9,.10), rgba(255,255,255,.035)),
+        rgba(91,30,35,.48);
+      border: 1px solid rgba(255,205,9,.25);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.055), 0 10px 28px rgba(0,0,0,.16);
+      -webkit-backdrop-filter: blur(14px) saturate(135%);
+      backdrop-filter: blur(14px) saturate(135%);
+    }
+    .user-name { color: var(--av-yellow); line-height: 1.35; }
+    .user-role { color: var(--av-yellow); opacity: .88; }
+    .developer-badge {
+      border-color: rgba(255,205,9,.42);
+      background: rgba(255,205,9,.07);
+      color: var(--av-yellow);
+    }
+    .sync-pill.sync-online {
+      background: rgba(16,185,90,.20);
+      color: #79F5AC;
+      border-color: rgba(74,222,128,.30);
+    }
+    .nav {
+      scrollbar-color: rgba(203,203,203,.68) rgba(255,255,255,.035);
+    }
+    .nav::-webkit-scrollbar { width: 8px; height: 8px; }
+    .nav::-webkit-scrollbar-track { background: rgba(255,255,255,.035); border-radius: 999px; }
+    .nav::-webkit-scrollbar-thumb { background: rgba(203,203,203,.65); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+    .nav-btn {
+      color: var(--av-yellow);
+      border: 1px solid transparent;
+      border-radius: 14px;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+    .nav-btn:hover {
+      transform: translateX(2px);
+      background: rgba(255,205,9,.075);
+      border-color: rgba(255,205,9,.12);
+      box-shadow: none;
+    }
+    .nav-btn.active {
+      color: #FFF4B8;
+      background: linear-gradient(90deg, rgba(255,205,9,.18), rgba(255,205,9,.055));
+      border-color: rgba(255,205,9,.22);
+      box-shadow: inset 4px 0 0 var(--av-yellow), 0 8px 20px rgba(0,0,0,.12);
+    }
+    .theme-btn {
+      background: linear-gradient(145deg, #FFD92A, #F4B800) !important;
+      color: #3A071D !important;
+      border: 1px solid rgba(255,255,255,.38) !important;
+      box-shadow: 0 8px 18px rgba(255,205,9,.20) !important;
+    }
+
+    /* Área principal */
+    .main { min-width: 0; background: transparent; }
+    .content { padding: 22px; }
+
+    /* Cabeçalho alinhado em uma linha no zoom 100% */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-height: 106px;
+      padding: 15px 18px 15px 22px;
+      color: var(--text);
+      background:
+        linear-gradient(115deg, rgba(255,255,255,.54), rgba(255,255,255,.28) 48%, rgba(246,196,38,.055)),
+        rgba(248,250,252,.55);
+      border-bottom: 1px solid rgba(90,22,49,.18);
+      box-shadow: 0 10px 32px rgba(15,23,42,.08);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      backdrop-filter: blur(20px) saturate(140%);
+      isolation: isolate;
+    }
+    .topbar::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background: linear-gradient(90deg, rgba(255,205,9,.06), transparent 31%, rgba(216,59,85,.035));
+    }
+    body.dark-mode .topbar {
+      background:
+        linear-gradient(115deg, rgba(61,47,50,.68), rgba(27,23,25,.62) 48%, rgba(82,13,35,.50)),
+        rgba(20,17,19,.60);
+      border-bottom-color: rgba(142,43,74,.42);
+      box-shadow: 0 12px 34px rgba(0,0,0,.24), inset 0 -1px 0 rgba(255,205,9,.035);
+    }
+    body.dark-mode .topbar::before {
+      background: linear-gradient(90deg, rgba(255,205,9,.07), transparent 35%, rgba(216,59,85,.06));
+    }
+    .top-left {
+      flex: 0 0 clamp(250px, 21vw, 330px);
+      min-width: 0;
+      padding-right: 4px;
+    }
+    .top-left h2 {
+      margin: 0;
+      color: var(--text);
+      font-size: clamp(1.12rem, 1.4vw, 1.42rem);
+      line-height: 1.15;
+      letter-spacing: -.025em;
+    }
+    .top-left p {
+      margin: 7px 0 0;
+      max-width: 420px;
+      color: var(--muted);
+      font-size: clamp(.78rem, .85vw, .9rem);
+      line-height: 1.42;
+      white-space: normal;
+    }
+    .store-meta {
+      flex: 1 1 auto;
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 96px 164px minmax(235px, 1fr) 116px 122px 48px;
+      align-items: stretch;
+      gap: 9px;
+    }
+    .info-tile {
+      min-width: 0;
+      min-height: 66px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 17px;
+      color: var(--text);
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.55), rgba(255,255,255,.30)),
+        rgba(255,255,255,.34);
+      border: 1px solid rgba(90,22,49,.22);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.70), 0 8px 22px rgba(15,23,42,.055);
+      -webkit-backdrop-filter: blur(14px) saturate(135%);
+      backdrop-filter: blur(14px) saturate(135%);
+      overflow: hidden;
+    }
+    body.dark-mode .info-tile {
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.065), rgba(255,255,255,.018)),
+        rgba(20,19,20,.48);
+      border-color: rgba(132,42,70,.62);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.055), 0 9px 24px rgba(0,0,0,.18);
+    }
+    .info-icon {
+      flex: 0 0 30px;
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      color: var(--av-yellow-2);
+      filter: drop-shadow(0 3px 8px rgba(246,196,38,.18));
+    }
+    .info-icon svg, .header-logout svg {
+      width: 25px;
+      height: 25px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .info-copy { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .info-copy small {
+      color: var(--av-yellow-2);
+      font-size: .63rem;
+      font-weight: 1000;
+      letter-spacing: .055em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .info-copy b {
+      min-width: 0;
+      color: var(--text);
+      font-size: clamp(.73rem, .79vw, .88rem);
+      line-height: 1.15;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .info-user .info-copy b { font-size: clamp(.68rem, .73vw, .82rem); }
+    .header-logout.logout-fixed {
+      position: relative;
+      inset: auto;
+      width: 48px;
+      height: auto;
+      min-height: 66px;
+      border-radius: 17px;
+      display: grid;
+      place-items: center;
+      color: #F2556A;
+      background: rgba(216,59,85,.055);
+      border: 1px solid rgba(216,59,85,.40);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 8px 22px rgba(0,0,0,.12);
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+    .header-logout.logout-fixed:hover {
+      transform: translateY(-2px);
+      background: rgba(216,59,85,.13);
+      box-shadow: 0 10px 26px rgba(216,59,85,.16);
+    }
+
+    /* Cards e painéis */
+    .metric, .section-card, .sector-card, .employee-card, .operator-card, .escala-direct-card, .escala-select-card {
+      border-color: rgba(90,22,49,.28);
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.68), rgba(255,255,255,.48)),
+        var(--page);
+      box-shadow: 0 12px 28px rgba(15,23,42,.075), inset 0 1px 0 rgba(255,255,255,.66);
+    }
+    body.dark-mode .metric,
+    body.dark-mode .section-card,
+    body.dark-mode .sector-card,
+    body.dark-mode .employee-card,
+    body.dark-mode .operator-card,
+    body.dark-mode .escala-direct-card,
+    body.dark-mode .escala-select-card {
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.012)),
+        rgba(28,27,28,.84);
+      border-color: rgba(126,39,67,.54);
+      box-shadow: 0 14px 32px rgba(0,0,0,.21), inset 0 1px 0 rgba(255,255,255,.035);
+    }
+    .section-card { border-radius: 23px; }
+    .metric {
+      min-height: 132px;
+      border-radius: 21px;
+      padding: 20px 74px 18px 18px;
+      overflow: hidden;
+    }
+    .metric::before {
+      height: 4px;
+      background: linear-gradient(90deg, var(--av-yellow), rgba(255,205,9,.25));
+    }
+    .metric::after {
+      content: attr(data-icon);
+      position: absolute;
+      right: 17px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 47px;
+      height: 47px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      color: var(--av-yellow-2);
+      font-size: 1.45rem;
+      font-weight: 900;
+      background: rgba(246,196,38,.07);
+      border: 1px solid rgba(246,196,38,.22);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    .metric:not([data-icon])::after,
+    .metric[data-icon=""]::after { display: none; }
+    .metric:not([data-icon]),
+    .metric[data-icon=""] { padding-right: 18px; }
+    .metric small { letter-spacing: .025em; }
+    .metric b { font-size: 2.1rem; margin-top: 12px; line-height: 1; }
+    .metric span { display: block; margin-top: 8px; line-height: 1.35; }
+    .sector-board { gap: 14px; }
+    .sector-card { border-radius: 19px; }
+    .sector-card h3 { font-size: 1.02rem; }
+    .section-title h1, .section-title h2 { letter-spacing: -.025em; }
+    .section-title p { line-height: 1.42; }
+
+    .btn {
+      border: 1px solid rgba(255,205,9,.22);
+      background: linear-gradient(145deg, #3A071D, #230711);
+      color: var(--av-yellow);
+      box-shadow: 0 8px 18px rgba(46,13,30,.14);
+      transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+    }
+    .btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
+    body.dark-mode .btn.secondary {
+      background: rgba(255,255,255,.035);
+      border-color: rgba(130,43,70,.55);
+      color: #F8FAFC;
+    }
+
+    .table-wrap {
+      border-radius: 18px;
+      border-color: rgba(90,22,49,.30);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    body.dark-mode .table-wrap { background: rgba(20,19,20,.54); }
+    th { background: linear-gradient(180deg, #34101F, #240A14); color: var(--av-yellow); }
+
+    /* SOPHIA harmonizada com o novo painel */
+    .sophia-fab, .sophia-float-toggle {
+      box-shadow: 0 12px 30px rgba(103,15,45,.28), 0 0 0 1px rgba(255,205,9,.10);
+    }
+
+    /* Responsividade sem quebrar o alinhamento em desktop */
+    @media (max-width: 1460px) {
+      .topbar { gap: 12px; padding-inline: 16px; }
+      .top-left { flex-basis: 245px; }
+      .store-meta { grid-template-columns: 82px 142px minmax(190px, 1fr) 100px 108px 44px; gap: 6px; }
+      .info-tile { padding: 9px 8px; gap: 7px; }
+      .info-icon { flex-basis: 25px; width: 25px; }
+      .info-icon svg { width: 22px; height: 22px; }
+      .header-logout.logout-fixed { width: 44px; }
+    }
+    @media (max-width: 1180px) {
+      .topbar { align-items: stretch; flex-direction: column; gap: 12px; }
+      .top-left { flex: 0 0 auto; }
+      .store-meta { grid-template-columns: repeat(5, minmax(120px, 1fr)) 48px; }
+      .info-user { grid-column: span 2; }
+    }
+    @media (max-width: 1100px) {
+      .sidebar { width: 100%; }
+      .topbar { min-height: auto; }
+      .nav { scrollbar-color: rgba(203,203,203,.68) transparent; }
+    }
+    @media (max-width: 760px) {
+      .content { padding: 14px; }
+      .topbar { padding: 14px; }
+      .store-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .info-user { grid-column: 1 / -1; }
+      .header-logout.logout-fixed { width: 100%; min-height: 52px; }
+      .metric { min-height: 120px; }
+    }
+
+    @media print {
+      .header-logout { display: none !important; }
+    }
+  </style>
+
+
+  <style id="tema-separado-v22">
+    /* =========================================================
+       V22 — PALETAS TOTALMENTE SEPARADAS
+       TEMA CLARO: amarelo + branco
+       TEMA ESCURO: vermelho/bordô + preto/cinza
+       ========================================================= */
+
+    /* ---------- TEMA CLARO: AMARELO + BRANCO ---------- */
+    body:not(.dark-mode) {
+      --amarelo: #FFCD09;
+      --amarelo-escuro: #D9A900;
+      --preto-logo: #241F14;
+      --bg: #FFFDF5;
+      --page: #FFFFFF;
+      --page-2: #FFFBEA;
+      --text: #241F14;
+      --muted: #6F6958;
+      --border: #E8D989;
+      --soft: #FFF6C9;
+      --shadow: 0 16px 34px rgba(106, 82, 0, .10);
+      --av-yellow: #FFCD09;
+      --av-yellow-2: #D9A900;
+      --av-wine: #FFCD09;
+      --av-wine-2: #F6C426;
+      --av-red: #D9A900;
+      --av-ink: #241F14;
+      --av-card: rgba(255,255,255,.88);
+      --av-line: rgba(217,169,0,.32);
+      background:
+        radial-gradient(circle at 78% 4%, rgba(255,205,9,.20), transparent 30%),
+        radial-gradient(circle at 92% 72%, rgba(246,196,38,.10), transparent 34%),
+        linear-gradient(145deg, #FFFDF5 0%, #FFFFFF 58%, #FFF9DD 100%) !important;
+      color: var(--text);
+    }
+
+    body:not(.dark-mode) .sidebar {
+      background:
+        linear-gradient(180deg, rgba(255,215,50,.98), rgba(246,196,38,.98)) !important;
+      color: #241F14 !important;
+      border-right: 1px solid rgba(112,85,0,.22) !important;
+      box-shadow: 12px 0 34px rgba(106,82,0,.12) !important;
+    }
+    body:not(.dark-mode) .logo-box {
+      background: linear-gradient(135deg, rgba(255,255,255,.30), transparent 70%) !important;
+      border-bottom-color: rgba(80,61,0,.28) !important;
+    }
+    body:not(.dark-mode) .logo-icon {
+      background: #FFFFFF !important;
+      color: #241F14 !important;
+      border: 1px solid rgba(112,85,0,.18);
+      box-shadow: 0 9px 22px rgba(106,82,0,.13), inset 0 1px 0 rgba(255,255,255,.85) !important;
+    }
+    body:not(.dark-mode) .logo-title,
+    body:not(.dark-mode) .logo-sub,
+    body:not(.dark-mode) .user-name,
+    body:not(.dark-mode) .user-role,
+    body:not(.dark-mode) .nav-btn {
+      color: #241F14 !important;
+    }
+    body:not(.dark-mode) .user-box {
+      background: linear-gradient(145deg, rgba(255,255,255,.68), rgba(255,255,255,.35)) !important;
+      color: #241F14 !important;
+      border-color: rgba(112,85,0,.22) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.82), 0 10px 24px rgba(106,82,0,.10) !important;
+    }
+    body:not(.dark-mode) .developer-badge {
+      background: rgba(255,255,255,.64) !important;
+      color: #241F14 !important;
+      border-color: rgba(112,85,0,.24) !important;
+    }
+    body:not(.dark-mode) .nav-btn:hover {
+      background: rgba(255,255,255,.34) !important;
+      border-color: rgba(112,85,0,.15) !important;
+    }
+    body:not(.dark-mode) .nav-btn.active {
+      color: #241F14 !important;
+      background: linear-gradient(90deg, rgba(255,255,255,.76), rgba(255,255,255,.32)) !important;
+      border-color: rgba(112,85,0,.22) !important;
+      box-shadow: inset 4px 0 0 #FFFFFF, 0 8px 20px rgba(106,82,0,.09) !important;
+    }
+    body:not(.dark-mode) .nav {
+      scrollbar-color: rgba(105,105,105,.58) rgba(255,255,255,.20) !important;
+    }
+    body:not(.dark-mode) .nav::-webkit-scrollbar-track { background: rgba(255,255,255,.20) !important; }
+    body:not(.dark-mode) .nav::-webkit-scrollbar-thumb {
+      background: rgba(105,105,105,.58) !important;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+    body:not(.dark-mode) .theme-btn {
+      background: rgba(255,255,255,.88) !important;
+      color: #8A6900 !important;
+      border-color: rgba(112,85,0,.24) !important;
+      box-shadow: 0 8px 18px rgba(106,82,0,.12) !important;
+    }
+
+    body:not(.dark-mode) .topbar {
+      color: #241F14 !important;
+      background:
+        linear-gradient(115deg, rgba(255,222,76,.78), rgba(255,205,9,.62) 48%, rgba(246,196,38,.55)),
+        rgba(255,205,9,.52) !important;
+      border-bottom-color: rgba(112,85,0,.20) !important;
+      box-shadow: 0 10px 30px rgba(106,82,0,.10), inset 0 -1px 0 rgba(255,255,255,.34) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(138%) !important;
+      backdrop-filter: blur(20px) saturate(138%) !important;
+    }
+    body:not(.dark-mode) .topbar::before {
+      background: linear-gradient(90deg, rgba(255,255,255,.28), transparent 38%, rgba(255,255,255,.10)) !important;
+    }
+    body:not(.dark-mode) .top-left h2,
+    body:not(.dark-mode) .top-left p { color: #241F14 !important; }
+    body:not(.dark-mode) .info-tile {
+      color: #241F14 !important;
+      background: linear-gradient(145deg, rgba(255,255,255,.76), rgba(255,255,255,.42)) !important;
+      border-color: rgba(112,85,0,.20) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.88), 0 8px 20px rgba(106,82,0,.075) !important;
+    }
+    body:not(.dark-mode) .info-icon,
+    body:not(.dark-mode) .info-copy small { color: #9B7600 !important; }
+    body:not(.dark-mode) .info-copy b { color: #241F14 !important; }
+    body:not(.dark-mode) .header-logout.logout-fixed {
+      color: #8A6900 !important;
+      background: rgba(255,255,255,.70) !important;
+      border-color: rgba(112,85,0,.22) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.88), 0 8px 20px rgba(106,82,0,.10) !important;
+    }
+    body:not(.dark-mode) .header-logout.logout-fixed:hover { background: #FFFFFF !important; }
+
+    body:not(.dark-mode) .metric,
+    body:not(.dark-mode) .section-card,
+    body:not(.dark-mode) .sector-card,
+    body:not(.dark-mode) .employee-card,
+    body:not(.dark-mode) .operator-card,
+    body:not(.dark-mode) .escala-direct-card,
+    body:not(.dark-mode) .escala-select-card,
+    body:not(.dark-mode) .task-card,
+    body:not(.dark-mode) .lane,
+    body:not(.dark-mode) .status-card,
+    body:not(.dark-mode) .modal,
+    body:not(.dark-mode) .table-wrap {
+      background: linear-gradient(145deg, rgba(255,255,255,.96), rgba(255,253,244,.88)) !important;
+      border-color: rgba(217,169,0,.30) !important;
+      color: #241F14 !important;
+      box-shadow: 0 12px 28px rgba(106,82,0,.075), inset 0 1px 0 rgba(255,255,255,.86) !important;
+    }
+    body:not(.dark-mode) .metric::before {
+      background: linear-gradient(90deg, #FFCD09, rgba(255,205,9,.24)) !important;
+    }
+    body:not(.dark-mode) .metric::after {
+      color: #9B7600 !important;
+      background: rgba(255,205,9,.12) !important;
+      border-color: rgba(217,169,0,.28) !important;
+    }
+    body:not(.dark-mode) .btn {
+      background: linear-gradient(145deg, #FFD936, #F6C426) !important;
+      color: #241F14 !important;
+      border-color: rgba(112,85,0,.20) !important;
+      box-shadow: 0 8px 18px rgba(106,82,0,.14) !important;
+    }
+    body:not(.dark-mode) .btn.secondary,
+    body:not(.dark-mode) .tab-btn,
+    body:not(.dark-mode) .icon-btn {
+      background: #FFFFFF !important;
+      color: #241F14 !important;
+      border-color: rgba(217,169,0,.34) !important;
+    }
+    body:not(.dark-mode) .tab-btn.active {
+      background: #FFCD09 !important;
+      color: #241F14 !important;
+      border-color: #D9A900 !important;
+    }
+    body:not(.dark-mode) th {
+      background: linear-gradient(180deg, #FFD936, #F6C426) !important;
+      color: #241F14 !important;
+      border-color: rgba(112,85,0,.20) !important;
+    }
+    body:not(.dark-mode) input,
+    body:not(.dark-mode) select,
+    body:not(.dark-mode) textarea {
+      background: #FFFFFF !important;
+      color: #241F14 !important;
+      border-color: rgba(217,169,0,.34) !important;
+    }
+    body:not(.dark-mode) input:focus,
+    body:not(.dark-mode) select:focus,
+    body:not(.dark-mode) textarea:focus {
+      border-color: #D9A900 !important;
+      box-shadow: 0 0 0 4px rgba(255,205,9,.20) !important;
+    }
+
+    /* SOPHIA no claro: branco + amarelo, sem bordô */
+    body:not(.dark-mode) .sophia-widget {
+      background: linear-gradient(145deg, rgba(255,255,255,.82), rgba(255,249,218,.66)) !important;
+      border-color: rgba(217,169,0,.30) !important;
+      box-shadow: 0 28px 75px rgba(106,82,0,.16), inset 0 1px 0 rgba(255,255,255,.88) !important;
+    }
+    body:not(.dark-mode) .sophia-floating-head,
+    body:not(.dark-mode) .sophia-head {
+      background: linear-gradient(135deg, rgba(255,217,54,.92), rgba(246,196,38,.84)) !important;
+      color: #241F14 !important;
+    }
+    body:not(.dark-mode) .sophia-widget .sophia-messages,
+    body:not(.dark-mode) .sophia-floating-body {
+      background: linear-gradient(180deg, rgba(255,255,255,.60), rgba(255,250,225,.48)) !important;
+    }
+    body:not(.dark-mode) .sophia-bubble {
+      background: #FFFFFF !important;
+      color: #241F14 !important;
+      border-color: rgba(217,169,0,.38) !important;
+    }
+    body:not(.dark-mode) .sophia-message.user .sophia-bubble {
+      background: #FFCD09 !important;
+      color: #241F14 !important;
+      border-color: #D9A900 !important;
+    }
+    body:not(.dark-mode) .sophia-mini-avatar,
+    body:not(.dark-mode) .sophia-message.user .sophia-mini-avatar {
+      background: #FFCD09 !important;
+      color: #241F14 !important;
+    }
+
+    /* Login no claro */
+    body:not(.dark-mode) .login-screen {
+      background: radial-gradient(circle at top left, rgba(255,205,9,.38), transparent 40%), linear-gradient(135deg, #FFF9D8 0%, #FFFFFF 100%) !important;
+    }
+    body:not(.dark-mode) .login-card { background: #FFFFFF !important; color: #241F14 !important; }
+    body:not(.dark-mode) .login-hero { background: #FFCD09 !important; border-bottom-color: #D9A900 !important; }
+
+    /* ---------- TEMA ESCURO: AMARELO + BORDÔ + PRETO/CINZA ---------- */
+    body.dark-mode {
+      --amarelo: #FFCD09;
+      --amarelo-escuro: #D9A900;
+      --preto-logo: #18191D;
+      --bg: #101114;
+      --page: #1A1C21;
+      --page-2: #24272D;
+      --text: #F7F4EE;
+      --muted: #CEC7BA;
+      --border: rgba(255,205,9,.18);
+      --soft: #2B2E35;
+      --shadow: 0 18px 38px rgba(0,0,0,.42);
+      --av-yellow: #FFCD09;
+      --av-yellow-2: #D9A900;
+      --av-wine: #4B0822;
+      --av-wine-2: #6A1030;
+      --av-red: #7E1636;
+      --av-ink: #111214;
+      --av-card: rgba(26,28,33,.92);
+      --av-line: rgba(255,205,9,.22);
+      background:
+        radial-gradient(circle at 78% 3%, rgba(255,205,9,.08), transparent 28%),
+        radial-gradient(circle at 94% 68%, rgba(106,16,48,.22), transparent 35%),
+        linear-gradient(145deg, #0F1013 0%, #17181D 52%, #220C15 100%) !important;
+      color: var(--text);
+    }
+
+    body.dark-mode .sidebar {
+      background: linear-gradient(180deg, rgba(71,0,28,.985), rgba(23,24,29,.995)) !important;
+      color: #FFCD09 !important;
+      border-right-color: rgba(255,205,9,.18) !important;
+      box-shadow: 12px 0 38px rgba(0,0,0,.34) !important;
+    }
+    body.dark-mode .logo-box {
+      background: linear-gradient(135deg, rgba(255,205,9,.06), rgba(106,16,48,.08) 55%, transparent 75%) !important;
+      border-bottom-color: rgba(255,205,9,.30) !important;
+    }
+    body.dark-mode .logo-icon {
+      background: linear-gradient(145deg, #FFCD09, #E6B800) !important;
+      color: #2A1020 !important;
+      border: 1px solid rgba(255,205,9,.28) !important;
+      box-shadow: 0 9px 24px rgba(255,205,9,.18), inset 0 1px 0 rgba(255,255,255,.24) !important;
+    }
+    body.dark-mode .logo-title,
+    body.dark-mode .user-name,
+    body.dark-mode .nav-btn { color: #FFCD09 !important; }
+    body.dark-mode .logo-sub,
+    body.dark-mode .user-role { color: #F1E8B9 !important; }
+    body.dark-mode .user-box {
+      background: linear-gradient(145deg, rgba(255,205,9,.08), rgba(26,28,33,.68)) !important;
+      border-color: rgba(255,205,9,.24) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 12px 28px rgba(0,0,0,.24) !important;
+    }
+    body.dark-mode .developer-badge {
+      background: rgba(255,205,9,.10) !important;
+      color: #FFCD09 !important;
+      border-color: rgba(255,205,9,.28) !important;
+      box-shadow: 0 8px 18px rgba(0,0,0,.18) !important;
+    }
+    body.dark-mode .nav-btn:hover {
+      background: rgba(255,205,9,.08) !important;
+      border-color: rgba(255,205,9,.16) !important;
+    }
+    body.dark-mode .nav-btn.active {
+      color: #FFF4C2 !important;
+      background: linear-gradient(90deg, rgba(255,205,9,.18), rgba(106,16,48,.12)) !important;
+      border-color: rgba(255,205,9,.20) !important;
+      box-shadow: inset 4px 0 0 #FFCD09, 0 8px 22px rgba(0,0,0,.20) !important;
+    }
+    body.dark-mode .theme-btn {
+      background: #26292F !important;
+      color: #FFCD09 !important;
+      border-color: rgba(255,205,9,.26) !important;
+      box-shadow: 0 8px 20px rgba(0,0,0,.30) !important;
+    }
+
+    body.dark-mode .topbar {
+      color: #F7F4EE !important;
+      background:
+        linear-gradient(115deg, rgba(71,0,28,.48), rgba(26,28,33,.72) 42%, rgba(26,28,33,.78) 66%, rgba(106,16,48,.34)),
+        rgba(17,18,20,.62) !important;
+      border-bottom-color: rgba(255,205,9,.18) !important;
+      box-shadow: 0 12px 34px rgba(0,0,0,.32), inset 0 -1px 0 rgba(255,205,9,.05) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(135%) !important;
+      backdrop-filter: blur(20px) saturate(135%) !important;
+    }
+    body.dark-mode .topbar::before {
+      background: linear-gradient(90deg, rgba(255,205,9,.07), transparent 36%, rgba(106,16,48,.10)) !important;
+    }
+    body.dark-mode .top-left h2 { color: #FFF7D7 !important; }
+    body.dark-mode .top-left p { color: #D8D0C4 !important; }
+    body.dark-mode .info-tile {
+      color: #F7F4EE !important;
+      background: linear-gradient(145deg, rgba(255,205,9,.05), rgba(255,255,255,.02)), rgba(26,28,33,.68) !important;
+      border-color: rgba(255,205,9,.22) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 9px 24px rgba(0,0,0,.22) !important;
+    }
+    body.dark-mode .info-icon,
+    body.dark-mode .info-copy small { color: #FFCD09 !important; }
+    body.dark-mode .info-copy b { color: #F7F4EE !important; }
+    body.dark-mode .header-logout.logout-fixed {
+      color: #FFCD09 !important;
+      background: rgba(31,33,38,.72) !important;
+      border-color: rgba(255,205,9,.26) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 10px 20px rgba(0,0,0,.22) !important;
+    }
+
+    body.dark-mode .metric,
+    body.dark-mode .section-card,
+    body.dark-mode .sector-card,
+    body.dark-mode .employee-card,
+    body.dark-mode .operator-card,
+    body.dark-mode .escala-direct-card,
+    body.dark-mode .escala-select-card,
+    body.dark-mode .task-card,
+    body.dark-mode .lane,
+    body.dark-mode .status-card,
+    body.dark-mode .modal,
+    body.dark-mode .table-wrap {
+      background: linear-gradient(145deg, rgba(255,205,9,.03), rgba(255,255,255,.01)), rgba(26,28,33,.92) !important;
+      border-color: rgba(255,205,9,.16) !important;
+      color: #F7F4EE !important;
+      box-shadow: 0 14px 32px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.03) !important;
+    }
+    body.dark-mode .metric::before {
+      background: linear-gradient(90deg, #FFCD09, rgba(255,205,9,.22), rgba(106,16,48,.14)) !important;
+    }
+    body.dark-mode .metric::after {
+      color: #FFCD09 !important;
+      background: rgba(255,205,9,.10) !important;
+      border-color: rgba(255,205,9,.24) !important;
+    }
+    body.dark-mode .btn {
+      background: linear-gradient(145deg, #FFCD09, #D9A900) !important;
+      color: #241F14 !important;
+      border-color: rgba(255,205,9,.28) !important;
+      box-shadow: 0 8px 20px rgba(0,0,0,.26) !important;
+    }
+    body.dark-mode .btn.secondary,
+    body.dark-mode .tab-btn,
+    body.dark-mode .icon-btn {
+      background: #25282E !important;
+      color: #F7F4EE !important;
+      border-color: rgba(255,205,9,.20) !important;
+    }
+    body.dark-mode .tab-btn.active {
+      background: rgba(255,205,9,.16) !important;
+      color: #FFCD09 !important;
+      border-color: rgba(255,205,9,.28) !important;
+    }
+    body.dark-mode th {
+      background: linear-gradient(180deg, #4B0822, #23151A) !important;
+      color: #FFCD09 !important;
+      border-color: rgba(255,205,9,.18) !important;
+    }
+    body.dark-mode input,
+    body.dark-mode select,
+    body.dark-mode textarea {
+      background: #23262C !important;
+      color: #F7F4EE !important;
+      border-color: rgba(255,205,9,.18) !important;
+    }
+    body.dark-mode input:focus,
+    body.dark-mode select:focus,
+    body.dark-mode textarea:focus {
+      border-color: #FFCD09 !important;
+      box-shadow: 0 0 0 4px rgba(255,205,9,.14) !important;
+    }
+
+    /* SOPHIA no escuro: bordo para Sophia + amarelo para usuário */
+    body.dark-mode .sophia-widget {
+      background: linear-gradient(145deg, rgba(71,0,28,.36), rgba(26,28,33,.76)) !important;
+      border-color: rgba(255,205,9,.18) !important;
+      box-shadow: 0 30px 85px rgba(0,0,0,.50), inset 0 1px 0 rgba(255,255,255,.08) !important;
+    }
+    body.dark-mode .sophia-floating-head,
+    body.dark-mode .sophia-head {
+      background: linear-gradient(135deg, rgba(71,0,28,.92), rgba(28,29,34,.90)) !important;
+      color: #FFF7D7 !important;
+    }
+    body.dark-mode .sophia-widget .sophia-messages,
+    body.dark-mode .sophia-floating-body {
+      background: linear-gradient(180deg, rgba(71,0,28,.10), rgba(18,18,20,.24)) !important;
+    }
+    body.dark-mode .sophia-bubble {
+      background: #5B0E2A !important;
+      color: #FFFFFF !important;
+      border-color: rgba(255,205,9,.12) !important;
+    }
+    body.dark-mode .sophia-message.user .sophia-bubble {
+      background: #FFCD09 !important;
+      color: #241F14 !important;
+      border-color: #D9A900 !important;
+    }
+    body.dark-mode .sophia-mini-avatar {
+      background: #5B0E2A !important;
+      color: #FFCD09 !important;
+    }
+    body.dark-mode .sophia-message.user .sophia-mini-avatar {
+      background: #FFCD09 !important;
+      color: #241F14 !important;
+    }
+    body.dark-mode .sophia-fab,
+    body.dark-mode .sophia-float-toggle {
+      background: linear-gradient(145deg, #FFCD09, #D9A900) !important;
+      color: #241F14 !important;
+      border-color: rgba(255,205,9,.28) !important;
+      box-shadow: 0 12px 30px rgba(0,0,0,.36), 0 0 0 1px rgba(255,205,9,.10) !important;
+    }
+
+    /* Login no escuro */
+    body.dark-mode .login-screen {
+      background: radial-gradient(circle at top left, rgba(255,205,9,.14), transparent 38%), linear-gradient(135deg, #47001C 0%, #111216 100%) !important;
+    }
+    body.dark-mode .login-card { background: #181A1F !important; color: #F7F4EE !important; border-color: rgba(255,205,9,.18) !important; }
+    body.dark-mode .login-hero { background: #47001C !important; border-bottom-color: #FFCD09 !important; }
+    body.dark-mode .login-hero h1,
+    body.dark-mode .login-hero p { color: #FFF7D7 !important; }
+    body.dark-mode .brand-mark,
+    body.dark-mode .app-loader-mark { background: #FFCD09 !important; color: #2A1020 !important; }
+    body.dark-mode .login-btn { background: #FFCD09 !important; color: #241F14 !important; }
+
+    /* Mantém o cabeçalho em uma linha em telas desktop largas */
+    @media (min-width: 1181px) {
+      .store-meta {
+        grid-template-columns: minmax(82px,.72fr) minmax(145px,1.22fr) minmax(235px,2.15fr) minmax(105px,.90fr) minmax(112px,.96fr) 48px !important;
+      }
+      .info-manager { grid-column: auto !important; }
+    }
+  </style>
+
+
+  <style id="tema-escuro-ajustado-v24">
+    /* V24 — bordô mais profundo e botão de tema junto ao logout */
+    .user-box { padding: 14px !important; }
+
+    .header-theme.theme-btn {
+      position: relative !important;
+      inset: auto !important;
+      width: 48px !important;
+      height: auto !important;
+      min-height: 66px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border-radius: 17px !important;
+      display: grid !important;
+      place-items: center !important;
+      font-size: 1.05rem !important;
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+    }
+    .header-theme.theme-btn:hover { transform: translateY(-2px); }
+
+    body:not(.dark-mode) .header-theme.theme-btn {
+      color: #8A6900 !important;
+      background: rgba(255,255,255,.70) !important;
+      border-color: rgba(112,85,0,.22) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.88), 0 8px 20px rgba(106,82,0,.10) !important;
+    }
+    body:not(.dark-mode) .header-theme.theme-btn:hover { background: #FFFFFF !important; }
+
+    body.dark-mode {
+      --av-wine: #320014;
+      --av-wine-2: #47001C;
+      --av-red: #5A0D29;
+      background:
+        radial-gradient(circle at 78% 3%, rgba(255,205,9,.065), transparent 28%),
+        radial-gradient(circle at 94% 68%, rgba(71,0,28,.18), transparent 35%),
+        linear-gradient(145deg, #0F1013 0%, #17181D 54%, #190A10 100%) !important;
+    }
+    body.dark-mode .sidebar {
+      background: linear-gradient(180deg, rgba(49,0,20,.992), rgba(19,20,24,.997)) !important;
+    }
+    body.dark-mode .logo-box {
+      background: linear-gradient(135deg, rgba(255,205,9,.055), rgba(71,0,28,.065) 56%, transparent 76%) !important;
+    }
+    body.dark-mode .topbar {
+      background:
+        linear-gradient(115deg, rgba(49,0,20,.36), rgba(26,28,33,.76) 43%, rgba(26,28,33,.82) 67%, rgba(71,0,28,.24)),
+        rgba(17,18,20,.66) !important;
+    }
+    body.dark-mode .topbar::before {
+      background: linear-gradient(90deg, rgba(255,205,9,.06), transparent 38%, rgba(71,0,28,.075)) !important;
+    }
+    body.dark-mode th {
+      background: linear-gradient(180deg, #320014, #201217) !important;
+    }
+    body.dark-mode .sophia-widget {
+      background: linear-gradient(145deg, rgba(49,0,20,.30), rgba(26,28,33,.80)) !important;
+    }
+    body.dark-mode .sophia-floating-head,
+    body.dark-mode .sophia-head {
+      background: linear-gradient(135deg, rgba(49,0,20,.94), rgba(28,29,34,.92)) !important;
+    }
+    body.dark-mode .sophia-bubble,
+    body.dark-mode .sophia-mini-avatar {
+      background: #47001C !important;
+    }
+    body.dark-mode .login-screen {
+      background: radial-gradient(circle at top left, rgba(255,205,9,.12), transparent 38%), linear-gradient(135deg, #320014 0%, #111216 100%) !important;
+    }
+    body.dark-mode .login-hero { background: #320014 !important; }
+    body.dark-mode .header-theme.theme-btn {
+      color: #FFCD09 !important;
+      background: rgba(31,33,38,.72) !important;
+      border-color: rgba(255,205,9,.26) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 10px 20px rgba(0,0,0,.22) !important;
+    }
+    body.dark-mode .header-theme.theme-btn:hover { background: rgba(255,205,9,.10) !important; }
+
+    @media (min-width: 1461px) {
+      .store-meta {
+        grid-template-columns: 96px 164px minmax(235px,1fr) 116px 122px 48px 48px !important;
+      }
+    }
+    @media (min-width: 1181px) and (max-width: 1460px) {
+      .store-meta {
+        grid-template-columns: 82px 142px minmax(190px,1fr) 100px 108px 44px 44px !important;
+      }
+      .header-theme.theme-btn,
+      .header-logout.logout-fixed { width: 44px !important; }
+    }
+    @media (max-width: 1180px) {
+      .store-meta { grid-template-columns: repeat(5, minmax(120px,1fr)) 48px 48px !important; }
+    }
+    @media (max-width: 760px) {
+      .store-meta { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+      .header-theme.theme-btn,
+      .header-logout.logout-fixed {
+        width: 100% !important;
+        min-height: 52px !important;
+      }
+    }
+    @media print {
+      .header-theme { display: none !important; }
+    }
+  </style>
+
 </head>
 <body>
+  <script>
+    /* Executado antes da interface para manter o tema correto sem piscar. */
+    (() => {
+      const root = document.documentElement;
+      if (root.dataset.theme === 'dark') document.body.classList.add('dark-mode');
+      requestAnimationFrame(() => root.classList.remove('theme-booting'));
+    })();
+  </script>
   <div id="loginScreen" class="login-screen">
     <div class="login-card">
       <div class="login-hero">
@@ -896,14 +2117,40 @@
 
   <div id="appLoader" class="app-loader" aria-live="polite" aria-hidden="true">
     <div class="app-loader-card">
-      <div class="app-loader-mark">AV</div>
-      <div class="app-loader-spinner"></div>
-      <h3 id="appLoaderTitle">Carregando sistema</h3>
-      <p id="appLoaderText">Aguarde um instante...</p>
+      <div class="app-loader-head">
+        <div class="app-loader-mark">AV</div>
+        <div>
+          <h3 id="appLoaderTitle">Carregando sistema</h3>
+          <p id="appLoaderText">Aguarde um instante...</p>
+        </div>
+        <div class="app-loader-spinner" aria-hidden="true"></div>
+      </div>
+      <div id="appLoaderChecks" class="app-loader-checks">
+        <div class="app-loader-progress"><span id="appLoaderProgressBar"></span></div>
+        <div id="appCheckInternet" class="app-loader-check" data-status="pending">
+          <div class="app-loader-check-icon">○</div>
+          <div class="app-loader-check-content">
+            <strong>Conexão com a internet</strong>
+            <small>Aguardando verificação...</small>
+          </div>
+        </div>
+        <div id="appCheckIA" class="app-loader-check" data-status="pending">
+          <div class="app-loader-check-icon">○</div>
+          <div class="app-loader-check-content">
+            <strong>IA funcionando</strong>
+            <small>Aguardando verificação...</small>
+          </div>
+        </div>
+        <div id="appCheckSync" class="app-loader-check" data-status="pending">
+          <div class="app-loader-check-icon">○</div>
+          <div class="app-loader-check-content">
+            <strong>Dados sincronizados</strong>
+            <small>Aguardando verificação...</small>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-
-  <button class="logout-fixed" onclick="logout()" title="Sair do sistema" aria-label="Sair do sistema">⏻</button>
 
   <aside class="sidebar">
     <div class="logo-box">
@@ -916,7 +2163,6 @@
       </div>
     </div>
     <div class="user-box">
-      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Ativar modo escuro" aria-label="Ativar modo escuro">🌙</button>
       <div class="user-name" id="userNameBox">Usuário</div>
       <div class="user-role" id="userRoleBox">Cargo</div>
       <div id="developerBadge" class="developer-badge" style="display:none;"><span>&lt;/&gt;</span> DESENVOLVEDOR</div>
@@ -943,22 +2189,51 @@
         <h2 id="pageTitle">Painel Geral</h2>
         <p id="pageSubtitle">Visão rápida das pendências, setores e prioridades da loja.</p>
       </div>
-      <div class="store-meta">
-        <span class="pill">LOJA: <b>24</b></span>
-        <span class="pill">MÊS: <b id="mesAtual"></b></span>
-        <span class="pill">USUÁRIO: <b id="headerUserName">-</b></span>
-        <span class="pill">OPERADOR: <b id="headerUserOperator">-</b></span>
-        <span class="pill">GERENTE: <b>ALANA</b></span>
+      <div class="store-meta" aria-label="Informações da sessão">
+        <div class="info-tile info-store">
+          <span class="info-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M3 10h18M5 10v9h14v-9M4 4h16l1 6H3l1-6Zm5 15v-5h6v5"/></svg>
+          </span>
+          <span class="info-copy"><small>Loja</small><b>24</b></span>
+        </div>
+        <div class="info-tile info-month">
+          <span class="info-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M6 3v3m12-3v3M4 8h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Zm3 7h3m2 0h3m-8 4h3m2 0h3"/></svg>
+          </span>
+          <span class="info-copy"><small>Mês</small><b id="mesAtual"></b></span>
+        </div>
+        <div class="info-tile info-user">
+          <span class="info-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8c.6-4 3-6 7-6s6.4 2 7 6H5Z"/></svg>
+          </span>
+          <span class="info-copy"><small>Usuário</small><b id="headerUserName">-</b></span>
+        </div>
+        <div class="info-tile info-operator">
+          <span class="info-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M8 4h8v4H8V4Zm-2 4h12v12H6V8Zm3 4h6m-6 4h4"/></svg>
+          </span>
+          <span class="info-copy"><small>Operador</small><b id="headerUserOperator">-</b></span>
+        </div>
+        <div class="info-tile info-manager">
+          <span class="info-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="m4 7 4 4 4-7 4 7 4-4-2 11H6L4 7Zm3 11h10"/></svg>
+          </span>
+          <span class="info-copy"><small>Gerente</small><b>ALANA</b></span>
+        </div>
+        <button class="theme-btn header-theme" id="themeBtn" onclick="toggleTheme()" title="Ativar modo escuro" aria-label="Ativar modo escuro">🌙</button>
+        <button class="logout-fixed header-logout" onclick="logout()" title="Sair do sistema" aria-label="Sair do sistema">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v9m-5.5-6.5A8 8 0 1 0 17.5 5.5"/></svg>
+        </button>
       </div>
     </header>
 
     <div class="content">
       <section id="painel" class="page active">
-        <div class="grid grid-4" style="margin-bottom:16px;">
-          <div class="metric"><small>Pendências abertas</small><b id="mAbertas">0</b><span>Tarefas e anotações não concluídas</span></div>
-          <div class="metric"><small>Alta prioridade</small><b id="mAlta">0</b><span>Itens que exigem atenção gerencial</span></div>
-          <div class="metric"><small>Atrasadas</small><b id="mAtrasadas">0</b><span>Prazo menor que hoje e não concluído</span></div>
-          <div class="metric"><small>Concluídas no mês</small><b id="mConcluidas">0</b><span>Finalizações registradas no mês atual</span></div>
+        <div class="grid grid-4 dashboard-metrics" style="margin-bottom:16px;">
+          <div class="metric metric-open" data-icon="▤"><small>Pendências abertas</small><b id="mAbertas">0</b><span>Tarefas e anotações não concluídas</span></div>
+          <div class="metric metric-priority" data-icon="◇"><small>Alta prioridade</small><b id="mAlta">0</b><span>Itens que exigem atenção gerencial</span></div>
+          <div class="metric metric-late" data-icon="◷"><small>Atrasadas</small><b id="mAtrasadas">0</b><span>Prazo menor que hoje e não concluído</span></div>
+          <div class="metric metric-done" data-icon="✓"><small>Concluídas no mês</small><b id="mConcluidas">0</b><span>Finalizações registradas no mês atual</span></div>
         </div>
 
         <div class="section-card">
@@ -1138,9 +2413,9 @@
             <div class="actions no-print"><button class="btn secondary" onclick="printActivePage()">🖨️ Imprimir</button></div>
           </div>
           <div class="grid grid-3" style="margin-bottom:16px;">
-            <div class="metric"><small>Operadores cadastrados</small><b id="opTotal">0</b><span>Funcionários com número de operador</span></div>
-            <div class="metric"><small>Caixa operacional ativo</small><b id="opAtivos">0</b><span>Disponíveis para operação de caixa</span></div>
-            <div class="metric"><small>Caixa operacional inativo</small><b id="opInativos">0</b><span>Operadores bloqueados/inativos</span></div>
+            <div class="metric" data-icon="👥"><small>Operadores cadastrados</small><b id="opTotal">0</b><span>Funcionários com número de operador</span></div>
+            <div class="metric" data-icon="✓"><small>Caixa operacional ativo</small><b id="opAtivos">0</b><span>Disponíveis para operação de caixa</span></div>
+            <div class="metric" data-icon="⊘"><small>Caixa operacional inativo</small><b id="opInativos">0</b><span>Operadores bloqueados/inativos</span></div>
           </div>
           <div class="filter-row no-print">
             <input id="fOpBusca" oninput="renderAll()" placeholder="Buscar operador, nome, matrícula ou cargo..." />
@@ -1389,10 +2664,10 @@
             <input id="relFim" type="date" onchange="renderAll()" />
           </div>
           <div class="grid grid-4" style="margin-bottom:14px;">
-            <div class="metric"><small>Total no período</small><b id="rTotal">0</b><span>Registros filtrados</span></div>
-            <div class="metric"><small>Pendentes</small><b id="rPendentes">0</b><span>Não concluídos</span></div>
-            <div class="metric"><small>Concluídos</small><b id="rConcluidos">0</b><span>Finalizados</span></div>
-            <div class="metric"><small>Alta prioridade</small><b id="rAlta">0</b><span>Itens urgentes</span></div>
+            <div class="metric" data-icon="▦"><small>Total no período</small><b id="rTotal">0</b><span>Registros filtrados</span></div>
+            <div class="metric" data-icon="⌛"><small>Pendentes</small><b id="rPendentes">0</b><span>Não concluídos</span></div>
+            <div class="metric" data-icon="✓"><small>Concluídos</small><b id="rConcluidos">0</b><span>Finalizados</span></div>
+            <div class="metric" data-icon="◆"><small>Alta prioridade</small><b id="rAlta">0</b><span>Itens urgentes</span></div>
           </div>
           <div class="table-wrap"><table id="tabelaRelatorio"><thead><tr><th>Data</th><th>Tipo</th><th>Setor</th><th>Título/Resumo</th><th>Responsável</th><th>Prioridade</th><th>Status</th><th>Prazo</th><th>Observação</th><th>Atualizado por</th></tr></thead><tbody id="tbodyRelatorio"></tbody></table></div>
         </div>
@@ -1438,6 +2713,41 @@
         </div>
       </section>
 
+
+
+      <!-- SOPHIA FLUTUANTE -->
+      <button id="sophiaLauncher" class="sophia-launcher no-print" type="button" onclick="toggleSophiaWidget()" title="Abrir SOPHIA" aria-label="Abrir SOPHIA">
+        <span class="sophia-launcher-icon">S</span>
+        <span class="sophia-launcher-label">SOPHIA</span>
+        <span class="sophia-launcher-status"></span>
+      </button>
+
+      <section id="sophiaWidget" class="sophia-widget no-print" aria-hidden="true">
+        <div class="sophia-floating-head">
+          <div class="sophia-identity">
+            <div class="sophia-avatar">S</div>
+            <div><h1>SOPHIA</h1><p>Assistente inteligente da Loja 24</p></div>
+          </div>
+          <div class="sophia-window-actions">
+            <button type="button" onclick="minimizarSophiaWidget()" title="Minimizar" aria-label="Minimizar SOPHIA">—</button>
+            <button type="button" onclick="fecharSophiaWidget()" title="Fechar" aria-label="Fechar SOPHIA">✕</button>
+          </div>
+        </div>
+        <div class="sophia-floating-body">
+          <div class="sophia-floating-shortcuts">
+            <button class="sophia-quick" onclick="perguntarSophia('Resuma meu dia')">☀️ Resumo</button>
+            <button class="sophia-quick" onclick="perguntarSophia('Quais tarefas estão pendentes?')">🔴 Pendentes</button>
+            <button class="sophia-quick" onclick="perguntarSophia('Mostre minhas anotações importantes')">📝 Anotações</button>
+            <button class="sophia-quick" onclick="perguntarSophia('Quem está na próxima escala?')">🗓️ Escala</button>
+          </div>
+          <div id="sophiaMessages" class="sophia-messages"></div>
+          <div class="sophia-compose">
+            <textarea id="sophiaInput" placeholder="Digite sua mensagem..."></textarea>
+            <button class="sophia-send" type="button" onclick="enviarSophia()" title="Enviar">➤</button>
+          </div>
+        </div>
+      </section>
+
       <div id="modalPermissoes" class="modal-backdrop no-print" onclick="fecharModalPermissoes()"><div id="modalPermissoesConteudo" class="modal" onclick="event.stopPropagation()"></div></div>
 
       <section id="config" class="page">
@@ -1455,7 +2765,7 @@ const SHARED_ROW_ID = 'dados_compartilhados_v1';
 const MODULOS = [
   ['painel','Painel Geral'],['anotacoes','Central de Anotações'],['tarefas','Quadro de Tarefas'],
   ['setores','Setores'],['funcionarios','Quadro de Funcionários'],['operadores','Operadores'],
-  ['escalas','Escala de Trabalho'],['acompanhamento','Acompanhamento do Dia'],['relatorios','Relatórios'],['sistemaav','SISTEMA AV'],['config','Configurações']
+  ['escalas','Escala de Trabalho'],['acompanhamento','Acompanhamento do Dia'],['relatorios','Relatórios'],['sistemaav','SISTEMA AV'],['sophia','SOPHIA'],['config','Configurações']
 ];
 
 const setores = [
@@ -1533,6 +2843,7 @@ const pageInfo = {
   acompanhamento: ['Acompanhamento do Dia','Resumo diário para apoiar a gerente no controle da loja.'],
   relatorios: ['Relatórios Gerenciais','Resumo por período e setor para impressão e Excel.'],
   sistemaav: ['SISTEMA AV','Acesso rápido aos sistemas oficiais da Avenida.'],
+  sophia: ['SOPHIA','Assistente inteligente para consultar e organizar informações do sistema.'],
   config: ['Configurações','Ajustes administrativos do sistema.']
 };
 
@@ -1637,19 +2948,129 @@ function atualizarMatriculaPreview(){
 function escapeHTML(s){ return String(s||'').replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m])); }
 function num(v){ return Number(v||0); }
 
-function showAppLoader(title='Carregando sistema', text='Aguarde um instante...'){
+function showAppLoader(title='Carregando sistema', text='Aguarde um instante...', mostrarChecks=false){
   const el = document.getElementById('appLoader');
   if(!el) return;
-  document.getElementById('appLoaderTitle').textContent = title;
-  document.getElementById('appLoaderText').textContent = text;
+  const titleEl = document.getElementById('appLoaderTitle');
+  const textEl = document.getElementById('appLoaderText');
+  if(titleEl) titleEl.textContent = title;
+  if(textEl) textEl.textContent = text;
+  toggleAppLoaderChecks(mostrarChecks);
+  if(!mostrarChecks) resetAppLoaderChecks();
+  el.classList.toggle('verification-mode', !!mostrarChecks);
   el.classList.add('active');
   el.setAttribute('aria-hidden', 'false');
 }
 function hideAppLoader(){
   const el = document.getElementById('appLoader');
   if(!el) return;
-  el.classList.remove('active');
+  el.classList.remove('active','verification-mode');
   el.setAttribute('aria-hidden', 'true');
+  toggleAppLoaderChecks(false);
+  resetAppLoaderChecks();
+}
+function toggleAppLoaderChecks(visivel=false){
+  const box = document.getElementById('appLoaderChecks');
+  if(!box) return;
+  box.classList.toggle('active', !!visivel);
+}
+function resetAppLoaderChecks(){
+  ['appCheckInternet','appCheckIA','appCheckSync'].forEach(id => {
+    const item = document.getElementById(id);
+    if(!item) return;
+    item.setAttribute('data-status','pending');
+    const icon = item.querySelector('.app-loader-check-icon');
+    const detail = item.querySelector('small');
+    if(icon) icon.textContent = '○';
+    if(detail) detail.textContent = 'Aguardando verificação...';
+  });
+  updateAppLoaderProgress();
+}
+function updateAppLoaderProgress(){
+  const bar = document.getElementById('appLoaderProgressBar');
+  if(!bar) return;
+  const itens = ['appCheckInternet','appCheckIA','appCheckSync'].map(id => document.getElementById(id)).filter(Boolean);
+  const concluidos = itens.filter(item => ['success','error'].includes(item.getAttribute('data-status'))).length;
+  const pct = itens.length ? Math.round((concluidos / itens.length) * 100) : 0;
+  bar.style.width = pct + '%';
+}
+function setAppLoaderCheck(chave, status='pending', detalhe=''){
+  const mapa = { internet:'appCheckInternet', ia:'appCheckIA', sync:'appCheckSync' };
+  const item = document.getElementById(mapa[chave] || chave);
+  if(!item) return;
+  item.setAttribute('data-status', status);
+  const icon = item.querySelector('.app-loader-check-icon');
+  const detail = item.querySelector('small');
+  if(icon){
+    icon.textContent = ({ pending:'○', checking:'⋯', success:'✓', error:'!' })[status] || '○';
+  }
+  if(detail && detalhe) detail.textContent = detalhe;
+  updateAppLoaderProgress();
+}
+function esperar(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
+function comTimeout(promise, ms=4000){
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Tempo de verificação excedido.')), ms))
+  ]);
+}
+async function verificarConexaoInternet(){
+  if(!navigator.onLine) return { ok:false, detalhe:'Sem conexão com a internet. O sistema seguirá em modo local.' };
+  try{
+    const { error } = await comTimeout(supabaseclient.from(ONLINE_TABLE).select('id').eq('id', GLOBAL_ROW_ID).maybeSingle(), 3500);
+    if(error) throw error;
+    return { ok:true, detalhe:'Conexão confirmada e acesso online disponível.' };
+  }catch(err){
+    console.error('Falha ao verificar internet:', err);
+    return { ok:false, detalhe:'Internet instável ou indisponível no momento.' };
+  }
+}
+function verificarIAFuncionando(){
+  const iaOk = typeof sophiaResposta === 'function' && typeof enviarSophia === 'function' && typeof perguntarSophia === 'function';
+  return iaOk
+    ? { ok:true, detalhe:'SOPHIA pronta para responder aos comandos do sistema.' }
+    : { ok:false, detalhe:'O módulo da SOPHIA não respondeu corretamente.' };
+}
+async function verificarDadosSincronizados(){
+  if(!usuarioAtual) return { ok:false, detalhe:'Nenhum usuário autenticado para validar a sincronização.' };
+  if(!navigator.onLine) return { ok:false, detalhe:'Sem internet: dados carregados do cache deste aparelho.' };
+  try{
+    const op = normalizarOperador(usuarioAtual.operador);
+    const { error } = await comTimeout(
+      supabaseclient.from(ONLINE_TABLE).select('id').in('id', [`usuario_${op}`, SHARED_ROW_ID]),
+      4000
+    );
+    if(error) throw error;
+    await salvarDadosUsuarioOnline(true);
+    return { ok:true, detalhe:'Dados conferidos e sincronizados com o Supabase.' };
+  }catch(err){
+    console.error('Falha ao verificar sincronização:', err);
+    return { ok:false, detalhe:'Não foi possível validar a sincronização online agora.' };
+  }
+}
+async function executarVerificacoesPosLogin(){
+  showAppLoader('Preparando o ambiente', 'Validação de serviços antes de abrir o painel.', true);
+  resetAppLoaderChecks();
+
+  setAppLoaderCheck('internet','checking','Testando a conexão com a internet...');
+  await esperar(180);
+  const internet = await verificarConexaoInternet();
+  setAppLoaderCheck('internet', internet.ok ? 'success' : 'error', internet.detalhe);
+
+  setAppLoaderCheck('ia','checking','Inicializando a SOPHIA...');
+  await esperar(160);
+  const ia = verificarIAFuncionando();
+  setAppLoaderCheck('ia', ia.ok ? 'success' : 'error', ia.detalhe);
+
+  setAppLoaderCheck('sync','checking','Validando os dados sincronizados...');
+  await esperar(180);
+  const sync = await verificarDadosSincronizados();
+  setAppLoaderCheck('sync', sync.ok ? 'success' : 'error', sync.detalhe);
+
+  const textEl = document.getElementById('appLoaderText');
+  if(textEl) textEl.textContent = sync.ok || internet.ok ? 'Ambiente validado. Abrindo o painel...' : 'Validação concluída. Abrindo com os recursos disponíveis...';
+  await esperar(820);
+  return { internet, ia, sync };
 }
 
 function funcionarioVazio(valor){
@@ -1720,7 +3141,7 @@ function deduplicarFuncionarios(){
 function permissoesPadrao(operador){
   const op = normalizarOperador(operador);
   if(op === '133') return {...Object.fromEntries(MODULOS.map(([id]) => [id,true])), alterarSenha:true};
-  return {painel:true,anotacoes:true,tarefas:true,setores:true,funcionarios:true,operadores:false,escalas:false,acompanhamento:true,relatorios:true,sistemaav:true,config:false,alterarSenha:false};
+  return {painel:true,anotacoes:true,tarefas:true,setores:true,funcionarios:true,operadores:false,escalas:false,acompanhamento:true,relatorios:true,sistemaav:true,sophia:true,config:false,alterarSenha:false};
 }
 function configGlobalPadrao(){
   const usuarios = usuariosOficiais.map(u => ({
@@ -1817,6 +3238,9 @@ function aplicarPermissoes(){
     const m=(btn.getAttribute('onclick')||'').match(/showPage\('([^']+)'/); if(!m) return;
     btn.style.display=perms[m[1]]?'flex':'none';
   });
+  const launcher=document.getElementById('sophiaLauncher');
+  if(launcher) launcher.style.display=perms.sophia?'flex':'none';
+  if(!perms.sophia) fecharSophiaWidget();
   const ativa=document.querySelector('.page.active')?.id;
   if(ativa && !perms[ativa]) showPage('painel');
 }
@@ -2016,6 +3440,7 @@ async function login(){
     sessionStorage.setItem(SESSION_KEY,JSON.stringify({nome:user.nome,operador:user.operador,loginEm:agoraBR()}));
     await carregarDadosUsuarioOnline(operadorInput);
     atualizarIdentidadeUsuarioAtual();
+    await executarVerificacoesPosLogin();
     initApp();
     ativarRealtimeUsuario();
     atualizarStatusConexao();
@@ -2124,6 +3549,7 @@ function setDefaultDates(){
 function toggleTheme(){
   document.body.classList.toggle('dark-mode');
   const dark = document.body.classList.contains('dark-mode');
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
   localStorage.setItem('adminGerencialDark', dark ? '1':'0');
   const themeBtn = document.getElementById('themeBtn');
   themeBtn.textContent = dark ? '☀️' : '🌙';
@@ -2134,6 +3560,8 @@ function toggleTheme(){
 function showPage(id, btn){
   if(!temPermissao(id)){ alert('Esta função não está liberada para o seu usuário.'); id='painel'; }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pagina=document.getElementById(id);
+  if(!pagina){ id='painel'; }
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   const nav = btn || [...document.querySelectorAll('.nav-btn')].find(b => b.getAttribute('onclick')?.includes(`'${id}'`));
@@ -2776,9 +4204,9 @@ function renderSetores(){
   const totalAtrasadas = [...notas,...tarefas].filter(isAtrasado).length;
   document.getElementById('sectorDetail').innerHTML = `
     <div class="grid grid-3" style="margin-bottom:16px;">
-      <div class="metric"><small>Pendências ${s.nome}</small><b>${totalPendencias}</b><span>${s.desc}</span></div>
-      <div class="metric"><small>Alta prioridade</small><b>${totalAlta}</b><span>Itens urgentes do setor</span></div>
-      <div class="metric"><small>Atrasadas</small><b>${totalAtrasadas}</b><span>Prazo vencido</span></div>
+      <div class="metric" data-icon="▤"><small>Pendências ${s.nome}</small><b>${totalPendencias}</b><span>${s.desc}</span></div>
+      <div class="metric" data-icon="◇"><small>Alta prioridade</small><b>${totalAlta}</b><span>Itens urgentes do setor</span></div>
+      <div class="metric" data-icon="◷"><small>Atrasadas</small><b>${totalAtrasadas}</b><span>Prazo vencido</span></div>
     </div>
     <div class="sector-content-stack">
       <section class="sector-content-panel">
@@ -3349,7 +4777,141 @@ function importarBackup(e){ const f=e.target.files[0]; if(!f) return; showAppLoa
 function limparTudo(){ if(confirm('Apagar todos os dados administrativos?')){ db=defaultDB(); sincronizarUsuariosLogin(); saveDB(); renderAll(); } }
 function downloadBlob(blob, filename){ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href); }
 function exportarCSVRelatorio(){ showAppLoader('Gerando CSV', 'Preparando o relatório completo da loja...'); setTimeout(() => { const rows=getRelatorio(); const head=['Data','Tipo','Setor','Titulo','Responsavel','Prioridade','Status','Prazo','Observacao','Atualizado por']; const csv=[head.join(';'), ...rows.map(r=>[r.data,r.tipo,r.setor,r.titulo,r.responsavel,r.prioridade,r.status,r.prazo,r.obs,r.atualizadoPor].map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(';'))].join('\n'); downloadBlob(new Blob([csv], {type:'text/csv;charset=utf-8'}), `relatorio_gerencial_${hojeISO()}.csv`); hideAppLoader(); }, 260); }
-function exportarExcelRelatorio(){ showAppLoader('Gerando Excel', 'Montando o arquivo do relatório gerencial...'); setTimeout(() => { const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>table{border-collapse:collapse;width:100%;font-family:Segoe UI,Arial}th{background:#291A1E;color:#F6C426}td,th{border:1px solid #999;padding:7px;text-align:left}h1{font-family:Segoe UI,Arial}</style></head><body><h1>Relatório Gerencial - Loja 24</h1><p>Gerente: ALANA • Exportado em ${agoraBR()}</p>${document.getElementById('tabelaRelatorio').outerHTML}</body></html>`; downloadBlob(new Blob([html], {type:'application/vnd.ms-excel'}), `relatorio_gerencial_${hojeISO()}.xls`); hideAppLoader(); }, 260); }
+function exportarExcelRelatorio(){ showAppLoader('Gerando Excel', 'Montando o arquivo do relatório gerencial...'); setTimeout(() => { const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>table{border-collapse:collapse;width:100%;font-family:Segoe UI,Arial}th{background:#291A1E;color:#F6C426}td,th{border:1px solid #999;padding:7px;text-align:left}h1{font-family:Segoe UI,Arial}
+
+
+
+
+    /* =========================================================
+       V21 — CORREÇÃO DE TEMA
+       Claro: amarelo Avenida | Escuro: bordô premium
+       ========================================================= */
+    body:not(.dark-mode) {
+      background:
+        radial-gradient(circle at 78% 5%, rgba(246,196,38,.18), transparent 31%),
+        radial-gradient(circle at 94% 70%, rgba(222,176,34,.10), transparent 34%),
+        var(--bg);
+    }
+
+    /* Menu lateral amarelo somente no tema claro */
+    body:not(.dark-mode) .sidebar {
+      background:
+        linear-gradient(180deg, rgba(255,211,45,.985), rgba(246,196,38,.985)),
+        var(--amarelo);
+      color: #291A1E;
+      border-right: 1px solid rgba(41,26,30,.22);
+      box-shadow: 12px 0 34px rgba(41,26,30,.12);
+    }
+    body:not(.dark-mode) .logo-box {
+      border-bottom-color: rgba(41,26,30,.48);
+      background: linear-gradient(135deg, rgba(255,255,255,.22), transparent 66%);
+    }
+    body:not(.dark-mode) .logo-icon {
+      background: linear-gradient(145deg, #321923, #211015);
+      color: #FFD52D;
+      box-shadow: 0 9px 22px rgba(41,26,30,.18), inset 0 1px 0 rgba(255,255,255,.14);
+    }
+    body:not(.dark-mode) .logo-title,
+    body:not(.dark-mode) .logo-sub,
+    body:not(.dark-mode) .user-name,
+    body:not(.dark-mode) .user-role {
+      color: #291A1E;
+    }
+    body:not(.dark-mode) .user-box {
+      color: #291A1E;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.28), rgba(255,255,255,.10)),
+        rgba(41,26,30,.08);
+      border-color: rgba(41,26,30,.22);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.50), 0 10px 24px rgba(41,26,30,.10);
+    }
+    body:not(.dark-mode) .developer-badge {
+      border-color: rgba(41,26,30,.32);
+      background: rgba(41,26,30,.08);
+      color: #291A1E;
+    }
+    body:not(.dark-mode) .nav-btn {
+      color: #291A1E;
+    }
+    body:not(.dark-mode) .nav-btn:hover {
+      background: rgba(41,26,30,.09);
+      border-color: rgba(41,26,30,.12);
+    }
+    body:not(.dark-mode) .nav-btn.active {
+      color: #291A1E;
+      background: linear-gradient(90deg, rgba(41,26,30,.17), rgba(41,26,30,.055));
+      border-color: rgba(41,26,30,.18);
+      box-shadow: inset 4px 0 0 #291A1E, 0 8px 20px rgba(41,26,30,.08);
+    }
+    body:not(.dark-mode) .nav {
+      scrollbar-color: rgba(83,83,83,.62) rgba(41,26,30,.05);
+    }
+    body:not(.dark-mode) .nav::-webkit-scrollbar-track {
+      background: rgba(41,26,30,.05);
+    }
+    body:not(.dark-mode) .nav::-webkit-scrollbar-thumb {
+      background: rgba(83,83,83,.62);
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+    body:not(.dark-mode) .nav::-webkit-scrollbar-thumb:hover {
+      background: rgba(47,47,47,.78);
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+    body:not(.dark-mode) .theme-btn {
+      background: rgba(41,26,30,.92) !important;
+      color: #FFD52D !important;
+      border-color: rgba(41,26,30,.32) !important;
+      box-shadow: 0 8px 18px rgba(41,26,30,.16) !important;
+    }
+
+    /* Cabeçalho amarelo translúcido somente no tema claro */
+    body:not(.dark-mode) .topbar {
+      color: #291A1E;
+      background:
+        linear-gradient(115deg, rgba(255,217,55,.82), rgba(246,196,38,.68) 48%, rgba(222,176,34,.62)),
+        rgba(246,196,38,.58);
+      border-bottom-color: rgba(41,26,30,.22);
+      box-shadow: 0 10px 30px rgba(41,26,30,.10), inset 0 -1px 0 rgba(255,255,255,.26);
+      -webkit-backdrop-filter: blur(19px) saturate(140%);
+      backdrop-filter: blur(19px) saturate(140%);
+    }
+    body:not(.dark-mode) .topbar::before {
+      background: linear-gradient(90deg, rgba(255,255,255,.20), transparent 36%, rgba(41,26,30,.035));
+    }
+    body:not(.dark-mode) .top-left h2,
+    body:not(.dark-mode) .top-left p {
+      color: #291A1E;
+    }
+    body:not(.dark-mode) .top-left p { opacity: .78; }
+    body:not(.dark-mode) .info-tile {
+      color: #291A1E;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.42), rgba(255,255,255,.19)),
+        rgba(255,255,255,.18);
+      border-color: rgba(41,26,30,.20);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.58), 0 8px 20px rgba(41,26,30,.075);
+    }
+    body:not(.dark-mode) .info-icon,
+    body:not(.dark-mode) .info-copy small {
+      color: #5A1631;
+    }
+    body:not(.dark-mode) .info-copy b {
+      color: #291A1E;
+    }
+    body:not(.dark-mode) .header-logout.logout-fixed {
+      color: #7F1D35;
+      background: rgba(255,255,255,.25);
+      border-color: rgba(90,22,49,.30);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.46), 0 8px 20px rgba(41,26,30,.10);
+    }
+    body:not(.dark-mode) .header-logout.logout-fixed:hover {
+      background: rgba(255,255,255,.40);
+      box-shadow: 0 10px 24px rgba(90,22,49,.13);
+    }
+
+  </style></head><body><h1>Relatório Gerencial - Loja 24</h1><p>Gerente: ALANA • Exportado em ${agoraBR()}</p>${document.getElementById('tabelaRelatorio').outerHTML}</body></html>`; downloadBlob(new Blob([html], {type:'application/vnd.ms-excel'}), `relatorio_gerencial_${hojeISO()}.xls`); hideAppLoader(); }, 260); }
 
 
 /* ===== ESCALA DIRETA V2 ===== */
@@ -3784,18 +5346,198 @@ function montarTextoEscalaWhatsApp(e){
   ].filter(Boolean).join('\n');
 }
 
+
+
+/* ===== SOPHIA — PROTÓTIPO FUNCIONAL LOCAL ===== */
+let sophiaIniciada = false;
+function toggleSophiaWidget(){
+  if(!temPermissao('sophia')){ alert('A SOPHIA não está liberada para o seu usuário.'); return; }
+  const widget=document.getElementById('sophiaWidget');
+  if(!widget)return;
+  if(widget.classList.contains('open') && !widget.classList.contains('minimized')){
+    minimizarSophiaWidget();
+    return;
+  }
+  widget.classList.add('open');
+  widget.classList.remove('minimized');
+  widget.setAttribute('aria-hidden','false');
+  iniciarSophia();
+  atualizarResumoSophia();
+  setTimeout(()=>document.getElementById('sophiaInput')?.focus(),80);
+}
+function minimizarSophiaWidget(){
+  const widget=document.getElementById('sophiaWidget'); if(!widget)return;
+  if(!widget.classList.contains('open')) return;
+  widget.classList.toggle('minimized');
+}
+function fecharSophiaWidget(){
+  const widget=document.getElementById('sophiaWidget'); if(!widget)return;
+  widget.classList.remove('open','minimized');
+  widget.setAttribute('aria-hidden','true');
+}
+window.toggleSophiaWidget=toggleSophiaWidget;
+window.minimizarSophiaWidget=minimizarSophiaWidget;
+window.fecharSophiaWidget=fecharSophiaWidget;
+function horaSophia(){ return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+function adicionarMensagemSophia(texto,tipo='sophia'){
+  const box=document.getElementById('sophiaMessages'); if(!box)return;
+  const item=document.createElement('div'); item.className='sophia-message '+(tipo==='user'?'user':'');
+  item.innerHTML=`<div class="sophia-mini-avatar">${tipo==='user'?'EU':'S'}</div><div class="sophia-bubble">${escapeHTML(texto)}<span class="sophia-time">${horaSophia()}</span></div>`;
+  box.appendChild(item); box.scrollTop=box.scrollHeight;
+}
+function iniciarSophia(){
+  atualizarResumoSophia(); if(sophiaIniciada)return; sophiaIniciada=true;
+  const nome=(usuarioAtual?.nome||'').split(' ')[0]||'Olá';
+  adicionarMensagemSophia(`Olá, ${nome}. Eu sou a SOPHIA. ✦\n\nNesta versão já consigo consultar suas tarefas, anotações, funcionários e escalas. Como posso ajudar?`);
+}
+function atualizarResumoSophia(){
+  if(!db)return;
+  const tarefas=Array.isArray(db.tarefas)?db.tarefas:[], notas=Array.isArray(db.notas)?db.notas:[], funcs=Array.isArray(db.funcionarios)?db.funcionarios:[];
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  set('sophiaPendentes',tarefas.filter(t=>statusSophiaTarefa(t)==='Pendente').length);
+  set('sophiaAndamento',tarefas.filter(t=>statusSophiaTarefa(t)==='Em andamento').length);
+  set('sophiaNotas',notas.filter(n=>!['Concluído','Arquivado'].includes(n.status)).length);
+  set('sophiaFuncionarios',funcs.filter(f=>f.status!=='DESLIGADO').length);
+}
+function statusSophiaTarefa(tarefa){
+  if(!tarefa || typeof tarefa !== 'object') return 'Aguardando';
+  if(tarefa.status === 'Concluída' || tarefa.status === 'Concluida') return 'Concluída';
+  const hoje = hojeISO();
+  const inicio = tarefa.inicio || tarefa.dataISO || '';
+  const fim = tarefa.fim || tarefa.prazo || '';
+  if(inicio && hoje < inicio) return 'Aguardando';
+  if(fim && hoje > fim) return 'Pendente';
+  if(inicio && hoje >= inicio && (!fim || hoje <= fim)) return 'Em andamento';
+  return tarefa.status || 'Aguardando';
+}
+function dataSophia(data){
+  if(!data) return '-';
+  const texto=String(data);
+  const partes=texto.slice(0,10).split('-');
+  if(partes.length===3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  return texto;
+}
+function sophiaResposta(pergunta){
+  const base=(typeof db==='object' && db) ? db : {};
+  const q=norm(pergunta), tarefas=Array.isArray(base.tarefas)?base.tarefas:[], notas=Array.isArray(base.notas)?base.notas:[], funcs=Array.isArray(base.funcionarios)?base.funcionarios:[], escalas=Array.isArray(base.escalas)?base.escalas:[];
+  const pend=tarefas.filter(t=>statusSophiaTarefa(t)==='Pendente');
+  const andamento=tarefas.filter(t=>statusSophiaTarefa(t)==='Em andamento');
+  const aguardando=tarefas.filter(t=>statusSophiaTarefa(t)==='Aguardando');
+  if(q.includes('RESUMA')||q.includes('MEU DIA')){
+    const altas=tarefas.filter(t=>t.prioridade==='Alta'&&statusSophiaTarefa(t)!=='Concluída').length;
+    const notasAltas=notas.filter(n=>n.prioridade==='Alta'&&!['Concluído','Arquivado'].includes(n.status)).length;
+    return `Resumo da sua sessão:\n• ${pend.length} tarefa(s) pendente(s)\n• ${andamento.length} em andamento\n• ${aguardando.length} aguardando início\n• ${altas} tarefa(s) de alta prioridade\n• ${notasAltas} anotação(ões) importante(s)`;
+  }
+  if(q.includes('PENDENT')){
+    if(!pend.length)return 'Você não possui tarefas pendentes neste momento.';
+    return `Você possui ${pend.length} tarefa(s) pendente(s):\n`+pend.slice(0,8).map((t,i)=>`${i+1}. ${t.atividade||t.titulo||'Tarefa sem título'}${t.fim?' — prazo '+dataSophia(t.fim):''}`).join('\n')+(pend.length>8?'\n… e mais '+(pend.length-8)+'.':'');
+  }
+  if(q.includes('ANDAMENTO')) return andamento.length?`Há ${andamento.length} tarefa(s) em andamento:\n`+andamento.slice(0,8).map((t,i)=>`${i+1}. ${t.atividade||'Tarefa sem título'}`).join('\n'):'Não há tarefas em andamento.';
+  if(q.includes('ANOT')||q.includes('RECADO')){
+    const lista=notas.filter(n=>n.prioridade==='Alta'&&!['Concluído','Arquivado'].includes(n.status));
+    if(!lista.length)return 'Não encontrei anotações importantes em aberto.';
+    return `Encontrei ${lista.length} anotação(ões) de alta prioridade:\n`+lista.slice(0,8).map((n,i)=>`${i+1}. ${n.titulo||'Sem título'} — ${n.setor||'GERAL'}`).join('\n');
+  }
+  if(q.includes('FUNCION')||q.includes('EQUIPE ATIVA')){
+    const ativos=funcs.filter(f=>f.status!=='DESLIGADO');
+    return `O quadro possui ${ativos.length} funcionário(s) ativo(s) ou temporariamente afastado(s). ${funcs.filter(f=>f.caixaOperacional==='ATIVO').length} estão com caixa operacional ativo.`;
+  }
+  if(q.includes('ESCALA')){
+    const hoje=hojeISO(); const prox=escalas.filter(e=>e.data>=hoje).sort((a,b)=>String(a.data).localeCompare(String(b.data)))[0];
+    if(!prox)return 'Não encontrei uma próxima escala cadastrada.';
+    return `Próxima escala: ${prox.tipo||'ESCALA'} em ${dataSophia(prox.data)}.\nAbertura: ${prox.abertura?.length||0} pessoa(s).\nFechamento: ${prox.fechamento?.length||0} pessoa(s).\nFolgas: ${prox.folgas?.length||0}.`;
+  }
+  if(q.includes('AJUDA')||q.includes('PODE FAZER')) return 'Você pode perguntar: “Resuma meu dia”, “Quais tarefas estão pendentes?”, “Mostre minhas anotações importantes”, “Quem está na próxima escala?” ou “Quantos funcionários estão ativos?”.';
+  return 'Ainda não reconheci esse pedido nesta versão de demonstração. Tente perguntar sobre tarefas pendentes, anotações importantes, funcionários, escala ou peça para eu resumir seu dia.';
+}
+function mostrarDigitandoSophia(){
+  const box=document.getElementById('sophiaMessages'); if(!box)return null;
+  const item=document.createElement('div');
+  item.className='sophia-message typing';
+  item.setAttribute('data-sophia-typing','1');
+  item.innerHTML='<div class="sophia-mini-avatar">S</div><div class="sophia-bubble"><span class="sophia-typing-dots" aria-label="SOPHIA está digitando"><i></i><i></i><i></i></span></div>';
+  box.appendChild(item); box.scrollTop=box.scrollHeight;
+  return item;
+}
+function removerDigitandoSophia(item){
+  if(item && item.parentNode) item.parentNode.removeChild(item);
+}
+function enviarSophia(){
+  try {
+    const input=document.getElementById('sophiaInput');
+    if(!input) return;
+    const texto=String(input.value||'').trim();
+    if(!texto) return;
+    adicionarMensagemSophia(texto,'user');
+    input.value='';
+    input.focus();
+    const digitando=mostrarDigitandoSophia();
+    const resposta=sophiaResposta(texto);
+    const espera=Math.min(1800,Math.max(700,420+resposta.length*5));
+    window.setTimeout(()=>{
+      removerDigitandoSophia(digitando);
+      adicionarMensagemSophia(resposta);
+    },espera);
+  } catch (erro) {
+    console.error('Erro ao responder na SOPHIA:', erro);
+    document.querySelectorAll('[data-sophia-typing="1"]').forEach(el=>el.remove());
+    adicionarMensagemSophia('Ocorreu um erro ao processar sua pergunta. Atualize a página e tente novamente.');
+  }
+}
+function perguntarSophia(texto){
+  const input=document.getElementById('sophiaInput');
+  if(!input) return;
+  input.value=texto;
+  enviarSophia();
+}
+function sophiaTecla(e){
+  if(e.key==='Enter'&&!e.shiftKey){
+    e.preventDefault();
+    enviarSophia();
+  }
+}
+
+// Garante funcionamento dos botões mesmo em navegadores que não expõem
+// automaticamente funções declaradas no escopo global.
+window.enviarSophia=enviarSophia;
+window.perguntarSophia=perguntarSophia;
+window.sophiaTecla=sophiaTecla;
+window.iniciarSophia=iniciarSophia;
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const input=document.getElementById('sophiaInput');
+  const botao=document.querySelector('.sophia-send');
+  if(botao && !botao.getAttribute('onclick')) botao.addEventListener('click',enviarSophia);
+  if(input) input.addEventListener('keydown',sophiaTecla);
+  document.querySelectorAll('.sophia-quick').forEach(botaoRapido=>{
+    // O onclick original continua válido; este marcador evita duplo envio.
+    botaoRapido.setAttribute('data-sophia-ready','1');
+  });
+});
+
 window.addEventListener('load', async () => {
   ['adminGerencialSessaoV1','adminGerencialSessaoV2','adminGerencialSessaoV3','adminGerencialSessaoV4','adminGerencialSessaoV5','adminGerencialSessaoV6','adminGerencialSessaoV7','adminGerencialSessaoV12Operador','adminGerencialSessaoV13Operador','adminGerencialSessaoV14Operador','adminGerencialSessaoV15Operador','adminGerencialSessaoV16Operador','adminGerencialSessaoV17Operador','adminGerencialSessaoV18Operador','adminGerencialSessaoV19Operador','adminGerencialSessaoV20Operador'].forEach(k=>localStorage.removeItem(k));
   loadDB(); await carregarConfigGlobalOnline();
   if(localStorage.getItem('adminGerencialDark')==='1'){
     document.body.classList.add('dark-mode');
+    document.documentElement.dataset.theme='dark';
     const themeBtn = document.getElementById('themeBtn');
     themeBtn.textContent='☀️';
     themeBtn.title='Ativar modo claro';
     themeBtn.setAttribute('aria-label','Ativar modo claro');
   }
   document.getElementById('mesAtual').textContent=mesAnoBR(); ocultarIdentificacaoLogin();
-  const restaurada=await trySession(); if(restaurada){ try{initApp();ativarRealtimeUsuario();} finally{hideAppLoader();} }
+  const restaurada=await trySession();
+  if(restaurada){
+    try{
+      await executarVerificacoesPosLogin();
+      initApp();
+      ativarRealtimeUsuario();
+      atualizarStatusConexao();
+    } finally {
+      hideAppLoader();
+    }
+  }
   document.getElementById('loginUser').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('loginPass').focus();}});
   document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
   window.addEventListener('online', atualizarStatusConexao);
