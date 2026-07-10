@@ -5,54 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Assistência Gerencial de Loja - Avenida V21</title>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script>
-      const SUPABASE_URL = 'https://euyrhkusnasgiueefldg.supabase.co';
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1eXJoa3VzbmFzZ2l1ZWVmbGRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzY0MTksImV4cCI6MjA5ODk1MjQxOX0.woI5Il3ObKrj8BJfdYz8DcUW08Jl5c458ykh1SrHYr4';
-      
-      // CORREÇÃO AQUI: Adicionado o objeto de configuração ativando o Realtime via WebSockets
-      const supabaseclient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-          auth: { persistSession: false },
-          realtime: {
-              params: {
-                  eventsPerSecond: 10
-              }
-          }
-      });
-
-      // 1. Função que busca as tarefas no banco de dados
-      async function carregarTarefas() {
-          const { data, error } = await supabaseclient
-              .from('tarefas')
-              .select('*');
-              
-          if (error) {
-              console.error('Erro ao buscar tarefas:', error);
-          } else {
-              console.log('Tarefas carregadas com sucesso:', data);
-              // Lembrete: se você tiver uma função que renderiza os elementos HTML 
-              // na tela (ex: atualizarListaHTML(data)), chame-a aqui.
-          }
-      }
-
-      // 2. Função que escuta o Supabase Realtime (Sincronização Automática)
-      function ativarTempoReal() {
-          supabaseclient
-              .channel('mudancas_tarefas')
-              .on('postgres_changes', { event: '*', schema: 'public', table: 'tarefas' }, (payload) => {
-                  console.log('Opa, o banco mudou! Atualizando dados...', payload);
-                  carregarTarefas(); // Recarrega os dados nos dois dispositivos
-              })
-              .subscribe((status) => {
-                  console.log('Status da conexão Realtime:', status);
-              });
-      }
-
-      // Inicialização segura do DOM
-      document.addEventListener('DOMContentLoaded', () => {
-          carregarTarefas();
-          ativarTempoReal();
-      });
-  </script>
   <style>
     :root {
       --amarelo: #F6C426;
@@ -932,8 +884,8 @@
               <div class="field w2"><label>Data de término</label><input id="tarefaFim" type="date" /></div>
               <div class="field w4"><label>Pessoa responsável</label><select id="tarefaResponsavel"></select></div>
               <div class="field w4"><label>Responsável adicional</label><select id="tarefaResponsavel2"></select></div>
-              <div class="field w2"><label>Prioridade</label><select id="tarefaPrioridade"><option>MuitoAlto</option><option>Normal</option><option>Alta</option><option>Baixa</option></select></div>
-              <div class="field w2"><label>Status</label><select id="tarefaStatus"><option value="Aguardando">Aguardando</option><option value="Em andamento">Em andamento</option><option value="Pendente">Pendente</option><option value="Concluída">Concluída</option></select></div>
+              <div class="field w2"><label>Prioridade</label><select id="tarefaPrioridade"><option>Normal</option><option>Alta</option><option>Baixa</option></select></div>
+              <div class="field w2"><label>Status</label><select id="tarefaStatus"><option value="PADRAO">Padrão</option><option value="Concluída">Concluída</option></select></div>
               <div class="field w12"><label>Observação</label><textarea id="tarefaDescricao" placeholder="Detalhe o que precisa ser feito, padrões de VM, observações da gerente, pendências de material ou qualquer ponto importante..."></textarea></div>
               <div class="field w12 actions">
                 <button class="btn" type="submit">💾 Salvar tarefa</button>
@@ -1259,6 +1211,22 @@
 const STORAGE_KEY = 'adminGerencialLojaV7';
 const SESSION_KEY = 'adminGerencialSessaoV20Operador';
 
+// ===== ARMAZENAMENTO ONLINE — SUPABASE =====
+const SUPABASE_URL = 'https://euyrhkusnasgiueefldg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1eXJoa3VzbmFzZ2l1ZWVmbGRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzY0MTksImV4cCI6MjA5ODk1MjQxOX0.woI5Il3ObKrj8BJfdYz8DcUW08Jl5c458ykh1SrHYr4';
+const SUPABASE_TABLE = 'assistencia_gerencial';
+const SUPABASE_ROW_ID = 'loja_24';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession: false },
+  realtime: { params: { eventsPerSecond: 5 } }
+});
+let syncTimer = null;
+let syncEmAndamento = false;
+let syncPendente = false;
+let realtimeChannel = null;
+let ultimaAtualizacaoRemota = '';
+
+
 const setores = [
   { id:'GERAL', nome:'GERAL', desc:'Assuntos gerais da gerência', badge:'b-geral', icon:'⭐' },
   { id:'VM', nome:'Visual Merchandising', desc:'Visual Merchandising: exposição, vitrine, layout, departamentos e comunicação visual da loja', badge:'b-vm', icon:'🎨' },
@@ -1547,9 +1515,21 @@ function aplicarOperadoresLoginFixos(){
   db.meta.operadoresLoginFixosV19 = true;
 }
 
-function loadDB(){
-  try { db = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultDB(); }
-  catch(e){ db = defaultDB(); }
+async function buscarDBOnline(){
+  const { data, error } = await supabaseClient
+    .from(SUPABASE_TABLE)
+    .select('dados, updated_at')
+    .eq('id', SUPABASE_ROW_ID)
+    .maybeSingle();
+  if(error) throw error;
+  if(data?.dados && typeof data.dados === 'object'){
+    ultimaAtualizacaoRemota = data.updated_at || '';
+    return data.dados;
+  }
+  return null;
+}
+
+function normalizarDBCarregada(){
   db.funcionarios ||= JSON.parse(JSON.stringify(funcionariosPadrao));
   deduplicarFuncionarios();
   funcionariosPadrao.forEach(f => {
@@ -1574,9 +1554,90 @@ function loadDB(){
   }
   garantirCamposFuncionarios();
   sincronizarUsuariosLogin();
-  saveDB();
 }
-function saveDB(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
+
+async function loadDB(){
+  showAppLoader('Sincronizando dados', 'Buscando a versão mais recente no Supabase...');
+  let remoto = null;
+  try {
+    remoto = await buscarDBOnline();
+  } catch(error){
+    console.error('Falha ao carregar do Supabase:', error);
+  }
+
+  if(remoto){
+    db = remoto;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); // cache de emergência
+  } else {
+    try { db = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultDB(); }
+    catch(e){ db = defaultDB(); }
+  }
+
+  normalizarDBCarregada();
+  await salvarDBOnlineAgora();
+  ativarSincronizacaoTempoReal();
+}
+
+async function salvarDBOnlineAgora(){
+  if(!db) return;
+  if(syncEmAndamento){ syncPendente = true; return; }
+  syncEmAndamento = true;
+  try{
+    db.meta ||= {};
+    db.meta.ultimaSincronizacao = new Date().toISOString();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); // somente cache/fallback
+    const { data, error } = await supabaseClient
+      .from(SUPABASE_TABLE)
+      .upsert({ id: SUPABASE_ROW_ID, dados: db, updated_at: new Date().toISOString() }, { onConflict: 'id' })
+      .select('updated_at')
+      .single();
+    if(error) throw error;
+    ultimaAtualizacaoRemota = data?.updated_at || ultimaAtualizacaoRemota;
+  } catch(error){
+    console.error('Falha ao salvar no Supabase:', error);
+    const msg = String(error?.message || error || 'Erro desconhecido');
+    if(!window.__avisoSupabaseMostrado){
+      window.__avisoSupabaseMostrado = true;
+      alert('Não foi possível salvar online no Supabase. Os dados ficaram no cache deste aparelho.\n\nDetalhe: ' + msg + '\n\nConfira se a tabela assistencia_gerencial e as políticas de acesso foram criadas.');
+    }
+  } finally {
+    syncEmAndamento = false;
+    if(syncPendente){ syncPendente = false; salvarDBOnlineAgora(); }
+  }
+}
+
+function saveDB(){
+  if(!db) return;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); // cache imediato
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => salvarDBOnlineAgora(), 350);
+}
+
+function ativarSincronizacaoTempoReal(){
+  if(realtimeChannel) return;
+  realtimeChannel = supabaseClient
+    .channel('assistencia_gerencial_loja_24')
+    .on('postgres_changes', {
+      event: '*', schema: 'public', table: SUPABASE_TABLE,
+      filter: `id=eq.${SUPABASE_ROW_ID}`
+    }, async payload => {
+      const remoto = payload.new?.dados;
+      const atualizadoEm = payload.new?.updated_at || '';
+      if(!remoto || atualizadoEm === ultimaAtualizacaoRemota) return;
+      ultimaAtualizacaoRemota = atualizadoEm;
+      db = remoto;
+      normalizarDBCarregada();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+      if(usuarioAtual){
+        sincronizarUsuariosLogin();
+        const op = normalizarOperador(usuarioAtual.operador);
+        usuarioAtual = db.usuarios.find(u => normalizarOperador(u.operador) === op) || usuarioAtual;
+        popularSelects();
+        renderAll();
+      }
+    })
+    .subscribe(status => console.log('Supabase Realtime:', status));
+}
 
 function login(){
   atualizarIdentificacaoLogin(true);
@@ -1727,6 +1788,27 @@ function badgePrioridade(p){
   return '<span class="badge b-warn">Normal</span>';
 }
 function isConcluido(item){ return ['Concluído','Concluída','Arquivado'].includes(item.status); }
+function calcularStatusTarefa(tarefa){
+  if(!tarefa) return 'Aguardando';
+  if(tarefa.status === 'Concluída' || tarefa.status === 'Concluído') return 'Concluída';
+  const hoje = hojeISO();
+  const inicio = tarefa.inicio || tarefa.dataISO || '';
+  const fim = tarefa.fim || tarefa.prazo || '';
+  if(inicio && hoje < inicio) return 'Aguardando';
+  if(fim && hoje > fim) return 'Pendente';
+  return 'Em andamento';
+}
+function atualizarStatusTarefasAutomaticos(){
+  let alterou = false;
+  (db?.tarefas || []).forEach(t => {
+    const calculado = calcularStatusTarefa(t);
+    if(t.status !== calculado){
+      t.status = calculado;
+      alterou = true;
+    }
+  });
+  return alterou;
+}
 function isAtrasado(item){ return item.prazo && item.prazo < hojeISO() && !isConcluido(item); }
 
 function salvarNota(e){
@@ -1858,11 +1940,12 @@ function salvarTarefa(e){
     responsavel: document.getElementById('tarefaResponsavel').value,
     responsavel2: document.getElementById('tarefaResponsavel2').value,
     prioridade: document.getElementById('tarefaPrioridade').value,
-    status: document.getElementById('tarefaStatus').value,
+    status: document.getElementById('tarefaStatus').value === 'Concluída' ? 'Concluída' : 'Em andamento',
     descricao: document.getElementById('tarefaDescricao').value,
     atualizadoPor: usuarioAtual.nome,
     atualizadoEm: agoraBR()
   };
+  tarefa.status = calcularStatusTarefa(tarefa);
   if(existente) Object.assign(existente, tarefa); else db.tarefas.unshift(tarefa);
   saveDB(); limparFormTarefa(); fecharModalTarefa(); renderAll();
 }
@@ -1880,11 +1963,19 @@ function editarTarefa(id, manterModal){
   document.getElementById('tarefaResponsavel').value=t.responsavel||'';
   document.getElementById('tarefaResponsavel2').value=t.responsavel2||'';
   document.getElementById('tarefaPrioridade').value=t.prioridade || 'Normal';
-  document.getElementById('tarefaStatus').value=t.status || 'Pendente';
+  document.getElementById('tarefaStatus').value=isConcluido(t) ? 'Concluída' : 'PADRAO';
   document.getElementById('tarefaDescricao').value=t.descricao||'';
   document.getElementById('modalTarefa').classList.add('active');
 }
-function setTarefaStatus(id,status){ const t=db.tarefas.find(x=>x.id===id); if(t){ t.status=status; t.atualizadoPor=usuarioAtual.nome; t.atualizadoEm=agoraBR(); saveDB(); renderAll(); } }
+function setTarefaStatus(id,status){
+  const t = db.tarefas.find(x=>x.id===id);
+  if(!t) return;
+  t.status = status === 'Concluída' ? 'Concluída' : calcularStatusTarefa({...t, status:'PADRAO'});
+  t.atualizadoPor = usuarioAtual.nome;
+  t.atualizadoEm = agoraBR();
+  saveDB();
+  renderAll();
+}
 function excluirTarefa(id){ if(confirm('Excluir esta tarefa?')){ db.tarefas=db.tarefas.filter(x=>x.id!==id); saveDB(); renderAll(); } }
 function limparFormTarefa(fechar=true){
   document.getElementById('formTarefa').reset();
@@ -2211,6 +2302,7 @@ function limparFormFuncionario(fechar=true){
 
 function renderAll(){
   if(!db || !usuarioAtual) return;
+  if(atualizarStatusTarefasAutomaticos()) saveDB();
   if(document.getElementById('fTarefaDepartamento')) popularFiltroTarefaDepartamento();
   renderPainel(); renderNotas(); renderKanban(); renderSetores(); renderFuncionarios(); renderOperadores(); renderEscalas(); renderDiario(); renderRelatorio(); renderConfig();
 }
@@ -2281,7 +2373,7 @@ function renderKanban(){
     return `<div class="lane"><h3>${st.toUpperCase()} <span class="badge b-info">${itens.length}</span></h3>${itens.length?itens.map(t=>{
       const periodo = `${t.inicio || t.dataISO || '-'} ${t.fim ? 'até ' + t.fim : ''}`;
       const responsaveis = [t.responsavel, t.responsavel2].filter(Boolean).join(' + ') || 'Não definido';
-      return `<div class="task-card"><h4>${escapeHTML(t.atividade || t.titulo)}</h4><div class="task-meta">${badgeSetor(t.setor)} ${badgePrioridade(t.prioridade)}</div><p><b>Departamento:</b> ${escapeHTML(t.departamento || 'Loja toda')}<br><b>Período:</b> ${escapeHTML(periodo)}<br><b>Resp.:</b> ${escapeHTML(responsaveis)}</p><p>${escapeHTML(t.descricao||'')}</p><div class="actions no-print"><button class="btn small secondary" onclick="abrirModalTarefa('${t.id}')">Editar</button>${st!=='Concluída'?`<button class="btn small good" onclick="setTarefaStatus('${t.id}','Concluída')">Concluir</button>`:''}<button class="btn small danger" onclick="excluirTarefa('${t.id}')">Excluir</button></div></div>`;
+      return `<div class="task-card"><h4>${escapeHTML(t.atividade || t.titulo)}</h4><div class="task-meta">${badgeSetor(t.setor)} ${badgePrioridade(t.prioridade)}</div><p><b>Departamento:</b> ${escapeHTML(t.departamento || 'Loja toda')}<br><b>Período:</b> ${escapeHTML(periodo)}<br><b>Resp.:</b> ${escapeHTML(responsaveis)}</p><p>${escapeHTML(t.descricao||'')}</p><div class="actions no-print"><button class="btn small secondary" onclick="abrirModalTarefa('${t.id}')">Editar</button>${st!=='Concluída'?`<button class="btn small good" onclick="setTarefaStatus('${t.id}','Concluída')">Concluir</button>`:`<button class="btn small secondary" onclick="setTarefaStatus('${t.id}','PADRAO')">Reabrir</button>`}<button class="btn small danger" onclick="excluirTarefa('${t.id}')">Excluir</button></div></div>`;
     }).join(''):'<div class="empty">Sem itens</div>'}</div>`;
   }).join('');
 }
@@ -3138,9 +3230,10 @@ function montarTextoEscalaWhatsApp(e){
   ].filter(Boolean).join('\n');
 }
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
   ['adminGerencialSessaoV1','adminGerencialSessaoV2','adminGerencialSessaoV3','adminGerencialSessaoV4','adminGerencialSessaoV5','adminGerencialSessaoV6','adminGerencialSessaoV7','adminGerencialSessaoV12Operador','adminGerencialSessaoV13Operador','adminGerencialSessaoV14Operador','adminGerencialSessaoV15Operador','adminGerencialSessaoV16Operador','adminGerencialSessaoV17Operador','adminGerencialSessaoV18Operador','adminGerencialSessaoV19Operador'].forEach(k => localStorage.removeItem(k));
-  loadDB();
+  await loadDB();
+  hideAppLoader();
   if(localStorage.getItem('adminGerencialDark')==='1') { document.body.classList.add('dark-mode'); document.getElementById('themeBtn').textContent='☀️ Modo Claro'; }
   document.getElementById('mesAtual').textContent = mesAnoBR();
   ocultarIdentificacaoLogin();
@@ -3149,6 +3242,7 @@ window.addEventListener('load', () => {
   document.getElementById('loginUser').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); document.getElementById('loginPass').focus(); } });
   document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
 });
+window.addEventListener('beforeunload', () => { if(db) localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); });
 </script>
 </body>
 </html>
