@@ -358,7 +358,14 @@
     .user-name { font-weight: 1000; font-size:.94rem; }
     .user-role { font-size:.76rem; font-weight:800; opacity:.78; margin-top: 3px; }
 
-    .nav { padding: 4px 12px 14px; overflow-y:auto; }
+    .nav { padding: 4px 12px 14px; overflow-y:auto; scrollbar-width: thin; scrollbar-color: rgba(100,116,139,.85) transparent; }
+    .nav::-webkit-scrollbar { width: 9px; height: 9px; }
+    .nav::-webkit-scrollbar-track { background: transparent; }
+    .nav::-webkit-scrollbar-thumb { background: rgba(100,116,139,.82); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+    .nav::-webkit-scrollbar-thumb:hover { background: rgba(71,85,105,.95); border: 2px solid transparent; background-clip: padding-box; }
+    body.dark-mode .nav { scrollbar-color: rgba(203,213,225,.68) transparent; }
+    body.dark-mode .nav::-webkit-scrollbar-thumb { background: rgba(203,213,225,.62); border: 2px solid transparent; background-clip: padding-box; }
+    body.dark-mode .nav::-webkit-scrollbar-thumb:hover { background: rgba(241,245,249,.82); border: 2px solid transparent; background-clip: padding-box; }
     .nav-btn {
       width:100%; display:flex; align-items:center; gap:10px; padding: 12px 12px; margin: 5px 0;
       border:0; border-radius: 14px; background: transparent; color: var(--preto-logo); cursor:pointer;
@@ -1254,6 +1261,7 @@ const STORAGE_KEY = 'adminGerencialLojaV7';
 const SESSION_KEY = 'adminGerencialSessaoV21Individual';
 const ONLINE_TABLE = 'assistencia_gerencial';
 const GLOBAL_ROW_ID = 'config_global_v1';
+const SHARED_ROW_ID = 'dados_compartilhados_v1';
 const MODULOS = [
   ['painel','Painel Geral'],['anotacoes','Central de Anotações'],['tarefas','Quadro de Tarefas'],
   ['setores','Setores'],['funcionarios','Quadro de Funcionários'],['operadores','Operadores'],
@@ -1555,7 +1563,7 @@ function setSyncStatus(texto, estado){
 }
 function atualizarStatusConexao(){
   if(!navigator.onLine) setSyncStatus('OFFLINE • dados no aparelho','offline');
-  else if(usuarioAtual) setSyncStatus('ONLINE • dados individuais','online');
+  else if(usuarioAtual) setSyncStatus('ONLINE • dados sincronizados','online');
   else setSyncStatus('ONLINE • aguardando login','online');
 }
 async function carregarConfigGlobalOnline(){
@@ -1591,23 +1599,78 @@ function aplicarPermissoes(){
   const ativa=document.querySelector('.page.active')?.id;
   if(ativa && !perms[ativa]) showPage('painel');
 }
+function dadosIndividuaisDoDB(base=db){
+  return {
+    notas: Array.isArray(base?.notas) ? base.notas : [],
+    tarefas: Array.isArray(base?.tarefas) ? base.tarefas : []
+  };
+}
+function dadosCompartilhadosDoDB(base=db){
+  const copia = {...(base || {})};
+  delete copia.notas;
+  delete copia.tarefas;
+  return copia;
+}
+function aplicarDadosCompartilhados(compartilhados){
+  if(!compartilhados || typeof compartilhados !== 'object') return;
+  const individuais = dadosIndividuaisDoDB(db);
+  db = {...defaultDB(), ...compartilhados, ...individuais};
+}
+async function carregarDadosCompartilhadosOnline(){
+  try{
+    let {data,error}=await supabaseclient.from(ONLINE_TABLE).select('dados').eq('id',SHARED_ROW_ID).maybeSingle();
+    if(error) throw error;
+    if(!data?.dados){
+      // Migração segura: usa prioritariamente os dados já existentes do operador 133.
+      const {data:fonte133,error:erro133}=await supabaseclient.from(ONLINE_TABLE).select('dados').eq('id','usuario_133').maybeSingle();
+      if(erro133) throw erro133;
+      const fonte = fonte133?.dados || db || defaultDB();
+      const compartilhados = dadosCompartilhadosDoDB(fonte);
+      const {error:erroCriar}=await supabaseclient.from(ONLINE_TABLE).upsert({id:SHARED_ROW_ID,dados:compartilhados,updated_at:new Date().toISOString()},{onConflict:'id'});
+      if(erroCriar) throw erroCriar;
+      data={dados:compartilhados};
+    }
+    aplicarDadosCompartilhados(data.dados);
+    localStorage.setItem(`${STORAGE_KEY}_compartilhado`,JSON.stringify(data.dados));
+    return true;
+  }catch(err){
+    console.error('Falha ao carregar dados compartilhados:',err);
+    try{
+      const cache=JSON.parse(localStorage.getItem(`${STORAGE_KEY}_compartilhado`)||'null');
+      if(cache) aplicarDadosCompartilhados(cache);
+    }catch(_){ }
+    return false;
+  }
+}
 async function carregarDadosUsuarioOnline(op){
   const operador=normalizarOperador(op); const rowId=`usuario_${operador}`;
   setSyncStatus('SINCRONIZANDO...','syncing');
   try{
     const {data,error}=await supabaseclient.from(ONLINE_TABLE).select('dados').eq('id',rowId).maybeSingle();
     if(error) throw error;
-    if(data?.dados){ db={...defaultDB(),...data.dados}; }
-    else {
+    if(data?.dados){
+      // Compatível com versões anteriores, mas preserva somente anotações e tarefas como individuais.
+      db={...defaultDB(),...dadosIndividuaisDoDB(data.dados)};
+    } else {
       const legado=localStorage.getItem(STORAGE_KEY);
-      db=(operador==='133'&&legado)?{...defaultDB(),...JSON.parse(legado)}:defaultDB();
-      await salvarDadosUsuarioOnline(true);
+      const fonte=(operador==='133'&&legado)?{...defaultDB(),...JSON.parse(legado)}:defaultDB();
+      db={...defaultDB(),...dadosIndividuaisDoDB(fonte)};
     }
-    localStorage.setItem(chaveLocalUsuario(operador),JSON.stringify(db));
-    prepararDBCarregado(); setSyncStatus('ONLINE • dados individuais','online'); return true;
+    await carregarDadosCompartilhadosOnline();
+    prepararDBCarregado();
+    localStorage.setItem(chaveLocalUsuario(operador),JSON.stringify(dadosIndividuaisDoDB(db)));
+    setSyncStatus('ONLINE • dados sincronizados','online');
+    // Garante a migração do registro individual antigo para o formato enxuto.
+    await salvarDadosUsuarioOnline(true);
+    return true;
   }catch(err){
-    console.error('Falha ao carregar dados individuais:',err);
-    try{ db=JSON.parse(localStorage.getItem(chaveLocalUsuario(operador)))||defaultDB(); }catch(e){ db=defaultDB(); }
+    console.error('Falha ao carregar dados:',err);
+    try{
+      const cacheIndividual=JSON.parse(localStorage.getItem(chaveLocalUsuario(operador))||'null')||{};
+      db={...defaultDB(),...dadosIndividuaisDoDB(cacheIndividual)};
+      const cacheCompartilhado=JSON.parse(localStorage.getItem(`${STORAGE_KEY}_compartilhado`)||'null');
+      if(cacheCompartilhado) aplicarDadosCompartilhados(cacheCompartilhado);
+    }catch(e){ db=defaultDB(); }
     prepararDBCarregado(); setSyncStatus('OFFLINE • cache deste aparelho','offline'); return false;
   }
 }
@@ -1619,10 +1682,18 @@ function prepararDBCarregado(){
 }
 async function salvarDadosUsuarioOnline(silencioso=false){
   if(!usuarioAtual||aplicandoRemoto) return;
-  const op=normalizarOperador(usuarioAtual.operador); localStorage.setItem(chaveLocalUsuario(op),JSON.stringify(db));
+  const op=normalizarOperador(usuarioAtual.operador);
+  const individuais=dadosIndividuaisDoDB(db);
+  const compartilhados=dadosCompartilhadosDoDB(db);
+  localStorage.setItem(chaveLocalUsuario(op),JSON.stringify(individuais));
+  localStorage.setItem(`${STORAGE_KEY}_compartilhado`,JSON.stringify(compartilhados));
   try{
     if(!silencioso)setSyncStatus('SALVANDO ONLINE...','syncing');
-    const {error}=await supabaseclient.from(ONLINE_TABLE).upsert({id:`usuario_${op}`,dados:db,updated_at:new Date().toISOString()},{onConflict:'id'});
+    const agora=new Date().toISOString();
+    const {error}=await supabaseclient.from(ONLINE_TABLE).upsert([
+      {id:`usuario_${op}`,dados:individuais,updated_at:agora},
+      {id:SHARED_ROW_ID,dados:compartilhados,updated_at:agora}
+    ],{onConflict:'id'});
     if(error) throw error; setSyncStatus('ONLINE • salvo agora','online');
   }catch(err){ console.error(err); setSyncStatus('OFFLINE • salvo no aparelho','offline'); if(!silencioso) alert('Não foi possível salvar online agora. Os dados ficaram no cache deste aparelho.\n\nDetalhe: '+err.message); }
 }
@@ -1633,7 +1704,24 @@ function ativarRealtimeUsuario(){
   realtimeChannel=supabaseclient.channel(`assistencia_${op}_${Date.now()}`)
    .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.usuario_${op}`},async()=>{
       const {data}=await supabaseclient.from(ONLINE_TABLE).select('dados').eq('id',`usuario_${op}`).maybeSingle();
-      if(data?.dados){ aplicandoRemoto=true; db={...defaultDB(),...data.dados}; prepararDBCarregado(); localStorage.setItem(chaveLocalUsuario(op),JSON.stringify(db)); renderAll(); aplicandoRemoto=false; setSyncStatus('Online • atualizado em tempo real'); }
+      if(data?.dados){
+        aplicandoRemoto=true;
+        const compartilhados=dadosCompartilhadosDoDB(db);
+        db={...defaultDB(),...compartilhados,...dadosIndividuaisDoDB(data.dados)};
+        prepararDBCarregado();
+        localStorage.setItem(chaveLocalUsuario(op),JSON.stringify(dadosIndividuaisDoDB(db)));
+        renderAll(); aplicandoRemoto=false; setSyncStatus('ONLINE • tarefas e anotações atualizadas','online');
+      }
+   })
+   .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${SHARED_ROW_ID}`},async()=>{
+      const {data}=await supabaseclient.from(ONLINE_TABLE).select('dados').eq('id',SHARED_ROW_ID).maybeSingle();
+      if(data?.dados){
+        aplicandoRemoto=true;
+        aplicarDadosCompartilhados(data.dados);
+        prepararDBCarregado();
+        localStorage.setItem(`${STORAGE_KEY}_compartilhado`,JSON.stringify(data.dados));
+        popularSelects(); renderAll(); aplicandoRemoto=false; setSyncStatus('ONLINE • dados da loja atualizados','online');
+      }
    })
    .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${GLOBAL_ROW_ID}`},async()=>{ await carregarConfigGlobalOnline(); usuarioAtual=usuarioGlobalPorOperador(op)||usuarioAtual; aplicarPermissoes(); renderAll(); })
    .subscribe();
@@ -1697,7 +1785,7 @@ async function login(){
   const err=document.getElementById('loginError');
   if(!operadorInput){err.textContent='Informe o número de operador.';return;}
   err.textContent='';
-  showAppLoader('Entrando no sistema','Validando acesso e carregando sua sessão individual...');
+  showAppLoader('Entrando no sistema','Validando acesso e carregando os dados da loja...');
   try{
     await carregarConfigGlobalOnline();
     const user=usuarioGlobalPorOperador(operadorInput);
