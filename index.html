@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Assistência Gerencial de Loja - Avenida V39</title>
+  <title>Assistência Gerencial de Loja - Avenida V39.1</title>
   <script>
     /* Aplica o tema antes da primeira pintura para impedir o clarão ao abrir ou sair. */
     (() => {
@@ -45,6 +45,7 @@
       const SOPHIA_FUNCTION_NAME = 'sophia-chat';
       const SOPHIA_SESSION_KEY = 'sophiaSessaoSeguraV1';
       const SOPHIA_HISTORY_KEY = 'sophiaHistoricoSessaoV1';
+      const SOPHIA_BUILD = 'V39.1-SEMPREFLIGHT';
   </script>
   <style>
     :root {
@@ -6628,12 +6629,17 @@ async function chamarSophiaApi(payload){
   const timer=setTimeout(()=>controller.abort(),30000);
   try{
     const endpoint=`${SUPABASE_URL}/functions/v1/${SOPHIA_FUNCTION_NAME}`;
+    // Requisição simples, sem headers personalizados. Como a Edge Function está
+    // pública (Verify JWT desativado), isso evita o preflight OPTIONS que alguns
+    // navegadores/redes estavam bloqueando com "Failed to fetch". A segurança
+    // continua sendo feita pelo login do operador e pelo token assinado da SOPHIA.
     const resposta=await fetch(endpoint,{
       method:'POST',
+      mode:'cors',
+      credentials:'omit',
+      cache:'no-store',
       headers:{
-        'Content-Type':'application/json',
-        'apikey':SUPABASE_ANON_KEY,
-        'Authorization':`Bearer ${SUPABASE_ANON_KEY}`
+        'Content-Type':'text/plain;charset=UTF-8'
       },
       body:JSON.stringify(payload),
       signal:controller.signal
