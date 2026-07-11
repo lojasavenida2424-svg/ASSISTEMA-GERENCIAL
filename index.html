@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Assistência Gerencial de Loja - Avenida V38</title>
+  <title>Assistência Gerencial de Loja - Avenida V39</title>
   <script>
     /* Aplica o tema antes da primeira pintura para impedir o clarão ao abrir ou sair. */
     (() => {
@@ -39,6 +39,12 @@
       });
 
       // A sincronização online por usuário é inicializada após o login.
+
+      // SOPHIA V39 — a chave da OpenAI nunca fica neste HTML.
+      // O navegador conversa apenas com a Edge Function segura do Supabase.
+      const SOPHIA_FUNCTION_NAME = 'sophia-chat';
+      const SOPHIA_SESSION_KEY = 'sophiaSessaoSeguraV1';
+      const SOPHIA_HISTORY_KEY = 'sophiaHistoricoSessaoV1';
   </script>
   <style>
     :root {
@@ -1090,6 +1096,50 @@
       .sophia-launcher-label { display:none; }
       .sophia-widget { right:10px; bottom:72px; width:calc(100vw - 20px); height:min(72vh, 590px); border-radius:20px; }
     }
+
+
+    /* ===== SOPHIA V39 — IA ONLINE, STATUS E FONTES ===== */
+    .sophia-online-bar {
+      display:flex; align-items:center; justify-content:space-between; gap:8px;
+      padding:8px 11px; border-bottom:1px solid rgba(255,255,255,.30);
+      background:rgba(255,255,255,.30); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+    }
+    .sophia-ai-status {
+      display:inline-flex; align-items:center; gap:7px; min-width:0;
+      color:var(--text); font-size:.70rem; line-height:1.2; font-weight:950;
+    }
+    .sophia-ai-status::before {
+      content:""; width:8px; height:8px; flex:0 0 auto; border-radius:50%;
+      background:#F59E0B; box-shadow:0 0 0 4px rgba(245,158,11,.14);
+    }
+    .sophia-ai-status.online::before { background:#22C55E; box-shadow:0 0 0 4px rgba(34,197,94,.15); }
+    .sophia-ai-status.offline::before { background:#EF4444; box-shadow:0 0 0 4px rgba(239,68,68,.14); }
+    .sophia-ai-status.connecting::before { background:#F59E0B; animation:loaderPulse 1.05s ease-in-out infinite; }
+    .sophia-web-toggle {
+      flex:0 0 auto; border:1px solid var(--border); border-radius:999px; padding:6px 9px;
+      background:var(--page); color:var(--text); cursor:pointer; font-size:.68rem; font-weight:950;
+    }
+    .sophia-web-toggle.active { background:var(--blue-bg); color:var(--blue); border-color:color-mix(in srgb,var(--blue) 28%,var(--border)); }
+    .sophia-web-toggle:disabled { opacity:.55; cursor:not-allowed; }
+    .sophia-widget .sophia-bubble { overflow-wrap:anywhere; }
+    .sophia-sources {
+      margin-top:10px; padding-top:9px; border-top:1px solid rgba(255,255,255,.22);
+      display:grid; gap:6px;
+    }
+    .sophia-sources strong { font-size:.70rem; letter-spacing:.04em; text-transform:uppercase; opacity:.78; }
+    .sophia-sources a {
+      display:block; color:inherit; text-decoration:none; font-size:.72rem; font-weight:850;
+      padding:7px 8px; border-radius:10px; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.15);
+    }
+    .sophia-sources a:hover { text-decoration:underline; background:rgba(255,255,255,.16); }
+    .sophia-message.user .sophia-sources { display:none; }
+    .sophia-send:disabled { opacity:.55; cursor:not-allowed; }
+    body.dark-mode .sophia-online-bar { background:rgba(46,13,30,.30); border-bottom-color:rgba(255,255,255,.12); }
+    body.dark-mode .sophia-ai-status { color:#F7F4EE; }
+    body.dark-mode .sophia-web-toggle { background:#25282E; color:#F7F4EE; border-color:rgba(255,205,9,.20); }
+    body.dark-mode .sophia-web-toggle.active { background:rgba(255,205,9,.14); color:#FFCD09; border-color:rgba(255,205,9,.28); }
+    body.dark-mode .sophia-sources { border-top-color:rgba(255,255,255,.16); }
+    body.dark-mode .sophia-sources a { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.12); }
 
     @media print {
       @page { size: A4 landscape; margin: 8mm; }
@@ -3412,34 +3462,39 @@
 
 
 
-      <!-- SOPHIA FLUTUANTE -->
+      <!-- SOPHIA FLUTUANTE — V39 IA ONLINE -->
       <button id="sophiaLauncher" class="sophia-launcher no-print" type="button" onclick="toggleSophiaWidget()" title="Abrir SOPHIA" aria-label="Abrir SOPHIA">
         <span class="sophia-launcher-icon">S</span>
         <span class="sophia-launcher-label">SOPHIA</span>
-        <span class="sophia-launcher-status"></span>
+        <span id="sophiaLauncherStatus" class="sophia-launcher-status"></span>
       </button>
 
       <section id="sophiaWidget" class="sophia-widget no-print" aria-hidden="true">
         <div class="sophia-floating-head">
           <div class="sophia-identity">
             <div class="sophia-avatar">S</div>
-            <div><h1>SOPHIA</h1><p>Assistente inteligente da Loja 24</p></div>
+            <div><h1>SOPHIA</h1><p id="sophiaSubtitle">IA + dados internos da Loja 24</p></div>
           </div>
           <div class="sophia-window-actions">
+            <button type="button" onclick="limparConversaSophia()" title="Limpar conversa" aria-label="Limpar conversa da SOPHIA">↻</button>
             <button type="button" onclick="minimizarSophiaWidget()" title="Minimizar" aria-label="Minimizar SOPHIA">—</button>
             <button type="button" onclick="fecharSophiaWidget()" title="Fechar" aria-label="Fechar SOPHIA">✕</button>
           </div>
         </div>
         <div class="sophia-floating-body">
+          <div class="sophia-online-bar">
+            <span id="sophiaStatus" class="sophia-ai-status connecting">Verificando a IA online...</span>
+            <button id="sophiaWebToggle" class="sophia-web-toggle active" type="button" onclick="alternarPesquisaSophia()" title="Ativar ou desativar pesquisa na internet">🌐 Internet ativa</button>
+          </div>
           <div class="sophia-floating-shortcuts">
             <button class="sophia-quick" onclick="perguntarSophia('Resuma meu dia')">☀️ Resumo</button>
             <button class="sophia-quick" onclick="perguntarSophia('Quais tarefas estão pendentes?')">🔴 Pendentes</button>
             <button class="sophia-quick" onclick="perguntarSophia('Mostre minhas anotações importantes')">📝 Anotações</button>
             <button class="sophia-quick" onclick="perguntarSophia('Quem está na próxima escala?')">🗓️ Escala</button>
           </div>
-          <div id="sophiaMessages" class="sophia-messages"></div>
+          <div id="sophiaMessages" class="sophia-messages" aria-live="polite"></div>
           <div class="sophia-compose">
-            <textarea id="sophiaInput" placeholder="Digite sua mensagem..."></textarea>
+            <textarea id="sophiaInput" maxlength="4000" placeholder="Pergunte sobre o sistema ou qualquer assunto..."></textarea>
             <button class="sophia-send" type="button" onclick="enviarSophia()" title="Enviar">➤</button>
           </div>
         </div>
@@ -3798,35 +3853,38 @@ async function verificarConexaoInternet(){
     };
   }
 }
-function verificarIAFuncionando(){
+async function verificarIAFuncionando(){
   try{
     const funcoesOk =
       typeof sophiaResposta === 'function' &&
       typeof enviarSophia === 'function' &&
-      typeof perguntarSophia === 'function';
+      typeof perguntarSophia === 'function' &&
+      typeof chamarSophiaApi === 'function';
 
-    if(!funcoesOk){
-      throw new Error('Funções principais da SOPHIA não foram carregadas.');
+    if(!funcoesOk) throw new Error('Funções principais da SOPHIA não foram carregadas.');
+
+    const respostaLocal = sophiaResposta('AJUDA');
+    if(typeof respostaLocal !== 'string' || respostaLocal.trim().length < 20){
+      throw new Error('O modo local da SOPHIA não respondeu corretamente.');
     }
 
-    const respostaTeste = sophiaResposta('AJUDA');
-    const respostaValida =
-      typeof respostaTeste === 'string' &&
-      respostaTeste.trim().length >= 20;
-
-    if(!respostaValida){
-      throw new Error('A SOPHIA não retornou uma resposta válida no autoteste.');
+    if(!navigator.onLine){
+      atualizarStatusSophia('offline','Modo local • sem internet');
+      return { ok:false, detalhe:'SOPHIA local disponível, mas a IA online aguarda conexão com a internet.' };
     }
 
-    return {
-      ok:true,
-      detalhe:'SOPHIA executou o autoteste e respondeu corretamente.'
-    };
+    const health = await comTimeout(chamarSophiaApi({action:'health'}), 5000);
+    if(!health?.ok) throw new Error(health?.error || 'Serviço de IA indisponível.');
+    if(!health.openai_configured) throw new Error('A chave da OpenAI ainda não foi configurada na Edge Function.');
+    if(!health.session_secret_configured) throw new Error('O segredo de sessão da SOPHIA ainda não foi configurado.');
+    atualizarStatusSophia('online','IA online • pesquisa disponível');
+    return { ok:true, detalhe:'SOPHIA online respondeu e a pesquisa na internet está disponível.' };
   }catch(err){
-    console.error('Falha no autoteste da IA:', err);
+    console.error('Falha no autoteste online da IA:', err);
+    atualizarStatusSophia('offline','Modo local • integração pendente');
     return {
       ok:false,
-      detalhe:'O módulo da SOPHIA não respondeu corretamente ao autoteste.'
+      detalhe:'SOPHIA local funcionando. A integração online ainda não respondeu.'
     };
   }
 }
@@ -4014,7 +4072,7 @@ async function executarVerificacoesPosLogin(){
 
   setAppLoaderCheck('ia','checking','Executando autoteste funcional da SOPHIA...');
   await esperar(180);
-  const ia = verificarIAFuncionando();
+  const ia = await verificarIAFuncionando();
   setAppLoaderCheck('ia', ia.ok ? 'success' : 'error', ia.detalhe);
 
   setAppLoaderCheck('sync','checking','Conferindo leitura e gravação dos dados online...');
@@ -4455,6 +4513,7 @@ async function login(){
     sessionStorage.setItem(SESSION_KEY,JSON.stringify({nome:user.nome,operador:user.operador,loginEm:agoraBR()}));
     await carregarDadosUsuarioOnline(operadorInput);
     atualizarIdentidadeUsuarioAtual();
+    await criarSessaoSophia(operadorInput, pass);
     await executarVerificacoesPosLogin();
     initApp();
     ativarRealtimeUsuario();
@@ -4548,7 +4607,7 @@ async function trySession(){
   catch(e){usuarioAtual=null;return false;}
 }
 
-function logout(){ sessionStorage.removeItem(SESSION_KEY); localStorage.removeItem(SESSION_KEY); location.reload(); }
+function logout(){ sessionStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(SOPHIA_SESSION_KEY); sessionStorage.removeItem(SOPHIA_HISTORY_KEY); localStorage.removeItem(SESSION_KEY); location.reload(); }
 
 function initApp(){
   if(!usuarioAtual) return;
@@ -6521,8 +6580,67 @@ function montarTextoEscalaWhatsApp(e){
 
 
 
-/* ===== SOPHIA — PROTÓTIPO FUNCIONAL LOCAL ===== */
+/* ===== SOPHIA V39 — IA ONLINE + MODO LOCAL ===== */
 let sophiaIniciada = false;
+let sophiaOcupada = false;
+let sophiaPesquisaWeb = true;
+let sophiaHistorico = [];
+
+try{
+  const historicoSalvo = JSON.parse(sessionStorage.getItem(SOPHIA_HISTORY_KEY) || '[]');
+  if(Array.isArray(historicoSalvo)) sophiaHistorico = historicoSalvo.slice(-12);
+}catch(_){ sophiaHistorico = []; }
+
+function tokenSophiaAtual(){
+  return sessionStorage.getItem(SOPHIA_SESSION_KEY) || '';
+}
+function salvarHistoricoSophia(){
+  try{ sessionStorage.setItem(SOPHIA_HISTORY_KEY, JSON.stringify(sophiaHistorico.slice(-12))); }catch(_){ }
+}
+function atualizarStatusSophia(estado='connecting', texto='Verificando...'){
+  const status=document.getElementById('sophiaStatus');
+  if(status){ status.className=`sophia-ai-status ${estado}`; status.textContent=texto; }
+  const launcher=document.getElementById('sophiaLauncherStatus');
+  if(launcher){
+    launcher.style.background=estado==='online'?'#22C55E':(estado==='offline'?'#EF4444':'#F59E0B');
+    launcher.style.boxShadow=estado==='online'?'0 0 0 4px rgba(34,197,94,.15)':(estado==='offline'?'0 0 0 4px rgba(239,68,68,.14)':'0 0 0 4px rgba(245,158,11,.14)');
+  }
+  const subtitle=document.getElementById('sophiaSubtitle');
+  if(subtitle) subtitle.textContent=estado==='online'?'IA + dados internos da Loja 24':'Assistente local da Loja 24';
+}
+async function chamarSophiaApi(payload){
+  const {data,error}=await supabaseclient.functions.invoke(SOPHIA_FUNCTION_NAME,{body:payload});
+  if(error) throw new Error(error.message || 'Falha ao acessar a Edge Function da SOPHIA.');
+  if(!data || data.ok===false) throw new Error(data?.error || 'Resposta inválida do serviço da SOPHIA.');
+  return data;
+}
+async function criarSessaoSophia(operador, senha){
+  if(!navigator.onLine){
+    atualizarStatusSophia('offline','Modo local • sem internet');
+    return false;
+  }
+  atualizarStatusSophia('connecting','Conectando à IA online...');
+  try{
+    const resposta=await comTimeout(chamarSophiaApi({action:'session',operador:normalizarOperador(operador),senha:String(senha||'')}),7000);
+    if(!resposta?.token) throw new Error('O servidor não forneceu uma sessão válida.');
+    sessionStorage.setItem(SOPHIA_SESSION_KEY,resposta.token);
+    atualizarStatusSophia('online','IA online • pesquisa disponível');
+    return true;
+  }catch(err){
+    console.warn('SOPHIA online não iniciou; modo local mantido:',err);
+    sessionStorage.removeItem(SOPHIA_SESSION_KEY);
+    atualizarStatusSophia('offline','Modo local • integração pendente');
+    return false;
+  }
+}
+function alternarPesquisaSophia(){
+  sophiaPesquisaWeb=!sophiaPesquisaWeb;
+  const botao=document.getElementById('sophiaWebToggle');
+  if(botao){
+    botao.classList.toggle('active',sophiaPesquisaWeb);
+    botao.textContent=sophiaPesquisaWeb?'🌐 Internet ativa':'🌐 Internet desligada';
+  }
+}
 function toggleSophiaWidget(){
   if(!temPermissao('sophia')){ alert('A SOPHIA não está liberada para o seu usuário.'); return; }
   const widget=document.getElementById('sophiaWidget');
@@ -6548,20 +6666,67 @@ function fecharSophiaWidget(){
   widget.classList.remove('open','minimized');
   widget.setAttribute('aria-hidden','true');
 }
+function limparConversaSophia(){
+  const box=document.getElementById('sophiaMessages');
+  if(box) box.innerHTML='';
+  sophiaHistorico=[];
+  salvarHistoricoSophia();
+  sophiaIniciada=false;
+  iniciarSophia();
+}
 window.toggleSophiaWidget=toggleSophiaWidget;
 window.minimizarSophiaWidget=minimizarSophiaWidget;
 window.fecharSophiaWidget=fecharSophiaWidget;
+window.limparConversaSophia=limparConversaSophia;
+window.alternarPesquisaSophia=alternarPesquisaSophia;
+
 function horaSophia(){ return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
-function adicionarMensagemSophia(texto,tipo='sophia'){
+function adicionarMensagemSophia(texto,tipo='sophia',opcoes={}){
   const box=document.getElementById('sophiaMessages'); if(!box)return;
-  const item=document.createElement('div'); item.className='sophia-message '+(tipo==='user'?'user':'');
-  item.innerHTML=`<div class="sophia-mini-avatar">${tipo==='user'?'EU':'S'}</div><div class="sophia-bubble">${escapeHTML(texto)}<span class="sophia-time">${horaSophia()}</span></div>`;
-  box.appendChild(item); box.scrollTop=box.scrollHeight;
+  const item=document.createElement('div');
+  item.className='sophia-message '+(tipo==='user'?'user':'');
+  const avatar=document.createElement('div');
+  avatar.className='sophia-mini-avatar';
+  avatar.textContent=tipo==='user'?'EU':'S';
+  const bubble=document.createElement('div');
+  bubble.className='sophia-bubble';
+  bubble.appendChild(document.createTextNode(String(texto||'')));
+
+  const fontes=Array.isArray(opcoes.fontes)?opcoes.fontes.filter(f=>f&&f.url).slice(0,8):[];
+  if(tipo!=='user' && fontes.length){
+    const bloco=document.createElement('div');
+    bloco.className='sophia-sources';
+    const titulo=document.createElement('strong');
+    titulo.textContent='Fontes consultadas';
+    bloco.appendChild(titulo);
+    fontes.forEach((fonte,indice)=>{
+      const link=document.createElement('a');
+      link.href=fonte.url;
+      link.target='_blank';
+      link.rel='noopener noreferrer';
+      link.textContent=`${indice+1}. ${fonte.title||new URL(fonte.url).hostname}`;
+      bloco.appendChild(link);
+    });
+    bubble.appendChild(bloco);
+  }
+  const hora=document.createElement('span');
+  hora.className='sophia-time';
+  hora.textContent=horaSophia();
+  bubble.appendChild(hora);
+  item.append(avatar,bubble);
+  box.appendChild(item);
+  box.scrollTop=box.scrollHeight;
 }
 function iniciarSophia(){
   atualizarResumoSophia(); if(sophiaIniciada)return; sophiaIniciada=true;
   const nome=(usuarioAtual?.nome||'').split(' ')[0]||'Olá';
-  adicionarMensagemSophia(`Olá, ${nome}. Eu sou a SOPHIA. ✦\n\nNesta versão já consigo consultar suas tarefas, anotações, funcionários e escalas. Como posso ajudar?`);
+  const online=!!tokenSophiaAtual();
+  atualizarStatusSophia(online?'online':'offline',online?'IA online • pesquisa disponível':'Modo local • integração pendente');
+  adicionarMensagemSophia(
+    online
+      ? `Olá, ${nome}. Eu sou a SOPHIA. ✦\n\nAgora posso responder perguntas abertas, consultar os dados do sistema e pesquisar informações atuais na internet. Como posso ajudar?`
+      : `Olá, ${nome}. Eu sou a SOPHIA. ✦\n\nO modo local está disponível para tarefas, anotações, funcionários e escalas. A IA online será ativada assim que a Edge Function for configurada e você entrar novamente.`
+  );
 }
 function atualizarResumoSophia(){
   if(!db)return;
@@ -6620,8 +6785,48 @@ function sophiaResposta(pergunta){
     if(!prox)return 'Não encontrei uma próxima escala cadastrada.';
     return `Próxima escala: ${prox.tipo||'ESCALA'} em ${dataSophia(prox.data)}.\nAbertura: ${prox.abertura?.length||0} pessoa(s).\nFechamento: ${prox.fechamento?.length||0} pessoa(s).\nFolgas: ${prox.folgas?.length||0}.`;
   }
-  if(q.includes('AJUDA')||q.includes('PODE FAZER')) return 'Você pode perguntar: “Resuma meu dia”, “Quais tarefas estão pendentes?”, “Mostre minhas anotações importantes”, “Quem está na próxima escala?” ou “Quantos funcionários estão ativos?”.';
-  return 'Ainda não reconheci esse pedido nesta versão de demonstração. Tente perguntar sobre tarefas pendentes, anotações importantes, funcionários, escala ou peça para eu resumir seu dia.';
+  if(q.includes('AJUDA')||q.includes('PODE FAZER')) return 'Você pode perguntar sobre tarefas, anotações, funcionários e escalas. Com a IA online ativa, também pode fazer perguntas gerais e solicitar pesquisas atuais na internet.';
+  return 'A IA online não está disponível nesta sessão. No modo local, tente perguntar sobre tarefas pendentes, anotações importantes, funcionários, escala ou peça para eu resumir seu dia.';
+}
+function nomePessoaEscalaSophia(item){
+  if(!item) return '';
+  if(typeof item==='string') return nomeFuncionarioPorId(item)||item;
+  return item.nome || nomeFuncionarioPorId(item.id||item.funcionarioId) || item.id || '';
+}
+function montarContextoSophiaSeguro(){
+  const base=(typeof db==='object'&&db)?db:{};
+  const tarefas=(Array.isArray(base.tarefas)?base.tarefas:[]).slice(-40).map(t=>({
+    titulo:t.atividade||t.titulo||'Tarefa sem título', setor:t.setor||'', area:t.area||'',
+    status:statusSophiaTarefa(t), prioridade:t.prioridade||'', inicio:t.inicio||t.dataISO||'',
+    prazo:t.fim||t.prazo||'', responsavel:t.responsavel||'', observacao:String(t.observacao||t.descricao||'').slice(0,350)
+  }));
+  const notas=(Array.isArray(base.notas)?base.notas:[]).slice(-30).map(n=>({
+    titulo:n.titulo||'Sem título', setor:n.setor||'', prioridade:n.prioridade||'', status:n.status||'',
+    data:n.dataISO||n.data||'', resumo:String(n.resumo||n.texto||n.descricao||'').slice(0,350)
+  }));
+  const escalas=(Array.isArray(base.escalas)?base.escalas:[])
+    .filter(e=>!e.data||e.data>=hojeISO()).sort((a,b)=>String(a.data||'').localeCompare(String(b.data||''))).slice(0,4)
+    .map(e=>({
+      tipo:e.tipo||'ESCALA', data:e.data||'', responsavel:nomeFuncionarioPorId(e.responsavel)||e.responsavel||'',
+      abertura:(e.abertura||[]).map(nomePessoaEscalaSophia).filter(Boolean).slice(0,30),
+      fechamento:(e.fechamento||[]).map(nomePessoaEscalaSophia).filter(Boolean).slice(0,30),
+      folgas:(e.folgas||[]).map(nomePessoaEscalaSophia).filter(Boolean).slice(0,30)
+    }));
+  const funcionarios=Array.isArray(base.funcionarios)?base.funcionarios:[];
+  return {
+    sistema:{nome:'Assistência Gerencial Avenida',regional:'3',loja:String(base.meta?.loja||'24'),mes:mesAnoBR(),dataAtual:hojeISO()},
+    usuario:{nome:usuarioAtual?.nome||'',cargo:usuarioAtual?.cargo||'',operador:normalizarOperador(usuarioAtual?.operador)},
+    resumo:{
+      tarefasPendentes:tarefas.filter(t=>t.status==='Pendente').length,
+      tarefasEmAndamento:tarefas.filter(t=>t.status==='Em andamento').length,
+      tarefasAguardando:tarefas.filter(t=>t.status==='Aguardando').length,
+      anotacoesAbertas:notas.filter(n=>!['Concluído','Arquivado'].includes(n.status)).length,
+      funcionariosAtivos:funcionarios.filter(f=>f.status!=='DESLIGADO').length,
+      caixasAtivos:funcionarios.filter(f=>f.caixaOperacional==='ATIVO').length
+    },
+    tarefas, notas, escalas,
+    equipe:funcionarios.filter(f=>f.status!=='DESLIGADO').slice(0,60).map(f=>({nome:f.nome||'',cargo:f.cargo||'',setor:f.setor||'',status:f.status||'',caixaOperacional:f.caixaOperacional||''}))
+  };
 }
 function mostrarDigitandoSophia(){
   const box=document.getElementById('sophiaMessages'); if(!box)return null;
@@ -6635,31 +6840,64 @@ function mostrarDigitandoSophia(){
 function removerDigitandoSophia(item){
   if(item && item.parentNode) item.parentNode.removeChild(item);
 }
-function enviarSophia(){
-  try {
-    const input=document.getElementById('sophiaInput');
-    if(!input) return;
-    const texto=String(input.value||'').trim();
-    if(!texto) return;
-    adicionarMensagemSophia(texto,'user');
-    input.value='';
-    input.focus();
-    const digitando=mostrarDigitandoSophia();
-    const resposta=sophiaResposta(texto);
-    const espera=Math.min(1800,Math.max(700,420+resposta.length*5));
-    window.setTimeout(()=>{
+function definirSophiaOcupada(ocupada){
+  sophiaOcupada=!!ocupada;
+  const input=document.getElementById('sophiaInput');
+  const botao=document.querySelector('.sophia-send');
+  if(input) input.disabled=sophiaOcupada;
+  if(botao) botao.disabled=sophiaOcupada;
+}
+async function enviarSophia(){
+  if(sophiaOcupada) return;
+  const input=document.getElementById('sophiaInput');
+  if(!input) return;
+  const texto=String(input.value||'').trim();
+  if(!texto) return;
+  adicionarMensagemSophia(texto,'user');
+  input.value='';
+  definirSophiaOcupada(true);
+  const digitando=mostrarDigitandoSophia();
+  const historicoAnterior=sophiaHistorico.slice(-10);
+  try{
+    const token=tokenSophiaAtual();
+    if(!navigator.onLine || !token){
+      const respostaLocal=sophiaResposta(texto);
+      await esperar(Math.min(900,Math.max(350,respostaLocal.length*3)));
       removerDigitandoSophia(digitando);
-      adicionarMensagemSophia(resposta);
-    },espera);
-  } catch (erro) {
-    console.error('Erro ao responder na SOPHIA:', erro);
-    document.querySelectorAll('[data-sophia-typing="1"]').forEach(el=>el.remove());
-    adicionarMensagemSophia('Ocorreu um erro ao processar sua pergunta. Atualize a página e tente novamente.');
+      adicionarMensagemSophia(respostaLocal);
+      sophiaHistorico.push({role:'user',content:texto},{role:'assistant',content:respostaLocal});
+      salvarHistoricoSophia();
+      atualizarStatusSophia('offline',navigator.onLine?'Modo local • entre novamente após configurar':'Modo local • sem internet');
+      return;
+    }
+
+    atualizarStatusSophia('connecting',sophiaPesquisaWeb?'IA online • analisando e pesquisando...':'IA online • analisando...');
+    const resposta=await chamarSophiaApi({
+      action:'chat', token, message:texto, history:historicoAnterior,
+      context:montarContextoSophiaSeguro(), web_search:sophiaPesquisaWeb
+    });
+    removerDigitandoSophia(digitando);
+    adicionarMensagemSophia(resposta.answer||'Não consegui gerar uma resposta.', 'sophia', {fontes:resposta.sources||[]});
+    sophiaHistorico.push({role:'user',content:texto},{role:'assistant',content:resposta.answer||''});
+    salvarHistoricoSophia();
+    atualizarStatusSophia('online',resposta.used_web?'IA online • pesquisa concluída':'IA online • pronta');
+  }catch(erro){
+    console.error('Erro ao responder na SOPHIA:',erro);
+    removerDigitandoSophia(digitando);
+    const fallback=sophiaResposta(texto);
+    adicionarMensagemSophia(`Não consegui acessar a IA online agora. Usei o modo local:\n\n${fallback}`);
+    sophiaHistorico.push({role:'user',content:texto},{role:'assistant',content:fallback});
+    salvarHistoricoSophia();
+    if(/sess[aã]o|token|autoriz/i.test(String(erro.message||''))) sessionStorage.removeItem(SOPHIA_SESSION_KEY);
+    atualizarStatusSophia('offline','Modo local • IA online indisponível');
+  }finally{
+    definirSophiaOcupada(false);
+    input.focus();
   }
 }
 function perguntarSophia(texto){
   const input=document.getElementById('sophiaInput');
-  if(!input) return;
+  if(!input || sophiaOcupada) return;
   input.value=texto;
   enviarSophia();
 }
@@ -6670,8 +6908,9 @@ function sophiaTecla(e){
   }
 }
 
-// Garante funcionamento dos botões mesmo em navegadores que não expõem
-// automaticamente funções declaradas no escopo global.
+window.chamarSophiaApi=chamarSophiaApi;
+window.criarSessaoSophia=criarSessaoSophia;
+window.atualizarStatusSophia=atualizarStatusSophia;
 window.enviarSophia=enviarSophia;
 window.perguntarSophia=perguntarSophia;
 window.sophiaTecla=sophiaTecla;
@@ -6682,10 +6921,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   const botao=document.querySelector('.sophia-send');
   if(botao && !botao.getAttribute('onclick')) botao.addEventListener('click',enviarSophia);
   if(input) input.addEventListener('keydown',sophiaTecla);
-  document.querySelectorAll('.sophia-quick').forEach(botaoRapido=>{
-    // O onclick original continua válido; este marcador evita duplo envio.
-    botaoRapido.setAttribute('data-sophia-ready','1');
-  });
+  document.querySelectorAll('.sophia-quick').forEach(botaoRapido=>botaoRapido.setAttribute('data-sophia-ready','1'));
+  atualizarStatusSophia(tokenSophiaAtual()?'online':'offline',tokenSophiaAtual()?'IA online • sessão restaurada':'Modo local • integração pendente');
 });
 
 window.addEventListener('load', async () => {
