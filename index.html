@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Assistência Gerencial de Loja - Avenida V28</title>
+  <title>Assistência Gerencial de Loja - Avenida V31</title>
   <script>
     /* Aplica o tema antes da primeira pintura para impedir o clarão ao abrir ou sair. */
     (() => {
@@ -388,6 +388,45 @@
       border-radius: inherit;
       background: linear-gradient(90deg, var(--amarelo), var(--amarelo-escuro));
       transition: width .28s ease;
+    }
+    .app-loader-stepbar {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+    }
+    .app-loader-step-badge {
+      display:inline-flex;
+      align-items:center;
+      min-height:24px;
+      padding:5px 9px;
+      border-radius:999px;
+      background:color-mix(in srgb, var(--amarelo) 16%, transparent);
+      border:1px solid color-mix(in srgb, var(--amarelo) 38%, var(--border));
+      color:var(--text);
+      font-size:.66rem;
+      font-weight:1000;
+      letter-spacing:.08em;
+      white-space:nowrap;
+    }
+    .app-loader-step-name {
+      color:var(--muted);
+      font-size:.68rem;
+      font-weight:900;
+      letter-spacing:.05em;
+      text-align:right;
+    }
+    .app-loader-stage {
+      display:none;
+    }
+    .app-loader-stage.active {
+      display:block;
+      animation:loaderStageIn .30s ease both;
+    }
+    @keyframes loaderStageIn {
+      from { opacity:0; transform:translateX(12px); }
+      to { opacity:1; transform:translateX(0); }
     }
     .app-loader-check {
       display: grid;
@@ -2126,33 +2165,64 @@
         <div class="app-loader-spinner" aria-hidden="true"></div>
       </div>
       <div id="appLoaderChecks" class="app-loader-checks">
-        <div class="app-loader-progress"><span id="appLoaderProgressBar"></span></div>
-        <div id="appCheckInternet" class="app-loader-check" data-status="pending">
-          <div class="app-loader-check-icon">○</div>
-          <div class="app-loader-check-content">
-            <strong>Conexão com a internet</strong>
-            <small>Aguardando verificação...</small>
+        <div class="app-loader-stepbar">
+          <span id="appLoaderStepBadge" class="app-loader-step-badge">ETAPA 1 DE 2</span>
+          <span id="appLoaderStepName" class="app-loader-step-name">AMBIENTE E SINCRONIZAÇÃO</span>
+        </div>
+
+        <div class="app-loader-progress">
+          <span id="appLoaderProgressBar"></span>
+        </div>
+
+        <div id="appLoaderStagePrimary" class="app-loader-stage active" data-stage="primary">
+          <div id="appCheckInternet" class="app-loader-check" data-status="pending">
+            <div class="app-loader-check-icon">○</div>
+            <div class="app-loader-check-content">
+              <strong>Conexão com a internet</strong>
+              <small>Aguardando verificação...</small>
+            </div>
+          </div>
+
+          <div id="appCheckIA" class="app-loader-check" data-status="pending">
+            <div class="app-loader-check-icon">○</div>
+            <div class="app-loader-check-content">
+              <strong>IA funcionando</strong>
+              <small>Aguardando verificação...</small>
+            </div>
+          </div>
+
+          <div id="appCheckSync" class="app-loader-check" data-status="pending">
+            <div class="app-loader-check-icon">○</div>
+            <div class="app-loader-check-content">
+              <strong>Dados sincronizados</strong>
+              <small>Aguardando verificação...</small>
+            </div>
           </div>
         </div>
-        <div id="appCheckIA" class="app-loader-check" data-status="pending">
-          <div class="app-loader-check-icon">○</div>
-          <div class="app-loader-check-content">
-            <strong>IA funcionando</strong>
-            <small>Aguardando verificação...</small>
+
+        <div id="appLoaderStageSystems" class="app-loader-stage" data-stage="systems">
+          <div id="appCheckGerencial" class="app-loader-check" data-status="pending">
+            <div class="app-loader-check-icon">○</div>
+            <div class="app-loader-check-content">
+              <strong>Sistema Gerencial (entrada atual)</strong>
+              <small>Aguardando verificação...</small>
+            </div>
           </div>
-        </div>
-        <div id="appCheckSync" class="app-loader-check" data-status="pending">
-          <div class="app-loader-check-icon">○</div>
-          <div class="app-loader-check-content">
-            <strong>Dados sincronizados</strong>
-            <small>Aguardando verificação...</small>
+
+          <div id="appCheckEstoque" class="app-loader-check" data-status="pending">
+            <div class="app-loader-check-icon">○</div>
+            <div class="app-loader-check-content">
+              <strong>Sistema de Estoque</strong>
+              <small>Aguardando verificação...</small>
+            </div>
           </div>
-        </div>
-        <div id="appCheckEstoque" class="app-loader-check" data-status="pending">
-          <div class="app-loader-check-icon">○</div>
-          <div class="app-loader-check-content">
-            <strong>Sistema de Estoque</strong>
-            <small>Aguardando verificação...</small>
+
+          <div id="appCheckResultados" class="app-loader-check" data-status="pending">
+            <div class="app-loader-check-icon">○</div>
+            <div class="app-loader-check-content">
+              <strong>Sistema de Resultados</strong>
+              <small>Aguardando verificação...</small>
+            </div>
           </div>
         </div>
       </div>
@@ -2726,6 +2796,24 @@
               <p>Recebimentos, DRM, inventários, check lists e relatórios de estoque.</p>
               <span class="sistema-av-open">ABRIR SISTEMA ↗</span>
             </a>
+
+            <a class="sistema-av-button" href="https://lojasavenida2424-svg.github.io/avenida-resultado/" target="_blank" rel="noopener noreferrer" aria-label="Abrir Sistema AV Resultado">
+              <div class="sistema-av-logo">
+                <span class="logo-fallback" aria-hidden="true">📊</span>
+              </div>
+              <h2>AV RESULTADO</h2>
+              <p>Metas, operadores, produtos financeiros, lançamentos e desempenho da loja.</p>
+              <span class="sistema-av-open">ABRIR SISTEMA ↗</span>
+            </a>
+
+            <a class="sistema-av-button" href="https://cartaoavenida.onboarding.smilego.io/app/login" target="_blank" rel="noopener noreferrer" aria-label="Abrir KAPPTA Cartão Avenida">
+              <div class="sistema-av-logo">
+                <span class="logo-fallback" aria-hidden="true">💳</span>
+              </div>
+              <h2>KAPPTA</h2>
+              <p>Portal de acesso e onboarding do Cartão Avenida.</p>
+              <span class="sistema-av-open">ABRIR KAPPTA ↗</span>
+            </a>
           </div>
         </div>
       </section>
@@ -2966,6 +3054,21 @@ function escapeHTML(s){ return String(s||'').replace(/[&<>'"]/g, m => ({'&':'&am
 function num(v){ return Number(v||0); }
 
 const SISTEMA_ESTOQUE_URL = 'https://lojasavenida2424-svg.github.io/avenida-estoque/';
+const SISTEMA_RESULTADOS_URL = 'https://lojasavenida2424-svg.github.io/avenida-resultado/';
+const SISTEMA_GERENCIAL_URL = (() => {
+  try{
+    if(location.protocol === 'http:' || location.protocol === 'https:'){
+      return new URL(location.pathname || '/', location.origin).href;
+    }
+  }catch(_){}
+  return location.href;
+})();
+
+const APP_LOADER_STAGE_IDS = {
+  primary:['appCheckInternet','appCheckIA','appCheckSync'],
+  systems:['appCheckGerencial','appCheckEstoque','appCheckResultados']
+};
+let appLoaderCurrentStage = 'primary';
 
 function showAppLoader(title='Carregando sistema', text='Aguarde um instante...', mostrarChecks=false){
   const el = document.getElementById('appLoader');
@@ -2993,8 +3096,29 @@ function toggleAppLoaderChecks(visivel=false){
   if(!box) return;
   box.classList.toggle('active', !!visivel);
 }
+function setAppLoaderStage(stage='primary'){
+  appLoaderCurrentStage = APP_LOADER_STAGE_IDS[stage] ? stage : 'primary';
+
+  const primary = document.getElementById('appLoaderStagePrimary');
+  const systems = document.getElementById('appLoaderStageSystems');
+  if(primary) primary.classList.toggle('active', appLoaderCurrentStage === 'primary');
+  if(systems) systems.classList.toggle('active', appLoaderCurrentStage === 'systems');
+
+  const badge = document.getElementById('appLoaderStepBadge');
+  const name = document.getElementById('appLoaderStepName');
+
+  if(appLoaderCurrentStage === 'primary'){
+    if(badge) badge.textContent = 'ETAPA 1 DE 2';
+    if(name) name.textContent = 'AMBIENTE E SINCRONIZAÇÃO';
+  }else{
+    if(badge) badge.textContent = 'ETAPA 2 DE 2';
+    if(name) name.textContent = 'ANÁLISE DOS SISTEMAS';
+  }
+
+  updateAppLoaderProgress();
+}
 function resetAppLoaderChecks(){
-  ['appCheckInternet','appCheckIA','appCheckSync','appCheckEstoque'].forEach(id => {
+  Object.values(APP_LOADER_STAGE_IDS).flat().forEach(id => {
     const item = document.getElementById(id);
     if(!item) return;
     item.setAttribute('data-status','pending');
@@ -3003,18 +3127,28 @@ function resetAppLoaderChecks(){
     if(icon) icon.textContent = '○';
     if(detail) detail.textContent = 'Aguardando verificação...';
   });
-  updateAppLoaderProgress();
+  setAppLoaderStage('primary');
 }
 function updateAppLoaderProgress(){
   const bar = document.getElementById('appLoaderProgressBar');
   if(!bar) return;
-  const itens = ['appCheckInternet','appCheckIA','appCheckSync','appCheckEstoque'].map(id => document.getElementById(id)).filter(Boolean);
-  const concluidos = itens.filter(item => ['success','error'].includes(item.getAttribute('data-status'))).length;
+  const ids = APP_LOADER_STAGE_IDS[appLoaderCurrentStage] || [];
+  const itens = ids.map(id => document.getElementById(id)).filter(Boolean);
+  const concluidos = itens.filter(item =>
+    ['success','error'].includes(item.getAttribute('data-status'))
+  ).length;
   const pct = itens.length ? Math.round((concluidos / itens.length) * 100) : 0;
   bar.style.width = pct + '%';
 }
 function setAppLoaderCheck(chave, status='pending', detalhe=''){
-  const mapa = { internet:'appCheckInternet', ia:'appCheckIA', sync:'appCheckSync', estoque:'appCheckEstoque' };
+  const mapa = {
+    internet:'appCheckInternet',
+    ia:'appCheckIA',
+    sync:'appCheckSync',
+    gerencial:'appCheckGerencial',
+    estoque:'appCheckEstoque',
+    resultados:'appCheckResultados'
+  };
   const item = document.getElementById(mapa[chave] || chave);
   if(!item) return;
   item.setAttribute('data-status', status);
@@ -3030,116 +3164,328 @@ function esperar(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
 function comTimeout(promise, ms=4000){
   return Promise.race([
     promise,
-    new Promise((_, reject) => setTimeout(() => reject(new Error('Tempo de verificação excedido.')), ms))
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Tempo de verificação excedido.')), ms)
+    )
   ]);
 }
 async function verificarConexaoInternet(){
-  if(!navigator.onLine) return { ok:false, detalhe:'Sem conexão com a internet. O sistema seguirá em modo local.' };
-  try{
-    const { error } = await comTimeout(supabaseclient.from(ONLINE_TABLE).select('id').eq('id', GLOBAL_ROW_ID).maybeSingle(), 3500);
-    if(error) throw error;
-    return { ok:true, detalhe:'Conexão confirmada e acesso online disponível.' };
-  }catch(err){
-    console.error('Falha ao verificar internet:', err);
-    return { ok:false, detalhe:'Internet instável ou indisponível no momento.' };
+  if(!navigator.onLine){
+    return {
+      ok:false,
+      detalhe:'Sem conexão com a internet. O sistema seguirá em modo local.'
+    };
   }
-}
-function verificarIAFuncionando(){
-  const iaOk = typeof sophiaResposta === 'function' && typeof enviarSophia === 'function' && typeof perguntarSophia === 'function';
-  return iaOk
-    ? { ok:true, detalhe:'SOPHIA pronta para responder aos comandos do sistema.' }
-    : { ok:false, detalhe:'O módulo da SOPHIA não respondeu corretamente.' };
-}
-async function verificarDadosSincronizados(){
-  if(!usuarioAtual) return { ok:false, detalhe:'Nenhum usuário autenticado para validar a sincronização.' };
-  if(!navigator.onLine) return { ok:false, detalhe:'Sem internet: dados carregados do cache deste aparelho.' };
   try{
-    const op = normalizarOperador(usuarioAtual.operador);
     const { error } = await comTimeout(
-      supabaseclient.from(ONLINE_TABLE).select('id').in('id', [`usuario_${op}`, SHARED_ROW_ID]),
+      supabaseclient
+        .from(ONLINE_TABLE)
+        .select('id')
+        .eq('id', GLOBAL_ROW_ID)
+        .maybeSingle(),
       4000
     );
     if(error) throw error;
-    await salvarDadosUsuarioOnline(true);
-    return { ok:true, detalhe:'Dados conferidos e sincronizados com o Supabase.' };
+    return {
+      ok:true,
+      detalhe:'Conexão confirmada por consulta real ao Supabase.'
+    };
   }catch(err){
-    console.error('Falha ao verificar sincronização:', err);
-    return { ok:false, detalhe:'Não foi possível validar a sincronização online agora.' };
+    console.error('Falha ao verificar internet:', err);
+    return {
+      ok:false,
+      detalhe:'Internet instável ou Supabase sem resposta no momento.'
+    };
   }
 }
-async function verificarSistemaEstoque(){
+function verificarIAFuncionando(){
+  try{
+    const funcoesOk =
+      typeof sophiaResposta === 'function' &&
+      typeof enviarSophia === 'function' &&
+      typeof perguntarSophia === 'function';
+
+    if(!funcoesOk){
+      throw new Error('Funções principais da SOPHIA não foram carregadas.');
+    }
+
+    const respostaTeste = sophiaResposta('AJUDA');
+    const respostaValida =
+      typeof respostaTeste === 'string' &&
+      respostaTeste.trim().length >= 20;
+
+    if(!respostaValida){
+      throw new Error('A SOPHIA não retornou uma resposta válida no autoteste.');
+    }
+
+    return {
+      ok:true,
+      detalhe:'SOPHIA executou o autoteste e respondeu corretamente.'
+    };
+  }catch(err){
+    console.error('Falha no autoteste da IA:', err);
+    return {
+      ok:false,
+      detalhe:'O módulo da SOPHIA não respondeu corretamente ao autoteste.'
+    };
+  }
+}
+async function verificarDadosSincronizados(){
+  if(!usuarioAtual){
+    return {
+      ok:false,
+      detalhe:'Nenhum usuário autenticado para validar a sincronização.'
+    };
+  }
   if(!navigator.onLine){
-    return { ok:false, detalhe:'Sem internet: não foi possível consultar o Sistema de Estoque.' };
+    return {
+      ok:false,
+      detalhe:'Sem internet: dados carregados do cache deste aparelho.'
+    };
+  }
+  try{
+    const op = normalizarOperador(usuarioAtual.operador);
+    const { error } = await comTimeout(
+      supabaseclient
+        .from(ONLINE_TABLE)
+        .select('id')
+        .in('id', [`usuario_${op}`, SHARED_ROW_ID]),
+      4500
+    );
+    if(error) throw error;
+
+    await salvarDadosUsuarioOnline(true);
+
+    return {
+      ok:true,
+      detalhe:'Leitura e gravação confirmadas no banco de dados online.'
+    };
+  }catch(err){
+    console.error('Falha ao verificar sincronização:', err);
+    return {
+      ok:false,
+      detalhe:'Não foi possível confirmar a sincronização com o Supabase.'
+    };
+  }
+}
+function montarUrlVerificacao(url){
+  const alvo = new URL(url, location.href);
+  alvo.searchParams.set('verificacao_av', String(Date.now()));
+  return alvo.href;
+}
+async function verificarSistemaPublicado({
+  nome,
+  url,
+  padroes=[],
+  permiteArquivoLocal=false
+}){
+  if(!navigator.onLine){
+    return {
+      ok:false,
+      detalhe:`Sem internet: não foi possível consultar ${nome}.`
+    };
   }
 
-  const urlTeste = `${SISTEMA_ESTOQUE_URL}?verificacao=${Date.now()}`;
+  if(location.protocol === 'file:' && permiteArquivoLocal){
+    const tituloAtual = document.title || '';
+    const paginaAtualValida = padroes.some(padrao => padrao.test(tituloAtual + ' ' + document.body.innerText.slice(0, 900)));
+
+    return paginaAtualValida
+      ? {
+          ok:true,
+          detalhe:'Entrada atual carregada localmente e estrutura validada.'
+        }
+      : {
+          ok:false,
+          detalhe:'A entrada atual foi aberta, mas a estrutura esperada não foi identificada.'
+        };
+  }
+
+  const urlTeste = montarUrlVerificacao(url);
 
   try{
-    const resposta = await comTimeout(fetch(urlTeste, {
-      method:'GET',
-      mode:'cors',
-      cache:'no-store',
-      redirect:'follow'
-    }), 5500);
+    const resposta = await comTimeout(
+      fetch(urlTeste, {
+        method:'GET',
+        cache:'no-store',
+        redirect:'follow',
+        credentials:'omit'
+      }),
+      6500
+    );
 
     if(!resposta.ok){
-      throw new Error(`O endereço respondeu com HTTP ${resposta.status}.`);
+      throw new Error(`HTTP ${resposta.status}`);
     }
 
     const conteudo = await resposta.text();
-    const paginaValida = /Avenida Estoque|Assistência Gerencial de Estoque|Entrar no Sistema/i.test(conteudo);
+    const paginaValida =
+      padroes.length === 0 ||
+      padroes.some(padrao => {
+        padrao.lastIndex = 0;
+        return padrao.test(conteudo);
+      });
+
     if(!paginaValida){
-      throw new Error('A página respondeu, mas o conteúdo esperado não foi identificado.');
+      throw new Error('Conteúdo esperado não identificado.');
     }
 
-    return { ok:true, detalhe:'Sistema de Estoque online e respondendo normalmente.' };
-  }catch(erroCors){
+    return {
+      ok:true,
+      detalhe:`${nome} online, HTTP ${resposta.status} e conteúdo validado.`
+    };
+  }catch(erroLeitura){
     try{
-      // Fallback para navegadores que bloqueiam a leitura cross-origin do GitHub Pages.
-      // A requisição ainda confirma que o endereço publicado respondeu na rede.
-      await comTimeout(fetch(urlTeste, {
-        method:'GET',
-        mode:'no-cors',
-        cache:'no-store',
-        redirect:'follow'
-      }), 5500);
-      return { ok:true, detalhe:'Sistema de Estoque respondeu no endereço publicado.' };
+      await comTimeout(
+        fetch(urlTeste, {
+          method:'GET',
+          mode:'no-cors',
+          cache:'no-store',
+          redirect:'follow',
+          credentials:'omit'
+        }),
+        6500
+      );
+
+      return {
+        ok:true,
+        detalhe:`${nome} respondeu no endereço publicado; leitura limitada pelo navegador.`
+      };
     }catch(erroRede){
-      console.error('Falha ao verificar o Sistema de Estoque:', erroCors, erroRede);
-      return { ok:false, detalhe:'Sistema de Estoque indisponível ou sem resposta no momento.' };
+      console.error(`Falha ao verificar ${nome}:`, erroLeitura, erroRede);
+      return {
+        ok:false,
+        detalhe:`${nome} indisponível ou sem resposta no momento.`
+      };
     }
   }
 }
+function verificarSistemaGerencial(){
+  return verificarSistemaPublicado({
+    nome:'Sistema Gerencial',
+    url:SISTEMA_GERENCIAL_URL,
+    padroes:[
+      /Assistência Gerencial/i,
+      /Assistencia Gerencial/i,
+      /SISTEMA CONEXÃO AV/i,
+      /Loja 24/i
+    ],
+    permiteArquivoLocal:true
+  });
+}
+function verificarSistemaEstoque(){
+  return verificarSistemaPublicado({
+    nome:'Sistema de Estoque',
+    url:SISTEMA_ESTOQUE_URL,
+    padroes:[
+      /Avenida Estoque/i,
+      /Assistência Gerencial de Estoque/i,
+      /Entrar no Sistema/i,
+      /SISTEMA DE ESTOQUE/i
+    ]
+  });
+}
+function verificarSistemaResultados(){
+  return verificarSistemaPublicado({
+    nome:'Sistema de Resultados',
+    url:SISTEMA_RESULTADOS_URL,
+    padroes:[
+      /AV Resultados/i,
+      /AV RESULTADO/i,
+      /Calendário de Vendas/i,
+      /Distribuição de Meta/i
+    ]
+  });
+}
 
 async function executarVerificacoesPosLogin(){
-  showAppLoader('Preparando o ambiente', 'Validação de serviços antes de abrir o painel.', true);
+  showAppLoader(
+    'Análise do ambiente',
+    'Etapa 1 de 2 — verificando conexão, IA e sincronização.',
+    true
+  );
   resetAppLoaderChecks();
+  setAppLoaderStage('primary');
 
-  setAppLoaderCheck('internet','checking','Testando a conexão com a internet...');
+  setAppLoaderCheck('internet','checking','Consultando a internet e o Supabase...');
   await esperar(180);
   const internet = await verificarConexaoInternet();
   setAppLoaderCheck('internet', internet.ok ? 'success' : 'error', internet.detalhe);
 
-  setAppLoaderCheck('ia','checking','Inicializando a SOPHIA...');
-  await esperar(160);
+  setAppLoaderCheck('ia','checking','Executando autoteste funcional da SOPHIA...');
+  await esperar(180);
   const ia = verificarIAFuncionando();
   setAppLoaderCheck('ia', ia.ok ? 'success' : 'error', ia.detalhe);
 
-  setAppLoaderCheck('sync','checking','Validando os dados sincronizados...');
+  setAppLoaderCheck('sync','checking','Conferindo leitura e gravação dos dados online...');
   await esperar(180);
   const sync = await verificarDadosSincronizados();
   setAppLoaderCheck('sync', sync.ok ? 'success' : 'error', sync.detalhe);
 
+  const titleEl = document.getElementById('appLoaderTitle');
+  const textEl = document.getElementById('appLoaderText');
+
+  if(textEl){
+    textEl.textContent = 'Primeira etapa concluída. Iniciando análise dos sistemas...';
+  }
+  await esperar(760);
+
+  setAppLoaderStage('systems');
+  if(titleEl) titleEl.textContent = 'Análise dos sistemas';
+  if(textEl){
+    textEl.textContent = 'Etapa 2 de 2 — verificando os endereços publicados.';
+  }
+
+  setAppLoaderCheck('gerencial','checking','Validando a entrada atual do Sistema Gerencial...');
+  await esperar(180);
+  const gerencial = await verificarSistemaGerencial();
+  setAppLoaderCheck(
+    'gerencial',
+    gerencial.ok ? 'success' : 'error',
+    gerencial.detalhe
+  );
+
   setAppLoaderCheck('estoque','checking','Consultando o Sistema de Estoque publicado...');
   await esperar(180);
   const estoque = await verificarSistemaEstoque();
-  setAppLoaderCheck('estoque', estoque.ok ? 'success' : 'error', estoque.detalhe);
+  setAppLoaderCheck(
+    'estoque',
+    estoque.ok ? 'success' : 'error',
+    estoque.detalhe
+  );
 
-  const textEl = document.getElementById('appLoaderText');
-  const essenciaisOk = internet.ok && sync.ok;
-  if(textEl) textEl.textContent = essenciaisOk ? 'Ambiente validado. Abrindo o painel...' : 'Validação concluída. Abrindo com os recursos disponíveis...';
-  await esperar(820);
-  return { internet, ia, sync, estoque };
+  setAppLoaderCheck('resultados','checking','Consultando o Sistema de Resultados publicado...');
+  await esperar(180);
+  const resultados = await verificarSistemaResultados();
+  setAppLoaderCheck(
+    'resultados',
+    resultados.ok ? 'success' : 'error',
+    resultados.detalhe
+  );
+
+  const essenciaisOk =
+    internet.ok &&
+    sync.ok &&
+    gerencial.ok &&
+    estoque.ok &&
+    resultados.ok;
+
+  if(textEl){
+    textEl.textContent = essenciaisOk
+      ? 'Todos os serviços e sistemas foram validados. Abrindo o painel...'
+      : 'Análise concluída. Abrindo com os recursos disponíveis...';
+  }
+
+  await esperar(900);
+
+  return {
+    internet,
+    ia,
+    sync,
+    gerencial,
+    estoque,
+    resultados
+  };
 }
 
 function funcionarioVazio(valor){
