@@ -4605,7 +4605,19 @@ function limparSessoesAntigas(){
 }
 async function trySession(){
   const raw=sessionStorage.getItem(SESSION_KEY); if(!raw)return false;
-  try{ const sess=JSON.parse(raw); await carregarConfigGlobalOnline(); usuarioAtual=usuarioGlobalPorOperador(sess.operador); if(!usuarioAtual)return false; await carregarDadosUsuarioOnline(sess.operador); atualizarIdentidadeUsuarioAtual(); return true; }
+  try{
+    const sess=JSON.parse(raw);
+    await carregarConfigGlobalOnline();
+    const user=usuarioGlobalPorOperador(sess.operador);
+    if(!user) return false;
+    // A sessão principal salva apenas nome e operador. Ao restaurar a página,
+    // recupera também a senha já armazenada na configuração global para que
+    // a SOPHIA consiga gerar uma nova sessão segura na Edge Function.
+    usuarioAtual={...user,senha:senhaDoUsuario(sess.operador)};
+    await carregarDadosUsuarioOnline(sess.operador);
+    atualizarIdentidadeUsuarioAtual();
+    return true;
+  }
   catch(e){usuarioAtual=null;return false;}
 }
 
@@ -6656,7 +6668,13 @@ async function criarSessaoSophia(operador, senha){
 async function garantirSessaoSophia(){
   if(tokenSophiaAtual()) return true;
   if(!navigator.onLine || !usuarioAtual) return false;
-  return await criarSessaoSophia(usuarioAtual.operador, usuarioAtual.senha);
+  const senha=String(usuarioAtual.senha || senhaDoUsuario(usuarioAtual.operador) || '');
+  if(!senha){
+    atualizarStatusSophia('offline','Modo local • saia e entre novamente');
+    return false;
+  }
+  usuarioAtual.senha=senha;
+  return await criarSessaoSophia(usuarioAtual.operador, senha);
 }
 function alternarPesquisaSophia(){
   sophiaPesquisaWeb=!sophiaPesquisaWeb;
@@ -6752,7 +6770,7 @@ async function iniciarSophia(){
   const nome=(usuarioAtual?.nome||'').split(' ')[0]||'Olá';
   let online=!!tokenSophiaAtual();
   if(!online && navigator.onLine) online=await garantirSessaoSophia();
-  atualizarStatusSophia(online?'online':'offline',online?'IA online • pronta':'Modo local • conexão não concluída');
+  if(online) atualizarStatusSophia('online','IA online • pronta');
   adicionarMensagemSophia(
     online
       ? `Olá, ${nome}. Eu sou a SOPHIA. ✦\n\nAgora posso responder perguntas abertas, consultar os dados do sistema e pesquisar informações atuais na internet. Como posso ajudar?`
