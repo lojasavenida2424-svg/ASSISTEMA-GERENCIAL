@@ -3476,7 +3476,7 @@
             <div><h1>SOPHIA</h1><p id="sophiaSubtitle">IA + dados internos da Loja 24</p></div>
           </div>
           <div class="sophia-window-actions">
-            <button type="button" onclick="limparConversaSophia()" title="Limpar conversa" aria-label="Limpar conversa da SOPHIA">↻</button>
+            <button type="button" onclick="limparConversaSophia()" title="Limpar e reconectar" aria-label="Limpar conversa e reconectar a SOPHIA">↻</button>
             <button type="button" onclick="minimizarSophiaWidget()" title="Minimizar" aria-label="Minimizar SOPHIA">—</button>
             <button type="button" onclick="fecharSophiaWidget()" title="Fechar" aria-label="Fechar SOPHIA">✕</button>
           </div>
@@ -6599,6 +6599,7 @@ let sophiaIniciada = false;
 let sophiaOcupada = false;
 let sophiaPesquisaWeb = true;
 let sophiaHistorico = [];
+let sophiaUltimoErro = '';
 
 try{
   const historicoSalvo = JSON.parse(sessionStorage.getItem(SOPHIA_HISTORY_KEY) || '[]');
@@ -6623,19 +6624,47 @@ function atualizarStatusSophia(estado='connecting', texto='Verificando...'){
   if(subtitle) subtitle.textContent=estado==='online'?'IA + dados internos da Loja 24':'Assistente local da Loja 24';
 }
 async function chamarSophiaApi(payload){
-  const {data,error}=await supabaseclient.functions.invoke(SOPHIA_FUNCTION_NAME,{body:payload});
-  if(error) throw new Error(error.message || 'Falha ao acessar a Edge Function da SOPHIA.');
-  if(!data || data.ok===false) throw new Error(data?.error || 'Resposta inválida do serviço da SOPHIA.');
-  return data;
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),30000);
+  try{
+    const endpoint=`${SUPABASE_URL}/functions/v1/${SOPHIA_FUNCTION_NAME}`;
+    const resposta=await fetch(endpoint,{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'apikey':SUPABASE_ANON_KEY,
+        'Authorization':`Bearer ${SUPABASE_ANON_KEY}`
+      },
+      body:JSON.stringify(payload),
+      signal:controller.signal
+    });
+    const bruto=await resposta.text();
+    let data={};
+    try{ data=bruto?JSON.parse(bruto):{}; }catch(_){ data={error:bruto}; }
+    if(!resposta.ok || data?.ok===false){
+      const detalhe=String(data?.error || bruto || `HTTP ${resposta.status}`).trim();
+      throw new Error(`${detalhe} [${resposta.status}]`);
+    }
+    if(!data || typeof data!=='object') throw new Error('Resposta inválida do serviço da SOPHIA.');
+    return data;
+  }catch(error){
+    if(error?.name==='AbortError') throw new Error('Tempo de conexão esgotado. A Edge Function demorou mais de 30 segundos.');
+    throw error;
+  }finally{
+    clearTimeout(timer);
+  }
 }
 async function criarSessaoSophia(operador, senha){
+  sophiaUltimoErro='';
   if(!navigator.onLine){
+    sophiaUltimoErro='Sem conexão com a internet.';
     atualizarStatusSophia('offline','Modo local • sem internet');
     return false;
   }
   const op=normalizarOperador(operador);
-  const pass=String(senha||'');
+  const pass=String(senha||'').trim();
   if(!op || !pass){
+    sophiaUltimoErro='Operador ou senha não foram recuperados nesta sessão.';
     atualizarStatusSophia('offline','Modo local • sessão não identificada');
     return false;
   }
@@ -6643,17 +6672,17 @@ async function criarSessaoSophia(operador, senha){
   let ultimoErro=null;
   for(let tentativa=1; tentativa<=2; tentativa++){
     try{
-      const resposta=await comTimeout(
-        chamarSophiaApi({action:'session',operador:op,senha:pass}),
-        tentativa===1 ? 18000 : 25000
-      );
+      const resposta=await chamarSophiaApi({action:'session',operador:op,senha:pass});
       if(!resposta?.token) throw new Error('O servidor não forneceu uma sessão válida.');
       sessionStorage.setItem(SOPHIA_SESSION_KEY,resposta.token);
+      sophiaUltimoErro='';
       atualizarStatusSophia('online','IA online • pronta');
       return true;
     }catch(err){
       ultimoErro=err;
+      sophiaUltimoErro=String(err?.message||err||'Falha de conexão');
       console.warn(`Tentativa ${tentativa} de conexão da SOPHIA falhou:`,err);
+      if(/\[401\]|\[403\]|\[429\]/.test(sophiaUltimoErro)) break;
       if(tentativa<2){
         atualizarStatusSophia('connecting','Acordando o serviço de IA...');
         await esperar(1200);
@@ -6661,15 +6690,17 @@ async function criarSessaoSophia(operador, senha){
     }
   }
   sessionStorage.removeItem(SOPHIA_SESSION_KEY);
-  const detalhe=String(ultimoErro?.message||'Falha de conexão').slice(0,90);
+  const detalhe=String(ultimoErro?.message||'Falha de conexão').slice(0,120);
   atualizarStatusSophia('offline',`IA indisponível • ${detalhe}`);
   return false;
 }
 async function garantirSessaoSophia(){
   if(tokenSophiaAtual()) return true;
-  if(!navigator.onLine || !usuarioAtual) return false;
-  const senha=String(usuarioAtual.senha || senhaDoUsuario(usuarioAtual.operador) || '');
+  if(!navigator.onLine){ sophiaUltimoErro='Sem conexão com a internet.'; return false; }
+  if(!usuarioAtual){ sophiaUltimoErro='A sessão principal do sistema não foi identificada.'; return false; }
+  const senha=String(usuarioAtual.senha || senhaDoUsuario(usuarioAtual.operador) || senhaPorOperador(usuarioAtual.operador) || '').trim();
   if(!senha){
+    sophiaUltimoErro='A senha do operador não pôde ser recuperada. Saia e entre novamente no sistema.';
     atualizarStatusSophia('offline','Modo local • saia e entre novamente');
     return false;
   }
@@ -6709,13 +6740,16 @@ function fecharSophiaWidget(){
   widget.classList.remove('open','minimized');
   widget.setAttribute('aria-hidden','true');
 }
-function limparConversaSophia(){
+async function limparConversaSophia(){
   const box=document.getElementById('sophiaMessages');
   if(box) box.innerHTML='';
   sophiaHistorico=[];
   salvarHistoricoSophia();
+  sessionStorage.removeItem(SOPHIA_SESSION_KEY);
+  sophiaUltimoErro='';
   sophiaIniciada=false;
-  iniciarSophia();
+  atualizarStatusSophia('connecting','Reconectando à IA online...');
+  await iniciarSophia();
 }
 window.toggleSophiaWidget=toggleSophiaWidget;
 window.minimizarSophiaWidget=minimizarSophiaWidget;
@@ -6917,10 +6951,12 @@ async function enviarSophia(){
       const respostaLocal=sophiaResposta(texto);
       await esperar(Math.min(900,Math.max(350,respostaLocal.length*3)));
       removerDigitandoSophia(digitando);
-      adicionarMensagemSophia(respostaLocal);
+      const motivo=sophiaUltimoErro ? `\n\nMotivo técnico: ${sophiaUltimoErro}` : '';
+      adicionarMensagemSophia(`${respostaLocal}${motivo}`);
       sophiaHistorico.push({role:'user',content:texto},{role:'assistant',content:respostaLocal});
       salvarHistoricoSophia();
-      atualizarStatusSophia('offline',navigator.onLine?'Modo local • entre novamente após configurar':'Modo local • sem internet');
+      const statusErro=sophiaUltimoErro ? `IA indisponível • ${sophiaUltimoErro.slice(0,100)}` : (navigator.onLine?'Modo local • conexão não concluída':'Modo local • sem internet');
+      atualizarStatusSophia('offline',statusErro);
       return;
     }
 
@@ -6941,8 +6977,9 @@ async function enviarSophia(){
     adicionarMensagemSophia(`Não consegui acessar a IA online agora. Usei o modo local:\n\n${fallback}`);
     sophiaHistorico.push({role:'user',content:texto},{role:'assistant',content:fallback});
     salvarHistoricoSophia();
-    if(/sess[aã]o|token|autoriz/i.test(String(erro.message||''))) sessionStorage.removeItem(SOPHIA_SESSION_KEY);
-    atualizarStatusSophia('offline','Modo local • IA online indisponível');
+    sophiaUltimoErro=String(erro?.message||erro||'Falha ao acessar a IA online.');
+    if(/sess[aã]o|token|autoriz|\[401\]|\[403\]/i.test(sophiaUltimoErro)) sessionStorage.removeItem(SOPHIA_SESSION_KEY);
+    atualizarStatusSophia('offline',`IA indisponível • ${sophiaUltimoErro.slice(0,110)}`);
   }finally{
     definirSophiaOcupada(false);
     input.focus();
