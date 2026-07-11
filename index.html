@@ -3873,12 +3873,14 @@ async function verificarIAFuncionando(){
       return { ok:false, detalhe:'SOPHIA local disponível, mas a IA online aguarda conexão com a internet.' };
     }
 
-    const health = await comTimeout(chamarSophiaApi({action:'health'}), 5000);
+    const health = await comTimeout(chamarSophiaApi({action:'health'}), 15000);
     if(!health?.ok) throw new Error(health?.error || 'Serviço de IA indisponível.');
-    if(!health.openai_configured) throw new Error('A chave da OpenAI ainda não foi configurada na Edge Function.');
+    const provedorConfigurado = health.gemini_configured || health.openai_configured;
+    if(!provedorConfigurado) throw new Error('Nenhum provedor de IA foi configurado na Edge Function.');
     if(!health.session_secret_configured) throw new Error('O segredo de sessão da SOPHIA ainda não foi configurado.');
-    atualizarStatusSophia('online','IA online • pesquisa disponível');
-    return { ok:true, detalhe:'SOPHIA online respondeu e a pesquisa na internet está disponível.' };
+    const provedor = String(health.provider || (health.gemini_configured ? 'Gemini' : 'IA')).toUpperCase();
+    atualizarStatusSophia('online',`${provedor} online • serviço disponível`);
+    return { ok:true, detalhe:`SOPHIA online respondeu pelo provedor ${provedor}.` };
   }catch(err){
     console.error('Falha no autoteste online da IA:', err);
     atualizarStatusSophia('offline','Modo local • integração pendente');
@@ -6619,19 +6621,42 @@ async function criarSessaoSophia(operador, senha){
     atualizarStatusSophia('offline','Modo local • sem internet');
     return false;
   }
-  atualizarStatusSophia('connecting','Conectando à IA online...');
-  try{
-    const resposta=await comTimeout(chamarSophiaApi({action:'session',operador:normalizarOperador(operador),senha:String(senha||'')}),7000);
-    if(!resposta?.token) throw new Error('O servidor não forneceu uma sessão válida.');
-    sessionStorage.setItem(SOPHIA_SESSION_KEY,resposta.token);
-    atualizarStatusSophia('online','IA online • pesquisa disponível');
-    return true;
-  }catch(err){
-    console.warn('SOPHIA online não iniciou; modo local mantido:',err);
-    sessionStorage.removeItem(SOPHIA_SESSION_KEY);
-    atualizarStatusSophia('offline','Modo local • integração pendente');
+  const op=normalizarOperador(operador);
+  const pass=String(senha||'');
+  if(!op || !pass){
+    atualizarStatusSophia('offline','Modo local • sessão não identificada');
     return false;
   }
+  atualizarStatusSophia('connecting','Conectando à IA online...');
+  let ultimoErro=null;
+  for(let tentativa=1; tentativa<=2; tentativa++){
+    try{
+      const resposta=await comTimeout(
+        chamarSophiaApi({action:'session',operador:op,senha:pass}),
+        tentativa===1 ? 18000 : 25000
+      );
+      if(!resposta?.token) throw new Error('O servidor não forneceu uma sessão válida.');
+      sessionStorage.setItem(SOPHIA_SESSION_KEY,resposta.token);
+      atualizarStatusSophia('online','IA online • pronta');
+      return true;
+    }catch(err){
+      ultimoErro=err;
+      console.warn(`Tentativa ${tentativa} de conexão da SOPHIA falhou:`,err);
+      if(tentativa<2){
+        atualizarStatusSophia('connecting','Acordando o serviço de IA...');
+        await esperar(1200);
+      }
+    }
+  }
+  sessionStorage.removeItem(SOPHIA_SESSION_KEY);
+  const detalhe=String(ultimoErro?.message||'Falha de conexão').slice(0,90);
+  atualizarStatusSophia('offline',`IA indisponível • ${detalhe}`);
+  return false;
+}
+async function garantirSessaoSophia(){
+  if(tokenSophiaAtual()) return true;
+  if(!navigator.onLine || !usuarioAtual) return false;
+  return await criarSessaoSophia(usuarioAtual.operador, usuarioAtual.senha);
 }
 function alternarPesquisaSophia(){
   sophiaPesquisaWeb=!sophiaPesquisaWeb;
@@ -6717,15 +6742,21 @@ function adicionarMensagemSophia(texto,tipo='sophia',opcoes={}){
   box.appendChild(item);
   box.scrollTop=box.scrollHeight;
 }
-function iniciarSophia(){
-  atualizarResumoSophia(); if(sophiaIniciada)return; sophiaIniciada=true;
+async function iniciarSophia(){
+  atualizarResumoSophia();
+  if(sophiaIniciada){
+    if(!tokenSophiaAtual() && navigator.onLine) await garantirSessaoSophia();
+    return;
+  }
+  sophiaIniciada=true;
   const nome=(usuarioAtual?.nome||'').split(' ')[0]||'Olá';
-  const online=!!tokenSophiaAtual();
-  atualizarStatusSophia(online?'online':'offline',online?'IA online • pesquisa disponível':'Modo local • integração pendente');
+  let online=!!tokenSophiaAtual();
+  if(!online && navigator.onLine) online=await garantirSessaoSophia();
+  atualizarStatusSophia(online?'online':'offline',online?'IA online • pronta':'Modo local • conexão não concluída');
   adicionarMensagemSophia(
     online
       ? `Olá, ${nome}. Eu sou a SOPHIA. ✦\n\nAgora posso responder perguntas abertas, consultar os dados do sistema e pesquisar informações atuais na internet. Como posso ajudar?`
-      : `Olá, ${nome}. Eu sou a SOPHIA. ✦\n\nO modo local está disponível para tarefas, anotações, funcionários e escalas. A IA online será ativada assim que a Edge Function for configurada e você entrar novamente.`
+      : `Olá, ${nome}. Eu sou a SOPHIA. ✦\n\nO modo local está disponível. Tentarei reconectar automaticamente à IA online quando você enviar uma mensagem.`
   );
 }
 function atualizarResumoSophia(){
@@ -6859,7 +6890,11 @@ async function enviarSophia(){
   const digitando=mostrarDigitandoSophia();
   const historicoAnterior=sophiaHistorico.slice(-10);
   try{
-    const token=tokenSophiaAtual();
+    let token=tokenSophiaAtual();
+    if(navigator.onLine && !token){
+      await garantirSessaoSophia();
+      token=tokenSophiaAtual();
+    }
     if(!navigator.onLine || !token){
       const respostaLocal=sophiaResposta(texto);
       await esperar(Math.min(900,Math.max(350,respostaLocal.length*3)));
@@ -6910,6 +6945,7 @@ function sophiaTecla(e){
 
 window.chamarSophiaApi=chamarSophiaApi;
 window.criarSessaoSophia=criarSessaoSophia;
+window.garantirSessaoSophia=garantirSessaoSophia;
 window.atualizarStatusSophia=atualizarStatusSophia;
 window.enviarSophia=enviarSophia;
 window.perguntarSophia=perguntarSophia;
