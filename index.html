@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Assistência Gerencial de Loja - Avenida V31</title>
+  <title>Assistência Gerencial de Loja - Avenida V38</title>
   <script>
     /* Aplica o tema antes da primeira pintura para impedir o clarão ao abrir ou sair. */
     (() => {
@@ -2114,6 +2114,592 @@
     }
   </style>
 
+
+  <style id="config-users-layout-fix">
+    /* V34 — tabela de usuários totalmente alinhada */
+    #configContent .config-login-stack {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 18px;
+      width: 100%;
+      min-width: 0;
+    }
+
+    #configContent .config-users-card,
+    #configContent .config-data-card {
+      width: 100%;
+      min-width: 0;
+      margin: 0;
+      box-shadow: none;
+    }
+
+    #configContent .config-add-user-row {
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr) auto;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 14px;
+    }
+
+    #configContent .config-add-user-row .field {
+      min-width: 0;
+    }
+
+    #configContent .config-add-user-row .actions {
+      align-self: end;
+    }
+
+    #configContent .config-add-user-row .btn {
+      min-height: 44px;
+      white-space: nowrap;
+    }
+
+    #configContent .config-users-table-wrap {
+      width: 100%;
+      min-width: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--page);
+      scrollbar-width: auto;
+      scrollbar-color:
+        color-mix(in srgb, var(--amarelo) 72%, var(--preto-logo))
+        color-mix(in srgb, var(--soft) 88%, transparent);
+      scrollbar-gutter: stable both-edges;
+      overscroll-behavior-inline: contain;
+      padding-bottom: 2px;
+    }
+
+    #configContent .config-users-table-wrap::-webkit-scrollbar {
+      height: 14px;
+      width: 14px;
+    }
+
+    #configContent .config-users-table-wrap::-webkit-scrollbar-track {
+      background:
+        linear-gradient(
+          180deg,
+          color-mix(in srgb, var(--page-2) 88%, transparent),
+          color-mix(in srgb, var(--soft) 92%, transparent)
+        );
+      border-top: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+      border-radius: 999px;
+      margin-inline: 10px;
+    }
+
+    #configContent .config-users-table-wrap::-webkit-scrollbar-thumb {
+      min-width: 64px;
+      border: 3px solid transparent;
+      border-radius: 999px;
+      background:
+        linear-gradient(
+          90deg,
+          var(--amarelo),
+          var(--amarelo-escuro)
+        ) padding-box;
+      box-shadow:
+        inset 0 0 0 1px color-mix(in srgb, var(--preto-logo) 20%, transparent),
+        0 2px 7px rgba(15, 23, 42, .14);
+      transition:
+        filter .18s ease,
+        box-shadow .18s ease,
+        transform .18s ease;
+    }
+
+    #configContent .config-users-table-wrap::-webkit-scrollbar-thumb:hover {
+      filter: brightness(.96) saturate(1.08);
+      box-shadow:
+        inset 0 0 0 1px color-mix(in srgb, var(--preto-logo) 28%, transparent),
+        0 3px 10px rgba(15, 23, 42, .22);
+    }
+
+    #configContent .config-users-table-wrap::-webkit-scrollbar-thumb:active {
+      filter: brightness(.88);
+    }
+
+    #configContent .config-users-table-wrap::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+
+    body.dark-mode #configContent .config-users-table-wrap {
+      scrollbar-color:
+        color-mix(in srgb, #FFCD09 82%, #7A5E00)
+        color-mix(in srgb, #2A2A2A 92%, transparent);
+    }
+
+    body.dark-mode #configContent .config-users-table-wrap::-webkit-scrollbar-track {
+      background:
+        linear-gradient(
+          180deg,
+          rgba(255,255,255,.035),
+          rgba(255,255,255,.065)
+        );
+      border-top-color: rgba(255,205,9,.12);
+    }
+
+    body.dark-mode #configContent .config-users-table-wrap::-webkit-scrollbar-thumb {
+      background:
+        linear-gradient(
+          90deg,
+          #F6C426,
+          #FFCD09
+        ) padding-box;
+      box-shadow:
+        inset 0 0 0 1px rgba(46,13,30,.28),
+        0 3px 10px rgba(0,0,0,.34);
+    }
+
+    #configContent .config-users-table-wrap:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--amarelo) 44%, transparent);
+      outline-offset: 3px;
+    }
+
+    #configContent .config-users-table {
+      width: 100%;
+      min-width: 1180px;
+      table-layout: fixed;
+      border-collapse: collapse;
+    }
+
+    #configContent .config-users-table col.col-user-name { width: 28%; }
+    #configContent .config-users-table col.col-user-operator { width: 9%; }
+    #configContent .config-users-table col.col-user-matricula { width: 13%; }
+    #configContent .config-users-table col.col-user-cargo { width: 17%; }
+    #configContent .config-users-table col.col-user-password { width: 10%; }
+    #configContent .config-users-table col.col-user-actions { width: 23%; }
+
+    #configContent .config-users-table th,
+    #configContent .config-users-table td {
+      padding: 13px 12px;
+      vertical-align: middle;
+      line-height: 1.3;
+    }
+
+    #configContent .config-users-table th {
+      white-space: nowrap;
+    }
+
+    #configContent .config-user-name-cell {
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: normal;
+      line-height: 1.35;
+      font-weight: 900;
+    }
+
+    #configContent .config-user-name-main {
+      display: block;
+      max-width: 100%;
+    }
+
+    #configContent .config-user-name-cell .badge {
+      margin-top: 7px;
+    }
+
+    #configContent .config-user-role-cell {
+      white-space: normal;
+      overflow-wrap: anywhere;
+      line-height: 1.35;
+    }
+
+    #configContent .config-user-actions {
+      display: grid;
+      grid-template-columns: auto minmax(118px, auto) auto;
+      align-items: center;
+      justify-content: start;
+      gap: 7px;
+      width: 100%;
+      min-width: 0;
+      white-space: nowrap;
+    }
+
+    #configContent .config-user-actions .btn,
+    #configContent .config-user-actions .badge {
+      margin: 0;
+      white-space: nowrap;
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #configContent .config-user-actions .btn {
+      padding: 8px 10px;
+      font-size: .74rem;
+    }
+
+    #configContent .config-user-actions .badge {
+      padding: 7px 9px;
+      font-size: .70rem;
+    }
+
+    #configContent .config-users-table tbody tr {
+      min-height: 72px;
+    }
+
+    #configContent .config-users-table tbody td {
+      height: 72px;
+    }
+
+    @media (max-width: 1180px) {
+      #configContent .config-users-table col.col-user-name { width: 300px; }
+      #configContent .config-users-table col.col-user-operator { width: 90px; }
+      #configContent .config-users-table col.col-user-matricula { width: 135px; }
+      #configContent .config-users-table col.col-user-cargo { width: 180px; }
+      #configContent .config-users-table col.col-user-password { width: 100px; }
+      #configContent .config-users-table col.col-user-actions { width: 375px; }
+    }
+
+    @media (max-width: 900px) {
+      #configContent .config-add-user-row {
+        grid-template-columns: 1fr;
+      }
+
+      #configContent .config-add-user-row .actions,
+      #configContent .config-add-user-row .btn {
+        width: 100%;
+      }
+    }
+  </style>
+
+
+  <style id="topbar-session-v37">
+    /* V37 — informações da sessão alinhadas e responsivas */
+    .topbar {
+      min-height: 106px;
+      align-items: center;
+    }
+
+    .top-left {
+      flex: 0 0 clamp(235px, 19vw, 305px);
+    }
+
+    .store-meta {
+      flex: 1 1 auto;
+      min-width: 0;
+      display: grid !important;
+      grid-template-columns:
+        94px
+        86px
+        152px
+        minmax(220px, 1fr)
+        106px
+        122px
+        48px
+        48px !important;
+      grid-auto-flow: row;
+      align-items: stretch;
+      gap: 8px !important;
+    }
+
+    .store-meta .info-tile,
+    .store-meta .header-theme,
+    .store-meta .header-logout {
+      min-height: 68px !important;
+      height: 68px !important;
+    }
+
+    .store-meta .info-tile {
+      padding: 10px 10px !important;
+      gap: 8px !important;
+    }
+
+    .info-regional .info-icon,
+    .info-store .info-icon {
+      flex-basis: 27px;
+      width: 27px;
+    }
+
+    .info-copy {
+      min-width: 0;
+      justify-content: center;
+    }
+
+    .info-copy small {
+      font-size: .61rem !important;
+      line-height: 1.05;
+    }
+
+    .info-copy b {
+      max-width: 100%;
+      font-size: .82rem !important;
+      line-height: 1.18;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .info-regional .info-copy b,
+    .info-store .info-copy b,
+    .info-operator .info-copy b {
+      font-size: .94rem !important;
+    }
+
+    .info-user .info-copy b {
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      font-size: .76rem !important;
+      line-height: 1.16;
+    }
+
+    .info-manager .info-copy b {
+      font-size: .78rem !important;
+    }
+
+    .header-theme.theme-btn,
+    .header-logout.logout-fixed {
+      width: 48px !important;
+      min-width: 48px !important;
+      border-radius: 17px !important;
+    }
+
+    @media (max-width: 1500px) {
+      .topbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        min-height: auto;
+      }
+
+      .top-left {
+        flex: 0 0 auto;
+        width: 100%;
+      }
+
+      .store-meta {
+        grid-template-columns:
+          88px
+          82px
+          148px
+          minmax(220px, 1fr)
+          102px
+          118px
+          48px
+          48px !important;
+      }
+    }
+
+    @media (max-width: 1120px) {
+      .store-meta {
+        grid-template-columns: repeat(4, minmax(135px, 1fr)) !important;
+      }
+
+      .info-user {
+        grid-column: span 2;
+      }
+
+      .header-theme.theme-btn,
+      .header-logout.logout-fixed {
+        width: 100% !important;
+        min-width: 0 !important;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .store-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+
+      .info-user {
+        grid-column: 1 / -1;
+      }
+
+      .store-meta .info-tile,
+      .store-meta .header-theme,
+      .store-meta .header-logout {
+        min-height: 58px !important;
+        height: auto !important;
+      }
+    }
+  </style>
+
+
+  <style id="topbar-session-v38">
+    /* V38 — topo com ícones proporcionais e textos sem invadir o espaço */
+    .topbar {
+      min-height: 102px;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .top-left {
+      flex: 0 0 clamp(220px, 18vw, 290px);
+    }
+
+    .store-meta {
+      flex: 1 1 auto;
+      min-width: 0;
+      display: grid !important;
+      grid-template-columns:
+        108px
+        96px
+        156px
+        minmax(250px, 1fr)
+        110px
+        132px
+        48px
+        48px !important;
+      grid-auto-flow: row;
+      align-items: stretch;
+      gap: 9px !important;
+    }
+
+    .store-meta .info-tile,
+    .store-meta .header-theme,
+    .store-meta .header-logout {
+      min-height: 66px !important;
+      height: 66px !important;
+    }
+
+    .store-meta .info-tile {
+      padding: 10px 12px !important;
+      gap: 9px !important;
+    }
+
+    .info-icon {
+      flex: 0 0 24px !important;
+      width: 24px !important;
+      height: 24px !important;
+      display: grid;
+      place-items: center;
+    }
+
+    .info-icon svg,
+    .header-logout svg {
+      width: 20px !important;
+      height: 20px !important;
+      stroke-width: 1.9 !important;
+    }
+
+    .info-copy {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .info-copy small {
+      max-width: 100%;
+      font-size: .58rem !important;
+      line-height: 1.05 !important;
+      letter-spacing: .045em !important;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .info-copy b {
+      max-width: 100%;
+      font-size: .81rem !important;
+      line-height: 1.14 !important;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .info-regional .info-copy b,
+    .info-store .info-copy b,
+    .info-operator .info-copy b {
+      font-size: .96rem !important;
+    }
+
+    .info-user .info-copy b {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      white-space: normal;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: .74rem !important;
+      line-height: 1.13 !important;
+    }
+
+    .info-manager .info-copy b {
+      font-size: .82rem !important;
+    }
+
+    .header-theme.theme-btn,
+    .header-logout.logout-fixed {
+      width: 48px !important;
+      min-width: 48px !important;
+      padding: 0 !important;
+      border-radius: 17px !important;
+    }
+
+    @media (max-width: 1580px) {
+      .topbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        min-height: auto;
+      }
+
+      .top-left {
+        flex: 0 0 auto;
+        width: 100%;
+      }
+
+      .store-meta {
+        grid-template-columns:
+          106px
+          94px
+          150px
+          minmax(220px, 1fr)
+          108px
+          128px
+          48px
+          48px !important;
+      }
+    }
+
+    @media (max-width: 1220px) {
+      .store-meta {
+        grid-template-columns: repeat(4, minmax(150px, 1fr)) !important;
+      }
+
+      .info-user {
+        grid-column: span 2;
+      }
+
+      .header-theme.theme-btn,
+      .header-logout.logout-fixed {
+        width: 100% !important;
+        min-width: 0 !important;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .store-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+
+      .info-user {
+        grid-column: 1 / -1;
+      }
+
+      .store-meta .info-tile,
+      .store-meta .header-theme,
+      .store-meta .header-logout {
+        min-height: 58px !important;
+        height: auto !important;
+      }
+
+      .info-copy small {
+        font-size: .56rem !important;
+      }
+
+      .info-copy b {
+        font-size: .78rem !important;
+      }
+    }
+  </style>
+
 </head>
 <body>
   <script>
@@ -2267,6 +2853,12 @@
         <p id="pageSubtitle">Visão rápida das pendências, setores e prioridades da loja.</p>
       </div>
       <div class="store-meta" aria-label="Informações da sessão">
+        <div class="info-tile info-regional">
+          <span class="info-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-12A7 7 0 1 0 5 9c0 5.8 7 12 7 12Zm0-9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/></svg>
+          </span>
+          <span class="info-copy"><small>Regional</small><b>3</b></span>
+        </div>
         <div class="info-tile info-store">
           <span class="info-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24"><path d="M3 10h18M5 10v9h14v-9M4 4h16l1 6H3l1-6Zm5 15v-5h6v5"/></svg>
@@ -2295,7 +2887,7 @@
           <span class="info-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24"><path d="m4 7 4 4 4-7 4 7 4-4-2 11H6L4 7Zm3 11h10"/></svg>
           </span>
-          <span class="info-copy"><small>Gerente</small><b>ALANA</b></span>
+          <span class="info-copy"><small>Gerente</small><b title="ALANA DOS REIS ARAUJO">ALANA</b></span>
         </div>
         <button class="theme-btn header-theme" id="themeBtn" onclick="toggleTheme()" title="Ativar modo escuro" aria-label="Ativar modo escuro">🌙</button>
         <button class="logout-fixed header-logout" onclick="logout()" title="Sair do sistema" aria-label="Sair do sistema">
@@ -2955,6 +3547,14 @@ const pageInfo = {
 function hojeISO(){ return new Date().toISOString().slice(0,10); }
 function agoraBR(){ return new Date().toLocaleString('pt-BR'); }
 function mesAnoBR(){ return new Date().toLocaleDateString('pt-BR', {month:'long', year:'numeric'}).replace(/^./, c => c.toUpperCase()); }
+function atualizarMesAtualCabecalho(){
+  const campoMes = document.getElementById('mesAtual');
+  if(campoMes) campoMes.textContent = mesAnoBR();
+}
+setInterval(atualizarMesAtualCabecalho, 60000);
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden) atualizarMesAtualCabecalho();
+});
 function norm(s){ return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toUpperCase().replace(/\s+/g,' '); }
 function uid(prefix){ return prefix + '_' + Date.now() + '_' + Math.random().toString(16).slice(2,8); }
 function extrairSeqMatricula(matricula){
@@ -3881,27 +4481,57 @@ function atualizarIdentificacaoLogin(mostrar = false){
   const preview = document.getElementById('loginUserPreview');
   if(!preview) return;
   if(!mostrar) { ocultarIdentificacaoLogin(); return; }
-  const operador = normalizarOperador(document.getElementById('loginUser')?.value || '');
+
+  const operador = normalizarOperador(
+    document.getElementById('loginUser')?.value || ''
+  );
+
   if(!operador){
     preview.className = 'login-user-preview empty';
     preview.innerHTML = `<div><small>Identificação</small><b>Digite seu operador</b><small>Depois vá para a senha</small></div><span class="preview-operator">--</span>`;
     return;
   }
 
-  const autorizado = usuarioGlobalPorOperador(operador) || (db.usuarios||[]).find(u => normalizarOperador(u.operador) === operador);
-  const funcionario = (db.funcionarios || []).find(f => normalizarOperador(f.operador) === operador);
-  const pessoa = autorizado || funcionario;
+  /*
+   * Privacidade do login:
+   * somente usuários com autorização de acesso podem ter nome e cargo exibidos.
+   * Funcionários cadastrados sem login não são identificados nesta tela.
+   */
+  const autorizado =
+    usuarioGlobalPorOperador(operador) ||
+    (db.usuarios || []).find(
+      usuario => normalizarOperador(usuario.operador) === operador
+    );
 
-  if(pessoa){
-    const nome = pessoa.nome || 'Usuário encontrado';
-    const cargo = pessoa.cargo ? ` • ${pessoa.cargo}` : '';
-    const acesso = autorizado ? '' : ' • sem acesso ao sistema';
+  if(autorizado){
+    const nome = autorizado.nome || 'Usuário autorizado';
+    const cargo = autorizado.cargo || '';
+
     preview.className = 'login-user-preview';
-    preview.innerHTML = `<div><small>Identificação confirmada</small><b>${escapeHTML(nome)}</b><small>${escapeHTML(cargo.replace(/^ • /,''))}${acesso}</small></div><span class="preview-operator">OP. ${escapeHTML(operador)}</span>`;
-  } else {
-    preview.className = 'login-user-preview not-found';
-    preview.innerHTML = `<div><small>Identificação</small><b>Operador não encontrado</b><small>Confira o número digitado</small></div><span class="preview-operator">OP. ${escapeHTML(operador)}</span>`;
+    preview.innerHTML = `
+      <div>
+        <small>Identificação confirmada</small>
+        <b>${escapeHTML(nome)}</b>
+        <small>${escapeHTML(cargo)}</small>
+      </div>
+      <span class="preview-operator">OP. ${escapeHTML(operador)}</span>
+    `;
+    return;
   }
+
+  /*
+   * A mesma mensagem é usada para operadores existentes sem acesso
+   * e para códigos inexistentes, impedindo a exposição de nomes.
+   */
+  preview.className = 'login-user-preview not-found';
+  preview.innerHTML = `
+    <div>
+      <small>Identificação</small>
+      <b>Acesso não autorizado</b>
+      <small>Este operador não possui acesso ao sistema</small>
+    </div>
+    <span class="preview-operator">OP. ${escapeHTML(operador)}</span>
+  `;
 }
 
 function limparSessoesAntigas(){
@@ -5102,7 +5732,65 @@ async function removerUsuarioLogin(op){
   const u=usuarioGlobalPorOperador(operador); if(u&&confirm('Remover o acesso de '+u.nome+'?')){ globalConfig.usuarios=globalConfig.usuarios.filter(x=>normalizarOperador(x.operador)!==operador); delete globalConfig.permissoes[operador]; await salvarConfigGlobalOnline(); renderAll(); }
 }
 function renderUsuariosLoginRows(){
-  return (globalConfig?.usuarios||[]).map(u=>{const op=normalizarOperador(u.operador),dev=op==='133',pode=!operadoresOficiaisLogin().includes(op);return `<tr><td>${escapeHTML(u.nome)} ${dev?'<span class="badge b-vm">&lt;/&gt; DESENVOLVEDOR</span>':''}</td><td><b>${escapeHTML(op)}</b></td><td>${escapeHTML(u.matricula||matriculaPorOperador(op))}</td><td>${escapeHTML(u.cargo||'')}</td><td><code>${escapeHTML(senhaDoUsuario(op))}</code></td><td class="no-print"><div class="actions"><button class="btn small secondary" onclick="editarPermissoesUsuario('${op}')">Permissões</button><button class="btn small" onclick="abrirAlteracaoSenha('${op}')">🔑 Alterar senha</button>${pode?`<button class="btn small danger" onclick="removerUsuarioLogin('${op}')">Remover</button>`:'<span class="badge b-ok">Padrão</span>'}</div></td></tr>`}).join('');
+  return (globalConfig?.usuarios || []).map(usuario => {
+    const operador = normalizarOperador(usuario.operador);
+    const dadosAtuais = usuarioGlobalPorOperador(operador) || usuario;
+    const nomeCompleto = String(
+      dadosAtuais.nome ||
+      usuario.nome ||
+      `OPERADOR ${operador}`
+    ).trim();
+    const matricula = String(
+      dadosAtuais.matricula ||
+      usuario.matricula ||
+      matriculaPorOperador(operador)
+    ).trim();
+    const cargo = String(
+      dadosAtuais.cargo ||
+      usuario.cargo ||
+      ''
+    ).trim();
+
+    const desenvolvedor = operador === '133';
+    const podeRemover = !operadoresOficiaisLogin().includes(operador);
+
+    return `
+      <tr>
+        <td class="config-user-name-cell" title="${escapeHTML(nomeCompleto)}">
+          <span class="config-user-name-main">${escapeHTML(nomeCompleto)}</span>
+          ${desenvolvedor
+            ? '<span class="badge b-vm">&lt;/&gt; DESENVOLVEDOR</span>'
+            : ''
+          }
+        </td>
+        <td><b>${escapeHTML(operador)}</b></td>
+        <td>${escapeHTML(matricula)}</td>
+        <td class="config-user-role-cell">${escapeHTML(cargo)}</td>
+        <td><code>${escapeHTML(senhaDoUsuario(operador))}</code></td>
+        <td class="no-print">
+          <div class="config-user-actions">
+            <button
+              class="btn small secondary config-action-permissions"
+              onclick="editarPermissoesUsuario('${operador}')"
+            >Permissões</button>
+
+            <button
+              class="btn small config-action-password"
+              onclick="abrirAlteracaoSenha('${operador}')"
+            >🔑 Alterar senha</button>
+
+            ${podeRemover
+              ? `<button
+                   class="btn small danger config-action-status"
+                   onclick="removerUsuarioLogin('${operador}')"
+                 >Remover</button>`
+              : '<span class="badge b-ok config-action-status">Padrão</span>'
+            }
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
 }
 function renderSelectNovoUsuarioLogin(){ const a=funcionariosDisponiveisParaLogin(); return a.length?'<option value="">Selecione um funcionário</option>'+a.map(f=>`<option value="${escapeHTML(normalizarOperador(f.operador))}">${escapeHTML(f.nome)} — OP. ${escapeHTML(normalizarOperador(f.operador))}</option>`).join(''):'<option value="">Nenhum funcionário disponível</option>'; }
 function editarPermissoesUsuario(op){
@@ -5164,7 +5852,12 @@ function renderConfig(){
   globalConfig=normalizarConfigGlobal(globalConfig);
   const usuariosPermissao=(globalConfig.usuarios||[]).filter(u=>normalizarOperador(u.operador)!=='133');
   const opcoesPermissao=usuariosPermissao.length
-    ? '<option value="">Selecione um operador</option>'+usuariosPermissao.map(u=>`<option value="${escapeHTML(normalizarOperador(u.operador))}">${escapeHTML(u.nome)} — OP. ${escapeHTML(normalizarOperador(u.operador))}</option>`).join('')
+    ? '<option value="">Selecione um operador</option>' +
+      usuariosPermissao.map(usuario => {
+        const operador = normalizarOperador(usuario.operador);
+        const dadosAtuais = usuarioGlobalPorOperador(operador) || usuario;
+        return `<option value="${escapeHTML(operador)}">${escapeHTML(dadosAtuais.nome || usuario.nome)} — OP. ${escapeHTML(operador)}</option>`;
+      }).join('')
     : '<option value="">Nenhum outro login liberado</option>';
   el.innerHTML=`<div class="developer-panel section-card" style="box-shadow:none"><div class="section-title"><div><h1>&lt;/&gt; DESENVOLVEDOR</h1><p>JOÃO PEDRO • Operador 133 • Acesso integral permanente ao sistema.</p></div><span class="badge b-vm">NÍVEL MÁXIMO</span></div></div>
 
@@ -5177,8 +5870,73 @@ function renderConfig(){
     <p style="margin:12px 0 0;color:var(--muted);font-weight:750;">As abas desmarcadas desaparecerão do painel do usuário. O operador 133 mantém acesso integral permanente.</p>
   </div>
 
-  <div class="grid grid-2"><div class="section-card" style="box-shadow:none;margin:0;"><div class="section-title"><div><h2>Usuários com login</h2><p>Libere novos acessos e também edite as permissões pelo botão de cada usuário.</p></div></div><div class="form-grid" style="margin-bottom:14px;"><div class="field w8"><label>Adicionar usuário</label><select id="configNovoUsuarioLogin">${renderSelectNovoUsuarioLogin()}</select></div><div class="field w4 actions"><button class="btn" onclick="adicionarUsuarioLogin()">➕ Liberar login</button></div></div><div class="table-wrap"><table><thead><tr><th>Nome</th><th>Operador</th><th>Matrícula</th><th>Cargo</th><th>Senha</th><th>Ações</th></tr></thead><tbody>${renderUsuariosLoginRows()}</tbody></table></div></div>
-  <div class="section-card" style="box-shadow:none;margin:0;"><h2>Dados individuais</h2><p style="color:var(--muted);font-weight:700">Cada operador possui um banco de dados separado. As informações do usuário 133 não aparecem para o usuário 139.</p><div class="actions"><button class="btn" onclick="baixarBackup()">⬇️ Backup deste usuário</button><label class="btn secondary">⬆️ Importar para este usuário<input type="file" accept="application/json" onchange="importarBackup(event)" style="display:none"></label><button class="btn danger" onclick="limparTudo()">⚠️ Limpar dados deste usuário</button></div></div></div>`;
+  <div class="config-login-stack">
+    <div class="section-card config-users-card">
+      <div class="section-title">
+        <div>
+          <h2>Usuários com login</h2>
+          <p>Libere novos acessos e também edite as permissões pelo botão de cada usuário.</p>
+        </div>
+      </div>
+
+      <div class="config-add-user-row">
+        <div class="field">
+          <label>Adicionar usuário</label>
+          <select id="configNovoUsuarioLogin">${renderSelectNovoUsuarioLogin()}</select>
+        </div>
+        <div class="actions">
+          <button class="btn" onclick="adicionarUsuarioLogin()">➕ Liberar login</button>
+        </div>
+      </div>
+
+      <div class="config-users-table-wrap" tabindex="0" aria-label="Tabela de usuários com rolagem horizontal">
+        <table class="config-users-table">
+          <colgroup>
+            <col class="col-user-name">
+            <col class="col-user-operator">
+            <col class="col-user-matricula">
+            <col class="col-user-cargo">
+            <col class="col-user-password">
+            <col class="col-user-actions">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Nome completo</th>
+              <th>Operador</th>
+              <th>Matrícula</th>
+              <th>Cargo</th>
+              <th>Senha</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>${renderUsuariosLoginRows()}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-card config-data-card">
+      <h2>Dados individuais</h2>
+      <p style="color:var(--muted);font-weight:700">
+        Cada operador possui um banco de dados separado. As informações do usuário 133 não aparecem para o usuário 139.
+      </p>
+      <div class="actions">
+        <button class="btn" onclick="baixarBackup()">⬇️ Backup deste usuário</button>
+        <label class="btn secondary">
+          ⬆️ Importar para este usuário
+          <input type="file" accept="application/json" onchange="importarBackup(event)" style="display:none">
+        </label>
+        <button class="btn danger" onclick="limparTudo()">⚠️ Limpar dados deste usuário</button>
+      </div>
+    </div>
+  </div>`;
+
+  requestAnimationFrame(() => {
+    document
+      .querySelectorAll('#configContent .config-users-table-wrap')
+      .forEach(wrapper => {
+        wrapper.scrollLeft = 0;
+      });
+  });
 }
 function abrirPermissoesSelecionadas(){
   const op=normalizarOperador(document.getElementById('configUsuarioPermissoes')?.value);
