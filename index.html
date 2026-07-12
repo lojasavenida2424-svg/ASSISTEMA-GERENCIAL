@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Assistência Gerencial de Loja - Avenida V40.4</title>
+  <title>Assistência Gerencial de Loja - Avenida V40.2</title>
   <script>
     /* Aplica o tema antes da primeira pintura para impedir o clarão ao abrir ou sair. */
     (() => {
@@ -606,8 +606,7 @@
     textarea { min-height: 104px; resize: vertical; }
     input:focus, select:focus, textarea:focus { border-color: var(--amarelo-escuro); box-shadow: 0 0 0 4px rgba(246,196,38,.18); }
     .field-help { display:block; margin-top:6px; color:var(--muted); font-size:.72rem; font-weight:750; line-height:1.35; }
-    .task-status-field { align-self:auto; }
-    .note-status-field { align-self:auto; }
+    .task-status-field { align-self:end; }
     .task-status-box {
       height:47px;
       min-height:47px;
@@ -640,8 +639,9 @@
       color:var(--text) !important;
       cursor:default;
     }
-    .task-status-field label,
-    .field.w2 label { white-space:nowrap; }
+    .task-status-field > .field-help {
+      margin-top:6px;
+    }
 
     .actions { display:flex; gap: 10px; flex-wrap: wrap; align-items:center; }
     .btn { border:0; padding: 11px 14px; border-radius: 13px; cursor:pointer; font-weight: 900; background: var(--preto-logo); color: var(--amarelo); }
@@ -3464,7 +3464,7 @@
       <section id="anotacoes" class="page">
         <div class="section-card">
           <div class="section-title">
-            <div><h1>Central de Anotações</h1><p>Recados, lembretes e registros com acompanhamento automático por data.</p></div>
+            <div><h1>Central de Anotações</h1><p>Recados, lembretes e registros rápidos para a gerência.</p></div>
             <div class="actions no-print">
               <button class="btn" type="button" onclick="abrirCriadorNota()">➕ Criar</button>
               <button class="btn secondary" onclick="printActivePage()">🖨️ Imprimir</button>
@@ -3486,11 +3486,10 @@
               <div class="field w2"><label>Setor</label><select id="notaSetor" required></select></div>
               <div class="field w2"><label>Tipo</label><select id="notaTipo"><option>Recado</option><option>Atenção</option><option>Ideia</option><option>Pendência</option><option>Solicitação</option><option>Alinhamento</option></select></div>
               <div class="field w2"><label>Prioridade</label><select id="notaPrioridade"><option>Normal</option><option>Alta</option><option>Baixa</option></select></div>
-              <div class="field w2"><label>Data de início</label><input id="notaInicio" type="date" onchange="atualizarStatusPrevistoNota()" oninput="atualizarStatusPrevistoNota()" /></div>
-              <div class="field w2"><label>Prazo</label><input id="notaPrazo" type="date" onchange="atualizarStatusPrevistoNota()" oninput="atualizarStatusPrevistoNota()" /></div>
+              <div class="field w2"><label>Prazo</label><input id="notaPrazo" type="date" /></div>
               <div class="field w4"><label>Responsável</label><select id="notaResponsavel"></select></div>
-              <div class="field w3 note-status-field"><label>Status</label><div class="task-status-box"><input id="notaStatus" class="task-status-standard" value="PADRÃO — ABERTO" readonly /></div></div>
-              <div class="field w3"><label>Observação rápida</label><input id="notaResumo" placeholder="Resumo curto para aparecer na lista" /></div>
+              <div class="field w3"><label>Status</label><select id="notaStatus"><option>Aberto</option><option>Em acompanhamento</option><option>Concluído</option><option>Arquivado</option></select></div>
+              <div class="field w5"><label>Observação rápida</label><input id="notaResumo" placeholder="Resumo curto para aparecer na lista" /></div>
               <div class="field w12"><label>Descrição completa</label><textarea id="notaDescricao" placeholder="Detalhe o que precisa ser lembrado, resolvido ou acompanhado..."></textarea></div>
               <div class="field w12 actions">
                 <button class="btn" type="submit">💾 Salvar anotação</button>
@@ -3555,7 +3554,7 @@
               <div class="field w4"><label>Pessoa responsável</label><select id="tarefaResponsavel"></select></div>
               <div class="field w4"><label>Responsável adicional</label><select id="tarefaResponsavel2"></select></div>
               <div class="field w2"><label>Prioridade</label><select id="tarefaPrioridade"><option>MuitoAlto</option><option>Normal</option><option>Alta</option><option>Baixa</option></select></div>
-              <div class="field w4 task-status-field"><label>Status</label><div class="task-status-box"><input id="tarefaStatus" class="task-status-standard" value="PADRÃO — AGUARDANDO" readonly /></div></div>
+              <div class="field w4 task-status-field"><label>Status</label><div class="task-status-box"><input id="tarefaStatus" class="task-status-standard" value="PADRÃO — AGUARDANDO" readonly /></div><small id="tarefaStatusAjuda" class="field-help">Definido automaticamente pelas datas da tarefa.</small></div>
               <div class="field w12"><label>Observação</label><textarea id="tarefaDescricao" placeholder="Detalhe o que precisa ser feito, padrões de VM, observações da gerente, pendências de material ou qualquer ponto importante..."></textarea></div>
               <div class="field w12 actions">
                 <button class="btn" type="submit">💾 Salvar tarefa</button>
@@ -4103,7 +4102,7 @@ let aplicandoRemoto = false;
 
 const pageInfo = {
   painel: ['Painel Geral','Visão rápida das pendências, setores e prioridades da loja.'],
-  anotacoes: ['Central de Anotações','Registros com status automático: aberto, em acompanhamento, concluído e arquivado.'],
+  anotacoes: ['Central de Anotações','Recados, lembretes e registros rápidos para a gerência.'],
   tarefas: ['Quadro de Tarefas','Resumo por status e criação de tarefas por área.'],
   operacoes: ['Operações','Central de rotinas, controles e processos operacionais da loja.'],
   funcionarios: ['Quadro de Funcionários','Equipe organizada por cargo, setor, tempo de loja e ficha administrativa.'],
@@ -5298,100 +5297,12 @@ function sincronizarFluxoTarefas(salvar=true){
   if(mudou && salvar) saveDB();
   return mudou;
 }
-const NOTA_CONCLUIDA_RETENCAO_MS = 24 * 60 * 60 * 1000;
-function statusNotaConcluido(nota){
-  return ['Concluído','Concluida','Concluída'].includes(nota?.status);
-}
-function statusNotaArquivado(nota){
-  return nota?.status === 'Arquivado';
-}
-function calcularStatusAutomaticoNota(nota, dataReferencia=hojeISO()){
-  if(statusNotaArquivado(nota)) return 'Arquivado';
-  if(statusNotaConcluido(nota)) return 'Concluído';
-  const inicio = String(nota?.inicio || '').slice(0,10);
-  if(!inicio || dataReferencia < inicio) return 'Aberto';
-  return 'Em acompanhamento';
-}
-function timestampConclusaoNota(nota){
-  return timestampDataHoraTarefa(nota?.concluidaEmISO || nota?.concluidoEmISO || nota?.concluidaEm || nota?.concluidoEm || nota?.atualizadoEm);
-}
-function sincronizarFluxoNotas(salvar=true){
-  if(!db || !Array.isArray(db.notas)) return false;
-  const agora = Date.now();
-  let mudou = false;
-  db.notas.forEach(nota => {
-    if(statusNotaArquivado(nota)){
-      if(nota.status !== 'Arquivado'){
-        nota.status = 'Arquivado';
-        mudou = true;
-      }
-      return;
-    }
-    if(statusNotaConcluido(nota)){
-      let concluidaEm = timestampConclusaoNota(nota);
-      if(!concluidaEm){
-        nota.concluidaEmISO = new Date().toISOString();
-        concluidaEm = agora;
-        mudou = true;
-      }else if(!nota.concluidaEmISO){
-        nota.concluidaEmISO = new Date(concluidaEm).toISOString();
-        mudou = true;
-      }
-      if(agora - concluidaEm >= NOTA_CONCLUIDA_RETENCAO_MS){
-        nota.status = 'Arquivado';
-        nota.arquivadaEmISO = new Date().toISOString();
-        nota.atualizadoEm = agoraBR();
-        mudou = true;
-      }else if(nota.status !== 'Concluído'){
-        nota.status = 'Concluído';
-        mudou = true;
-      }
-      return;
-    }
-    // Compatibilidade com anotações antigas que já estavam em acompanhamento.
-    if(!nota.inicio && nota.status === 'Em acompanhamento'){
-      nota.inicio = String(nota.dataISO || hojeISO()).slice(0,10);
-      mudou = true;
-    }
-    const novoStatus = calcularStatusAutomaticoNota(nota);
-    if(nota.status !== novoStatus){
-      nota.status = novoStatus;
-      nota.atualizadoEm = agoraBR();
-      mudou = true;
-    }
-    if(nota.concluidaEmISO || nota.concluidoEmISO || nota.concluidaEm || nota.concluidoEm || nota.arquivadaEmISO){
-      delete nota.concluidaEmISO;
-      delete nota.concluidoEmISO;
-      delete nota.concluidaEm;
-      delete nota.concluidoEm;
-      delete nota.arquivadaEmISO;
-      mudou = true;
-    }
-  });
-  if(mudou && salvar) saveDB();
-  return mudou;
-}
 function iniciarMonitorStatusTarefas(){
   clearInterval(tarefaStatusTimer);
   tarefaStatusTimer = setInterval(() => {
     if(!db || !usuarioAtual) return;
-    const tarefasMudaram = sincronizarFluxoTarefas(true);
-    const notasMudaram = sincronizarFluxoNotas(true);
-    if(tarefasMudaram || notasMudaram) renderAll();
+    if(sincronizarFluxoTarefas(true)) renderAll();
   }, 60 * 1000);
-}
-function atualizarStatusPrevistoNota(){
-  const campo = document.getElementById('notaStatus');
-  if(!campo) return;
-  const id = document.getElementById('notaId')?.value || '';
-  const existente = db?.notas?.find(n => n.id === id);
-  let status;
-  if(existente && statusNotaArquivado(existente)) status = 'Arquivado';
-  else if(existente && statusNotaConcluido(existente)) status = 'Concluído';
-  else status = calcularStatusAutomaticoNota({
-    inicio: document.getElementById('notaInicio')?.value || ''
-  });
-  campo.value = `PADRÃO — ${status.toUpperCase()}`;
 }
 function atualizarStatusPrevistoTarefa(){
   const campo = document.getElementById('tarefaStatus');
@@ -5420,16 +5331,6 @@ function salvarNota(e){
   e.preventDefault();
   const id = document.getElementById('notaId').value || uid('nota');
   const existente = db.notas.find(n => n.id === id);
-  const inicio = document.getElementById('notaInicio').value;
-  const prazo = document.getElementById('notaPrazo').value;
-  if(inicio && prazo && prazo < inicio){
-    alert('A data do prazo não pode ser anterior à data de início.');
-    return;
-  }
-  let status;
-  if(existente && statusNotaArquivado(existente)) status = 'Arquivado';
-  else if(existente && statusNotaConcluido(existente)) status = 'Concluído';
-  else status = calcularStatusAutomaticoNota({inicio});
   const nota = {
     id,
     criadoEm: existente?.criadoEm || agoraBR(),
@@ -5438,16 +5339,13 @@ function salvarNota(e){
     setor: document.getElementById('notaSetor').value,
     tipo: document.getElementById('notaTipo').value,
     prioridade: document.getElementById('notaPrioridade').value,
-    inicio,
-    prazo,
+    prazo: document.getElementById('notaPrazo').value,
     responsavel: document.getElementById('notaResponsavel').value,
-    status,
+    status: document.getElementById('notaStatus').value,
     resumo: document.getElementById('notaResumo').value,
     descricao: document.getElementById('notaDescricao').value,
     atualizadoPor: usuarioAtual.nome,
-    atualizadoEm: agoraBR(),
-    concluidaEmISO: existente?.concluidaEmISO,
-    arquivadaEmISO: existente?.arquivadaEmISO
+    atualizadoEm: agoraBR()
   };
   if(existente) Object.assign(existente, nota); else db.notas.unshift(nota);
   saveDB(); limparFormNota(); fecharCriadorNota(); renderAll();
@@ -5461,31 +5359,19 @@ function editarNota(id){
   document.getElementById('notaSetor').value = n.setor;
   document.getElementById('notaTipo').value = n.tipo;
   document.getElementById('notaPrioridade').value = n.prioridade;
-  document.getElementById('notaInicio').value = n.inicio || '';
   document.getElementById('notaPrazo').value = n.prazo || '';
   document.getElementById('notaResponsavel').value = n.responsavel || '';
+  document.getElementById('notaStatus').value = n.status;
   document.getElementById('notaResumo').value = n.resumo || '';
   document.getElementById('notaDescricao').value = n.descricao || '';
-  atualizarStatusPrevistoNota();
 }
-function concluirNota(id){
-  const n=db.notas.find(x=>x.id===id);
-  if(n && !statusNotaArquivado(n)){
-    n.status='Concluído';
-    n.concluidaEmISO=new Date().toISOString();
-    delete n.arquivadaEmISO;
-    n.atualizadoPor=usuarioAtual.nome;
-    n.atualizadoEm=agoraBR();
-    saveDB(); renderAll();
-  }
-}
+function concluirNota(id){ const n=db.notas.find(x=>x.id===id); if(n){ n.status='Concluído'; n.atualizadoPor=usuarioAtual.nome; n.atualizadoEm=agoraBR(); saveDB(); renderAll(); } }
 function excluirNota(id){ if(confirm('Excluir esta anotação?')){ db.notas=db.notas.filter(x=>x.id!==id); saveDB(); renderAll(); } }
 function limparFormNota(){
   document.getElementById('formNota').reset();
   document.getElementById('notaId').value='';
   const titulo = document.getElementById('notaCreatorTitle');
   if(titulo) titulo.textContent = 'Nova anotação';
-  atualizarStatusPrevistoNota();
 }
 function abrirCriadorNota(editando=false){
   const painel = document.getElementById('notaCreatorPanel');
@@ -5970,8 +5856,7 @@ function limparFormFuncionario(fechar=true){
 function renderAll(){
   if(!db || !usuarioAtual) return;
   const tarefasAlteradas = sincronizarFluxoTarefas(false);
-  const notasAlteradas = sincronizarFluxoNotas(false);
-  if(tarefasAlteradas || notasAlteradas) saveDB();
+  if(tarefasAlteradas) saveDB();
   if(document.getElementById('fTarefaDepartamento')) popularFiltroTarefaDepartamento();
   renderPainel(); renderNotas(); renderKanban(); renderFuncionarios(); renderOperadores(); renderEscalas(); renderDiario(); renderRelatorio(); renderConfig();
 }
@@ -6029,14 +5914,14 @@ function renderNotas(){
       <div class="note-head">
         <div>
           <h3>${escapeHTML(n.titulo)}</h3>
-          <div class="note-meta">${badgeSetor(n.setor)} ${badgePrioridade(n.prioridade)} ${badgeStatus(n.status)} <span class="badge b-info">${escapeHTML(n.tipo||'Recado')}</span>${isAtrasado(n)?' <span class="badge b-bad">Prazo vencido</span>':''}</div>
+          <div class="note-meta">${badgeSetor(n.setor)} ${badgePrioridade(n.prioridade)} ${badgeStatus(n.status)} <span class="badge b-info">${escapeHTML(n.tipo||'Recado')}</span></div>
         </div>
         <div class="note-date">${escapeHTML(dataExibida)}</div>
       </div>
       <p class="note-summary">${escapeHTML(n.resumo||n.descricao||'Sem observação.')}</p>
-      <p style="margin:5px 0;color:var(--muted);font-size:.82rem;font-weight:800;"><b>Responsável:</b> ${escapeHTML(n.responsavel||'-')} ${n.inicio?`• <b>Início:</b> ${escapeHTML(n.inicio)}`:''} ${n.prazo?`• <b>Prazo:</b> ${escapeHTML(n.prazo)}`:''}</p>
+      <p style="margin:5px 0;color:var(--muted);font-size:.82rem;font-weight:800;"><b>Responsável:</b> ${escapeHTML(n.responsavel||'-')} ${n.prazo?`• <b>Prazo:</b> ${escapeHTML(n.prazo)}`:''}</p>
       ${detalhe?`<details class="note-details"><summary>Ver descrição completa</summary><p>${escapeHTML(detalhe)}</p></details>`:''}
-      <div class="actions note-actions no-print"><button class="btn small secondary" onclick="editarNota('${n.id}')">Editar</button>${!statusNotaConcluido(n)&&!statusNotaArquivado(n)?`<button class="btn small good" onclick="concluirNota('${n.id}')">Concluir</button>`:''}<button class="btn small danger" onclick="excluirNota('${n.id}')">Excluir</button></div>
+      <div class="actions note-actions no-print"><button class="btn small secondary" onclick="editarNota('${n.id}')">Editar</button><button class="btn small good" onclick="concluirNota('${n.id}')">Concluir</button><button class="btn small danger" onclick="excluirNota('${n.id}')">Excluir</button></div>
     </article>`;
   }).join('') : '<div class="empty">Nenhuma anotação encontrada.</div>';
 }
