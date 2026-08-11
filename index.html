@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Assistência Gerencial de Loja - Avenida V51.7</title>
+  <title>Assistência Gerencial de Loja - Avenida V51.8</title>
   <!-- PWA / Ícones do Sistema Gerencial Avenida -->
   <meta name="theme-color" content="#291A1E">
   <meta name="application-name" content="Gerencial Avenida">
@@ -62,7 +62,7 @@
       const SOPHIA_SESSION_KEY = 'sophiaSessaoSeguraV1';
       const SOPHIA_HISTORY_KEY = 'sophiaHistoricoSessaoV1';
       const SOPHIA_BUILD = 'V39.1-SEMPREFLIGHT';
-      const GERENCIAL_BUILD = 'V51.7-CALENDARIO-MOBILE-LISTA';
+      const GERENCIAL_BUILD = 'V51.22-DENSIDADE-DESKTOP-80';
   </script>
   <style>
     :root {
@@ -675,7 +675,8 @@
     .tab-btn.active { background: var(--preto-logo); color: var(--amarelo); border-color: var(--preto-logo); }
 
     .table-wrap { overflow:auto; border:1px solid var(--border); border-radius: 18px; background: var(--page); }
-    table { width:100%; border-collapse: collapse; min-width: 980px; }
+    table { width:100%; border-collapse: collapse; }
+    .table-wrap > table { min-width: 980px; }
     th, td { border-bottom: 1px solid var(--border); padding: 10px 10px; text-align:left; vertical-align:top; font-size:.86rem; }
     th { background: var(--preto-logo); color: var(--amarelo); position: sticky; top:0; z-index:1; }
     tr:nth-child(even) td { background: rgba(148,163,184,.07); }
@@ -7619,9 +7620,118 @@
   </style>
 
 
-  <style id="repeticao-lembrete-tarefa-v481">
-    #tarefaFimField[hidden]{display:none !important}
+  <!-- V51.11: agendamento inteligente de tarefas -->
+  <style id="repeticao-lembrete-tarefa-v519">
+    #tarefaInicioField[hidden],
+    #tarefaHoraInicioField[hidden],
+    #tarefaFimField[hidden],
+    #tarefaHoraFimField[hidden],
+    #tarefaRepeticaoField[hidden],
+    #tarefaDiaSemanaField[hidden],
+    #tarefaDiaMesField[hidden],
+    #tarefaHoraRepeticaoField[hidden]{display:none !important}
+    #tarefaAgendamentoTipo,
+    #tarefaRepeticaoLembrete,
+    #tarefaDiaSemanaRepeticao,
+    #tarefaDiaMesRepeticao,
+    #tarefaHoraInicio,
+    #tarefaHoraFim,
+    #tarefaHoraRepeticao{font-weight:850;}
+    #tarefaAgendamentoTipo{border-color:color-mix(in srgb,var(--amarelo) 52%,var(--border));}
+    .note-item.note-pinned{
+      border-color:color-mix(in srgb, var(--amarelo) 68%, var(--border));
+      box-shadow:0 10px 26px rgba(15,23,42,.10), inset 4px 0 0 var(--amarelo);
+    }
+    .note-item.note-pinned::before{
+      background:var(--amarelo-escuro);
+      box-shadow:0 0 0 5px var(--page),0 0 0 6px var(--amarelo-escuro);
+    }
+    .note-pin-badge{background:var(--amarelo);color:var(--preto-logo);}
+    body.dark-mode .note-pin-badge{background:#FFCD09;color:#2E0D1E;}
+    @media(max-width:720px){
+      #tarefaAgendamentoTipo, #tarefaDiaSemanaField{grid-column:span 12;}
+      #tarefaInicioField,#tarefaHoraInicioField,#tarefaFimField,#tarefaHoraFimField,#tarefaRepeticaoField,#tarefaDiaMesField,#tarefaHoraRepeticaoField{grid-column:span 12;}
+    }
   </style>
+
+  <!-- V51.12: visualização de cronograma no Quadro de Tarefas -->
+  <style id="task-cronograma-v5112">
+    .task-view-switch{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:2px 0 16px;}
+    #taskStatusSummary[hidden]{display:none!important;}
+    .task-view-btn{border:1px solid var(--border);background:var(--page);color:var(--text);padding:9px 13px;border-radius:999px;font-weight:900;cursor:pointer;transition:.18s;}
+    .task-view-btn:hover{border-color:var(--amarelo-escuro);transform:translateY(-1px);}
+    .task-view-btn.active{background:var(--preto-logo);color:var(--amarelo);border-color:var(--preto-logo);}
+    body.dark-mode .task-view-btn.active{background:#FFCD09;color:#2E0D1E;border-color:#FFCD09;}
+    .task-timeline-shell[hidden]{display:none !important;}
+    .task-timeline-shell{border:1px solid var(--border);border-radius:20px;background:var(--page-2);overflow:hidden;}
+    .task-timeline-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--page);}
+    .task-timeline-toolbar h3{margin:0;font-size:1rem;}
+    .task-timeline-toolbar p{margin:3px 0 0;color:var(--muted);font-size:.78rem;font-weight:750;}
+    .task-timeline-nav{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+    .task-timeline-nav button{border:1px solid var(--border);background:var(--soft);color:var(--text);border-radius:11px;padding:8px 10px;font-weight:900;cursor:pointer;}
+    .task-gantt-scroll{overflow:auto;padding:12px;scrollbar-width:thin;}
+    .task-gantt-grid{display:grid;grid-template-columns:280px repeat(7,minmax(125px,1fr));min-width:1180px;border:1px solid var(--border);border-radius:18px;overflow:hidden;background:var(--page);}
+    .task-gantt-head{padding:12px 10px;background:var(--preto-logo);color:var(--amarelo);font-size:.78rem;font-weight:1000;letter-spacing:.03em;text-transform:uppercase;border-right:1px solid rgba(255,255,255,.08);}
+    .task-gantt-head.task-col{position:sticky;left:0;z-index:5;display:flex;align-items:center;}
+    .task-gantt-head.day-col{display:grid;place-items:center;text-align:center;gap:3px;}
+    .task-gantt-head.day-col span{display:block;color:rgba(255,255,255,.76);font-size:.68rem;font-weight:800;letter-spacing:0;text-transform:none;}
+    .task-gantt-head.day-col.today{background:linear-gradient(180deg,var(--amarelo-escuro),var(--preto-logo));}
+    .task-gantt-row-label{position:sticky;left:0;z-index:4;padding:11px 12px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--page);display:flex;flex-direction:column;justify-content:center;gap:6px;min-height:78px;}
+    .task-gantt-row-label h4{margin:0;font-size:.88rem;line-height:1.25;font-weight:900;}
+    .task-gantt-row-label p{margin:0;color:var(--muted);font-size:.72rem;font-weight:750;line-height:1.3;}
+    .task-gantt-row-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+    .task-gantt-row-meta .badge{font-size:.66rem;padding:4px 7px;}
+    .task-gantt-cell{position:relative;min-height:78px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);background:linear-gradient(180deg,var(--page),var(--page-2));}
+    .task-gantt-cell.today{background:linear-gradient(180deg,color-mix(in srgb, var(--amarelo) 10%, var(--page)),color-mix(in srgb, var(--amarelo) 5%, var(--page-2)));}
+    .task-gantt-cell::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(148,163,184,.12);transform:translateX(-50%);}
+    .task-gantt-bar,.task-gantt-chip{position:absolute;left:7px;right:7px;top:50%;transform:translateY(-50%);}
+    .task-gantt-bar{height:24px;border-radius:999px;background:linear-gradient(90deg,#38BDF8,#0EA5E9);box-shadow:0 4px 12px rgba(14,165,233,.22);display:flex;align-items:center;padding:0 9px;font-size:.69rem;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+    .task-gantt-bar.middle{border-radius:6px;padding:0;justify-content:center;color:transparent;}
+    .task-gantt-bar.start{border-top-right-radius:6px;border-bottom-right-radius:6px;}
+    .task-gantt-bar.end{border-top-left-radius:6px;border-bottom-left-radius:6px;justify-content:flex-end;}
+    .task-gantt-bar.single{padding:0 9px;}
+    .task-gantt-bar.continued-left::before{content:'←';margin-right:6px;color:rgba(255,255,255,.92);}
+    .task-gantt-bar.continued-right::after{content:'→';margin-left:6px;color:rgba(255,255,255,.92);}
+    .task-gantt-bar.priority-alta,.task-gantt-chip.priority-alta{background:linear-gradient(90deg,#FB7185,#EF4444);box-shadow:0 4px 12px rgba(239,68,68,.22);color:#fff;}
+    .task-gantt-bar.priority-baixa,.task-gantt-chip.priority-baixa{background:linear-gradient(90deg,#A3E635,#65A30D);box-shadow:0 4px 12px rgba(101,163,13,.20);color:#18310a;}
+    .task-gantt-bar.completed,.task-gantt-chip.completed{opacity:.58;filter:saturate(.72);}
+    .task-gantt-chip{padding:6px 9px;border-radius:999px;background:linear-gradient(90deg,#60A5FA,#2563EB);box-shadow:0 4px 12px rgba(37,99,235,.18);font-size:.68rem;font-weight:900;color:#fff;display:flex;align-items:center;gap:6px;justify-content:center;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .task-gantt-chip.deadline{background:linear-gradient(90deg,#F59E0B,#F97316);box-shadow:0 4px 12px rgba(249,115,22,.18);}
+    .task-gantt-chip.start{background:linear-gradient(90deg,#22C55E,#16A34A);box-shadow:0 4px 12px rgba(22,163,74,.18);}
+    .task-gantt-empty{grid-column:1 / -1;padding:22px 16px;text-align:center;color:var(--muted);font-weight:800;background:var(--page);}
+    .task-timeline-unscheduled{margin:0 12px 12px;padding:10px 12px;border:1px dashed var(--border);border-radius:13px;color:var(--muted);font-size:.76rem;font-weight:800;background:var(--page);}
+    .task-gantt-legend{display:flex;gap:8px;flex-wrap:wrap;padding:0 12px 12px;}
+    .task-gantt-legend span{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid var(--border);border-radius:999px;background:var(--page);font-size:.72rem;font-weight:900;color:var(--muted);}
+    .task-gantt-legend i{width:12px;height:12px;border-radius:999px;display:inline-block;}
+    .task-gantt-legend .lg-range{background:linear-gradient(90deg,#38BDF8,#0EA5E9);}
+    .task-gantt-legend .lg-deadline{background:linear-gradient(90deg,#F59E0B,#F97316);}
+    .task-gantt-legend .lg-start{background:linear-gradient(90deg,#22C55E,#16A34A);}
+    .task-gantt-legend .lg-repeat{background:linear-gradient(90deg,#60A5FA,#2563EB);}
+    @media(max-width:760px){
+      .task-view-switch{position:sticky;top:0;z-index:2;background:var(--page);padding:8px 0;}
+      .task-timeline-toolbar{align-items:flex-start;}
+      .task-timeline-nav{width:100%;}
+      .task-timeline-nav button{flex:1;}
+      .task-gantt-scroll{padding:9px;}
+      .task-gantt-grid{grid-template-columns:220px repeat(7,minmax(115px,1fr));min-width:1015px;}
+    }
+    @media print{
+      .task-view-switch,.task-timeline-nav{display:none!important;}
+      .task-gantt-scroll{overflow:visible;padding:0;}
+      .task-gantt-grid{min-width:0;}
+      .task-gantt-row-label,.task-gantt-head.task-col{position:static;}
+      .task-gantt-bar,.task-gantt-chip{box-shadow:none;}
+    }
+  </style>
+  <style id="task-cronograma-interno-v5116">
+    #taskCronogramaView[hidden],#taskStatusView[hidden]{display:none!important;}
+    #taskCronogramaView{width:100%;}
+    #taskCronogramaView .task-timeline-shell{border-radius:22px;}
+    #taskCronogramaView .task-timeline-toolbar{border-radius:22px 22px 0 0;}
+    #taskCronogramaView .task-gantt-scroll{padding:14px;}
+    @media(max-width:760px){#taskCronogramaView .task-gantt-scroll{padding:8px;}}
+  </style>
+
 
 
   <style id="av-mobile-v48-6">
@@ -9517,6 +9627,432 @@ body.dark-mode .ag-dist-mini-status.no .mark{
 }
 </style>
 
+<style id="anotacoes-v5117">
+  .nota-mode-switch{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px;padding:6px;background:var(--soft);border:1px solid var(--border);border-radius:16px;width:max-content;max-width:100%;}
+  .nota-mode-btn{border:0;background:transparent;color:var(--muted);padding:10px 14px;border-radius:12px;font-weight:1000;cursor:pointer;transition:.18s;}
+  .nota-mode-btn.active{background:var(--page);color:var(--text);box-shadow:0 5px 14px rgba(15,23,42,.10);}
+  .nota-entry-area{border:1px solid var(--border);border-radius:18px;padding:16px;background:var(--page);}
+  .nota-entry-area[hidden]{display:none!important;}
+  .nota-entry-title{display:flex;align-items:flex-start;gap:11px;margin-bottom:12px;}
+  .nota-entry-title>span{width:38px;height:38px;border-radius:12px;background:var(--soft);display:grid;place-items:center;font-size:1.1rem;flex:0 0 auto;}
+  .nota-entry-title strong{display:block;font-size:.94rem;}
+  .nota-entry-title small{display:block;color:var(--muted);font-size:.76rem;font-weight:750;margin-top:3px;}
+  .nota-voice-capture{border:1px solid var(--border);border-radius:15px;padding:14px;background:var(--page-2);}
+  .nota-voice-review{margin-top:12px;border:1px solid color-mix(in srgb,var(--green) 35%,var(--border));border-radius:15px;padding:14px;background:color-mix(in srgb,var(--green-bg) 25%,var(--page));}
+  .nota-voice-review[hidden]{display:none!important;}
+  .nota-voice-review-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+  .nota-voice-review-head strong{display:block;font-size:.9rem;}
+  .nota-voice-review-head small{display:block;color:var(--muted);font-size:.74rem;font-weight:750;margin-top:3px;}
+  .nota-review-badge{display:inline-flex;align-items:center;padding:6px 9px;border-radius:999px;border:1px solid var(--border);background:var(--page);color:var(--muted);font-size:.69rem;font-weight:1000;}
+  .nota-review-badge.ok{background:var(--green-bg);color:var(--green);border-color:color-mix(in srgb,var(--green) 30%,var(--border));}
+  .nota-voice-review-actions{margin-top:10px;}
+  #notaVozRascunho{min-height:145px;}
+  #notaDescricao,#notaDescricaoEscrita{min-height:160px;}
+  .note-origin-badge{display:inline-flex;align-items:center;gap:4px;padding:6px 9px;border-radius:999px;font-size:.70rem;font-weight:1000;background:var(--soft);color:var(--muted);border:1px solid var(--border);}
+  .note-origin-badge.voice{background:var(--purple-bg);color:var(--purple);}
+  .note-tags{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0 0;align-items:center;}
+  .note-tag{appearance:none;border:0;background:transparent;color:var(--blue);padding:2px 1px;font-size:.76rem;font-weight:1000;cursor:pointer;line-height:1.2;}
+  .note-tag:hover{text-decoration:underline;text-underline-offset:2px;}
+  .nota-hashtag-control{position:relative;}
+  .nota-hashtag-editor{min-height:46px;width:100%;border:1px solid var(--border);background:var(--page);border-radius:13px;padding:7px 9px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;cursor:text;transition:border-color .18s ease,box-shadow .18s ease;}
+  .nota-hashtag-editor:focus-within{border-color:var(--amarelo-escuro);box-shadow:0 0 0 4px rgba(246,196,38,.18);}
+  .nota-hashtag-editor.invalid{border-color:var(--red);box-shadow:0 0 0 4px color-mix(in srgb,var(--red) 16%,transparent);}
+  .nota-hashtag-chips{display:contents;}
+  .nota-hashtag-chip{display:inline-flex;align-items:center;gap:5px;max-width:100%;padding:6px 8px;border-radius:999px;background:var(--blue-bg);color:var(--blue);border:1px solid color-mix(in srgb,var(--blue) 28%,var(--border));font-size:.76rem;font-weight:1000;line-height:1;white-space:nowrap;}
+  .nota-hashtag-chip button{width:18px;height:18px;display:grid;place-items:center;border:0;border-radius:50%;background:color-mix(in srgb,var(--blue) 12%,transparent);color:inherit;cursor:pointer;font-size:.76rem;font-weight:1000;padding:0;line-height:1;}
+  .nota-hashtag-chip button:hover{background:color-mix(in srgb,var(--blue) 22%,transparent);}
+  #notaTagInput{flex:1 1 135px;min-width:120px;width:auto!important;border:0!important;background:transparent!important;box-shadow:none!important;padding:5px 4px!important;border-radius:0!important;color:var(--text);font-weight:850;}
+  #notaTagInput::placeholder{color:var(--muted);font-weight:750;}
+  .nota-hashtag-suggestions{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:80;border:1px solid var(--border);border-radius:15px;background:var(--page);box-shadow:0 18px 38px rgba(15,23,42,.18);overflow:hidden;max-height:260px;overflow-y:auto;}
+  .nota-hashtag-suggestions[hidden]{display:none!important;}
+  .nota-hashtag-suggestions-head{padding:9px 11px 7px;color:var(--muted);font-size:.68rem;font-weight:1000;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);}
+  .nota-hashtag-suggestion{width:100%;border:0;background:var(--page);color:var(--text);display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;cursor:pointer;text-align:left;}
+  .nota-hashtag-suggestion:hover,.nota-hashtag-suggestion.active{background:var(--soft);}
+  .nota-hashtag-suggestion strong{display:block;color:var(--blue);font-size:.84rem;}
+  .nota-hashtag-suggestion small{color:var(--muted);font-size:.69rem;font-weight:800;}
+  .nota-hashtag-create{color:var(--blue);font-weight:1000;}
+  .nota-hashtag-help{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+  .nota-hashtag-help .tag-rule{color:var(--muted);font-size:.71rem;font-weight:750;}
+  .nota-hashtag-help .tag-rule.error{color:var(--red);font-weight:900;}
+  .nota-hashtag-help .tag-count{color:var(--muted);font-size:.69rem;font-weight:900;}
+  body.dark-mode .nota-hashtag-suggestions{box-shadow:0 20px 44px rgba(0,0,0,.42);}
+  .nota-attachments-panel{border:1px solid var(--border);border-radius:18px;background:var(--page);padding:15px;}
+  .nota-attachments-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:11px;}
+  .nota-attachments-head strong{display:block;font-size:.94rem;}
+  .nota-attachments-head small{display:block;color:var(--muted);font-size:.74rem;font-weight:750;margin-top:3px;line-height:1.35;}
+  .nota-attachments-actions{display:flex;gap:7px;flex-wrap:wrap;}
+  .nota-file-label{display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;}
+  .nota-file-label input{display:none!important;}
+  .nota-dropzone{border:1px dashed var(--border);border-radius:14px;padding:14px;text-align:center;color:var(--muted);font-size:.76rem;font-weight:850;background:var(--page-2);transition:.18s;}
+  .nota-dropzone.dragover{border-color:var(--amarelo-escuro);background:color-mix(in srgb,var(--amarelo) 10%,var(--page));color:var(--text);}
+  .nota-attachment-editor-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:9px;margin-top:11px;}
+  .nota-attachment-editor-card{display:grid;grid-template-columns:46px minmax(0,1fr) 30px;gap:9px;align-items:center;border:1px solid var(--border);border-radius:13px;padding:8px;background:var(--page-2);}
+  .nota-attachment-preview{width:46px;height:46px;border-radius:10px;background:var(--soft);display:grid;place-items:center;overflow:hidden;font-size:1.3rem;}
+  .nota-attachment-preview img{width:100%;height:100%;object-fit:cover;display:block;}
+  .nota-attachment-info{min-width:0;}
+  .nota-attachment-info strong{display:block;font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .nota-attachment-info small{display:block;color:var(--muted);font-size:.68rem;font-weight:800;margin-top:3px;}
+  .nota-attachment-remove{width:30px;height:30px;border:0;border-radius:50%;background:var(--red-bg);color:var(--red);font-weight:1000;cursor:pointer;}
+  .note-attachment-badge{display:inline-flex;align-items:center;gap:4px;padding:6px 9px;border-radius:999px;font-size:.70rem;font-weight:1000;background:var(--blue-bg);color:var(--blue);border:1px solid color-mix(in srgb,var(--blue) 28%,var(--border));}
+  .note-attachments-view{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin:10px 0 4px;}
+  .note-attachment-view{border:1px solid var(--border);border-radius:13px;background:var(--page-2);padding:8px;display:grid;grid-template-columns:42px minmax(0,1fr);gap:8px;align-items:center;cursor:pointer;text-align:left;color:var(--text);}
+  .note-attachment-view:hover{border-color:var(--amarelo-escuro);}
+  .note-attachment-view .thumb{width:42px;height:42px;border-radius:9px;background:var(--soft);display:grid;place-items:center;overflow:hidden;font-size:1.2rem;}
+  .note-attachment-view .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .note-attachment-view strong{display:block;font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .note-attachment-view small{display:block;color:var(--muted);font-size:.65rem;font-weight:800;margin-top:3px;}
+  @media(max-width:720px){.nota-mode-switch{width:100%;}.nota-mode-btn{flex:1;}.nota-voice-review-head{display:grid;}.nota-voice-actions{width:100%;}.nota-attachments-actions{width:100%;}.nota-attachments-actions .btn{flex:1;}.nota-attachment-editor-list,.note-attachments-view{grid-template-columns:1fr;}}
+</style>
+
+
+  <style id="topbar-regularizacao-v5121">
+    /* ==========================================================
+       V51.21 — CORREÇÃO REAL DO CABEÇALHO
+       Evita sobreposição do título/subtítulo com os cards da sessão.
+       ========================================================== */
+    @media (min-width: 1221px){
+      .topbar{
+        display:grid !important;
+        grid-template-columns:minmax(0,1fr) max-content !important;
+        align-items:center !important;
+        gap:18px !important;
+        min-height:104px !important;
+        overflow:hidden !important;
+      }
+      .top-left{
+        min-width:0 !important;
+        max-width:100% !important;
+        overflow:hidden !important;
+        padding-right:0 !important;
+      }
+      .top-left h2,
+      #pageTitle{
+        display:block !important;
+        margin:0 !important;
+        max-width:100% !important;
+        white-space:nowrap !important;
+        overflow:hidden !important;
+        text-overflow:ellipsis !important;
+      }
+      .top-left p,
+      #pageSubtitle{
+        display:block !important;
+        margin:4px 0 0 !important;
+        max-width:100% !important;
+        white-space:nowrap !important;
+        overflow:hidden !important;
+        text-overflow:ellipsis !important;
+      }
+      .store-meta{
+        width:max-content !important;
+        max-width:none !important;
+        min-width:max-content !important;
+        justify-self:end !important;
+        align-self:center !important;
+        flex:none !important;
+      }
+    }
+    @media (min-width: 761px) and (max-width: 1220px){
+      .topbar{
+        display:flex !important;
+        flex-direction:column !important;
+        align-items:stretch !important;
+        gap:12px !important;
+      }
+      .top-left{
+        min-width:0 !important;
+        overflow:hidden !important;
+      }
+      .top-left h2,
+      .top-left p,
+      #pageTitle,
+      #pageSubtitle{
+        display:block !important;
+        max-width:100% !important;
+        overflow:hidden !important;
+        text-overflow:ellipsis !important;
+        white-space:nowrap !important;
+      }
+    }
+  </style>
+
+
+  <style id="desktop-density-v5122">
+    /* ==========================================================
+       V51.22 — DENSIDADE DESKTOP
+       Referência visual: layout aprovado com navegador em 80%.
+       Reproduz essa área útil em zoom 100% sem afetar mobile/tablet.
+       ========================================================== */
+    @media (min-width:1101px){
+      html{font-size:13px !important;}
+
+      /* Estrutura principal: sidebar ~80% da largura anterior. */
+      .sidebar{
+        width:220px !important;
+        min-width:220px !important;
+      }
+      .main{
+        width:calc(100% - 220px) !important;
+        margin-left:220px !important;
+      }
+
+      /* Marca e identificação lateral. */
+      .logo-box{padding:14px 14px 12px !important;}
+      .logo-line{gap:9px !important;}
+      .logo-icon{
+        width:48px !important;
+        height:40px !important;
+        border-radius:14px !important;
+      }
+      .logo-title{font-size:1rem !important;}
+      .logo-sub{font-size:.72rem !important;}
+      .user-box{
+        margin:12px !important;
+        padding:12px !important;
+        border-radius:16px !important;
+      }
+      .user-name{font-size:.9rem !important;}
+      .user-role{font-size:.72rem !important;}
+      .developer-badge{
+        margin-top:7px !important;
+        padding:5px 8px !important;
+        font-size:.66rem !important;
+      }
+      .sync-pill{
+        margin-top:6px !important;
+        padding:4px 7px !important;
+        font-size:.66rem !important;
+      }
+      .nav{padding:3px 9px 10px !important;}
+      .nav-btn{
+        gap:8px !important;
+        padding:9px 9px !important;
+        margin:3px 0 !important;
+        border-radius:11px !important;
+        font-size:.88rem !important;
+      }
+      .nav-btn .ico{width:20px !important;}
+
+      /* Cabeçalho compacto, mantendo título e sessão em áreas independentes. */
+      .topbar{
+        display:grid !important;
+        grid-template-columns:minmax(285px,1fr) max-content !important;
+        align-items:center !important;
+        gap:14px !important;
+        min-height:92px !important;
+        padding:10px 12px 10px 16px !important;
+        overflow:hidden !important;
+      }
+      .top-left{
+        min-width:0 !important;
+        max-width:100% !important;
+        overflow:hidden !important;
+        padding:0 !important;
+      }
+      .top-left h2,#pageTitle{
+        font-size:1.42rem !important;
+        line-height:1.1 !important;
+        white-space:nowrap !important;
+        overflow:hidden !important;
+        text-overflow:ellipsis !important;
+      }
+      .top-left p,#pageSubtitle{
+        margin-top:4px !important;
+        font-size:.82rem !important;
+        line-height:1.25 !important;
+        white-space:nowrap !important;
+        overflow:hidden !important;
+        text-overflow:ellipsis !important;
+      }
+      .store-meta{
+        display:grid !important;
+        grid-template-columns:76px 126px 200px 88px 106px 40px 40px 40px !important;
+        gap:7px !important;
+        width:max-content !important;
+        min-width:max-content !important;
+        max-width:none !important;
+        align-items:stretch !important;
+        justify-self:end !important;
+      }
+      .info-tile{
+        min-height:54px !important;
+        height:54px !important;
+        padding:7px 8px !important;
+        gap:7px !important;
+        border-radius:14px !important;
+      }
+      .info-icon{
+        flex-basis:23px !important;
+        width:23px !important;
+        height:23px !important;
+      }
+      .info-icon svg,
+      .header-logout svg,
+      .header-notification svg{
+        width:19px !important;
+        height:19px !important;
+      }
+      .info-copy{gap:2px !important;}
+      .info-copy small{font-size:.58rem !important;}
+      .info-copy b,
+      .info-user .info-copy b{
+        font-size:.78rem !important;
+        line-height:1.08 !important;
+      }
+      .store-meta .header-notification,
+      .store-meta .header-theme,
+      .store-meta .header-logout,
+      #notificationBtn.av47-notification-btn,
+      #notificationBtn,
+      .header-theme.theme-btn,
+      .header-logout.logout-fixed{
+        position:relative !important;
+        inset:auto !important;
+        width:40px !important;
+        min-width:40px !important;
+        height:54px !important;
+        min-height:54px !important;
+        border-radius:14px !important;
+        padding:0 !important;
+      }
+
+      /* Área útil. */
+      .content{padding:18px !important;}
+      .section-card{
+        padding:16px !important;
+        margin-bottom:14px !important;
+        border-radius:18px !important;
+      }
+      .section-title{gap:10px !important;margin-bottom:12px !important;}
+      .section-title h1,.section-title h2{font-size:1.25rem !important;}
+      .section-title p{margin-top:3px !important;}
+
+      /* Grids e cards. */
+      .grid{gap:12px !important;}
+      .metric{
+        min-height:104px !important;
+        padding:15px 58px 14px 14px !important;
+        border-radius:17px !important;
+      }
+      .metric::after{
+        right:13px !important;
+        width:38px !important;
+        height:38px !important;
+        border-radius:12px !important;
+      }
+      .metric b{margin-top:5px !important;}
+      .sector-board{gap:10px !important;}
+      .sector-card{
+        padding:12px !important;
+        border-radius:16px !important;
+      }
+      .sector-stat{padding:6px 0 !important;}
+      .employee-grid{
+        grid-template-columns:repeat(4,minmax(165px,1fr)) !important;
+        gap:10px !important;
+        margin-top:12px !important;
+      }
+      .employee-card{
+        padding:12px !important;
+        border-radius:16px !important;
+      }
+      .employee-card p{font-size:.78rem !important;line-height:1.35 !important;}
+      .operator-grid{
+        grid-template-columns:repeat(3,minmax(200px,1fr)) !important;
+        gap:10px !important;
+        margin-top:12px !important;
+      }
+      .operator-card{
+        padding:13px !important;
+        border-radius:16px !important;
+      }
+      .operator-card p{margin:6px 0 9px !important;line-height:1.38 !important;}
+
+      /* Formulários, filtros e botões. */
+      .form-grid{gap:9px !important;}
+      label{margin-bottom:5px !important;}
+      input,select,textarea{
+        padding:8px 9px !important;
+        border-radius:10px !important;
+      }
+      textarea{min-height:82px !important;}
+      .filter-row{
+        gap:8px !important;
+        margin-bottom:11px !important;
+      }
+      .filter-row select,.filter-row input{max-width:210px !important;}
+      .tabs{gap:6px !important;margin-bottom:12px !important;}
+      .tab-btn{padding:7px 10px !important;}
+      .actions{gap:7px !important;}
+      .btn{
+        padding:8px 11px !important;
+        border-radius:10px !important;
+      }
+      .btn.small{
+        padding:6px 8px !important;
+        border-radius:8px !important;
+      }
+      .badge{padding:4px 7px !important;font-size:.68rem !important;}
+
+      /* Listas, tarefas e anotações. */
+      .task-summary{gap:9px !important;margin:9px 0 12px !important;}
+      .status-card{padding:11px !important;border-radius:14px !important;}
+      .status-card b{font-size:1.5rem !important;}
+      .task-list-groups{gap:10px !important;}
+      .task-group{border-radius:16px !important;}
+      .task-group-head{padding:10px 12px !important;}
+      .task-group-body{gap:8px !important;padding:9px !important;}
+      .task-row{
+        padding:10px 11px !important;
+        border-radius:13px !important;
+        gap:10px !important;
+      }
+      .notes-timeline{gap:9px !important;padding-left:22px !important;}
+      .note-item{
+        padding:11px 12px !important;
+        border-radius:14px !important;
+      }
+      .note-head{gap:10px !important;}
+      .note-actions{margin-top:9px !important;}
+
+      /* Tabelas e blocos operacionais. */
+      .table-wrap{border-radius:14px !important;}
+      th,td{padding:8px !important;font-size:.78rem !important;}
+      .operations-placeholder{min-height:240px !important;padding:22px !important;}
+      .escala-direct-card,.escala-select-card{
+        padding:14px !important;
+        border-radius:17px !important;
+      }
+
+      /* Modais: maior área útil sem perder legibilidade. */
+      .modal{
+        max-height:94vh !important;
+        padding:16px !important;
+        border-radius:19px !important;
+      }
+      .modal-head{margin-bottom:11px !important;}
+    }
+
+    /* Em desktops mais estreitos, reduz apenas a largura da sessão para
+       preservar o cabeçalho em uma linha sem sobreposição. */
+    @media (min-width:1101px) and (max-width:1320px){
+      .topbar{grid-template-columns:minmax(245px,1fr) max-content !important;gap:10px !important;}
+      .store-meta{
+        grid-template-columns:70px 116px 174px 80px 94px 38px 38px 38px !important;
+        gap:5px !important;
+      }
+      .store-meta .header-notification,
+      .store-meta .header-theme,
+      .store-meta .header-logout,
+      #notificationBtn,
+      .header-theme.theme-btn,
+      .header-logout.logout-fixed{
+        width:38px !important;
+        min-width:38px !important;
+      }
+    }
+  </style>
+
 </head>
 <body>
   <script>
@@ -9744,9 +10280,10 @@ body.dark-mode .ag-dist-mini-status.no .mark{
       <section id="anotacoes" class="page">
         <div class="section-card">
           <div class="section-title">
-            <div><h1>Central de Anotações</h1><p>Recados, lembretes e registros com acompanhamento automático por data.</p></div>
+            <div><h1>Central de Anotações</h1><p>Anotações escritas e por voz com revisão, fotos, documentos, tags e organização completa.</p></div>
             <div class="actions no-print">
-              <button class="btn" type="button" onclick="abrirCriadorNota()">➕ Criar</button>
+              <button class="btn" type="button" onclick="abrirCriadorNota(false,'ESCRITA')">✍️ Nova escrita</button>
+              <button class="btn secondary" type="button" onclick="abrirCriadorNota(false,'VOZ')">🎙️ Nova por voz</button>
               <button class="btn secondary" onclick="printActivePage()">🖨️ Imprimir</button>
             </div>
           </div>
@@ -9755,42 +10292,98 @@ body.dark-mode .ag-dist-mini-status.no .mark{
               <div class="nota-create-toolbar">
                 <div>
                   <h3 id="notaCreatorTitle">Nova anotação</h3>
-                  <p>Preencha somente quando precisar criar ou editar um registro.</p>
+                  <p>Escolha como deseja registrar a anotação.</p>
                 </div>
                 <button class="btn secondary small" type="button" onclick="fecharCriadorNota()">✕ Fechar criação</button>
               </div>
-          <form id="formNota" onsubmit="salvarNota(event)">
-            <input type="hidden" id="notaId" />
-            <div class="form-grid">
-              <div class="field w4"><label>Título</label><input id="notaTitulo" required placeholder="Ex.: Ajustar exposição da entrada" /></div>
-              <div class="field w2"><label>Setor</label><select id="notaSetor" required></select></div>
-              <div class="field w2"><label>Tipo</label><select id="notaTipo"><option>Recado</option><option>Atenção</option><option>Ideia</option><option>Pendência</option><option>Solicitação</option><option>Alinhamento</option></select></div>
-              <div class="field w2"><label>Prioridade</label><select id="notaPrioridade"><option>Normal</option><option>Alta</option><option>Baixa</option></select></div>
-              <div class="field w2"><label>Data de início</label><input id="notaInicio" type="date" onchange="atualizarStatusPrevistoNota()" oninput="atualizarStatusPrevistoNota()" /></div>
-              <div class="field w2"><label>Prazo</label><input id="notaPrazo" type="date" onchange="atualizarStatusPrevistoNota()" oninput="atualizarStatusPrevistoNota()" /></div>
-              <div class="field w4"><label>Responsável</label><select id="notaResponsavel"></select></div>
-              <div class="field w3 note-status-field"><label>Status</label><div class="task-status-box"><input id="notaStatus" class="task-status-standard" value="PADRÃO — ABERTO" readonly /></div></div>
-              <div class="field w3"><label>Observação rápida</label><input id="notaResumo" placeholder="Resumo curto para aparecer na lista" /></div>
-              <div class="field w12 nota-voice-field">
-                <div class="nota-voice-head">
-                  <label for="notaDescricao">Descrição completa</label>
-                  <div class="nota-voice-actions">
-                    <span id="notaDitadoStatus" class="nota-voice-status" aria-live="polite">Ditado disponível</span>
-                    <button id="notaDitadoBtn" class="nota-voice-btn" type="button" onclick="toggleDitadoNota()" aria-pressed="false" title="Iniciar ditado por voz">
-                      <span class="nota-voice-mic" aria-hidden="true">🎙️</span>
-                      <span id="notaDitadoBtnTexto">Iniciar ditado</span>
-                    </button>
+
+              <div class="nota-mode-switch" role="tablist" aria-label="Tipo de anotação">
+                <button id="notaModoEscritaBtn" class="nota-mode-btn active" type="button" onclick="selecionarModoNota('ESCRITA')">✍️ Anotação escrita</button>
+                <button id="notaModoVozBtn" class="nota-mode-btn" type="button" onclick="selecionarModoNota('VOZ')">🎙️ Anotação por voz</button>
+              </div>
+
+              <form id="formNota" onsubmit="salvarNota(event)">
+                <input type="hidden" id="notaId" />
+                <input type="hidden" id="notaOrigem" value="ESCRITA" />
+                <input type="hidden" id="notaVozRevisaoConfirmada" value="0" />
+                <div class="form-grid">
+                  <div class="field w4"><label>Título</label><input id="notaTitulo" required placeholder="Ex.: Ajustar exposição da entrada" /></div>
+                  <div class="field w2"><label>Setor</label><select id="notaSetor" required></select></div>
+                  <div class="field w2"><label>Tipo</label><select id="notaTipo"><option>Recado</option><option>Atenção</option><option>Ideia</option><option>Pendência</option><option>Solicitação</option><option>Alinhamento</option></select></div>
+                  <div class="field w2"><label>Prioridade</label><select id="notaPrioridade"><option>Normal</option><option>Alta</option><option>Baixa</option></select></div>
+                  <div class="field w2"><label>Data de início</label><input id="notaInicio" type="date" onchange="atualizarStatusPrevistoNota()" oninput="atualizarStatusPrevistoNota()" /></div>
+                  <div class="field w2"><label>Prazo</label><input id="notaPrazo" type="date" onchange="atualizarStatusPrevistoNota()" oninput="atualizarStatusPrevistoNota()" /></div>
+                  <div class="field w4"><label>Responsável</label><select id="notaResponsavel"></select></div>
+                  <div class="field w3 note-status-field"><label>Status</label><div class="task-status-box"><input id="notaStatus" class="task-status-standard" value="PADRÃO — ABERTO" readonly /></div></div>
+                  <div class="field w3"><label>Observação rápida</label><input id="notaResumo" placeholder="Resumo curto para aparecer na lista" /></div>
+                  <div class="field w6"><label>#Tags</label>
+                    <div class="nota-hashtag-control">
+                      <div id="notaHashtagEditor" class="nota-hashtag-editor" onclick="focarCampoHashtagNota()">
+                        <div id="notaTagChips" class="nota-hashtag-chips"></div>
+                        <input id="notaTagInput" type="text" autocomplete="off" spellcheck="false" placeholder="#adicionar_tag" aria-label="Adicionar hashtag" aria-autocomplete="list" aria-controls="notaTagSuggestions" oninput="aoDigitarHashtagNota(event)" onkeydown="aoTeclarHashtagNota(event)" onfocus="aoFocarHashtagNota()" />
+                        <input id="notaTags" type="hidden" />
+                      </div>
+                      <div id="notaTagSuggestions" class="nota-hashtag-suggestions" role="listbox" hidden></div>
+                    </div>
+                    <div class="nota-hashtag-help"><span id="notaTagRegra" class="tag-rule">Digite <b>#</b> para criar ou localizar uma hashtag.</span><span id="notaTagContagem" class="tag-count">0/12</span></div>
+                  </div>
+
+                  <div id="notaEscritaArea" class="field w12 nota-entry-area active">
+                    <div class="nota-entry-title"><span>✍️</span><div><strong>Anotação escrita</strong><small>Digite livremente o conteúdo final da anotação.</small></div></div>
+                    <textarea id="notaDescricaoEscrita" placeholder="Detalhe o que precisa ser lembrado, resolvido ou acompanhado..."></textarea>
+                  </div>
+
+                  <div id="notaVozArea" class="field w12 nota-entry-area" hidden>
+                    <div class="nota-entry-title"><span>🎙️</span><div><strong>Anotação por voz</strong><small>Grave primeiro. Depois revise a transcrição antes de salvar.</small></div></div>
+                    <div class="nota-voice-capture">
+                      <div class="nota-voice-head">
+                        <label for="notaVozRascunho">1. Transcrição da fala</label>
+                        <div class="nota-voice-actions">
+                          <span id="notaDitadoStatus" class="nota-voice-status" aria-live="polite">Ditado disponível</span>
+                          <button id="notaDitadoBtn" class="nota-voice-btn" type="button" onclick="toggleDitadoNota()" aria-pressed="false" title="Iniciar ditado por voz">
+                            <span class="nota-voice-mic" aria-hidden="true">🎙️</span>
+                            <span id="notaDitadoBtnTexto">Iniciar gravação</span>
+                          </button>
+                        </div>
+                      </div>
+                      <textarea id="notaVozRascunho" placeholder="A transcrição aparecerá aqui enquanto você fala..."></textarea>
+                      <div class="nota-voice-help">Comandos: “nova linha”, “parágrafo”, “vírgula”, “ponto final”, “dois pontos”, “ponto de interrogação” e “ponto de exclamação”.</div>
+                      <div class="actions nota-voice-review-actions">
+                        <button class="btn secondary" type="button" onclick="prepararRevisaoVozNota()">📝 Revisar transcrição</button>
+                        <button class="btn secondary" type="button" onclick="reiniciarVozNota()">↻ Regravar</button>
+                      </div>
+                    </div>
+                    <div id="notaVozReviewPanel" class="nota-voice-review" hidden>
+                      <div class="nota-voice-review-head">
+                        <div><strong>2. Revisão antes de salvar</strong><small>Corrija nomes, pontuação ou qualquer trecho interpretado incorretamente.</small></div>
+                        <span id="notaVozReviewBadge" class="nota-review-badge">Aguardando revisão</span>
+                      </div>
+                      <textarea id="notaDescricao" placeholder="Revise aqui o texto final da anotação..."></textarea>
+                      <div class="actions">
+                        <button class="btn good" type="button" onclick="confirmarRevisaoVozNota()">✓ Confirmar revisão</button>
+                        <button class="btn secondary" type="button" onclick="voltarTranscricaoVozNota()">← Voltar à transcrição</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="field w12 nota-attachments-panel" id="notaAttachmentsPanel" ondragover="eventoDragAnexoNota(event,true)" ondragleave="eventoDragAnexoNota(event,false)" ondrop="receberDropAnexoNota(event)">
+                    <div class="nota-attachments-head">
+                      <div><strong>📎 Fotos e documentos</strong><small>Inclua imagens, PDF, Word, Excel, PowerPoint, texto, CSV ou ZIP. Fotos grandes são reduzidas automaticamente para economizar espaço.</small></div>
+                      <div class="nota-attachments-actions">
+                        <label class="btn secondary small nota-file-label">📷 Adicionar foto<input id="notaFotoInput" type="file" accept="image/*" capture="environment" multiple onchange="selecionarAnexosNota(this.files);this.value=''" /></label>
+                        <label class="btn secondary small nota-file-label">📎 Adicionar arquivo<input id="notaArquivoInput" type="file" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip" multiple onchange="selecionarAnexosNota(this.files);this.value=''" /></label>
+                      </div>
+                    </div>
+                    <div id="notaDropzone" class="nota-dropzone">Arraste fotos ou documentos para esta área.</div>
+                    <div id="notaAnexosPreview" class="nota-attachment-editor-list"></div>
+                  </div>
+
+                  <div class="field w12 actions">
+                    <button class="btn" type="submit">💾 Salvar anotação</button>
+                    <button class="btn secondary" type="button" onclick="limparFormNota()">Limpar</button>
                   </div>
                 </div>
-                <textarea id="notaDescricao" placeholder="Detalhe o que precisa ser lembrado, resolvido ou acompanhado..."></textarea>
-                <div class="nota-voice-help">Fale normalmente. Comandos disponíveis: “nova linha”, “parágrafo”, “vírgula”, “ponto final”, “dois pontos” e “ponto de interrogação”.</div>
-              </div>
-              <div class="field w12 actions">
-                <button class="btn" type="submit">💾 Salvar anotação</button>
-                <button class="btn secondary" type="button" onclick="limparFormNota()">Limpar</button>
-              </div>
-            </div>
-          </form>
+              </form>
             </div>
           </div>
         </div>
@@ -9800,31 +10393,45 @@ body.dark-mode .ag-dist-mini-status.no .mark{
             <select id="fNotaSetor" onchange="renderAll()"></select>
             <select id="fNotaStatus" onchange="renderAll()"><option value="TODOS">Todos os status</option><option>Aberto</option><option>Em acompanhamento</option><option>Concluído</option><option>Arquivado</option></select>
             <select id="fNotaPrioridade" onchange="renderAll()"><option value="TODOS">Todas as prioridades</option><option>Alta</option><option>Normal</option><option>Baixa</option></select>
-            <input id="fNotaBusca" oninput="renderAll()" placeholder="Buscar anotação..." />
+            <select id="fNotaOrigem" onchange="renderAll()"><option value="TODOS">Escrita e voz</option><option value="ESCRITA">✍️ Escritas</option><option value="VOZ">🎙️ Por voz</option></select>
+            <select id="fNotaOrdem" onchange="renderAll()"><option value="RECENTES">Mais recentes</option><option value="PRIORIDADE">Prioridade</option><option value="PRAZO">Prazo</option><option value="TITULO">Título A–Z</option></select>
+            <input id="fNotaBusca" oninput="renderAll()" placeholder="Buscar anotação, tag..." />
           </div>
           <div id="notasTimeline" class="notes-timeline"></div>
         </div>
       </section>
 
       <section id="tarefas" class="page">
-        <div class="section-card">
-          <div class="section-title">
-            <div><h1>Quadro de Tarefas</h1><p>Resumo das tarefas por status. A criação da tarefa é feita pelo botão abaixo, escolhendo a área responsável.</p></div>
-            <div class="actions no-print">
-              <button class="btn" onclick="abrirModalTarefa()">➕ Criar tarefa</button>
-              <button class="btn secondary" onclick="printActivePage()">🖨️ Imprimir</button>
+        <div class="task-view-switch no-print" aria-label="Visualização do quadro de tarefas" style="margin-bottom:16px;">
+          <button type="button" class="task-view-btn active" id="tarefaViewStatusBtn" onclick="setVisualizacaoTarefas('STATUS')">▤ Por status</button>
+          <button type="button" class="task-view-btn" id="tarefaViewCronogramaBtn" onclick="setVisualizacaoTarefas('CRONOGRAMA')">📅 Cronograma</button>
+        </div>
+
+        <div id="taskStatusView">
+          <div class="section-card">
+            <div class="section-title">
+              <div><h1>Quadro de Tarefas</h1><p>Resumo das tarefas por status. A criação da tarefa é feita pelo botão abaixo, escolhendo a área responsável.</p></div>
+              <div class="actions no-print">
+                <button class="btn" onclick="abrirModalTarefa()">➕ Criar tarefa</button>
+                <button class="btn secondary" onclick="printActivePage()">🖨️ Imprimir</button>
+              </div>
             </div>
-          </div>
 
-          <div class="task-summary" id="taskStatusSummary"></div>
+            <div class="task-summary" id="taskStatusSummary"></div>
 
-          <div class="filter-row no-print">
-            <select id="fTarefaSetor" onchange="onFiltroTarefaSetorChange()"></select>
-            <select id="fTarefaDepartamento" onchange="renderAll()"><option value="TODOS">Todas as áreas relacionadas</option></select>
-            <select id="fTarefaPrioridade" onchange="renderAll()"><option value="TODOS">Todas prioridades</option><option>Alta</option><option>Normal</option><option>Baixa</option></select>
-            <input id="fTarefaBusca" oninput="renderAll()" placeholder="Buscar por atividade, departamento ou responsável..." />
+            <div class="filter-row no-print">
+              <select id="fTarefaSetor" onchange="onFiltroTarefaSetorChange()"></select>
+              <select id="fTarefaDepartamento" onchange="renderAll()"><option value="TODOS">Todas as áreas relacionadas</option></select>
+              <select id="fTarefaPrioridade" onchange="renderAll()"><option value="TODOS">Todas prioridades</option><option>Alta</option><option>Normal</option><option>Baixa</option></select>
+              <input id="fTarefaBusca" oninput="renderAll()" placeholder="Buscar por atividade, departamento ou responsável..." />
+            </div>
+
+            <div class="task-list-groups" id="kanban"></div>
           </div>
-          <div class="task-list-groups" id="kanban"></div>
+        </div>
+
+        <div id="taskCronogramaView" hidden>
+          <div id="taskTimeline" class="task-timeline-shell"></div>
         </div>
       </section>
 
@@ -9843,16 +10450,48 @@ body.dark-mode .ag-dist-mini-status.no .mark{
               <div class="field w4"><label>Área da tarefa</label><select id="tarefaSetor" required onchange="ajustarCamposTarefa()"></select></div>
               <div class="field w4"><label id="lblAtividade">Atividade</label><input id="tarefaAtividade" required placeholder="Ex.: Reorganizar exposição da entrada" /></div>
               <div class="field w4"><label>Departamento da loja</label><select id="tarefaDepartamento"></select></div>
-              <div class="field w2"><label>Data de início</label><input id="tarefaInicio" type="date" required onchange="atualizarStatusPrevistoTarefa()" oninput="atualizarStatusPrevistoTarefa()" /></div>
-              <div class="field w2" id="tarefaFimField"><label>Data de término</label><input id="tarefaFim" type="date" onchange="atualizarStatusPrevistoTarefa()" oninput="atualizarStatusPrevistoTarefa()" /></div>
               <div class="field w4">
-                <label>Repetição do lembrete</label>
-                <select id="tarefaRepeticaoLembrete" onchange="atualizarCampoTerminoPorRepeticao()">
-                  <option value="NENHUMA">Não repetir</option>
+                <label>Agendamento da tarefa</label>
+                <select id="tarefaAgendamentoTipo" onchange="atualizarCamposAgendamentoTarefa()">
+                  <option value="INICIO">Somente início</option>
+                  <option value="INICIO_FIM">Início e término</option>
+                  <option value="TERMINO">Somente término / prazo</option>
+                  <option value="REPETICAO">Repetição</option>
+                  <option value="SEM_AGENDAMENTO">Sem data / horário</option>
+                </select>
+              </div>
+              <div class="field w2" id="tarefaInicioField"><label>Data de início</label><input id="tarefaInicio" type="date" onchange="atualizarStatusPrevistoTarefa()" oninput="atualizarStatusPrevistoTarefa()" /></div>
+              <div class="field w2" id="tarefaHoraInicioField"><label>Hora de início</label><input id="tarefaHoraInicio" type="time" onchange="atualizarStatusPrevistoTarefa()" oninput="atualizarStatusPrevistoTarefa()" /></div>
+              <div class="field w2" id="tarefaFimField" hidden><label>Data de término</label><input id="tarefaFim" type="date" onchange="atualizarStatusPrevistoTarefa()" oninput="atualizarStatusPrevistoTarefa()" /></div>
+              <div class="field w2" id="tarefaHoraFimField" hidden><label>Hora de término</label><input id="tarefaHoraFim" type="time" onchange="atualizarStatusPrevistoTarefa()" oninput="atualizarStatusPrevistoTarefa()" /></div>
+              <div class="field w4" id="tarefaRepeticaoField" hidden>
+                <label>Frequência</label>
+                <select id="tarefaRepeticaoLembrete" onchange="atualizarCamposAgendamentoTarefa()">
                   <option value="DIARIA">Diariamente</option>
                   <option value="SEMANAL">Semanalmente</option>
                   <option value="MENSAL">Mensalmente</option>
                 </select>
+              </div>
+              <div class="field w4" id="tarefaDiaSemanaField" hidden>
+                <label>Dia da semana</label>
+                <select id="tarefaDiaSemanaRepeticao">
+                  <option value="">Selecione o dia</option>
+                  <option value="0">Domingo</option>
+                  <option value="1">Segunda-feira</option>
+                  <option value="2">Terça-feira</option>
+                  <option value="3">Quarta-feira</option>
+                  <option value="4">Quinta-feira</option>
+                  <option value="5">Sexta-feira</option>
+                  <option value="6">Sábado</option>
+                </select>
+              </div>
+              <div class="field w2" id="tarefaDiaMesField" hidden>
+                <label>Dia do mês</label>
+                <input id="tarefaDiaMesRepeticao" type="number" min="1" max="31" inputmode="numeric" placeholder="1 a 31" />
+              </div>
+              <div class="field w2" id="tarefaHoraRepeticaoField" hidden>
+                <label>Hora</label>
+                <input id="tarefaHoraRepeticao" type="time" />
               </div>
               <div class="field w4"><label>Pessoa responsável</label><select id="tarefaResponsavel"></select></div>
               <div class="field w4"><label>Responsável adicional</label><select id="tarefaResponsavel2"></select></div>
@@ -10842,6 +11481,8 @@ let globalConfig = null;
 let realtimeChannel = null;
 let salvamentoTimer = null;
 let tarefaStatusTimer = null;
+let tarefaVisualizacaoAtual = 'STATUS';
+let tarefaCronogramaSemanaOffset = 0;
 let aplicandoRemoto = false;
 let salvamentoEmAndamento = false;
 let salvamentoPendente = false;
@@ -11740,6 +12381,197 @@ function aplicarPermissoes(){
   const ativa=document.querySelector('.page.active')?.id;
   if(ativa && !perms[ativa]) showPage('painel');
 }
+/* ==========================================================
+   V51.8 — SINCRONIZAÇÃO SEGURA ENTRE VÁRIOS COMPUTADORES
+   - merge de três vias preserva alterações locais e remotas
+   - arrays com ID são mesclados registro a registro
+   - updated_at funciona como trava otimista (compare-and-swap)
+   ========================================================== */
+function cloneJSONSeguro(valor, fallback=null){
+  try{ return JSON.parse(JSON.stringify(valor)); }
+  catch(_){ return fallback; }
+}
+function jsonIgual(a,b){
+  if(a === b) return true;
+  try{ return JSON.stringify(a) === JSON.stringify(b); }
+  catch(_){ return false; }
+}
+function chaveBaseUsuario(op){
+  return `${chaveLocalUsuario(op)}_base_sync`;
+}
+function chaveBaseCompartilhado(){
+  return `${STORAGE_KEY}_compartilhado_base_sync`;
+}
+function valorBaseSync(chave, fallback={}){
+  const lido = storageGetJSONSeguro(chave, null);
+  return lido && typeof lido === 'object' ? lido : cloneJSONSeguro(fallback, {});
+}
+function chaveItemMerge(item){
+  if(!item || typeof item !== 'object' || Array.isArray(item)) return null;
+  for(const campo of ['id','uuid','protocolo']){
+    const valor = String(item[campo] ?? '').trim();
+    if(valor) return `${campo}:${valor}`;
+  }
+  return null;
+}
+function arrayObjetosComChave(arr){
+  return Array.isArray(arr) && arr.length > 0 && arr.every(item => !!chaveItemMerge(item));
+}
+function mesclarArrayPrimitivo(base, local, remoto){
+  const b = Array.isArray(base) ? base : [];
+  const l = Array.isArray(local) ? local : [];
+  const r = Array.isArray(remoto) ? remoto : [];
+  const chave = v => `${typeof v}:${JSON.stringify(v)}`;
+  const mb = new Map(b.map(v=>[chave(v),v]));
+  const ml = new Map(l.map(v=>[chave(v),v]));
+  const mr = new Map(r.map(v=>[chave(v),v]));
+  const ordem=[];
+  [...r,...l,...b].forEach(v=>{ const k=chave(v); if(!ordem.includes(k)) ordem.push(k); });
+  const saida=[];
+  ordem.forEach(k=>{
+    const vb=mb.has(k), vl=ml.has(k), vr=mr.has(k);
+    let manter;
+    if(vl===vb) manter=vr;          // local não mudou: respeita remoto
+    else if(vr===vb) manter=vl;     // remoto não mudou: respeita local
+    else manter=vl;                 // ambos tocaram: preferência local
+    if(manter) saida.push(ml.get(k) ?? mr.get(k) ?? mb.get(k));
+  });
+  return saida;
+}
+function mesclarArrayPorId(base, local, remoto){
+  const b=Array.isArray(base)?base:[];
+  const l=Array.isArray(local)?local:[];
+  const r=Array.isArray(remoto)?remoto:[];
+  const mb=new Map(b.map(x=>[chaveItemMerge(x),x]));
+  const ml=new Map(l.map(x=>[chaveItemMerge(x),x]));
+  const mr=new Map(r.map(x=>[chaveItemMerge(x),x]));
+  const ordem=[];
+  [...r,...l,...b].forEach(x=>{ const k=chaveItemMerge(x); if(k && !ordem.includes(k)) ordem.push(k); });
+  const saida=[];
+  ordem.forEach(k=>{
+    const temB=mb.has(k), temL=ml.has(k), temR=mr.has(k);
+    const vb=mb.get(k), vl=ml.get(k), vr=mr.get(k);
+
+    // Registro novo.
+    if(!temB){
+      if(temL && temR) saida.push(mesclarTresVias({},vl,vr));
+      else if(temL) saida.push(cloneJSONSeguro(vl,vl));
+      else if(temR) saida.push(cloneJSONSeguro(vr,vr));
+      return;
+    }
+
+    // Exclusão local: não ressuscita o registro por um snapshot remoto antigo.
+    if(!temL){
+      if(!temR || jsonIgual(vr,vb)) return;
+      // Se o remoto alterou exatamente o item enquanto este PC o excluiu,
+      // a exclusão local prevalece. Isso evita registros "fantasmas".
+      return;
+    }
+
+    // Exclusão remota, sem mudança local: respeita a exclusão remota.
+    if(!temR){
+      if(jsonIgual(vl,vb)) return;
+      // Houve edição local concorrente; preserva a edição para não perder trabalho.
+      saida.push(cloneJSONSeguro(vl,vl));
+      return;
+    }
+
+    saida.push(mesclarTresVias(vb,vl,vr));
+  });
+  return saida;
+}
+function mesclarTresVias(base, local, remoto){
+  if(jsonIgual(local,base)) return cloneJSONSeguro(remoto,remoto);
+  if(jsonIgual(remoto,base)) return cloneJSONSeguro(local,local);
+  if(jsonIgual(local,remoto)) return cloneJSONSeguro(local,local);
+
+  if(Array.isArray(local) && Array.isArray(remoto)){
+    const b=Array.isArray(base)?base:[];
+    if(arrayObjetosComChave(local) && arrayObjetosComChave(remoto) && (!b.length || arrayObjetosComChave(b))){
+      return mesclarArrayPorId(b,local,remoto);
+    }
+    const primitivos=[...b,...local,...remoto].every(v => v===null || ['string','number','boolean'].includes(typeof v));
+    if(primitivos) return mesclarArrayPrimitivo(b,local,remoto);
+    // Lista estrutural sem chave estável: preserva a alteração local em conflito.
+    return cloneJSONSeguro(local,local);
+  }
+
+  if(objetoPlano(local) && objetoPlano(remoto)){
+    const b=objetoPlano(base)?base:{};
+    const saida={};
+    const chaves=new Set([...Object.keys(b),...Object.keys(local),...Object.keys(remoto)]);
+    chaves.forEach(chave=>{
+      const temB=Object.prototype.hasOwnProperty.call(b,chave);
+      const temL=Object.prototype.hasOwnProperty.call(local,chave);
+      const temR=Object.prototype.hasOwnProperty.call(remoto,chave);
+
+      if(!temL && temB){
+        if(!temR || jsonIgual(remoto[chave],b[chave])) return;
+        return; // exclusão local prevalece em conflito
+      }
+      if(!temR && temB){
+        if(jsonIgual(local[chave],b[chave])) return; // exclusão remota
+        saida[chave]=cloneJSONSeguro(local[chave],local[chave]);
+        return;
+      }
+      if(!temL && temR){ saida[chave]=cloneJSONSeguro(remoto[chave],remoto[chave]); return; }
+      if(temL && !temR){ saida[chave]=cloneJSONSeguro(local[chave],local[chave]); return; }
+      saida[chave]=mesclarTresVias(temB?b[chave]:undefined,local[chave],remoto[chave]);
+    });
+    return saida;
+  }
+
+  // Mesmo campo alterado nos dois lados: mantém o valor deste aparelho.
+  return cloneJSONSeguro(local,local);
+}
+async function salvarLinhaComConcorrencia(rowId, dadosLocais, dadosBase, tentativas=4){
+  let local=cloneJSONSeguro(dadosLocais,{});
+  let base=cloneJSONSeguro(dadosBase,{});
+
+  for(let tentativa=1; tentativa<=tentativas; tentativa++){
+    const {data:atual,error:erroLeitura}=await supabaseclient
+      .from(ONLINE_TABLE)
+      .select('dados,updated_at')
+      .eq('id',rowId)
+      .maybeSingle();
+    if(erroLeitura) throw erroLeitura;
+
+    if(!atual){
+      const agora=new Date().toISOString();
+      const {data:criado,error:erroCriar}=await supabaseclient
+        .from(ONLINE_TABLE)
+        .upsert({id:rowId,dados:local,updated_at:agora},{onConflict:'id'})
+        .select('dados,updated_at')
+        .maybeSingle();
+      if(erroCriar) throw erroCriar;
+      return cloneJSONSeguro(criado?.dados ?? local, local);
+    }
+
+    const remoto=atual.dados && typeof atual.dados==='object' ? atual.dados : {};
+    const combinado=mesclarTresVias(base,local,remoto);
+    const novoUpdatedAt=new Date().toISOString();
+
+    let query=supabaseclient
+      .from(ONLINE_TABLE)
+      .update({dados:combinado,updated_at:novoUpdatedAt})
+      .eq('id',rowId);
+    query = atual.updated_at ? query.eq('updated_at',atual.updated_at) : query.is('updated_at',null);
+
+    const {data:salvo,error:erroSalvar}=await query
+      .select('dados,updated_at')
+      .maybeSingle();
+    if(erroSalvar) throw erroSalvar;
+    if(salvo) return cloneJSONSeguro(salvo.dados ?? combinado, combinado);
+
+    // Outro computador gravou entre nossa leitura e a tentativa de update.
+    // Usa o remoto recém-lido como nova base e tenta novamente.
+    base=cloneJSONSeguro(remoto,{});
+    local=cloneJSONSeguro(combinado,{});
+    await esperar(80*tentativa);
+  }
+  throw new Error('Conflito de sincronização: outro computador alterou os mesmos dados repetidamente.');
+}
+
 function dadosIndividuaisDoDB(base=db){
   return {
     notas: Array.isArray(base?.notas) ? base.notas : [],
@@ -11773,6 +12605,7 @@ async function carregarDadosCompartilhadosOnline(){
     }
     aplicarDadosCompartilhados(data.dados);
     storageSetSeguro(`${STORAGE_KEY}_compartilhado`,data.dados,{serializar:true,silencioso:true});
+    storageSetSeguro(chaveBaseCompartilhado(),data.dados,{serializar:true,silencioso:true});
     marcarSincronizacaoConfirmada('ONLINE • dados da loja carregados');
     return true;
   }catch(err){
@@ -11801,6 +12634,7 @@ async function carregarDadosUsuarioOnline(op){
     await carregarDadosCompartilhadosOnline();
     prepararDBCarregado();
     storageSetSeguro(chaveLocalUsuario(operador),dadosIndividuaisDoDB(db),{serializar:true,silencioso:true});
+    storageSetSeguro(chaveBaseUsuario(operador),dadosIndividuaisDoDB(db),{serializar:true,silencioso:true});
     marcarSincronizacaoConfirmada('ONLINE • dados sincronizados');
     // Garante a migração do registro individual antigo para o formato enxuto.
     await salvarDadosUsuarioOnline(true);
@@ -11820,6 +12654,13 @@ function prepararDBCarregado(){
   db.funcionarios ||= JSON.parse(JSON.stringify(funcionariosPadrao)); deduplicarFuncionarios();
   funcionariosPadrao.forEach(f=>{ const existente=localizarFuncionarioPadrao(f); if(existente) mesclarFuncionario(existente,f); else db.funcionarios.push({...f}); });
   deduplicarFuncionarios(); db.notas||=[];db.tarefas||=[];db.diario||=[];db.escalas||=[];db.escalasLimpeza||=[];db.escalasProvador||=[];db.meta||={loja:'24',gerente:'ALANA',criadoEm:agoraBR()};
+  db.tarefas.forEach(t=>{
+    t.agendamentoTipo=normalizarTipoAgendamentoTarefa(t);
+    t.horaInicio=String(t.horaInicio||''); t.horaFim=String(t.horaFim||''); t.horaRepeticao=String(t.horaRepeticao||'');
+    const rep=String(t?.repeticaoLembrete||'NENHUMA').toUpperCase();
+    if(rep==='SEMANAL' && !diaSemanaRepeticaoValido(t?.diaSemanaRepeticao)) t.diaSemanaRepeticao=diaSemanaDaDataISO(t.inicio || t.dataISO || hojeISO());
+    if(rep==='MENSAL' && !diaMesRepeticaoValido(t?.diaMesRepeticao)) t.diaMesRepeticao=diaMesDaDataISO(t.inicio || t.dataISO || hojeISO());
+  });
   db.gerencial ||= {};
   db.gerencial.resultados = Array.isArray(db.gerencial.resultados) ? db.gerencial.resultados : [];
   db.gerencial.setores = Array.isArray(db.gerencial.setores) ? db.gerencial.setores : [];
@@ -11838,20 +12679,32 @@ async function salvarDadosUsuarioOnline(silencioso=false){
 
   salvamentoEmAndamento = true;
   const op = normalizarOperador(usuarioAtual.operador);
-  const individuais = dadosIndividuaisDoDB(db);
-  const compartilhados = dadosCompartilhadosDoDB(db);
-  storageSetSeguro(chaveLocalUsuario(op),individuais,{serializar:true,silencioso});
-  storageSetSeguro(`${STORAGE_KEY}_compartilhado`,compartilhados,{serializar:true,silencioso});
+  const individuaisLocais = dadosIndividuaisDoDB(db);
+  const compartilhadosLocais = dadosCompartilhadosDoDB(db);
+  storageSetSeguro(chaveLocalUsuario(op),individuaisLocais,{serializar:true,silencioso});
+  storageSetSeguro(`${STORAGE_KEY}_compartilhado`,compartilhadosLocais,{serializar:true,silencioso});
 
   try{
     if(!navigator.onLine) throw new Error('Sem conexão com a internet.');
     if(!silencioso) setSyncStatus('SALVANDO ONLINE...','syncing');
-    const agora = new Date().toISOString();
-    const {error} = await supabaseclient.from(ONLINE_TABLE).upsert([
-      {id:`usuario_${op}`,dados:individuais,updated_at:agora},
-      {id:SHARED_ROW_ID,dados:compartilhados,updated_at:agora}
-    ],{onConflict:'id'});
-    if(error) throw error;
+
+    const baseIndividual=valorBaseSync(chaveBaseUsuario(op),{});
+    const baseCompartilhado=valorBaseSync(chaveBaseCompartilhado(),{});
+
+    // Cada linha é salva com trava otimista. Se outro PC salvou no intervalo,
+    // a função relê, mescla e tenta novamente sem sobrescrever silenciosamente.
+    const individuaisSalvos=await salvarLinhaComConcorrencia(`usuario_${op}`,individuaisLocais,baseIndividual);
+    const compartilhadosSalvos=await salvarLinhaComConcorrencia(SHARED_ROW_ID,compartilhadosLocais,baseCompartilhado);
+
+    // Atualiza a memória local com qualquer mudança remota que entrou durante o merge.
+    db={...defaultDB(),...compartilhadosSalvos,...dadosIndividuaisDoDB(individuaisSalvos)};
+    prepararDBCarregado();
+
+    storageSetSeguro(chaveLocalUsuario(op),dadosIndividuaisDoDB(db),{serializar:true,silencioso:true});
+    storageSetSeguro(chaveBaseUsuario(op),dadosIndividuaisDoDB(db),{serializar:true,silencioso:true});
+    storageSetSeguro(`${STORAGE_KEY}_compartilhado`,dadosCompartilhadosDoDB(db),{serializar:true,silencioso:true});
+    storageSetSeguro(chaveBaseCompartilhado(),dadosCompartilhadosDoDB(db),{serializar:true,silencioso:true});
+
     marcarSincronizacaoConfirmada('ONLINE • salvo agora');
     return true;
   }catch(err){
@@ -11879,24 +12732,53 @@ function ativarRealtimeUsuario(){
       const {data}=await supabaseclient.from(ONLINE_TABLE).select('dados').eq('id',`usuario_${op}`).maybeSingle();
       if(data?.dados){
         aplicandoRemoto=true;
-        const compartilhados=dadosCompartilhadosDoDB(db);
-        db={...defaultDB(),...compartilhados,...dadosIndividuaisDoDB(data.dados)};
-        prepararDBCarregado();
-        storageSetSeguro(chaveLocalUsuario(op),dadosIndividuaisDoDB(db),{serializar:true,silencioso:true});
-        renderAll(); aplicandoRemoto=false; setSyncStatus('ONLINE • tarefas e anotações atualizadas','online');
+        try{
+          const local=dadosIndividuaisDoDB(db);
+          const base=valorBaseSync(chaveBaseUsuario(op),{});
+          const remoto=dadosIndividuaisDoDB(data.dados);
+          const mesclado=mesclarTresVias(base,local,remoto);
+          const compartilhados=dadosCompartilhadosDoDB(db);
+          db={...defaultDB(),...compartilhados,...dadosIndividuaisDoDB(mesclado)};
+          prepararDBCarregado();
+          storageSetSeguro(chaveLocalUsuario(op),dadosIndividuaisDoDB(db),{serializar:true,silencioso:true});
+          storageSetSeguro(chaveBaseUsuario(op),remoto,{serializar:true,silencioso:true});
+          renderAll();
+          marcarSincronizacaoConfirmada('ONLINE • tarefas e anotações atualizadas');
+        }finally{
+          aplicandoRemoto=false;
+        }
       }
    })
    .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${SHARED_ROW_ID}`},async()=>{
       const {data}=await supabaseclient.from(ONLINE_TABLE).select('dados').eq('id',SHARED_ROW_ID).maybeSingle();
       if(data?.dados){
         aplicandoRemoto=true;
-        aplicarDadosCompartilhados(data.dados);
-        prepararDBCarregado();
-        storageSetSeguro(`${STORAGE_KEY}_compartilhado`,data.dados,{serializar:true,silencioso:true});
-        atualizarIdentidadeUsuarioAtual(); atualizarIdentidadeNaTela(); popularSelects(); renderAll(); aplicandoRemoto=false; setSyncStatus('ONLINE • dados da loja atualizados','online');
+        try{
+          const local=dadosCompartilhadosDoDB(db);
+          const base=valorBaseSync(chaveBaseCompartilhado(),{});
+          const remoto=data.dados;
+          const mesclado=mesclarTresVias(base,local,remoto);
+          aplicarDadosCompartilhados(mesclado);
+          prepararDBCarregado();
+          storageSetSeguro(`${STORAGE_KEY}_compartilhado`,dadosCompartilhadosDoDB(db),{serializar:true,silencioso:true});
+          storageSetSeguro(chaveBaseCompartilhado(),remoto,{serializar:true,silencioso:true});
+          atualizarIdentidadeUsuarioAtual();
+          atualizarIdentidadeNaTela();
+          popularSelects();
+          renderAll();
+          marcarSincronizacaoConfirmada('ONLINE • dados da loja atualizados');
+        }finally{
+          aplicandoRemoto=false;
+        }
       }
    })
-   .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${GLOBAL_ROW_ID}`},async()=>{ await carregarConfigGlobalOnline(); atualizarIdentidadeUsuarioAtual(); atualizarIdentidadeNaTela(); aplicarPermissoes(); renderAll(); })
+   .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${GLOBAL_ROW_ID}`},async()=>{
+      await carregarConfigGlobalOnline();
+      atualizarIdentidadeUsuarioAtual();
+      atualizarIdentidadeNaTela();
+      aplicarPermissoes();
+      renderAll();
+   })
    .subscribe(status => {
       realtimeStatus = status;
       if(status === 'SUBSCRIBED'){
@@ -12171,12 +13053,19 @@ function badgePrioridade(p){
 const TAREFA_CONCLUIDA_RETENCAO_MS = 24 * 60 * 60 * 1000;
 function isConcluido(item){ return ['Concluído','Concluida','Concluída','Arquivado'].includes(item?.status); }
 function isAtrasado(item){ return item?.prazo && item.prazo < hojeISO() && !isConcluido(item); }
-function calcularStatusAutomaticoTarefa(tarefa, dataReferencia=hojeISO()){
+function calcularStatusAutomaticoTarefa(tarefa, dataReferencia=null){
   if(isConcluido(tarefa)) return 'Concluída';
-  const inicio = String(tarefa?.inicio || tarefa?.dataISO || '').slice(0,10);
-  const fim = String(tarefa?.fim || tarefa?.prazo || '').slice(0,10);
-  if(inicio && dataReferencia < inicio) return 'Aguardando';
-  if(fim && dataReferencia >= fim) return 'Pendente';
+  const tipo=normalizarTipoAgendamentoTarefa(tarefa);
+  if(tipo==='REPETICAO' || tipo==='SEM_AGENDAMENTO') return 'Em andamento';
+  let agora=Date.now();
+  if(typeof dataReferencia==='number' && Number.isFinite(dataReferencia)) agora=dataReferencia;
+  else if(typeof dataReferencia==='string' && /^\d{4}-\d{2}-\d{2}$/.test(dataReferencia)){
+    const ts=new Date(`${dataReferencia}T12:00:00`).getTime(); if(Number.isFinite(ts)) agora=ts;
+  }
+  const inicio=timestampAgendamentoTarefa(tarefa?.inicio || tarefa?.dataISO,tarefa?.horaInicio,false);
+  const fim=timestampAgendamentoTarefa(tarefa?.fim || tarefa?.prazo,tarefa?.horaFim,true);
+  if((tipo==='INICIO'||tipo==='INICIO_FIM') && inicio!==null && agora < inicio) return 'Aguardando';
+  if((tipo==='TERMINO'||tipo==='INICIO_FIM') && fim!==null && agora >= fim) return 'Pendente';
   return 'Em andamento';
 }
 function timestampDataHoraTarefa(valor){
@@ -12346,29 +13235,361 @@ function atualizarStatusPrevistoTarefa(){
   let status;
   if(existente && isConcluido(existente)) status = 'Concluída';
   else status = calcularStatusAutomaticoTarefa({
-    inicio: document.getElementById('tarefaInicio')?.value || hojeISO(),
-    fim: document.getElementById('tarefaFim')?.value || ''
+    agendamentoTipo: document.getElementById('tarefaAgendamentoTipo')?.value || 'INICIO',
+    inicio: document.getElementById('tarefaInicio')?.value || '',
+    horaInicio: document.getElementById('tarefaHoraInicio')?.value || '',
+    fim: document.getElementById('tarefaFim')?.value || '',
+    horaFim: document.getElementById('tarefaHoraFim')?.value || '',
+    repeticaoLembrete: document.getElementById('tarefaRepeticaoLembrete')?.value || 'NENHUMA'
   });
   campo.value = `PADRÃO — ${status.toUpperCase()}`;
   if(!ajuda) return;
   const mensagens = {
-    'Aguardando':'A tarefa ainda não alcançou a data de início.',
-    'Em andamento':'A tarefa já iniciou e ainda não alcançou a data de término.',
-    'Pendente':'A tarefa alcançou a data de término e ainda não foi concluída.',
+    'Aguardando':'A tarefa ainda não alcançou o início programado.',
+    'Em andamento':'A tarefa está ativa.',
+    'Pendente':'O término programado foi alcançado e a tarefa ainda não foi concluída.',
     'Concluída':'Conclusão manual registrada. A tarefa desaparecerá após 24 horas.'
   };
-  ajuda.textContent = mensagens[status] || 'Definido automaticamente pelas datas da tarefa.';
+  ajuda.textContent = mensagens[status] || 'Status definido automaticamente pelo agendamento.';
 }
 
+function normalizarOrigemNota(valor){
+  return String(valor||'').toUpperCase()==='VOZ' ? 'VOZ' : 'ESCRITA';
+}
+function normalizarHashtagNota(valor){
+  let tag=String(valor||'').trim().replace(/^#+/,'');
+  tag=tag.replace(/\s+/g,'_').replace(/[^0-9A-Za-zÀ-ÖØ-öø-ÿ_]/g,'').replace(/_+/g,'_').replace(/^_+|_+$/g,'');
+  return tag.toLocaleLowerCase('pt-BR').slice(0,40);
+}
+function tagsDaNota(valor){
+  const lista=Array.isArray(valor)?valor:String(valor||'').split(',');
+  const tags=lista.map(normalizarHashtagNota).filter(Boolean);
+  return [...new Set(tags)].slice(0,12);
+}
+function tagsSelecionadasNota(){
+  return tagsDaNota(document.getElementById('notaTags')?.value || '');
+}
+function atualizarHistoricoHashtagsNota(tags){
+  const lista=tagsDaNota(tags);
+  if(!lista.length || !db || typeof db!=='object') return;
+  if(!db.meta || typeof db.meta!=='object') db.meta={};
+  const agora=new Date().toISOString();
+  const anterior=Array.isArray(db.meta.hashtagsRecentesNotas)?db.meta.hashtagsRecentesNotas:[];
+  const mapa=new Map();
+  anterior.forEach(item=>{
+    const tag=normalizarHashtagNota(typeof item==='string'?item:item?.tag);
+    if(tag && !mapa.has(tag)) mapa.set(tag,{tag,usadoEm:String(item?.usadoEm||'')});
+  });
+  lista.forEach(tag=>mapa.set(tag,{tag,usadoEm:agora}));
+  db.meta.hashtagsRecentesNotas=[...mapa.values()].sort((a,b)=>String(b.usadoEm||'').localeCompare(String(a.usadoEm||''))).slice(0,40);
+}
+function hashtagsRecentesSistemaNota(limite=12){
+  const selecionadas=new Set(tagsSelecionadasNota());
+  const saida=[];
+  const vistos=new Set();
+  const historico=Array.isArray(db?.meta?.hashtagsRecentesNotas)?db.meta.hashtagsRecentesNotas:[];
+  historico.forEach(item=>{
+    const tag=normalizarHashtagNota(typeof item==='string'?item:item?.tag);
+    if(tag && !vistos.has(tag) && !selecionadas.has(tag)){ vistos.add(tag); saida.push(tag); }
+  });
+  // Compatibilidade: se o histórico ainda não existe, aproveita tags já presentes nas anotações carregadas.
+  (db?.notas||[]).forEach(n=>tagsDaNota(n.tags).forEach(tag=>{
+    if(tag && !vistos.has(tag) && !selecionadas.has(tag)){ vistos.add(tag); saida.push(tag); }
+  }));
+  return saida.slice(0,Math.max(1,Number(limite)||12));
+}
+function renderHashtagsNotaEditor(tags=tagsSelecionadasNota()){
+  const normalizadas=tagsDaNota(tags);
+  const hidden=document.getElementById('notaTags');
+  if(hidden) hidden.value=normalizadas.join(',');
+  const chips=document.getElementById('notaTagChips');
+  if(chips){
+    chips.innerHTML=normalizadas.map(tag=>`<span class="nota-hashtag-chip"><span>#${escapeHTML(tag)}</span><button type="button" onclick="event.stopPropagation();removerHashtagNota('${tag}')" aria-label="Remover #${escapeHTML(tag)}">×</button></span>`).join('');
+  }
+  const cont=document.getElementById('notaTagContagem');
+  if(cont) cont.textContent=`${normalizadas.length}/12`;
+  return normalizadas;
+}
+function focarCampoHashtagNota(){ document.getElementById('notaTagInput')?.focus(); }
+function definirRegraHashtagNota(texto='',erro=false){
+  const el=document.getElementById('notaTagRegra');
+  if(!el) return;
+  el.classList.toggle('error',!!erro);
+  el.innerHTML=texto || 'Digite <b>#</b> para criar ou localizar uma hashtag.';
+  document.getElementById('notaHashtagEditor')?.classList.toggle('invalid',!!erro);
+}
+function esconderSugestoesHashtagNota(){
+  const box=document.getElementById('notaTagSuggestions');
+  if(box){ box.hidden=true; box.innerHTML=''; }
+}
+function mostrarSugestoesHashtagNota(consulta=''){
+  const box=document.getElementById('notaTagSuggestions');
+  if(!box) return;
+  const q=normalizarHashtagNota(consulta);
+  const recentes=hashtagsRecentesSistemaNota(16);
+  const filtradas=(q?recentes.filter(t=>norm(t).includes(norm(q))):recentes).slice(0,10);
+  const selecionadas=new Set(tagsSelecionadasNota());
+  const podeCriar=!!q && !selecionadas.has(q) && !recentes.includes(q) && tagsSelecionadasNota().length<12;
+  if(!filtradas.length && !podeCriar){ esconderSugestoesHashtagNota(); return; }
+  const titulo=q?'Sugestões':'Hashtags recentes';
+  const sugestoes=filtradas.map((tag,i)=>`<button type="button" class="nota-hashtag-suggestion ${i===0?'active':''}" role="option" onclick="selecionarSugestaoHashtagNota('${tag}')"><span><strong>#${escapeHTML(tag)}</strong><small>Usada recentemente no sistema</small></span><span>＋</span></button>`).join('');
+  const criar=podeCriar?`<button type="button" class="nota-hashtag-suggestion" role="option" onclick="selecionarSugestaoHashtagNota('${q}')"><span><strong class="nota-hashtag-create">Criar #${escapeHTML(q)}</strong><small>Nova hashtag</small></span><span>＋</span></button>`:'';
+  box.innerHTML=`<div class="nota-hashtag-suggestions-head">${titulo}</div>${sugestoes}${criar}`;
+  box.hidden=false;
+}
+function adicionarHashtagNota(valor,{exigirHash=false}={}){
+  const bruto=String(valor||'').trim();
+  if(exigirHash && !bruto.startsWith('#')){
+    definirRegraHashtagNota('Para adicionar uma hashtag, comece digitando <b>#</b>.',true);
+    return false;
+  }
+  const tag=normalizarHashtagNota(bruto);
+  if(!tag){ definirRegraHashtagNota('Digite algo depois de <b>#</b>, por exemplo <b>#vitrine</b>.',true); return false; }
+  const tags=tagsSelecionadasNota();
+  if(tags.includes(tag)){
+    definirRegraHashtagNota(`<b>#${escapeHTML(tag)}</b> já foi adicionada.`,true);
+    return false;
+  }
+  if(tags.length>=12){ definirRegraHashtagNota('Limite de <b>12 hashtags</b> por anotação.',true); return false; }
+  tags.push(tag);
+  renderHashtagsNotaEditor(tags);
+  const input=document.getElementById('notaTagInput'); if(input) input.value='';
+  definirRegraHashtagNota();
+  esconderSugestoesHashtagNota();
+  input?.focus();
+  return true;
+}
+function selecionarSugestaoHashtagNota(tag){ adicionarHashtagNota(`#${tag}`,{exigirHash:true}); }
+function removerHashtagNota(tag){
+  const alvo=normalizarHashtagNota(tag);
+  renderHashtagsNotaEditor(tagsSelecionadasNota().filter(t=>t!==alvo));
+  definirRegraHashtagNota();
+  esconderSugestoesHashtagNota();
+}
+function aoFocarHashtagNota(){
+  const input=document.getElementById('notaTagInput');
+  if(String(input?.value||'').startsWith('#')) mostrarSugestoesHashtagNota(String(input.value).slice(1));
+}
+function aoDigitarHashtagNota(ev){
+  const input=ev?.target || document.getElementById('notaTagInput');
+  const valor=String(input?.value||'');
+  if(!valor){ definirRegraHashtagNota(); esconderSugestoesHashtagNota(); return; }
+  if(!valor.startsWith('#')){
+    definirRegraHashtagNota('Use <b>#</b> no início. Exemplo: <b>#campanha</b>.',true);
+    esconderSugestoesHashtagNota();
+    return;
+  }
+  definirRegraHashtagNota();
+  mostrarSugestoesHashtagNota(valor.slice(1));
+}
+function aoTeclarHashtagNota(ev){
+  const input=ev?.target || document.getElementById('notaTagInput');
+  const valor=String(input?.value||'');
+  if(ev.key==='Enter' || ev.key===','){
+    ev.preventDefault();
+    adicionarHashtagNota(valor,{exigirHash:true});
+    return;
+  }
+  if(ev.key===' ' && valor.startsWith('#') && normalizarHashtagNota(valor)){
+    ev.preventDefault();
+    adicionarHashtagNota(valor,{exigirHash:true});
+    return;
+  }
+  if(ev.key==='Backspace' && !valor){
+    const tags=tagsSelecionadasNota();
+    if(tags.length){ tags.pop(); renderHashtagsNotaEditor(tags); }
+  }
+  if(ev.key==='Escape') esconderSugestoesHashtagNota();
+}
+function filtrarAnotacoesPorHashtag(tag){
+  const busca=document.getElementById('fNotaBusca');
+  if(!busca) return;
+  busca.value=normalizarHashtagNota(tag);
+  renderAll();
+  busca.focus();
+}
+// Fecha a lista ao clicar fora do editor, sem interferir nos demais controles.
+document.addEventListener('click',ev=>{
+  const controle=document.querySelector('.nota-hashtag-control');
+  if(controle && !controle.contains(ev.target)) esconderSugestoesHashtagNota();
+});
+
+const NOTA_ANEXOS_MAX_ARQUIVOS=6;
+const NOTA_ANEXO_MAX_BYTES=2*1024*1024;
+const NOTA_ANEXOS_TOTAL_MAX_BYTES=3*1024*1024;
+let notaAnexosRascunho=[];
+function anexosDaNota(valor){
+  if(!Array.isArray(valor)) return [];
+  return valor.filter(a=>a && typeof a==='object' && a.dataUrl).map(a=>({
+    id:String(a.id||uid('anexo')),
+    nome:String(a.nome||'Arquivo'),
+    tipo:String(a.tipo||'application/octet-stream'),
+    tamanho:Number(a.tamanho)||0,
+    dataUrl:String(a.dataUrl||''),
+    adicionadoEm:String(a.adicionadoEm||'')
+  }));
+}
+function tamanhoAnexosNota(lista=notaAnexosRascunho){ return anexosDaNota(lista).reduce((s,a)=>s+(Number(a.tamanho)||0),0); }
+function formatarTamanhoAnexoNota(bytes){
+  const n=Number(bytes)||0;
+  if(n<1024) return `${n} B`;
+  if(n<1024*1024) return `${(n/1024).toFixed(n<10240?1:0)} KB`;
+  return `${(n/1024/1024).toFixed(1)} MB`;
+}
+function iconeTipoAnexoNota(tipo='',nome=''){
+  const t=String(tipo||'').toLowerCase(), n=String(nome||'').toLowerCase();
+  if(t.startsWith('image/')) return '🖼️';
+  if(t.includes('pdf')||n.endsWith('.pdf')) return '📕';
+  if(t.includes('word')||/\.docx?$/.test(n)) return '📘';
+  if(t.includes('sheet')||t.includes('excel')||/\.xlsx?$/.test(n)||n.endsWith('.csv')) return '📗';
+  if(t.includes('presentation')||/\.pptx?$/.test(n)) return '📙';
+  if(n.endsWith('.zip')) return '🗜️';
+  if(t.startsWith('text/')||n.endsWith('.txt')) return '📄';
+  return '📎';
+}
+function arquivoParaDataURLNota(file){
+  return new Promise((resolve,reject)=>{ const r=new FileReader(); r.onload=()=>resolve(String(r.result||'')); r.onerror=()=>reject(r.error||new Error('Falha ao ler arquivo')); r.readAsDataURL(file); });
+}
+function carregarImagemArquivoNota(file){
+  return new Promise((resolve,reject)=>{ const url=URL.createObjectURL(file); const img=new Image(); img.onload=()=>{URL.revokeObjectURL(url);resolve(img);}; img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Imagem inválida'));}; img.src=url; });
+}
+async function prepararArquivoAnexoNota(file){
+  const ehImagem=String(file?.type||'').startsWith('image/');
+  if(ehImagem && !String(file.type||'').includes('gif') && !String(file.type||'').includes('svg')){
+    try{
+      const img=await carregarImagemArquivoNota(file);
+      const max=1600;
+      const escala=Math.min(1,max/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height));
+      const w=Math.max(1,Math.round((img.naturalWidth||img.width)*escala));
+      const h=Math.max(1,Math.round((img.naturalHeight||img.height)*escala));
+      const c=document.createElement('canvas'); c.width=w; c.height=h;
+      const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,w,h);
+      const dataUrl=c.toDataURL('image/jpeg',.78);
+      const estimado=Math.round((dataUrl.length-(dataUrl.indexOf(',')+1))*0.75);
+      return {id:uid('anexo'),nome:String(file.name||'foto').replace(/\.[^.]+$/,'')+'.jpg',tipo:'image/jpeg',tamanho:estimado,dataUrl,adicionadoEm:agoraBR()};
+    }catch(_){ /* usa original */ }
+  }
+  if(Number(file?.size||0)>NOTA_ANEXO_MAX_BYTES) throw new Error(`O arquivo “${file.name}” ultrapassa 2 MB.`);
+  const dataUrl=await arquivoParaDataURLNota(file);
+  return {id:uid('anexo'),nome:file.name||'Arquivo',tipo:file.type||'application/octet-stream',tamanho:Number(file.size)||0,dataUrl,adicionadoEm:agoraBR()};
+}
+async function selecionarAnexosNota(files){
+  const lista=Array.from(files||[]); if(!lista.length) return;
+  for(const file of lista){
+    if(notaAnexosRascunho.length>=NOTA_ANEXOS_MAX_ARQUIVOS){ alert(`Limite de ${NOTA_ANEXOS_MAX_ARQUIVOS} anexos por anotação.`); break; }
+    if(notaAnexosRascunho.some(a=>a.nome===file.name && Number(a.tamanho)===Number(file.size))){ continue; }
+    try{
+      const anexo=await prepararArquivoAnexoNota(file);
+      if(anexo.tamanho>NOTA_ANEXO_MAX_BYTES){ alert(`O arquivo “${file.name}” ficou maior que 2 MB após o processamento.`); continue; }
+      if(tamanhoAnexosNota()+anexo.tamanho>NOTA_ANEXOS_TOTAL_MAX_BYTES){ alert('Os anexos desta anotação atingiram o limite de aproximadamente 3 MB. Remova algum arquivo antes de adicionar outro.'); break; }
+      notaAnexosRascunho.push(anexo);
+    }catch(err){ alert(err?.message||`Não foi possível anexar “${file.name}”.`); }
+  }
+  renderAnexosNotaEditor();
+}
+function eventoDragAnexoNota(ev,ativo){ ev.preventDefault(); ev.stopPropagation(); document.getElementById('notaDropzone')?.classList.toggle('dragover',!!ativo); }
+function receberDropAnexoNota(ev){ eventoDragAnexoNota(ev,false); selecionarAnexosNota(ev.dataTransfer?.files); }
+function removerAnexoNotaRascunho(id){ notaAnexosRascunho=notaAnexosRascunho.filter(a=>a.id!==id); renderAnexosNotaEditor(); }
+function renderAnexosNotaEditor(){
+  const alvo=document.getElementById('notaAnexosPreview'); if(!alvo) return;
+  const anexos=anexosDaNota(notaAnexosRascunho);
+  alvo.innerHTML=anexos.map(a=>`<div class="nota-attachment-editor-card">
+    <div class="nota-attachment-preview">${a.tipo.startsWith('image/')?`<img src="${a.dataUrl}" alt="">`:iconeTipoAnexoNota(a.tipo,a.nome)}</div>
+    <div class="nota-attachment-info"><strong title="${escapeHTML(a.nome)}">${escapeHTML(a.nome)}</strong><small>${escapeHTML(formatarTamanhoAnexoNota(a.tamanho))}</small></div>
+    <button type="button" class="nota-attachment-remove" onclick="removerAnexoNotaRascunho('${a.id}')" title="Remover anexo">×</button>
+  </div>`).join('');
+}
+function obterAnexoNota(idNota,idAnexo){ const n=(db.notas||[]).find(x=>x.id===idNota); return anexosDaNota(n?.anexos).find(a=>a.id===idAnexo)||null; }
+function abrirAnexoNota(idNota,idAnexo){
+  const a=obterAnexoNota(idNota,idAnexo); if(!a) return;
+  try{ const w=window.open(); if(w) w.location.href=a.dataUrl; else baixarAnexoNota(idNota,idAnexo); }catch(_){ baixarAnexoNota(idNota,idAnexo); }
+}
+function baixarAnexoNota(idNota,idAnexo){
+  const a=obterAnexoNota(idNota,idAnexo); if(!a) return;
+  const link=document.createElement('a'); link.href=a.dataUrl; link.download=a.nome||'arquivo'; document.body.appendChild(link); link.click(); link.remove();
+}
+function htmlAnexosNotaVisualizacao(n){
+  const anexos=anexosDaNota(n?.anexos); if(!anexos.length) return '';
+  return `<div class="note-attachments-view">${anexos.map(a=>`<button type="button" class="note-attachment-view no-print" onclick="abrirAnexoNota('${n.id}','${a.id}')" title="Abrir ${escapeHTML(a.nome)}">
+    <span class="thumb">${a.tipo.startsWith('image/')?`<img src="${a.dataUrl}" alt="">`:iconeTipoAnexoNota(a.tipo,a.nome)}</span>
+    <span><strong>${escapeHTML(a.nome)}</strong><small>${escapeHTML(formatarTamanhoAnexoNota(a.tamanho))} • clique para abrir</small></span>
+  </button>`).join('')}</div>`;
+}
+function selecionarModoNota(modo, preservar=false){
+  const origem=normalizarOrigemNota(modo);
+  if(typeof pararDitadoNota==='function') pararDitadoNota(true);
+  const origemEl=document.getElementById('notaOrigem'); if(origemEl) origemEl.value=origem;
+  const escrita=document.getElementById('notaEscritaArea');
+  const voz=document.getElementById('notaVozArea');
+  const btnE=document.getElementById('notaModoEscritaBtn');
+  const btnV=document.getElementById('notaModoVozBtn');
+  if(escrita) escrita.hidden=origem!=='ESCRITA';
+  if(voz) voz.hidden=origem!=='VOZ';
+  if(btnE) btnE.classList.toggle('active',origem==='ESCRITA');
+  if(btnV) btnV.classList.toggle('active',origem==='VOZ');
+  if(!preservar && origem==='VOZ'){
+    const confirm=document.getElementById('notaVozRevisaoConfirmada'); if(confirm) confirm.value='0';
+    atualizarBadgeRevisaoVozNota(false);
+  }
+}
+function atualizarBadgeRevisaoVozNota(ok){
+  const badge=document.getElementById('notaVozReviewBadge');
+  if(!badge) return;
+  badge.classList.toggle('ok',!!ok);
+  badge.textContent=ok?'✓ Revisão confirmada':'Aguardando revisão';
+}
+function prepararRevisaoVozNota(){
+  if(typeof pararDitadoNota==='function') pararDitadoNota(false);
+  const bruto=document.getElementById('notaVozRascunho');
+  const final=document.getElementById('notaDescricao');
+  const painel=document.getElementById('notaVozReviewPanel');
+  const texto=String(bruto?.value||'').trim();
+  if(!texto){ alert('Grave ou digite uma transcrição antes de iniciar a revisão.'); bruto?.focus(); return; }
+  if(final && !String(final.value||'').trim()) final.value=texto;
+  if(painel) painel.hidden=false;
+  const confirm=document.getElementById('notaVozRevisaoConfirmada'); if(confirm) confirm.value='0';
+  atualizarBadgeRevisaoVozNota(false);
+  setTimeout(()=>final?.focus(),20);
+}
+function confirmarRevisaoVozNota(){
+  const final=document.getElementById('notaDescricao');
+  if(!String(final?.value||'').trim()){ alert('Revise o texto antes de confirmar.'); final?.focus(); return; }
+  const confirm=document.getElementById('notaVozRevisaoConfirmada'); if(confirm) confirm.value='1';
+  atualizarBadgeRevisaoVozNota(true);
+}
+function voltarTranscricaoVozNota(){
+  const painel=document.getElementById('notaVozReviewPanel'); if(painel) painel.hidden=true;
+  const confirm=document.getElementById('notaVozRevisaoConfirmada'); if(confirm) confirm.value='0';
+  atualizarBadgeRevisaoVozNota(false);
+  document.getElementById('notaVozRascunho')?.focus();
+}
+function reiniciarVozNota(){
+  if(typeof pararDitadoNota==='function') pararDitadoNota(true);
+  const bruto=document.getElementById('notaVozRascunho'); if(bruto) bruto.value='';
+  const final=document.getElementById('notaDescricao'); if(final) final.value='';
+  const painel=document.getElementById('notaVozReviewPanel'); if(painel) painel.hidden=true;
+  const confirm=document.getElementById('notaVozRevisaoConfirmada'); if(confirm) confirm.value='0';
+  atualizarBadgeRevisaoVozNota(false);
+  if(typeof atualizarUIDitadoNota==='function') atualizarUIDitadoNota('', 'Ditado disponível');
+}
 function salvarNota(e){
   e.preventDefault();
   const id = document.getElementById('notaId').value || uid('nota');
   const existente = db.notas.find(n => n.id === id);
   const inicio = document.getElementById('notaInicio').value;
   const prazo = document.getElementById('notaPrazo').value;
-  if(inicio && prazo && prazo < inicio){
-    alert('A data do prazo não pode ser anterior à data de início.');
-    return;
+  const origem=normalizarOrigemNota(document.getElementById('notaOrigem')?.value || existente?.origem);
+  if(inicio && prazo && prazo < inicio){ alert('A data do prazo não pode ser anterior à data de início.'); return; }
+  let descricao='';
+  let transcricaoOriginal='';
+  if(origem==='VOZ'){
+    transcricaoOriginal=String(document.getElementById('notaVozRascunho')?.value||'').trim();
+    descricao=String(document.getElementById('notaDescricao')?.value||'').trim();
+    const revisada=document.getElementById('notaVozRevisaoConfirmada')?.value==='1';
+    if(!transcricaoOriginal){ alert('Grave a anotação por voz antes de salvar.'); return; }
+    if(!descricao || !revisada){ alert('Revise a transcrição e clique em “Confirmar revisão” antes de salvar.'); document.getElementById('notaDescricao')?.focus(); return; }
+  }else{
+    descricao=String(document.getElementById('notaDescricaoEscrita')?.value||'').trim();
   }
   let status;
   if(existente && statusNotaArquivado(existente)) status = 'Arquivado';
@@ -12382,18 +13603,24 @@ function salvarNota(e){
     setor: document.getElementById('notaSetor').value,
     tipo: document.getElementById('notaTipo').value,
     prioridade: document.getElementById('notaPrioridade').value,
-    inicio,
-    prazo,
+    inicio,prazo,
     responsavel: document.getElementById('notaResponsavel').value,
     status,
     resumo: document.getElementById('notaResumo').value,
-    descricao: document.getElementById('notaDescricao').value,
+    descricao,
+    origem,
+    transcricaoOriginal: origem==='VOZ' ? transcricaoOriginal : '',
+    vozRevisada: origem==='VOZ',
+    tags: tagsDaNota(document.getElementById('notaTags')?.value),
+    anexos: anexosDaNota(notaAnexosRascunho),
+    fixada: Boolean(existente?.fixada),
     atualizadoPor: usuarioAtual.nome,
     atualizadoEm: agoraBR(),
     concluidaEmISO: existente?.concluidaEmISO,
     arquivadaEmISO: existente?.arquivadaEmISO
   };
   if(existente) Object.assign(existente, nota); else db.notas.unshift(nota);
+  atualizarHistoricoHashtagsNota(nota.tags);
   saveDB(); limparFormNota(); fecharCriadorNota(); renderAll();
 }
 function editarNota(id){
@@ -12401,6 +13628,8 @@ function editarNota(id){
   const n = db.notas.find(x=>x.id===id); if(!n) return;
   showPage('anotacoes');
   abrirCriadorNota(true);
+  const origem=normalizarOrigemNota(n.origem);
+  selecionarModoNota(origem,true);
   document.getElementById('notaId').value = n.id;
   document.getElementById('notaTitulo').value = n.titulo;
   document.getElementById('notaSetor').value = n.setor;
@@ -12410,7 +13639,23 @@ function editarNota(id){
   document.getElementById('notaPrazo').value = n.prazo || '';
   document.getElementById('notaResponsavel').value = n.responsavel || '';
   document.getElementById('notaResumo').value = n.resumo || '';
-  document.getElementById('notaDescricao').value = n.descricao || '';
+  document.getElementById('notaTags').value = tagsDaNota(n.tags).join(',');
+  renderHashtagsNotaEditor(tagsDaNota(n.tags));
+  const tagInput=document.getElementById('notaTagInput'); if(tagInput) tagInput.value='';
+  definirRegraHashtagNota();
+  esconderSugestoesHashtagNota();
+  if(origem==='VOZ'){
+    document.getElementById('notaVozRascunho').value=n.transcricaoOriginal || n.descricao || '';
+    document.getElementById('notaDescricao').value=n.descricao || '';
+    document.getElementById('notaVozReviewPanel').hidden=false;
+    document.getElementById('notaVozRevisaoConfirmada').value='1';
+    atualizarBadgeRevisaoVozNota(true);
+  }else{
+    document.getElementById('notaDescricaoEscrita').value=n.descricao || '';
+    document.getElementById('notaVozReviewPanel').hidden=true;
+  }
+  notaAnexosRascunho=anexosDaNota(n.anexos).map(a=>({...a}));
+  renderAnexosNotaEditor();
   atualizarStatusPrevistoNota();
 }
 function concluirNota(id){
@@ -12424,21 +13669,130 @@ function concluirNota(id){
     saveDB(); renderAll();
   }
 }
+function alternarFixarNota(id){
+  const n=db.notas.find(x=>x.id===id);
+  if(!n) return;
+  n.fixada=!Boolean(n.fixada);
+  n.atualizadoPor=usuarioAtual.nome;
+  n.atualizadoEm=agoraBR();
+  saveDB(); renderAll();
+}
+function duplicarNota(id){
+  const origem=db.notas.find(x=>x.id===id);
+  if(!origem) return;
+  const copia={
+    ...origem,
+    id:uid('nota'),
+    titulo:`Cópia — ${origem.titulo || 'Anotação'}`,
+    criadoEm:agoraBR(),
+    dataISO:hojeISO(),
+    status:calcularStatusAutomaticoNota({inicio:origem.inicio || hojeISO()}),
+    fixada:false,
+    anexos:anexosDaNota(origem.anexos).map(a=>({...a,id:uid('anexo')})),
+    atualizadoPor:usuarioAtual.nome,
+    atualizadoEm:agoraBR()
+  };
+  delete copia.concluidaEmISO;
+  delete copia.concluidoEmISO;
+  delete copia.concluidaEm;
+  delete copia.concluidoEm;
+  delete copia.arquivadaEmISO;
+  db.notas.unshift(copia);
+  atualizarHistoricoHashtagsNota(copia.tags);
+  saveDB(); renderAll();
+}
+function arquivarNota(id){
+  const n=db.notas.find(x=>x.id===id);
+  if(!n) return;
+  n.status='Arquivado';
+  n.arquivadaEmISO=new Date().toISOString();
+  n.atualizadoPor=usuarioAtual.nome;
+  n.atualizadoEm=agoraBR();
+  saveDB(); renderAll();
+}
+function restaurarNota(id){
+  const n=db.notas.find(x=>x.id===id);
+  if(!n) return;
+  delete n.arquivadaEmISO;
+  delete n.concluidaEmISO;
+  delete n.concluidoEmISO;
+  delete n.concluidaEm;
+  delete n.concluidoEm;
+  n.status=calcularStatusAutomaticoNota(n);
+  n.atualizadoPor=usuarioAtual.nome;
+  n.atualizadoEm=agoraBR();
+  saveDB(); renderAll();
+}
+function reabrirNota(id){
+  const n=db.notas.find(x=>x.id===id);
+  if(!n) return;
+  delete n.concluidaEmISO;
+  delete n.concluidoEmISO;
+  delete n.concluidaEm;
+  delete n.concluidoEm;
+  delete n.arquivadaEmISO;
+  n.status=calcularStatusAutomaticoNota(n);
+  n.atualizadoPor=usuarioAtual.nome;
+  n.atualizadoEm=agoraBR();
+  saveDB(); renderAll();
+}
 function excluirNota(id){ if(confirm('Excluir esta anotação?')){ db.notas=db.notas.filter(x=>x.id!==id); saveDB(); renderAll(); } }
+async function copiarNota(id){
+  const n=db.notas.find(x=>x.id===id); if(!n) return;
+  const tags=tagsDaNota(n.tags);
+  const texto=[n.titulo,n.resumo,n.descricao,tags.length?`Tags: ${tags.join(', ')}`:''].filter(Boolean).join('\n\n');
+  try{ await navigator.clipboard.writeText(texto); }
+  catch(_){
+    const ta=document.createElement('textarea'); ta.value=texto; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+  }
+  alert('Anotação copiada.');
+}
+function transformarNotaEmTarefa(id){
+  const n=db.notas.find(x=>x.id===id); if(!n) return;
+  showPage('tarefas');
+  setTimeout(()=>{
+    abrirModalTarefa();
+    const setor=n.setor && n.setor!=='GERAL' ? n.setor : 'VM';
+    const setorEl=document.getElementById('tarefaSetor'); if(setorEl) setorEl.value=setor;
+    ajustarCamposTarefa();
+    const atividade=document.getElementById('tarefaAtividade'); if(atividade) atividade.value=n.titulo || n.resumo || 'Tarefa criada de anotação';
+    const resp=document.getElementById('tarefaResponsavel'); if(resp && [...resp.options].some(o=>o.value===n.responsavel)) resp.value=n.responsavel||'';
+    const prioridade=document.getElementById('tarefaPrioridade'); if(prioridade) prioridade.value=n.prioridade||'Normal';
+    const descricao=document.getElementById('tarefaDescricao'); if(descricao) descricao.value=[n.resumo,n.descricao].filter(Boolean).join('\n\n');
+    if(n.inicio && n.prazo){ document.getElementById('tarefaAgendamentoTipo').value='INICIO_FIM'; document.getElementById('tarefaInicio').value=n.inicio; document.getElementById('tarefaFim').value=n.prazo; }
+    else if(n.prazo){ document.getElementById('tarefaAgendamentoTipo').value='TERMINO'; document.getElementById('tarefaFim').value=n.prazo; }
+    else if(n.inicio){ document.getElementById('tarefaAgendamentoTipo').value='INICIO'; document.getElementById('tarefaInicio').value=n.inicio; }
+    atualizarCamposAgendamentoTarefa();
+  },40);
+}
 function limparFormNota(){
   if(typeof pararDitadoNota === 'function') pararDitadoNota(true);
   document.getElementById('formNota').reset();
+  renderHashtagsNotaEditor([]);
+  const tagInput=document.getElementById('notaTagInput'); if(tagInput) tagInput.value='';
+  definirRegraHashtagNota();
+  esconderSugestoesHashtagNota();
+  notaAnexosRascunho=[];
+  renderAnexosNotaEditor();
   document.getElementById('notaId').value='';
+  document.getElementById('notaOrigem').value='ESCRITA';
+  document.getElementById('notaVozRevisaoConfirmada').value='0';
+  document.getElementById('notaVozReviewPanel').hidden=true;
+  selecionarModoNota('ESCRITA',true);
+  atualizarBadgeRevisaoVozNota(false);
   const titulo = document.getElementById('notaCreatorTitle');
   if(titulo) titulo.textContent = 'Nova anotação';
   atualizarStatusPrevistoNota();
 }
-function abrirCriadorNota(editando=false){
+function abrirCriadorNota(editando=false, modo='ESCRITA'){
   const painel = document.getElementById('notaCreatorPanel');
   if(!painel) return;
-  if(!editando) limparFormNota();
+  if(!editando){
+    limparFormNota();
+    selecionarModoNota(modo,true);
+  }
   const titulo = document.getElementById('notaCreatorTitle');
-  if(titulo) titulo.textContent = editando ? 'Editar anotação' : 'Nova anotação';
+  if(titulo) titulo.textContent = editando ? 'Editar anotação' : (normalizarOrigemNota(modo)==='VOZ' ? 'Nova anotação por voz' : 'Nova anotação escrita');
   painel.classList.add('active');
   setTimeout(()=>painel.scrollIntoView({behavior:'smooth', block:'start'}),30);
 }
@@ -12453,7 +13807,7 @@ function abrirModalTarefa(id){
   else { limparFormTarefa(false); document.getElementById('modalTarefaTitulo').textContent='Criar tarefa'; document.getElementById('tarefaInicio').value = hojeISO(); }
   document.getElementById('modalTarefa').classList.add('active');
   ajustarCamposTarefa();
-  atualizarCampoTerminoPorRepeticao();
+  atualizarCamposAgendamentoTarefa();
 }
 function fecharModalTarefa(ev){
   if(ev && ev.target.id !== 'modalTarefa') return;
@@ -12515,40 +13869,142 @@ function ajustarCamposTarefa(selecionado=''){
   }
 }
 
-function atualizarCampoTerminoPorRepeticao(){
-  const repeticao = String(document.getElementById('tarefaRepeticaoLembrete')?.value || 'NENHUMA').toUpperCase();
-  const campoFim = document.getElementById('tarefaFimField');
-  const inputFim = document.getElementById('tarefaFim');
-  const recorrente = repeticao !== 'NENHUMA';
+const DIAS_SEMANA_REPETICAO = [
+  'Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'
+];
+const TIPOS_AGENDAMENTO_TAREFA = ['INICIO','INICIO_FIM','TERMINO','REPETICAO','SEM_AGENDAMENTO'];
 
-  if(campoFim) campoFim.hidden = recorrente;
-
-  if(inputFim){
-    if(recorrente){
-      inputFim.value = '';
-      inputFim.disabled = true;
-    }else{
-      inputFim.disabled = false;
-    }
+function diaSemanaRepeticaoValido(valor){
+  const n=Number(valor);
+  return Number.isInteger(n) && n>=0 && n<=6;
+}
+function diaMesRepeticaoValido(valor){
+  const n=Number(valor);
+  return Number.isInteger(n) && n>=1 && n<=31;
+}
+function horaTarefaValida(valor){
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(String(valor||''));
+}
+function diaSemanaDaDataISO(dataIso){
+  const data=String(dataIso||'').slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(data)) return '';
+  const d=new Date(`${data}T12:00:00`);
+  return Number.isFinite(d.getTime()) ? String(d.getDay()) : '';
+}
+function diaMesDaDataISO(dataIso){
+  const data=String(dataIso||'').slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(data)) return '';
+  return String(Number(data.slice(8,10)) || '');
+}
+function nomeDiaSemanaRepeticao(valor){
+  return diaSemanaRepeticaoValido(valor) ? DIAS_SEMANA_REPETICAO[Number(valor)] : '';
+}
+function normalizarTipoAgendamentoTarefa(tarefa={}){
+  const salvo=String(tarefa?.agendamentoTipo||'').toUpperCase();
+  if(TIPOS_AGENDAMENTO_TAREFA.includes(salvo)) return salvo;
+  const repeticao=String(tarefa?.repeticaoLembrete||'NENHUMA').toUpperCase();
+  if(repeticao!=='NENHUMA') return 'REPETICAO';
+  const inicio=String(tarefa?.inicio||'').slice(0,10);
+  const fim=String(tarefa?.fim||tarefa?.prazo||'').slice(0,10);
+  if(inicio && fim) return 'INICIO_FIM';
+  if(fim) return 'TERMINO';
+  if(inicio) return 'INICIO';
+  return 'SEM_AGENDAMENTO';
+}
+function timestampAgendamentoTarefa(data,hora='',fimDoDia=false){
+  const d=String(data||'').slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return null;
+  let h=horaTarefaValida(hora) ? hora : (fimDoDia ? '23:59' : '00:00');
+  const ts=new Date(`${d}T${h}:00`).getTime();
+  return Number.isFinite(ts) ? ts : null;
+}
+function formatarDataHoraTarefa(data,hora=''){
+  const d=String(data||'').slice(0,10);
+  if(!d) return '';
+  return `${d}${horaTarefaValida(hora) ? ` • ${hora}` : ''}`;
+}
+function resumoAgendamentoTarefa(tarefa={}){
+  const tipo=normalizarTipoAgendamentoTarefa(tarefa);
+  if(tipo==='REPETICAO'){
+    return rotuloRepeticaoLembrete(tarefa.repeticaoLembrete,tarefa.diaSemanaRepeticao,tarefa.diaMesRepeticao,tarefa.horaRepeticao);
   }
+  if(tipo==='INICIO_FIM'){
+    const ini=formatarDataHoraTarefa(tarefa.inicio,tarefa.horaInicio) || '-';
+    const fim=formatarDataHoraTarefa(tarefa.fim||tarefa.prazo,tarefa.horaFim) || '-';
+    return `${ini} até ${fim}`;
+  }
+  if(tipo==='TERMINO') return `Até ${formatarDataHoraTarefa(tarefa.fim||tarefa.prazo,tarefa.horaFim) || '-'}`;
+  if(tipo==='INICIO') return `A partir de ${formatarDataHoraTarefa(tarefa.inicio||tarefa.dataISO,tarefa.horaInicio) || '-'}`;
+  return 'Sem data / horário';
+}
+
+function atualizarCamposAgendamentoTarefa(){
+  const tipoEl=document.getElementById('tarefaAgendamentoTipo');
+  const tipo=String(tipoEl?.value||'INICIO').toUpperCase();
+  const inicioField=document.getElementById('tarefaInicioField');
+  const horaInicioField=document.getElementById('tarefaHoraInicioField');
+  const fimField=document.getElementById('tarefaFimField');
+  const horaFimField=document.getElementById('tarefaHoraFimField');
+  const repeticaoField=document.getElementById('tarefaRepeticaoField');
+  const diaSemanaField=document.getElementById('tarefaDiaSemanaField');
+  const diaMesField=document.getElementById('tarefaDiaMesField');
+  const horaRepeticaoField=document.getElementById('tarefaHoraRepeticaoField');
+  const inicio=document.getElementById('tarefaInicio');
+  const horaInicio=document.getElementById('tarefaHoraInicio');
+  const fim=document.getElementById('tarefaFim');
+  const horaFim=document.getElementById('tarefaHoraFim');
+  const repeticao=document.getElementById('tarefaRepeticaoLembrete');
+  const diaSemana=document.getElementById('tarefaDiaSemanaRepeticao');
+  const diaMes=document.getElementById('tarefaDiaMesRepeticao');
+
+  const usaInicio=tipo==='INICIO' || tipo==='INICIO_FIM';
+  const usaFim=tipo==='TERMINO' || tipo==='INICIO_FIM';
+  const usaRepeticao=tipo==='REPETICAO';
+  const frequencia=String(repeticao?.value||'DIARIA').toUpperCase();
+  const semanal=usaRepeticao && frequencia==='SEMANAL';
+  const mensal=usaRepeticao && frequencia==='MENSAL';
+
+  if(inicioField) inicioField.hidden=!usaInicio;
+  if(horaInicioField) horaInicioField.hidden=!usaInicio;
+  if(fimField) fimField.hidden=!usaFim;
+  if(horaFimField) horaFimField.hidden=!usaFim;
+  if(repeticaoField) repeticaoField.hidden=!usaRepeticao;
+  if(diaSemanaField) diaSemanaField.hidden=!semanal;
+  if(diaMesField) diaMesField.hidden=!mensal;
+  if(horaRepeticaoField) horaRepeticaoField.hidden=!usaRepeticao;
+
+  if(inicio){ inicio.disabled=!usaInicio; inicio.required=usaInicio; if(usaInicio && !inicio.value) inicio.value=hojeISO(); }
+  if(horaInicio) horaInicio.disabled=!usaInicio;
+  if(fim){ fim.disabled=!usaFim; fim.required=usaFim; }
+  if(horaFim) horaFim.disabled=!usaFim;
+  if(repeticao){ repeticao.disabled=!usaRepeticao; if(usaRepeticao && !['DIARIA','SEMANAL','MENSAL'].includes(frequencia)) repeticao.value='DIARIA'; }
+  if(diaSemana){ diaSemana.disabled=!semanal; diaSemana.required=semanal; if(!semanal) diaSemana.value=''; }
+  if(diaMes){ diaMes.disabled=!mensal; diaMes.required=mensal; if(!mensal) diaMes.value=''; }
 
   atualizarStatusPrevistoTarefa();
 }
+// Compatibilidade com chamadas de versões anteriores.
+function atualizarCampoTerminoPorRepeticao(){ atualizarCamposAgendamentoTarefa(); }
 
-function rotuloRepeticaoLembrete(valor){
-  const mapa={
-    NENHUMA:'Não repetir',
-    DIARIA:'Diariamente',
-    SEMANAL:'Semanalmente',
-    MENSAL:'Mensalmente'
-  };
-  return mapa[String(valor||'NENHUMA').toUpperCase()] || 'Não repetir';
+function rotuloRepeticaoLembrete(valor,diaSemana='',diaMes='',hora=''){
+  const tipo=String(valor||'NENHUMA').toUpperCase();
+  const partes=[];
+  if(tipo==='DIARIA') partes.push('Diariamente');
+  else if(tipo==='SEMANAL'){
+    partes.push('Semanalmente');
+    const nome=nomeDiaSemanaRepeticao(diaSemana);
+    if(nome) partes.push(nome);
+  }else if(tipo==='MENSAL'){
+    partes.push('Mensalmente');
+    if(diaMesRepeticaoValido(diaMes)) partes.push(`dia ${Number(diaMes)}`);
+  }else return 'Não repetir';
+  if(horaTarefaValida(hora)) partes.push(hora);
+  return partes.join(' • ');
 }
-
 function badgeRepeticaoLembreteTarefa(tarefa){
   const valor=String(tarefa?.repeticaoLembrete||'NENHUMA').toUpperCase();
   if(valor==='NENHUMA') return '';
-  return `<span class="badge b-info">🔁 ${escapeHTML(rotuloRepeticaoLembrete(valor))}</span>`;
+  return `<span class="badge b-info">🔁 ${escapeHTML(rotuloRepeticaoLembrete(valor,tarefa?.diaSemanaRepeticao,tarefa?.diaMesRepeticao,tarefa?.horaRepeticao))}</span>`;
 }
 
 function salvarTarefa(e){
@@ -12558,15 +14014,43 @@ function salvarTarefa(e){
   const setor = document.getElementById('tarefaSetor').value;
   const atividade = document.getElementById('tarefaAtividade').value;
   const departamento = document.getElementById('tarefaDepartamento').value;
-  const inicio = document.getElementById('tarefaInicio').value;
-  const repeticaoLembrete = document.getElementById('tarefaRepeticaoLembrete')?.value || 'NENHUMA';
-  const fim = repeticaoLembrete === 'NENHUMA' ? document.getElementById('tarefaFim').value : '';
-  if(fim && inicio && fim < inicio){
-    alert('A data de término não pode ser anterior à data de início.');
-    return;
+  const agendamentoTipo=String(document.getElementById('tarefaAgendamentoTipo')?.value||'INICIO').toUpperCase();
+  const usaInicio=agendamentoTipo==='INICIO' || agendamentoTipo==='INICIO_FIM';
+  const usaFim=agendamentoTipo==='TERMINO' || agendamentoTipo==='INICIO_FIM';
+  const usaRepeticao=agendamentoTipo==='REPETICAO';
+  const inicio=usaInicio ? String(document.getElementById('tarefaInicio')?.value||'') : '';
+  const horaInicio=usaInicio ? String(document.getElementById('tarefaHoraInicio')?.value||'') : '';
+  const fim=usaFim ? String(document.getElementById('tarefaFim')?.value||'') : '';
+  const horaFim=usaFim ? String(document.getElementById('tarefaHoraFim')?.value||'') : '';
+  const repeticaoLembrete=usaRepeticao ? String(document.getElementById('tarefaRepeticaoLembrete')?.value||'DIARIA') : 'NENHUMA';
+  const diaSemanaRepeticao=usaRepeticao && repeticaoLembrete==='SEMANAL' ? String(document.getElementById('tarefaDiaSemanaRepeticao')?.value||'') : '';
+  const diaMesRepeticao=usaRepeticao && repeticaoLembrete==='MENSAL' ? String(document.getElementById('tarefaDiaMesRepeticao')?.value||'') : '';
+  const horaRepeticao=usaRepeticao ? String(document.getElementById('tarefaHoraRepeticao')?.value||'') : '';
+
+  if(usaInicio && !inicio){ alert('Informe a data de início da tarefa.'); document.getElementById('tarefaInicio')?.focus(); return; }
+  if(usaFim && !fim){ alert('Informe a data de término da tarefa.'); document.getElementById('tarefaFim')?.focus(); return; }
+  if(repeticaoLembrete==='SEMANAL' && !diaSemanaRepeticaoValido(diaSemanaRepeticao)){
+    alert('Selecione o dia da semana em que a tarefa deve se repetir.');
+    document.getElementById('tarefaDiaSemanaRepeticao')?.focus(); return;
   }
+  if(repeticaoLembrete==='MENSAL' && !diaMesRepeticaoValido(diaMesRepeticao)){
+    alert('Informe um dia do mês entre 1 e 31.');
+    document.getElementById('tarefaDiaMesRepeticao')?.focus(); return;
+  }
+  if(horaInicio && !horaTarefaValida(horaInicio)){ alert('Informe uma hora de início válida.'); return; }
+  if(horaFim && !horaTarefaValida(horaFim)){ alert('Informe uma hora de término válida.'); return; }
+  if(horaRepeticao && !horaTarefaValida(horaRepeticao)){ alert('Informe uma hora válida para a repetição.'); return; }
+  if(agendamentoTipo==='INICIO_FIM' && inicio && fim){
+    const tsInicio=timestampAgendamentoTarefa(inicio,horaInicio,false);
+    const tsFim=timestampAgendamentoTarefa(fim,horaFim,true);
+    if(tsInicio!==null && tsFim!==null && tsFim < tsInicio){
+      alert('O término não pode ser anterior ao início da tarefa.'); return;
+    }
+  }
+
   const concluida = !!(existente && isConcluido(existente));
-  const status = concluida ? 'Concluída' : calcularStatusAutomaticoTarefa({inicio,fim,dataISO:inicio});
+  const dadosStatus={agendamentoTipo,inicio,horaInicio,fim,horaFim,prazo:fim,repeticaoLembrete,diaSemanaRepeticao,diaMesRepeticao,horaRepeticao,dataISO:existente?.dataISO||hojeISO()};
+  const status = concluida ? 'Concluída' : calcularStatusAutomaticoTarefa(dadosStatus);
   const tarefa = {
     id,
     criadoEm: existente?.criadoEm || agoraBR(),
@@ -12575,13 +14059,19 @@ function salvarTarefa(e){
     atividade,
     setor,
     departamento,
+    agendamentoTipo,
     inicio,
+    horaInicio,
     fim,
+    horaFim,
     prazo: fim,
     responsavel: document.getElementById('tarefaResponsavel').value,
     responsavel2: document.getElementById('tarefaResponsavel2').value,
     prioridade: document.getElementById('tarefaPrioridade').value,
     repeticaoLembrete,
+    diaSemanaRepeticao,
+    diaMesRepeticao,
+    horaRepeticao,
     status,
     descricao: document.getElementById('tarefaDescricao').value,
     atualizadoPor: usuarioAtual.nome,
@@ -12603,14 +14093,30 @@ function editarTarefa(id, manterModal){
   ajustarCamposTarefa(t.departamento || 'Loja toda');
   document.getElementById('tarefaAtividade').value=t.atividade || t.titulo || '';
   if([...document.getElementById('tarefaDepartamento').options].some(o=>o.value === (t.departamento || 'Loja toda'))) document.getElementById('tarefaDepartamento').value=t.departamento || 'Loja toda';
-  document.getElementById('tarefaInicio').value=t.inicio || t.dataISO || hojeISO();
+  const tipo=normalizarTipoAgendamentoTarefa(t);
+  const tipoEl=document.getElementById('tarefaAgendamentoTipo');
+  if(tipoEl) tipoEl.value=tipo;
+  document.getElementById('tarefaInicio').value=t.inicio || (tipo==='INICIO'||tipo==='INICIO_FIM' ? t.dataISO || hojeISO() : '');
+  document.getElementById('tarefaHoraInicio').value=t.horaInicio || '';
   document.getElementById('tarefaFim').value=t.fim || t.prazo || '';
+  document.getElementById('tarefaHoraFim').value=t.horaFim || '';
   document.getElementById('tarefaResponsavel').value=t.responsavel||'';
   document.getElementById('tarefaResponsavel2').value=t.responsavel2||'';
   document.getElementById('tarefaPrioridade').value=t.prioridade || 'Normal';
   const repeticaoEl=document.getElementById('tarefaRepeticaoLembrete');
-  if(repeticaoEl) repeticaoEl.value=t.repeticaoLembrete || 'NENHUMA';
-  atualizarCampoTerminoPorRepeticao();
+  if(repeticaoEl) repeticaoEl.value=(t.repeticaoLembrete && t.repeticaoLembrete!=='NENHUMA') ? t.repeticaoLembrete : 'DIARIA';
+  const diaSemanaEl=document.getElementById('tarefaDiaSemanaRepeticao');
+  if(diaSemanaEl){
+    const salvo=String(t.diaSemanaRepeticao ?? '');
+    diaSemanaEl.value=diaSemanaRepeticaoValido(salvo) ? salvo : (tipo==='REPETICAO' && t.repeticaoLembrete==='SEMANAL' ? diaSemanaDaDataISO(t.inicio || t.dataISO || hojeISO()) : '');
+  }
+  const diaMesEl=document.getElementById('tarefaDiaMesRepeticao');
+  if(diaMesEl){
+    const salvo=String(t.diaMesRepeticao ?? '');
+    diaMesEl.value=diaMesRepeticaoValido(salvo) ? salvo : (tipo==='REPETICAO' && t.repeticaoLembrete==='MENSAL' ? diaMesDaDataISO(t.inicio || t.dataISO || hojeISO()) : '');
+  }
+  document.getElementById('tarefaHoraRepeticao').value=t.horaRepeticao || '';
+  atualizarCamposAgendamentoTarefa();
   document.getElementById('tarefaDescricao').value=t.descricao||'';
   atualizarStatusPrevistoTarefa();
   document.getElementById('modalTarefa').classList.add('active');
@@ -12635,10 +14141,21 @@ function limparFormTarefa(fechar=true){
   document.getElementById('formTarefa').reset();
   document.getElementById('tarefaId').value='';
   document.getElementById('modalTarefaTitulo').textContent='Criar tarefa';
+  const tipoEl=document.getElementById('tarefaAgendamentoTipo');
+  if(tipoEl) tipoEl.value='INICIO';
   document.getElementById('tarefaInicio').value=hojeISO();
+  document.getElementById('tarefaHoraInicio').value='';
+  document.getElementById('tarefaFim').value='';
+  document.getElementById('tarefaHoraFim').value='';
   const repeticaoEl=document.getElementById('tarefaRepeticaoLembrete');
-  if(repeticaoEl) repeticaoEl.value='NENHUMA';
-  atualizarCampoTerminoPorRepeticao();
+  if(repeticaoEl) repeticaoEl.value='DIARIA';
+  const diaSemanaEl=document.getElementById('tarefaDiaSemanaRepeticao');
+  if(diaSemanaEl) diaSemanaEl.value='';
+  const diaMesEl=document.getElementById('tarefaDiaMesRepeticao');
+  if(diaMesEl) diaMesEl.value='';
+  const horaRepEl=document.getElementById('tarefaHoraRepeticao');
+  if(horaRepEl) horaRepEl.value='';
+  atualizarCamposAgendamentoTarefa();
   if(fechar) document.getElementById('modalTarefa').classList.remove('active');
   ajustarCamposTarefa();
   atualizarStatusPrevistoTarefa();
@@ -12964,7 +14481,7 @@ function renderAll(){
   const notasAlteradas = sincronizarFluxoNotas(false);
   if(tarefasAlteradas || notasAlteradas) saveDB();
   if(document.getElementById('fTarefaDepartamento')) popularFiltroTarefaDepartamento();
-  renderPainel(); if(window.innerWidth <= 760 && typeof syncMobilePainelDashboard === 'function') syncMobilePainelDashboard(); renderNotas(); renderKanban(); renderFuncionarios(); renderOperadores(); renderEscalas(); renderEscalasLimpeza(); renderEscalasProvador(); renderDiario(); renderAcompanhamentoGerencial(); renderRelatorio(); renderConfig();
+  renderPainel(); if(window.innerWidth <= 760 && typeof syncMobilePainelDashboard === 'function') syncMobilePainelDashboard(); renderNotas(); renderKanban(); renderCronogramaTarefas(); renderFuncionarios(); renderOperadores(); renderEscalas(); renderEscalasLimpeza(); renderEscalasProvador(); renderDiario(); renderAcompanhamentoGerencial(); renderRelatorio(); renderConfig();
   if(typeof atualizarCentralNotificacoes === 'function') atualizarCentralNotificacoes(false);
 
   const paginaOperacoes=document.getElementById('operacoes');
@@ -13004,20 +14521,34 @@ function renderPainel(){
 
 function cardMini(x){
   const resp = [x.responsavel, x.responsavel2].filter(Boolean).join(' + ') || 'Não definido';
-  const prazo = x.fim || x.prazo || 'Sem prazo';
+  const prazo = resumoAgendamentoTarefa(x);
   const dep = x.departamento ? ` • <b>Depto.:</b> ${escapeHTML(x.departamento)}` : '';
-  return `<div class="task-card"><h4>${escapeHTML(x.atividade||x.titulo||x.resumo)}</h4><div class="task-meta">${badgeSetor(x.setor)} ${badgePrioridade(x.prioridade||'Normal')} ${badgeStatus(x.status)}</div><p><b>Prazo:</b> ${prazo} • <b>Resp.:</b> ${escapeHTML(resp)}${dep}</p><p>${escapeHTML(x.descricao||x.resumo||'')}</p></div>`;
+  return `<div class="task-card"><h4>${escapeHTML(x.atividade||x.titulo||x.resumo)}</h4><div class="task-meta">${badgeSetor(x.setor)} ${badgePrioridade(x.prioridade||'Normal')} ${badgeStatus(x.status)}</div><p><b>Agendamento:</b> ${escapeHTML(prazo)} • <b>Resp.:</b> ${escapeHTML(resp)}${dep}</p><p>${escapeHTML(x.descricao||x.resumo||'')}</p></div>`;
 }
 
 function renderNotas(){
-  const fs = document.getElementById('fNotaSetor').value || 'TODOS';
-  const st = document.getElementById('fNotaStatus').value || 'TODOS';
-  const pr = document.getElementById('fNotaPrioridade').value || 'TODOS';
-  const busca = norm(document.getElementById('fNotaBusca').value);
-  let arr = db.notas.filter(n =>
-    (fs==='TODOS'||n.setor===fs) && (st==='TODOS'||n.status===st) && (pr==='TODOS'||n.prioridade===pr) &&
-    (!busca || norm(n.titulo+' '+n.resumo+' '+n.descricao+' '+n.responsavel).includes(busca))
-  ).sort((a,b)=>(b.dataISO||b.criadoEm||'').localeCompare(a.dataISO||a.criadoEm||''));
+  const fs = document.getElementById('fNotaSetor')?.value || 'TODOS';
+  const st = document.getElementById('fNotaStatus')?.value || 'TODOS';
+  const pr = document.getElementById('fNotaPrioridade')?.value || 'TODOS';
+  const origemFiltro = document.getElementById('fNotaOrigem')?.value || 'TODOS';
+  const ordem = document.getElementById('fNotaOrdem')?.value || 'RECENTES';
+  const busca = norm(document.getElementById('fNotaBusca')?.value || '');
+  let arr = (db.notas||[]).filter(n => {
+    const origem=normalizarOrigemNota(n.origem);
+    const tags=tagsDaNota(n.tags).join(' ');
+    return (fs==='TODOS'||n.setor===fs) && (st==='TODOS'||n.status===st) && (pr==='TODOS'||n.prioridade===pr) &&
+      (origemFiltro==='TODOS'||origem===origemFiltro) &&
+      (!busca || norm((n.titulo||'')+' '+(n.resumo||'')+' '+(n.descricao||'')+' '+(n.responsavel||'')+' '+tags).includes(busca));
+  });
+  const pri={Alta:0,Normal:1,Baixa:2};
+  arr.sort((a,b)=>{
+    const fixA=Boolean(a.fixada), fixB=Boolean(b.fixada);
+    if(fixA!==fixB) return fixA ? -1 : 1;
+    if(ordem==='PRIORIDADE') return (pri[a.prioridade]??1)-(pri[b.prioridade]??1) || String(b.dataISO||b.criadoEm||'').localeCompare(String(a.dataISO||a.criadoEm||''));
+    if(ordem==='PRAZO') return String(a.prazo||'9999-99-99').localeCompare(String(b.prazo||'9999-99-99'));
+    if(ordem==='TITULO') return String(a.titulo||'').localeCompare(String(b.titulo||''),'pt-BR');
+    return String(b.dataISO||b.criadoEm||'').localeCompare(String(a.dataISO||a.criadoEm||''));
+  });
 
   const alvo = document.getElementById('notasTimeline');
   if(!alvo) return;
@@ -13025,34 +14556,295 @@ function renderNotas(){
     const prioridadeClasse = n.prioridade==='Alta' ? 'priority-alta' : (n.prioridade==='Baixa' ? 'priority-baixa' : '');
     const dataExibida = n.criadoEm || n.dataISO || '-';
     const detalhe = n.descricao && n.descricao !== n.resumo ? n.descricao : '';
-    return `<article class="note-item ${prioridadeClasse}">
+    const origem=normalizarOrigemNota(n.origem);
+    const tags=tagsDaNota(n.tags);
+    const anexos=anexosDaNota(n.anexos);
+    const tagsHtml=tags.length?`<div class="note-tags">${tags.map(t=>`<button type="button" class="note-tag" onclick="filtrarAnotacoesPorHashtag('${t}')" title="Filtrar por #${escapeHTML(t)}">#${escapeHTML(t)}</button>`).join('')}</div>`:'';
+    const anexosHtml=htmlAnexosNotaVisualizacao(n);
+    return `<article class="note-item ${prioridadeClasse} ${n.fixada?'note-pinned':''}">
       <div class="note-head">
         <div>
-          <h3>${escapeHTML(n.titulo)}</h3>
-          <div class="note-meta">${badgeSetor(n.setor)} ${badgePrioridade(n.prioridade)} ${badgeStatus(n.status)} <span class="badge b-info">${escapeHTML(n.tipo||'Recado')}</span>${isAtrasado(n)?' <span class="badge b-bad">Prazo vencido</span>':''}</div>
+          <h3>${n.fixada?'📌 ':''}${escapeHTML(n.titulo)}</h3>
+          <div class="note-meta">${badgeSetor(n.setor)} ${badgePrioridade(n.prioridade)} ${badgeStatus(n.status)} <span class="badge b-info">${escapeHTML(n.tipo||'Recado')}</span> <span class="note-origin-badge ${origem==='VOZ'?'voice':''}">${origem==='VOZ'?'🎙️ Voz revisada':'✍️ Escrita'}</span>${anexos.length?` <span class="note-attachment-badge">📎 ${anexos.length} ${anexos.length===1?'anexo':'anexos'}</span>`:''}${n.fixada?' <span class="badge note-pin-badge">FIXADA</span>':''}${isAtrasado(n)?' <span class="badge b-bad">Prazo vencido</span>':''}</div>
+          ${tagsHtml}
         </div>
         <div class="note-date">${escapeHTML(dataExibida)}</div>
       </div>
       <p class="note-summary">${escapeHTML(n.resumo||n.descricao||'Sem observação.')}</p>
       <p style="margin:5px 0;color:var(--muted);font-size:.82rem;font-weight:800;"><b>Responsável:</b> ${escapeHTML(n.responsavel||'-')} ${n.inicio?`• <b>Início:</b> ${escapeHTML(n.inicio)}`:''} ${n.prazo?`• <b>Prazo:</b> ${escapeHTML(n.prazo)}`:''}</p>
-      ${detalhe?`<details class="note-details"><summary>Ver descrição completa</summary><p>${escapeHTML(detalhe)}</p></details>`:''}
-      <div class="actions note-actions no-print"><button class="btn small secondary" onclick="editarNota('${n.id}')">Editar</button>${!statusNotaConcluido(n)&&!statusNotaArquivado(n)?`<button class="btn small good" onclick="concluirNota('${n.id}')">Concluir</button>`:''}<button class="btn small danger" onclick="excluirNota('${n.id}')">Excluir</button></div>
+      ${anexosHtml}
+      ${detalhe?`<details class="note-details"><summary>Ver descrição completa</summary><p>${escapeHTML(detalhe)}</p>${origem==='VOZ'&&n.transcricaoOriginal&&n.transcricaoOriginal!==n.descricao?`<details style="margin-top:8px"><summary>Comparar com transcrição original</summary><p>${escapeHTML(n.transcricaoOriginal)}</p></details>`:''}</details>`:''}
+      <div class="actions note-actions no-print">
+        <button class="btn small secondary" onclick="alternarFixarNota('${n.id}')">${n.fixada?'Desafixar':'📌 Fixar'}</button>
+        <button class="btn small secondary" onclick="editarNota('${n.id}')">Editar</button>
+        <button class="btn small secondary" onclick="duplicarNota('${n.id}')">Duplicar</button>
+        <button class="btn small secondary" onclick="copiarNota('${n.id}')">📋 Copiar</button>
+        <button class="btn small secondary" onclick="transformarNotaEmTarefa('${n.id}')">✓ Criar tarefa</button>
+        ${statusNotaArquivado(n)
+          ? `<button class="btn small good" onclick="restaurarNota('${n.id}')">Restaurar</button>`
+          : statusNotaConcluido(n)
+            ? `<button class="btn small good" onclick="reabrirNota('${n.id}')">Reabrir</button><button class="btn small secondary" onclick="arquivarNota('${n.id}')">Arquivar</button>`
+            : `<button class="btn small good" onclick="concluirNota('${n.id}')">Concluir</button><button class="btn small secondary" onclick="arquivarNota('${n.id}')">Arquivar</button>`}
+        <button class="btn small danger" onclick="excluirNota('${n.id}')">Excluir</button>
+      </div>
     </article>`;
   }).join('') : '<div class="empty">Nenhuma anotação encontrada.</div>';
 }
 
-function renderKanban(){
-  const fs = document.getElementById('fTarefaSetor').value || 'TODOS';
+function tarefasFiltradasQuadro(){
+  const fs = document.getElementById('fTarefaSetor')?.value || 'TODOS';
   const fd = document.getElementById('fTarefaDepartamento')?.value || 'TODOS';
-  const pr = document.getElementById('fTarefaPrioridade').value || 'TODOS';
-  const busca = norm(document.getElementById('fTarefaBusca').value);
-  const status = ['Aguardando','Em andamento','Pendente','Concluída'];
-  let arr = db.tarefas.filter(t =>
+  const pr = document.getElementById('fTarefaPrioridade')?.value || 'TODOS';
+  const busca = norm(document.getElementById('fTarefaBusca')?.value || '');
+  return (db?.tarefas || []).filter(t =>
     (fs==='TODOS'||t.setor===fs) &&
     (fd==='TODOS'||t.departamento===fd) &&
     (pr==='TODOS'||t.prioridade===pr) &&
     (!busca || norm((t.titulo||'')+' '+(t.atividade||'')+' '+(t.descricao||'')+' '+(t.responsavel||'')+' '+(t.responsavel2||'')+' '+(t.departamento||'')).includes(busca))
   );
+}
+
+function setVisualizacaoTarefas(modo){
+  tarefaVisualizacaoAtual = String(modo||'STATUS').toUpperCase()==='CRONOGRAMA' ? 'CRONOGRAMA' : 'STATUS';
+  const statusBtn=document.getElementById('tarefaViewStatusBtn');
+  const cronogramaBtn=document.getElementById('tarefaViewCronogramaBtn');
+  const statusView=document.getElementById('taskStatusView');
+  const cronogramaView=document.getElementById('taskCronogramaView');
+  if(statusBtn) statusBtn.classList.toggle('active',tarefaVisualizacaoAtual==='STATUS');
+  if(cronogramaBtn) cronogramaBtn.classList.toggle('active',tarefaVisualizacaoAtual==='CRONOGRAMA');
+  if(statusView) statusView.hidden=tarefaVisualizacaoAtual!=='STATUS';
+  if(cronogramaView) cronogramaView.hidden=tarefaVisualizacaoAtual!=='CRONOGRAMA';
+  if(tarefaVisualizacaoAtual==='CRONOGRAMA') renderCronogramaTarefas();
+}
+
+function dataISODeDateLocal(d){
+  const ano=d.getFullYear();
+  const mes=String(d.getMonth()+1).padStart(2,'0');
+  const dia=String(d.getDate()).padStart(2,'0');
+  return `${ano}-${mes}-${dia}`;
+}
+function dateLocalDeISO(iso){
+  const valor=String(iso||'').slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(valor)) return null;
+  const [a,m,d]=valor.split('-').map(Number);
+  const data=new Date(a,m-1,d,12,0,0,0);
+  return Number.isFinite(data.getTime()) ? data : null;
+}
+function somarDiasCronograma(data,dias){
+  const d=new Date(data.getFullYear(),data.getMonth(),data.getDate()+dias,12,0,0,0);
+  return d;
+}
+function inicioSemanaCronograma(offset=0){
+  const hoje=new Date();
+  const base=new Date(hoje.getFullYear(),hoje.getMonth(),hoje.getDate(),12,0,0,0);
+  const deslocamento=(base.getDay()+6)%7;
+  base.setDate(base.getDate()-deslocamento+(Number(offset)||0)*7);
+  return base;
+}
+function formatarDiaCronograma(data){
+  const dias=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  return {semana:dias[data.getDay()],data:`${String(data.getDate()).padStart(2,'0')}/${String(data.getMonth()+1).padStart(2,'0')}`};
+}
+function formatarPeriodoCronograma(inicio){
+  const fim=somarDiasCronograma(inicio,6);
+  const anoIni=inicio.getFullYear(), anoFim=fim.getFullYear();
+  const a=`${String(inicio.getDate()).padStart(2,'0')}/${String(inicio.getMonth()+1).padStart(2,'0')}${anoIni!==anoFim?`/${anoIni}`:''}`;
+  const b=`${String(fim.getDate()).padStart(2,'0')}/${String(fim.getMonth()+1).padStart(2,'0')}/${anoFim}`;
+  return `${a} a ${b}`;
+}
+function ocorrenciaTarefaNoDia(tarefa,dataIso){
+  const tipo=normalizarTipoAgendamentoTarefa(tarefa);
+  if(tipo==='SEM_AGENDAMENTO') return null;
+  if(tipo==='REPETICAO'){
+    const freq=String(tarefa?.repeticaoLembrete||'DIARIA').toUpperCase();
+    const data=dateLocalDeISO(dataIso); if(!data) return null;
+    let ocorre=false;
+    if(freq==='DIARIA') ocorre=true;
+    else if(freq==='SEMANAL') ocorre=diaSemanaRepeticaoValido(tarefa?.diaSemanaRepeticao) && data.getDay()===Number(tarefa.diaSemanaRepeticao);
+    else if(freq==='MENSAL') ocorre=diaMesRepeticaoValido(tarefa?.diaMesRepeticao) && data.getDate()===Number(tarefa.diaMesRepeticao);
+    if(!ocorre) return null;
+    const hora=horaTarefaValida(tarefa?.horaRepeticao)?tarefa.horaRepeticao:'';
+    return {hora,ordem:hora||'12:00',momento:'Repetição'};
+  }
+  const inicio=String(tarefa?.inicio||tarefa?.dataISO||'').slice(0,10);
+  const fim=String(tarefa?.fim||tarefa?.prazo||'').slice(0,10);
+  if(tipo==='INICIO'){
+    if(dataIso!==inicio) return null;
+    const hora=horaTarefaValida(tarefa?.horaInicio)?tarefa.horaInicio:'';
+    return {hora,ordem:hora||'00:00',momento:'Início'};
+  }
+  if(tipo==='TERMINO'){
+    if(dataIso!==fim) return null;
+    const hora=horaTarefaValida(tarefa?.horaFim)?tarefa.horaFim:'';
+    return {hora,ordem:hora||'23:59',momento:'Término'};
+  }
+  if(tipo==='INICIO_FIM'){
+    if(!inicio || !fim || dataIso<inicio || dataIso>fim) return null;
+    const mesmaData=inicio===fim;
+    if(mesmaData){
+      const hi=horaTarefaValida(tarefa?.horaInicio)?tarefa.horaInicio:'';
+      const hf=horaTarefaValida(tarefa?.horaFim)?tarefa.horaFim:'';
+      return {hora:[hi,hf].filter(Boolean).join(' – '),ordem:hi||'00:00',momento:'Início e término'};
+    }
+    if(dataIso===inicio){
+      const hora=horaTarefaValida(tarefa?.horaInicio)?tarefa.horaInicio:'';
+      return {hora,ordem:hora||'00:00',momento:'Início'};
+    }
+    if(dataIso===fim){
+      const hora=horaTarefaValida(tarefa?.horaFim)?tarefa.horaFim:'';
+      return {hora,ordem:hora||'23:59',momento:'Término'};
+    }
+    return {hora:'',ordem:'12:00',momento:'Em andamento'};
+  }
+  return null;
+}
+function classePrioridadeCronogramaTarefa(tarefa={}){
+  if(tarefa?.prioridade==='Alta') return 'priority-alta';
+  if(tarefa?.prioridade==='Baixa') return 'priority-baixa';
+  return '';
+}
+function primeiraOcorrenciaTarefaNaSemana(tarefa,dias=[]){
+  for(const data of dias){
+    const iso=dataISODeDateLocal(data);
+    const oc=ocorrenciaTarefaNoDia(tarefa,iso);
+    if(oc) return `${iso} ${oc.ordem||'12:00'}`;
+  }
+  const tipo=normalizarTipoAgendamentoTarefa(tarefa);
+  if(tipo==='INICIO_FIM') return `${String(tarefa?.inicio||'9999-99-99').slice(0,10)} ${horaTarefaValida(tarefa?.horaInicio)?tarefa.horaInicio:'00:00'}`;
+  if(tipo==='TERMINO') return `${String(tarefa?.fim||tarefa?.prazo||'9999-99-99').slice(0,10)} ${horaTarefaValida(tarefa?.horaFim)?tarefa.horaFim:'23:59'}`;
+  if(tipo==='INICIO') return `${String(tarefa?.inicio||'9999-99-99').slice(0,10)} ${horaTarefaValida(tarefa?.horaInicio)?tarefa.horaInicio:'00:00'}`;
+  return '9999-99-99 23:59';
+}
+function segmentoIntervaloCronograma(tarefa,iso,inicioSemanaIso,fimSemanaIso){
+  const tipo=normalizarTipoAgendamentoTarefa(tarefa);
+  if(tipo!=='INICIO_FIM') return null;
+  const inicio=String(tarefa?.inicio||'').slice(0,10);
+  const fim=String(tarefa?.fim||tarefa?.prazo||'').slice(0,10);
+  if(!inicio || !fim || iso<inicio || iso>fim) return null;
+  const visInicio=inicio>inicioSemanaIso?inicio:inicioSemanaIso;
+  const visFim=fim<fimSemanaIso?fim:fimSemanaIso;
+  if(iso<visInicio || iso>visFim) return null;
+  const startCell=iso===visInicio;
+  const endCell=iso===visFim;
+  const single=visInicio===visFim;
+  return {
+    startCell,
+    endCell,
+    single,
+    continuedLeft: inicio<inicioSemanaIso,
+    continuedRight: fim>fimSemanaIso,
+    horaInicio: horaTarefaValida(tarefa?.horaInicio)?tarefa.horaInicio:'',
+    horaFim: horaTarefaValida(tarefa?.horaFim)?tarefa.horaFim:'',
+    inicio,
+    fim
+  };
+}
+function conteudoBarraIntervaloCronograma(tarefa,seg){
+  if(!seg) return '';
+  const inicioTxt=seg.horaInicio || (seg.startCell && !seg.continuedLeft ? 'Início' : '');
+  const fimTxt=seg.horaFim || (seg.endCell && !seg.continuedRight ? 'Término' : '');
+  if(seg.single){
+    const faixa=[inicioTxt,fimTxt].filter(Boolean).join(' – ');
+    return faixa || 'Período';
+  }
+  if(seg.startCell){
+    if(seg.continuedLeft && seg.continuedRight) return 'Em andamento';
+    if(seg.continuedLeft) return fimTxt ? `Até ${fimTxt}` : 'Em andamento';
+    return inicioTxt ? `${inicioTxt} →` : 'Início';
+  }
+  if(seg.endCell){
+    if(seg.continuedRight) return 'Continua';
+    return fimTxt ? `→ ${fimTxt}` : 'Término';
+  }
+  return '';
+}
+function marcadorTarefaNoDiaCronograma(tarefa,iso){
+  const tipo=normalizarTipoAgendamentoTarefa(tarefa);
+  if(tipo==='INICIO_FIM') return null;
+  const oc=ocorrenciaTarefaNoDia(tarefa,iso);
+  if(!oc) return null;
+  const classeBase=classePrioridadeCronogramaTarefa(tarefa);
+  const concluida=isConcluido(tarefa)?'completed':'';
+  let classe='task-gantt-chip';
+  let prefixo='';
+  if(tipo==='TERMINO'){ classe += ' deadline'; prefixo='Prazo'; }
+  else if(tipo==='INICIO'){ classe += ' start'; prefixo='Início'; }
+  const label=[prefixo,oc.hora||oc.momento].filter(Boolean).join(' • ') || 'Tarefa';
+  return `<div class="${classe} ${classeBase} ${concluida}" onclick="abrirModalTarefa('${tarefa.id}')" title="Abrir tarefa">${escapeHTML(label)}</div>`;
+}
+function renderLinhaCronogramaTarefa(tarefa,dias,inicioSemanaIso,fimSemanaIso,hoje){
+  const prioridadeClasse=classePrioridadeCronogramaTarefa(tarefa);
+  const concluida=isConcluido(tarefa)?'completed':'';
+  const label=`<div class="task-gantt-row-label" onclick="abrirModalTarefa('${tarefa.id}')" title="Abrir tarefa">
+      <h4>${escapeHTML(tarefa.atividade||tarefa.titulo||'Tarefa')}</h4>
+    </div>`;
+  const cells=dias.map(data=>{
+    const iso=dataISODeDateLocal(data);
+    const today=iso===hoje?'today':'';
+    const seg=segmentoIntervaloCronograma(tarefa,iso,inicioSemanaIso,fimSemanaIso);
+    let inner='';
+    if(seg){
+      let cls='task-gantt-bar';
+      if(seg.single) cls+=' single';
+      else if(seg.startCell) cls+=' start';
+      else if(seg.endCell) cls+=' end';
+      else cls+=' middle';
+      if(seg.continuedLeft && (seg.startCell || seg.single)) cls+=' continued-left';
+      if(seg.continuedRight && (seg.endCell || seg.single || seg.startCell)) cls+=' continued-right';
+      const conteudo=conteudoBarraIntervaloCronograma(tarefa,seg);
+      inner=`<div class="${cls} ${prioridadeClasse} ${concluida}" onclick="abrirModalTarefa('${tarefa.id}')" title="Abrir tarefa">${escapeHTML(conteudo)}</div>`;
+    }else{
+      inner=marcadorTarefaNoDiaCronograma(tarefa,iso) || '';
+    }
+    return `<div class="task-gantt-cell ${today}">${inner}</div>`;
+  }).join('');
+  return label + cells;
+}
+function moverSemanaCronograma(delta){
+  tarefaCronogramaSemanaOffset += Number(delta)||0;
+  renderCronogramaTarefas();
+}
+function irSemanaAtualCronograma(){
+  tarefaCronogramaSemanaOffset=0;
+  renderCronogramaTarefas();
+}
+function renderCronogramaTarefas(){
+  const alvo=document.getElementById('taskTimeline');
+  if(!alvo) return;
+  const arr=[...(db?.tarefas || [])];
+  const inicio=inicioSemanaCronograma(tarefaCronogramaSemanaOffset);
+  const inicioSemanaIso=dataISODeDateLocal(inicio);
+  const fimSemanaIso=dataISODeDateLocal(somarDiasCronograma(inicio,6));
+  const hoje=hojeISO();
+  const dias=Array.from({length:7},(_,i)=>somarDiasCronograma(inicio,i));
+  const agendadas=arr.filter(t=>normalizarTipoAgendamentoTarefa(t)!=='SEM_AGENDAMENTO')
+    .sort((a,b)=>{
+      const ordem=primeiraOcorrenciaTarefaNaSemana(a,dias).localeCompare(primeiraOcorrenciaTarefaNaSemana(b,dias));
+      if(ordem) return ordem;
+      const pa={Alta:0,Normal:1,Baixa:2};
+      return (pa[a.prioridade]??1)-(pa[b.prioridade]??1);
+    });
+  const header=`<div class="task-gantt-head task-col">Tarefa</div>` + dias.map(data=>{
+    const iso=dataISODeDateLocal(data);
+    const rotulo=formatarDiaCronograma(data);
+    return `<div class="task-gantt-head day-col ${iso===hoje?'today':''}">${escapeHTML(rotulo.semana)}<span>${escapeHTML(rotulo.data)}</span></div>`;
+  }).join('');
+  const linhas=agendadas.length ? agendadas.map(t=>renderLinhaCronogramaTarefa(t,dias,inicioSemanaIso,fimSemanaIso,hoje)).join('') : `<div class="task-gantt-empty">Nenhuma tarefa agendada encontrada para os filtros atuais.</div>`;
+  alvo.innerHTML=`
+    <div class="task-timeline-toolbar">
+      <div><h3>📅 Cronograma lateral</h3><p>${formatarPeriodoCronograma(inicio)} • organização horizontal por tarefa</p></div>
+      <div class="task-timeline-nav no-print">
+        <button type="button" onclick="moverSemanaCronograma(-1)">← Semana anterior</button>
+        <button type="button" onclick="irSemanaAtualCronograma()">Hoje</button>
+        <button type="button" onclick="moverSemanaCronograma(1)">Próxima semana →</button>
+      </div>
+    </div>
+    <div class="task-gantt-scroll"><div class="task-gantt-grid">${header}${linhas}</div></div>`;
+}
+
+function renderKanban(){
+  const status = ['Aguardando','Em andamento','Pendente','Concluída'];
+  const arr = tarefasFiltradasQuadro();
 
   const classes = {'Pendente':'pendente','Em andamento':'andamento','Aguardando':'aguardando','Concluída':'concluida'};
   document.getElementById('taskStatusSummary').innerHTML = status.map(st=>`<div class="status-card ${classes[st]}"><div><small>${st.toUpperCase()}</small><b>${arr.filter(t=>t.status===st).length}</b></div><span class="dot"></span></div>`).join('');
@@ -13062,17 +14854,22 @@ function renderKanban(){
     return `<section class="task-group">
       <div class="task-group-head"><h3>${st.toUpperCase()}</h3><span class="badge b-info">${itens.length}</span></div>
       <div class="task-group-body">${itens.length?itens.map(t=>{
-        const periodo = `${t.inicio || t.dataISO || '-'}${t.fim ? ' até ' + t.fim : ''}`;
+        const periodo = resumoAgendamentoTarefa(t);
         const responsaveis = [t.responsavel, t.responsavel2].filter(Boolean).join(' + ') || 'Não definido';
         return `<article class="task-row">
           <div class="task-row-main"><h4>${escapeHTML(t.atividade || t.titulo)}</h4><div class="task-meta">${badgeSetor(t.setor)} ${badgePrioridade(t.prioridade)} ${badgeRepeticaoLembreteTarefa(t)}</div><p><b>Departamento:</b> ${escapeHTML(t.departamento || 'Loja toda')}</p></div>
-          <div class="task-row-meta"><p><b>Período:</b> ${escapeHTML(periodo)}</p><p><b>Responsável:</b> ${escapeHTML(responsaveis)}</p></div>
+          <div class="task-row-meta"><p><b>Agendamento:</b> ${escapeHTML(periodo)}</p><p><b>Responsável:</b> ${escapeHTML(responsaveis)}</p></div>
           <div class="actions task-row-actions no-print"><button class="btn small secondary" onclick="abrirModalTarefa('${t.id}')">Editar</button>${st!=='Concluída'?`<button class="btn small good" onclick="setTarefaStatus('${t.id}','Concluída')">Concluir</button>`:''}<button class="btn small danger" onclick="excluirTarefa('${t.id}')">Excluir</button></div>
           ${t.descricao?`<details class="task-row-details"><summary>Ver detalhes da tarefa</summary><p>${escapeHTML(t.descricao)}</p></details>`:''}
         </article>`;
       }).join(''):'<div class="empty">Sem itens neste status.</div>'}</div>
     </section>`;
   }).join('');
+
+  const kanban=document.getElementById('kanban');
+  const resumoStatus=document.getElementById('taskStatusSummary');
+  if(resumoStatus) resumoStatus.hidden=false;
+  if(kanban) kanban.hidden=false;
 }
 
 function renderSectorTabs(){
@@ -13119,7 +14916,7 @@ function getRelatorio(){
   const fim = document.getElementById('relFim').value || '9999-99-99';
   let rows=[];
   if(tipo==='TODOS'||tipo==='NOTAS') db.notas.forEach(n=>rows.push({data:n.dataISO,tipo:'Anotação',setor:n.setor,titulo:n.titulo,responsavel:n.responsavel,prioridade:n.prioridade,status:n.status,prazo:n.prazo,obs:n.resumo||n.descricao,atualizadoPor:n.atualizadoPor}));
-  if(tipo==='TODOS'||tipo==='TAREFAS') db.tarefas.forEach(t=>rows.push({data:t.dataISO,tipo:'Tarefa',setor:t.setor,titulo:t.atividade||t.titulo,responsavel:[t.responsavel,t.responsavel2].filter(Boolean).join(' + '),prioridade:t.prioridade,status:t.status,prazo:t.fim||t.prazo,obs:`Departamento: ${t.departamento||'-'} | Início: ${t.inicio||'-'} | Observação: ${t.descricao||'-'}`,atualizadoPor:t.atualizadoPor}));
+  if(tipo==='TODOS'||tipo==='TAREFAS') db.tarefas.forEach(t=>rows.push({data:t.dataISO,tipo:'Tarefa',setor:t.setor,titulo:t.atividade||t.titulo,responsavel:[t.responsavel,t.responsavel2].filter(Boolean).join(' + '),prioridade:t.prioridade,status:t.status,prazo:t.fim||t.prazo,obs:`Departamento: ${t.departamento||'-'} | Agendamento: ${resumoAgendamentoTarefa(t)} | Observação: ${t.descricao||'-'}`,atualizadoPor:t.atualizadoPor}));
   if(tipo==='TODOS'||tipo==='DIARIO') db.diario.forEach(d=>rows.push({data:d.dataISO,tipo:'Acompanhamento',setor:'GERAL',titulo:d.resumo,responsavel:d.responsavel,prioridade:'-',status:`VM:${d.vm} Fiscal:${d.fiscal} ADM:${d.adm} PF:${d.pf}`,prazo:'-',obs:d.obs,atualizadoPor:d.atualizadoPor}));
   rows = rows.filter(r => (setor==='TODOS'||r.setor===setor||r.setor==='GERAL') && r.data>=ini && r.data<=fim).sort((a,b)=>a.data<b.data?1:-1);
   return rows;
@@ -24184,50 +25981,56 @@ function dataMensalNotif(baseIso,ano,mesZero){
 
 function proximoCicloRepeticaoTarefa(item){
   const repeticao=String(item?.repeticaoLembrete||'NENHUMA').toUpperCase();
-  const base=String(
-    repeticao==='NENHUMA'
-      ? (item?.fim || item?.prazo || item?.inicio || item?.dataISO || '')
-      : (item?.inicio || item?.dataISO || item?.fim || item?.prazo || '')
-  ).slice(0,10);
-  if(!base) return '';
-
-  if(repeticao==='NENHUMA') return base;
-
-  const hoje=hojeISO();
-  if(base>=hoje) return base;
-
-  if(repeticao==='DIARIA'){
-    return hoje;
+  if(repeticao==='NENHUMA'){
+    return String(item?.fim || item?.prazo || item?.inicio || item?.dataISO || '').slice(0,10);
   }
+  const hoje=hojeISO();
+  if(repeticao==='DIARIA') return hoje;
 
   if(repeticao==='SEMANAL'){
-    const baseDate=new Date(`${base}T12:00:00`);
     const hojeDate=new Date(`${hoje}T12:00:00`);
-    const diff=Math.max(0,Math.floor((hojeDate-baseDate)/86400000));
-    const saltos=Math.ceil(diff/7);
-    return somarDiasNotif(base,saltos*7);
+    if(!Number.isFinite(hojeDate.getTime())) return hoje;
+    const fallback=diaSemanaDaDataISO(item?.inicio || item?.dataISO || hoje);
+    const diaAlvo=diaSemanaRepeticaoValido(item?.diaSemanaRepeticao) ? Number(item.diaSemanaRepeticao) : Number(fallback||hojeDate.getDay());
+    const diferenca=(diaAlvo-hojeDate.getDay()+7)%7;
+    const candidato=new Date(hojeDate);
+    candidato.setDate(candidato.getDate()+diferenca);
+    return `${candidato.getFullYear()}-${String(candidato.getMonth()+1).padStart(2,'0')}-${String(candidato.getDate()).padStart(2,'0')}`;
   }
 
   if(repeticao==='MENSAL'){
-    const baseDate=new Date(`${base}T12:00:00`);
     const hojeDate=new Date(`${hoje}T12:00:00`);
-    let ano=hojeDate.getFullYear();
-    let mes=hojeDate.getMonth();
-    let candidato=dataMensalNotif(base,ano,mes);
-    if(candidato<hoje){
-      mes++;
-      if(mes>11){mes=0;ano++;}
-      candidato=dataMensalNotif(base,ano,mes);
-    }
+    if(!Number.isFinite(hojeDate.getTime())) return hoje;
+    const fallback=Number(diaMesDaDataISO(item?.inicio || item?.dataISO || hoje)) || hojeDate.getDate();
+    const diaAlvo=diaMesRepeticaoValido(item?.diaMesRepeticao) ? Number(item.diaMesRepeticao) : fallback;
+    let ano=hojeDate.getFullYear(), mes=hojeDate.getMonth();
+    const criar=(a,m)=>{
+      const ultimo=new Date(a,m+1,0).getDate();
+      const d=new Date(a,m,Math.min(diaAlvo,ultimo),12,0,0,0);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    };
+    let candidato=criar(ano,mes);
+    if(candidato<hoje){ mes++; if(mes>11){mes=0;ano++;} candidato=criar(ano,mes); }
     return candidato;
   }
-
-  return base;
+  return hoje;
 }
 
 function prazoNotifItem(item,tipo){
   if(tipo==='tarefa') return proximoCicloRepeticaoTarefa(item);
   return String(item?.prazo || '').slice(0,10);
+}
+function horaNotifItem(item,tipo){
+  if(tipo!=='tarefa') return '';
+  const tipoAg=normalizarTipoAgendamentoTarefa(item);
+  if(tipoAg==='REPETICAO') return horaTarefaValida(item?.horaRepeticao) ? item.horaRepeticao : '';
+  if(tipoAg==='TERMINO'||tipoAg==='INICIO_FIM') return horaTarefaValida(item?.horaFim) ? item.horaFim : '';
+  if(tipoAg==='INICIO') return horaTarefaValida(item?.horaInicio) ? item.horaInicio : '';
+  return '';
+}
+function prazoComHoraNotif(n){
+  const data=dataBRNotif(n?.prazo);
+  return `${data}${horaTarefaValida(n?.hora) ? ` às ${n.hora}` : ''}`;
 }
 
 function descricaoEstadoNotif(diff){
@@ -24249,11 +26052,12 @@ function coletarNotificacoesGerenciais(){
     if(!item || isConcluido(item) || item.status==='Arquivado') return;
     const prazo = prazoNotifItem(item,tipo);
     if(!prazo) return;
+    const hora = horaNotifItem(item,tipo);
 
     const diff = diasEntreDatasNotif(prazo);
     if(diff > NOTIF_UPCOMING_DAYS) return;
 
-    const id = `${tipo}:${item.id}:${prazo}`;
+    const id = `${tipo}:${item.id}:${prazo}:${hora||'dia'}`;
     const estado = descricaoEstadoNotif(diff);
     const snoozeAte = Number(snoozes[id] || 0);
     const temLembrete = snoozeAte > 0;
@@ -24265,6 +26069,7 @@ function coletarNotificacoesGerenciais(){
       categoria: (temLembrete || (tipo==='tarefa' && String(item?.repeticaoLembrete||'NENHUMA').toUpperCase()!=='NENHUMA')) ? 'lembretes' : (tipo==='tarefa'?'tarefas':'anotacoes'),
       titulo:tituloNotifItem(item,tipo),
       prazo,
+      hora,
       diff,
       estado:estado.texto,
       estadoClasse:estado.classe,
@@ -24272,6 +26077,9 @@ function coletarNotificacoesGerenciais(){
       responsavel:[item.responsavel,item.responsavel2].filter(Boolean).join(' + ') || 'Não definido',
       prioridade:item.prioridade || 'Normal',
       repeticaoLembrete: tipo==='tarefa' ? (item.repeticaoLembrete || 'NENHUMA') : 'NENHUMA',
+      diaSemanaRepeticao: tipo==='tarefa' ? (item.diaSemanaRepeticao ?? '') : '',
+      diaMesRepeticao: tipo==='tarefa' ? (item.diaMesRepeticao ?? '') : '',
+      horaRepeticao: tipo==='tarefa' ? (item.horaRepeticao ?? '') : '',
       lida:Boolean(lidas[id]),
       snoozeAte,
       snoozed:snoozeAte > agora,
@@ -24348,9 +26156,9 @@ function renderCentralNotificacoes(lista){
         <span class="notification-state ${n.estadoClasse}">${escapeHTML(n.estado)}</span>
       </div>
       <h3>${escapeHTML(n.titulo)}</h3>
-      <p><b>Prazo:</b> ${escapeHTML(dataBRNotif(n.prazo))} • <b>Responsável:</b> ${escapeHTML(n.responsavel)}</p>
+      <p><b>Prazo:</b> ${escapeHTML(prazoComHoraNotif(n))} • <b>Responsável:</b> ${escapeHTML(n.responsavel)}</p>
       ${n.snoozeAte>0?`<div class="notification-item-footer"><span>Lembrete programado</span><span>${n.snoozed?'Retorna às '+formatarHoraNotif(n.snoozeAte):'Pronto para lembrar'}</span></div>`:
-      `<div class="notification-item-footer"><span>${String(n.repeticaoLembrete||'NENHUMA').toUpperCase()!=='NENHUMA' ? '🔁 '+escapeHTML(rotuloRepeticaoLembrete(n.repeticaoLembrete)) : 'Prioridade: '+escapeHTML(n.prioridade)}</span><span>${n.lida?'Lida':'Nova'}</span></div>`}
+      `<div class="notification-item-footer"><span>${String(n.repeticaoLembrete||'NENHUMA').toUpperCase()!=='NENHUMA' ? '🔁 '+escapeHTML(rotuloRepeticaoLembrete(n.repeticaoLembrete,n.diaSemanaRepeticao,n.diaMesRepeticao,n.horaRepeticao)) : 'Prioridade: '+escapeHTML(n.prioridade)}</span><span>${n.lida?'Lida':'Nova'}</span></div>`}
     </article>
   `).join('');
 }
@@ -24546,7 +26354,7 @@ function mostrarBalaoSophia(itens){
       ${preview.map(n=>`
         <div class="sophia-notification-preview-item">
           <b>${escapeHTML(n.titulo)}</b>
-          <span>Prazo: ${escapeHTML(dataBRNotif(n.prazo))}${n.diff<0?' • ATRASADA':''}</span>
+          <span>Prazo: ${escapeHTML(prazoComHoraNotif(n))}${n.diff<0?' • ATRASADA':''}</span>
         </div>
       `).join('')}
     </div>
@@ -24667,7 +26475,7 @@ function corpoNotificacaoNativaSophia(itens){
   if(!itens.length) return '';
 
   const primeiro = itens[0];
-  const prazo = dataBRNotif(primeiro.prazo);
+  const prazo = prazoComHoraNotif(primeiro);
   let corpo = `${primeiro.titulo} • Prazo: ${prazo}`;
 
   if(itens.length > 1){
@@ -25148,7 +26956,7 @@ function atualizarUIDitadoNota(estado, mensagem){
   const status = document.getElementById('notaDitadoStatus');
   const btn = document.getElementById('notaDitadoBtn');
   const texto = document.getElementById('notaDitadoBtnTexto');
-  const area = document.getElementById('notaDescricao');
+  const area = document.getElementById('notaVozRascunho');
 
   if(status){
     status.className = 'nota-voice-status' + (estado ? ' ' + estado : '');
@@ -25164,8 +26972,8 @@ function atualizarUIDitadoNota(estado, mensagem){
 
   if(texto){
     texto.textContent = (estado === 'listening' || estado === 'processing')
-      ? 'Parar ditado'
-      : 'Iniciar ditado';
+      ? 'Parar gravação'
+      : 'Iniciar gravação';
   }
 
   if(area){
@@ -25215,7 +27023,7 @@ function juntarTextoDitadoNota(base, reconhecido){
 }
 
 function renderizarDitadoNota(){
-  const area = document.getElementById('notaDescricao');
+  const area = document.getElementById('notaVozRascunho');
   if(!area) return;
 
   const final = aplicarComandosDitadoNota(notaDitadoFinalSessao);
@@ -25267,6 +27075,8 @@ function criarReconhecimentoDitadoNota(){
 
     notaDitadoInterim = interimAtual;
     renderizarDitadoNota();
+    const confirm=document.getElementById('notaVozRevisaoConfirmada'); if(confirm) confirm.value='0';
+    atualizarBadgeRevisaoVozNota(false);
     atualizarUIDitadoNota('listening', 'Ouvindo agora…');
   };
 
@@ -25315,7 +27125,7 @@ function criarReconhecimentoDitadoNota(){
 }
 
 function iniciarDitadoNota(){
-  const area = document.getElementById('notaDescricao');
+  const area = document.getElementById('notaVozRascunho');
   if(!area) return;
 
   if(!ditadoNotaSuportado()){
@@ -25365,7 +27175,7 @@ function pararDitadoNota(silencioso = false){
   notaDitadoAtivo = false;
   notaDitadoReiniciar = false;
 
-  const area = document.getElementById('notaDescricao');
+  const area = document.getElementById('notaVozRascunho');
 
   if(area){
     // Consolida o texto atual como definitivo.
