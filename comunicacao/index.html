@@ -34467,5 +34467,127 @@ document.addEventListener('DOMContentLoaded',()=>aplicarIconesChatV5138());
 })();
 </script>
 
+
+<script id="comunicacao-mobile-session-v140-script">
+(function(){
+  const PERSIST_KEY='comunicacaoAVSessaoMobilePersistenteV2';
+
+  function ehMobileComunicacao(){
+    try{
+      return window.matchMedia?.('(max-width: 820px)')?.matches ||
+             window.matchMedia?.('(display-mode: standalone)')?.matches ||
+             navigator.standalone === true ||
+             /iPhone|iPad|iPod/i.test(navigator.userAgent||'');
+    }catch(_){ return /iPhone|iPad|iPod/i.test(navigator.userAgent||''); }
+  }
+  function lerPersistente(){
+    try{
+      const raw=localStorage.getItem(PERSIST_KEY); if(!raw)return null;
+      const s=JSON.parse(raw); if(!s||!s.operador)return null;
+      return s;
+    }catch(_){return null;}
+  }
+  function salvarPersistente(sess){
+    if(!ehMobileComunicacao()||!sess?.operador)return;
+    try{
+      localStorage.setItem(PERSIST_KEY,JSON.stringify({
+        nome:sess.nome||usuarioAtual?.nome||'',
+        operador:normalizarOperador(sess.operador),
+        loginEm:sess.loginEm||agoraBR(),
+        sid:sess.sid||gerarIdSessaoCompartilhada(),
+        loginTipo:sess.loginTipo||'OPERADOR',
+        identificador:sess.identificador||normalizarOperador(sess.operador),
+        persistidoEm:Date.now(),
+        versao:2
+      }));
+    }catch(_){ }
+  }
+  function limparPersistente(){try{localStorage.removeItem(PERSIST_KEY)}catch(_){}}
+  function copiarPersistenteParaSessao(){
+    if(!ehMobileComunicacao())return false;
+    try{
+      if(sessionStorage.getItem(COMUNICACAO_AV_SESSION_KEY))return true;
+      const s=lerPersistente(); if(!s?.operador)return false;
+      sessionStorage.setItem(COMUNICACAO_AV_SESSION_KEY,JSON.stringify(s));
+      return true;
+    }catch(_){return false;}
+  }
+  function preencherIdentificadorSeNecessario(){
+    if(!ehMobileComunicacao())return;
+    const input=document.getElementById('loginUser'); if(!input||String(input.value||'').trim())return;
+    const s=lerPersistente(); if(!s)return;
+    input.value=String(s.identificador||s.operador||'');
+    try{window.atualizarIdentificacaoLogin?.(true)}catch(_){ }
+  }
+
+  const baseTry=window.trySession;
+  if(typeof baseTry==='function'){
+    window.trySession=async function(){
+      if(modoComunicacaoAVAtivo()&&ehMobileComunicacao())copiarPersistenteParaSessao();
+      const ok=await baseTry.apply(this,arguments);
+      if(ok&&modoComunicacaoAVAtivo()&&ehMobileComunicacao()){
+        try{
+          const raw=sessionStorage.getItem(COMUNICACAO_AV_SESSION_KEY);
+          if(raw)salvarPersistente(JSON.parse(raw));
+        }catch(_){ }
+      }
+      return ok;
+    };
+  }
+
+  const baseLogin=window.login;
+  if(typeof baseLogin==='function'){
+    window.login=async function(){
+      const r=await baseLogin.apply(this,arguments);
+      if(modoComunicacaoAVAtivo()&&ehMobileComunicacao()&&usuarioAtual?.operador){
+        try{
+          const raw=sessionStorage.getItem(COMUNICACAO_AV_SESSION_KEY);
+          if(raw)salvarPersistente(JSON.parse(raw));
+          else salvarPersistente({nome:usuarioAtual.nome,operador:usuarioAtual.operador,loginEm:agoraBR(),sid:gerarIdSessaoCompartilhada()});
+        }catch(_){ }
+      }
+      return r;
+    };
+  }
+
+  const baseLogout=window.logout;
+  if(typeof baseLogout==='function'){
+    window.logout=function(){
+      if(modoComunicacaoAVAtivo())limparPersistente();
+      return baseLogout.apply(this,arguments);
+    };
+  }
+
+  const baseIdentificar=window.atualizarIdentificacaoLogin;
+  if(typeof baseIdentificar==='function'){
+    window.atualizarIdentificacaoLogin=async function(mostrar=false){
+      if(modoComunicacaoAVAtivo()&&ehMobileComunicacao()&&mostrar){
+        try{await carregarConfigGlobalOnline()}catch(_){ }
+      }
+      return baseIdentificar.apply(this,arguments);
+    };
+  }
+
+  const basePreparar=window.prepararTelaLoginComunicacaoAV;
+  if(typeof basePreparar==='function'){
+    window.prepararTelaLoginComunicacaoAV=function(){
+      const r=basePreparar.apply(this,arguments);
+      setTimeout(preencherIdentificadorSeNecessario,80);
+      return r;
+    };
+  }
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    if(ehMobileComunicacao()){
+      copiarPersistenteParaSessao();
+      setTimeout(preencherIdentificadorSeNecessario,120);
+    }
+  });
+  window.addEventListener('pageshow',()=>{
+    if(ehMobileComunicacao())copiarPersistenteParaSessao();
+  });
+})();
+</script>
+
 </body>
 </html>
