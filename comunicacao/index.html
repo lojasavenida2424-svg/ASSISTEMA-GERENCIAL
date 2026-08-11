@@ -33737,251 +33737,200 @@ document.addEventListener('DOMContentLoaded',()=>aplicarIconesChatV5138());
 
 
 
-<style id="comunicacao-mobile-ios-redesign-v120">
-@media (max-width: 820px){
-  body.avcomm-ios-mobile{overflow:hidden!important;background:#080b10!important;}
-  body.avcomm-ios-mobile #comunicacaoAVStandalone{grid-template-rows:auto minmax(0,1fr)!important;background:radial-gradient(circle at top left,rgba(107,22,43,.55),transparent 34%),linear-gradient(180deg,#090c12 0%,#05070a 100%)!important;color:#F5F7FA!important;}
+
+<style id="comunicacao-mobile-ios-redesign-v121">
+@media (max-width:820px){
+  html{background:#07090d!important;-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important;}
+  body.avcomm-ios-mobile{overflow:hidden!important;background:#07090d!important;-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone{grid-template-rows:auto minmax(0,1fr)!important;background:radial-gradient(circle at 0 0,rgba(90,18,38,.55),transparent 36%),linear-gradient(180deg,#0b0d12,#05070a)!important;color:#f7f8fa!important;}
+
+  /* Nunca renderizar E-mail e Bate-papo juntos */
+  body.avcomm-ios-mobile #avMailWorkspace[hidden],
+  body.avcomm-ios-mobile #avChatWorkspace[hidden]{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  body.avcomm-ios-mobile #avMailWorkspace:not([hidden]){display:flex!important;visibility:visible!important;pointer-events:auto!important;}
+  body.avcomm-ios-mobile #avChatWorkspace:not([hidden]){display:grid!important;visibility:visible!important;pointer-events:auto!important;}
   body.avcomm-ios-mobile .avcomm-mode-switch{display:none!important;}
-  body.avcomm-ios-mobile .avmail-topbar{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:14px!important;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px 14px!important;background:linear-gradient(180deg,rgba(62,14,29,.94),rgba(17,19,25,.96))!important;border-bottom:1px solid rgba(246,196,38,.22)!important;box-shadow:none!important;backdrop-filter:blur(20px)!important;-webkit-backdrop-filter:blur(20px)!important;}
-  body.avcomm-ios-mobile .avmail-brand{align-items:flex-start!important;gap:12px!important;}
-  body.avcomm-ios-mobile .avmail-mark{width:48px!important;height:48px!important;border-radius:16px!important;font-size:1.25rem!important;box-shadow:0 10px 24px rgba(246,196,38,.18)!important;}
-  body.avcomm-ios-mobile .avmail-brand-copy strong{font-size:1.15rem!important;white-space:normal!important;line-height:1.05!important;}
-  body.avcomm-ios-mobile .avmail-brand-copy small{font-size:.92rem!important;line-height:1.2!important;color:rgba(255,255,255,.76)!important;max-width:180px!important;}
-  body.avcomm-ios-mobile .avmail-top-actions{gap:10px!important;align-items:flex-start!important;}
+
+  /* Cabeçalho */
+  body.avcomm-ios-mobile .avmail-topbar{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:auto auto!important;gap:14px!important;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 16px!important;background:linear-gradient(180deg,rgba(71,17,33,.95),rgba(25,14,19,.94))!important;border-bottom:1px solid rgba(246,196,38,.20)!important;box-shadow:none!important;backdrop-filter:blur(22px)!important;-webkit-backdrop-filter:blur(22px)!important;}
+  body.avcomm-ios-mobile .avmail-brand{gap:12px!important;align-items:center!important;min-width:0!important;}
+  body.avcomm-ios-mobile .avmail-mark{width:46px!important;height:46px!important;border-radius:15px!important;background:#F6C426!important;color:#2A1A05!important;font-size:20px!important;box-shadow:0 8px 22px rgba(246,196,38,.18)!important;flex:none!important;}
+  body.avcomm-ios-mobile .avmail-brand-copy strong{font-size:26px!important;line-height:1!important;letter-spacing:-.035em!important;white-space:normal!important;}
+  body.avcomm-ios-mobile .avmail-brand-copy small{font-size:15px!important;line-height:1.15!important;margin-top:5px!important;color:rgba(255,255,255,.72)!important;max-width:210px!important;}
+  body.avcomm-ios-mobile .avmail-top-actions{gap:9px!important;align-items:center!important;}
   body.avcomm-ios-mobile .avmail-user{display:none!important;}
-  body.avcomm-ios-mobile .avcomm-account-actions{display:flex!important;gap:10px!important;}
-  body.avcomm-ios-mobile .avcomm-top-menu-btn{width:52px!important;height:52px!important;border-radius:18px!important;padding:0!important;display:grid!important;place-items:center!important;min-width:0!important;background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:0 12px 26px rgba(0,0,0,.18)!important;}
-  body.avcomm-ios-mobile .avcomm-top-menu-btn span:last-child{display:none!important;}
-  body.avcomm-ios-mobile .avcomm-top-menu-icon, body.avcomm-ios-mobile .avcomm-profile-mini-avatar{font-size:1rem!important;}
-  body.avcomm-ios-mobile .avcomm-profile-mini-avatar{width:34px!important;height:34px!important;border-radius:999px!important;background:#F6C426!important;color:#1f1504!important;display:grid!important;place-items:center!important;font-weight:1000!important;}
-  body.avcomm-ios-mobile .avmail-search{grid-column:1/-1!important;order:3!important;padding:0!important;}
-  body.avcomm-ios-mobile .avmail-search input{height:56px!important;border-radius:18px!important;background:rgba(255,255,255,.08)!important;border:1px solid rgba(246,196,38,.22)!important;padding-left:44px!important;font-size:1rem!important;}
-  body.avcomm-ios-mobile .avmail-search::before{left:15px!important;top:14px!important;font-size:1.35rem!important;}
+  body.avcomm-ios-mobile .avcomm-account-actions{display:flex!important;gap:9px!important;}
+  body.avcomm-ios-mobile .avcomm-top-menu-btn{width:48px!important;height:48px!important;min-width:48px!important;border-radius:16px!important;padding:0!important;display:grid!important;place-items:center!important;background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.14)!important;color:#fff!important;box-shadow:none!important;}
+  body.avcomm-ios-mobile .avcomm-top-menu-btn>span:last-child{display:none!important;}
+  body.avcomm-ios-mobile .avcomm-top-menu-icon{font-size:20px!important;}
+  body.avcomm-ios-mobile .avcomm-profile-mini-avatar{width:34px!important;height:34px!important;border-radius:50%!important;background:#F6C426!important;color:#2A1A05!important;display:grid!important;place-items:center!important;font-size:14px!important;font-weight:1000!important;}
+  body.avcomm-ios-mobile .avmail-search{grid-column:1/-1!important;grid-row:2!important;padding:0!important;}
+  body.avcomm-ios-mobile .avmail-search input{height:54px!important;border-radius:18px!important;background:rgba(255,255,255,.08)!important;border:1px solid rgba(246,196,38,.24)!important;color:#fff!important;padding:0 16px 0 46px!important;font-size:17px!important;line-height:54px!important;}
+  body.avcomm-ios-mobile .avmail-search input::placeholder{color:rgba(255,255,255,.60)!important;}
+  body.avcomm-ios-mobile .avmail-search::before{left:16px!important;top:13px!important;font-size:22px!important;color:#F6C426!important;}
+  body.avcomm-ios-mobile .avmail-search::after{display:none!important;}
+
   body.avcomm-ios-mobile #avCommProfileMenu,
-  body.avcomm-ios-mobile #avCommConfigMenu{top:calc(env(safe-area-inset-top,0px) + 78px)!important;right:16px!important;left:auto!important;width:min(310px,calc(100vw - 32px))!important;}
+  body.avcomm-ios-mobile #avCommConfigMenu{top:calc(env(safe-area-inset-top,0px) + 72px)!important;right:14px!important;left:auto!important;width:min(310px,calc(100vw - 28px))!important;z-index:4700!important;}
 
-  body.avcomm-ios-mobile #avMailWorkspace{display:flex!important;flex-direction:column!important;gap:14px!important;padding:12px 14px calc(92px + env(safe-area-inset-bottom,0px))!important;overflow:auto!important;min-height:0!important;}
+  /* E-mail */
+  body.avcomm-ios-mobile #avMailWorkspace{flex-direction:column!important;gap:12px!important;padding:12px 14px calc(96px + env(safe-area-inset-bottom,0px))!important;overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important;}
   body.avcomm-ios-mobile .avmail-folders,
-  body.avcomm-ios-mobile .avmail-list-pane{background:rgba(20,23,30,.88)!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:24px!important;backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important;box-shadow:0 16px 40px rgba(0,0,0,.28)!important;}
-  body.avcomm-ios-mobile .avmail-folders{padding:10px!important;border-right:0!important;}
-  body.avcomm-ios-mobile .avmail-folder-title{display:block!important;padding:6px 10px 10px!important;font-size:.68rem!important;color:#aeb6c3!important;}
+  body.avcomm-ios-mobile .avmail-list-pane{width:100%!important;min-width:0!important;max-width:none!important;flex:none!important;background:rgba(21,24,31,.92)!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:22px!important;box-shadow:0 16px 38px rgba(0,0,0,.24)!important;overflow:hidden!important;}
+  body.avcomm-ios-mobile .avmail-folders{display:block!important;padding:10px!important;border-right:0!important;min-height:auto!important;}
+  body.avcomm-ios-mobile .avmail-folder-title{display:block!important;padding:5px 10px 10px!important;color:#9fa8b6!important;font-size:12px!important;letter-spacing:.10em!important;}
   body.avcomm-ios-mobile .avmail-folder-footer{display:none!important;}
-  body.avcomm-ios-mobile .avmail-folder{padding:13px 12px!important;border-radius:16px!important;color:#F6F7F9!important;grid-template-columns:26px minmax(0,1fr) auto!important;}
-  body.avcomm-ios-mobile .avmail-folder:hover{background:rgba(255,255,255,.05)!important;}
-  body.avcomm-ios-mobile .avmail-folder.active{background:linear-gradient(135deg,rgba(246,196,38,.2),rgba(246,196,38,.08))!important;color:#F6C426!important;box-shadow:inset 0 0 0 1px rgba(246,196,38,.28)!important;}
-  body.avcomm-ios-mobile .avmail-folder-count{background:rgba(255,255,255,.09)!important;color:#fff!important;}
-  body.avcomm-ios-mobile .avmail-folder.active .avmail-folder-count{background:#F6C426!important;color:#1F1504!important;}
-  body.avcomm-ios-mobile .avmail-new{position:fixed!important;right:18px!important;bottom:calc(92px + env(safe-area-inset-bottom,0px))!important;width:62px!important;height:62px!important;border-radius:50%!important;margin:0!important;display:grid!important;place-items:center!important;z-index:3600!important;font-size:0!important;box-shadow:0 18px 40px rgba(246,196,38,.28)!important;}
-  body.avcomm-ios-mobile .avmail-new::after{content:'✎';font-size:1.35rem!important;}
+  body.avcomm-ios-mobile .avmail-folder{position:relative!important;width:100%!important;display:grid!important;grid-template-columns:28px minmax(0,1fr) auto!important;gap:10px!important;align-items:center!important;padding:13px 12px!important;border-radius:15px!important;color:#F3F5F8!important;text-align:left!important;font-size:15px!important;}
+  body.avcomm-ios-mobile .avmail-folder span:nth-child(2){display:block!important;}
+  body.avcomm-ios-mobile .avmail-folder-count{position:static!important;margin:0!important;min-width:25px!important;height:25px!important;padding:0 7px!important;background:rgba(255,255,255,.09)!important;color:#fff!important;font-size:12px!important;}
+  body.avcomm-ios-mobile .avmail-folder.active{background:linear-gradient(135deg,rgba(246,196,38,.20),rgba(246,196,38,.07))!important;color:#F6C426!important;box-shadow:inset 0 0 0 1px rgba(246,196,38,.26)!important;}
+  body.avcomm-ios-mobile .avmail-folder.active .avmail-folder-count{background:#F6C426!important;color:#211703!important;}
+  body.avcomm-ios-mobile .avmail-new{position:fixed!important;right:18px!important;bottom:calc(92px + env(safe-area-inset-bottom,0px))!important;width:60px!important;height:60px!important;border-radius:50%!important;margin:0!important;padding:0!important;z-index:3900!important;font-size:0!important;display:grid!important;place-items:center!important;box-shadow:0 18px 40px rgba(246,196,38,.26)!important;}
+  body.avcomm-ios-mobile .avmail-new::after{content:'✎';font-size:25px!important;font-weight:700!important;}
 
-  body.avcomm-ios-mobile .avmail-list-pane{border-right:0!important;min-height:420px!important;display:grid!important;grid-template-rows:auto auto minmax(0,1fr)!important;overflow:hidden!important;}
-  body.avcomm-ios-mobile .avmail-list-head{padding:18px 16px 12px!important;border-bottom:1px solid rgba(255,255,255,.08)!important;}
-  body.avcomm-ios-mobile .avmail-list-head h2{font-size:1.95rem!important;line-height:1!important;letter-spacing:-.04em!important;}
-  body.avcomm-ios-mobile .avmail-list-head small{font-size:.9rem!important;color:#9da6b3!important;}
-  body.avcomm-ios-mobile .avmail-tool-btn,
+  body.avcomm-ios-mobile .avmail-list-pane{display:grid!important;grid-template-rows:auto auto minmax(320px,auto)!important;min-height:420px!important;border-right:0!important;}
+  body.avcomm-ios-mobile .avmail-list-head{padding:17px 16px 12px!important;border-bottom:1px solid rgba(255,255,255,.07)!important;}
+  body.avcomm-ios-mobile .avmail-list-head h2{font-size:30px!important;line-height:1.02!important;letter-spacing:-.04em!important;color:#fff!important;}
+  body.avcomm-ios-mobile .avmail-list-head small{font-size:14px!important;color:#A5ADBA!important;margin-top:5px!important;}
+  body.avcomm-ios-mobile .avmail-list-tools{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 46px!important;gap:8px!important;padding:10px 12px 12px!important;border-bottom:1px solid rgba(255,255,255,.07)!important;}
   body.avcomm-ios-mobile .avmail-list-tools select,
-  body.avcomm-ios-mobile .avmail-action{height:44px!important;border-radius:14px!important;background:rgba(255,255,255,.05)!important;border:1px solid rgba(255,255,255,.10)!important;color:#F1F3F7!important;font-size:.88rem!important;}
-  body.avcomm-ios-mobile .avmail-tool-btn{padding:0 14px!important;font-weight:900!important;}
-  body.avcomm-ios-mobile .avmail-list-tools{padding:0 16px 14px!important;gap:10px!important;border-bottom:1px solid rgba(255,255,255,.08)!important;}
-  body.avcomm-ios-mobile .avmail-message-list{padding:0 0 8px!important;}
-  body.avcomm-ios-mobile .avmail-row{background:transparent!important;border-bottom:1px solid rgba(255,255,255,.06)!important;padding:14px 16px 14px 18px!important;min-height:92px!important;}
-  body.avcomm-ios-mobile .avmail-row.selected{background:rgba(246,196,38,.08)!important;box-shadow:inset 3px 0 0 #F6C426!important;}
-  body.avcomm-ios-mobile .avmail-row-person{font-size:.95rem!important;}
-  body.avcomm-ios-mobile .avmail-row-subject{font-size:.93rem!important;}
-  body.avcomm-ios-mobile .avmail-row-preview{font-size:.84rem!important;color:#AEB5C1!important;white-space:normal!important;display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;}
-  body.avcomm-ios-mobile .avmail-row-date{color:#AEB5C1!important;font-size:.78rem!important;}
-  body.avcomm-ios-mobile .avmail-mini-badge{background:rgba(255,255,255,.08)!important;color:#E9EDF4!important;}
-  body.avcomm-ios-mobile .avmail-mini-badge.urgent{background:rgba(239,68,68,.18)!important;color:#FCA5A5!important;}
-  body.avcomm-ios-mobile .avmail-mini-badge.high{background:rgba(245,158,11,.18)!important;color:#F9C86B!important;}
+  body.avcomm-ios-mobile .avmail-tool-btn{height:44px!important;border-radius:13px!important;background:rgba(255,255,255,.055)!important;border:1px solid rgba(255,255,255,.10)!important;color:#EEF1F5!important;font-size:13px!important;padding-inline:10px!important;}
+  body.avcomm-ios-mobile .avmail-list-head .avmail-tool-btn{width:auto!important;min-width:78px!important;font-size:13px!important;}
+  body.avcomm-ios-mobile .avmail-message-list{min-height:300px!important;overflow:visible!important;}
+  body.avcomm-ios-mobile .avmail-row{background:transparent!important;border-bottom:1px solid rgba(255,255,255,.065)!important;padding:14px 15px 14px 18px!important;min-height:88px!important;}
+  body.avcomm-ios-mobile .avmail-row:hover{background:rgba(255,255,255,.035)!important;}
+  body.avcomm-ios-mobile .avmail-row.selected{background:rgba(246,196,38,.07)!important;box-shadow:inset 3px 0 0 #F6C426!important;}
+  body.avcomm-ios-mobile .avmail-row-person{font-size:15px!important;color:#fff!important;}
+  body.avcomm-ios-mobile .avmail-row-date{font-size:12px!important;color:#A9B1BD!important;}
+  body.avcomm-ios-mobile .avmail-row-subject{font-size:15px!important;color:#F1F3F6!important;margin-top:5px!important;}
+  body.avcomm-ios-mobile .avmail-row-preview{font-size:13px!important;line-height:1.35!important;color:#9FA8B4!important;white-space:normal!important;display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;overflow:hidden!important;}
+  body.avcomm-ios-mobile .avmail-empty-list{padding:48px 20px!important;color:#8F98A6!important;font-size:14px!important;}
 
+  /* leitura de e-mail ocupa a tela, nunca divide com lista */
   body.avcomm-ios-mobile .avmail-reading-pane{display:none!important;}
-  body.avcomm-ios-mobile.avmail-detail-open .avmail-reading-pane{display:grid!important;position:fixed!important;inset:0!important;z-index:3900!important;background:#0b0f14!important;grid-template-rows:auto minmax(0,1fr)!important;}
-  body.avcomm-ios-mobile.avmail-detail-open .avmail-reading-toolbar{padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 10px!important;flex-wrap:wrap!important;gap:8px!important;background:linear-gradient(180deg,#23171d,#10141a)!important;border-bottom:1px solid rgba(255,255,255,.08)!important;}
-  body.avcomm-ios-mobile.avmail-detail-open .avmail-reading-scroll{padding:18px 16px calc(24px + env(safe-area-inset-bottom,0px))!important;background:#0b0f14!important;}
-  body.avcomm-ios-mobile .avmail-mobile-back{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:44px!important;height:44px!important;padding:0 14px!important;border-radius:14px!important;border:1px solid rgba(255,255,255,.10)!important;background:rgba(255,255,255,.05)!important;color:#fff!important;font-weight:900!important;}
-  body.avcomm-ios-mobile .avmail-email-item{background:rgba(255,255,255,.03)!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:18px!important;padding:14px!important;}
-  body.avcomm-ios-mobile .avmail-email-subject{font-size:1.45rem!important;line-height:1.15!important;}
-  body.avcomm-ios-mobile .avmail-reading-empty{display:none!important;}
+  body.avcomm-ios-mobile.avmail-detail-open .avmail-reading-pane{display:grid!important;position:fixed!important;inset:0!important;z-index:4400!important;grid-template-rows:auto minmax(0,1fr)!important;background:#090c11!important;}
+  body.avcomm-ios-mobile.avmail-detail-open .avmail-reading-toolbar{min-height:66px!important;padding:calc(env(safe-area-inset-top,0px) + 8px) 12px 8px!important;display:flex!important;align-items:center!important;gap:7px!important;flex-wrap:wrap!important;background:linear-gradient(180deg,#321721,#11141a)!important;border-bottom:1px solid rgba(255,255,255,.08)!important;}
+  body.avcomm-ios-mobile.avmail-detail-open .avmail-reading-scroll{padding:18px 15px calc(24px + env(safe-area-inset-bottom,0px))!important;background:#090c11!important;}
+  body.avcomm-ios-mobile .avmail-mobile-back{height:42px!important;padding:0 13px!important;border-radius:13px!important;border:1px solid rgba(255,255,255,.11)!important;background:rgba(255,255,255,.06)!important;color:#fff!important;font-size:13px!important;font-weight:900!important;}
+  body.avcomm-ios-mobile .avmail-action{height:42px!important;border-radius:13px!important;background:rgba(255,255,255,.06)!important;border:1px solid rgba(255,255,255,.10)!important;color:#F0F2F5!important;font-size:12px!important;}
+  body.avcomm-ios-mobile .avmail-action.primary{background:#F6C426!important;border-color:#F6C426!important;color:#241903!important;}
+  body.avcomm-ios-mobile .avmail-email-subject{font-size:25px!important;line-height:1.12!important;color:#fff!important;}
+  body.avcomm-ios-mobile .avmail-email-item{background:rgba(255,255,255,.035)!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:17px!important;padding:13px!important;}
 
-  body.avcomm-ios-mobile #avChatWorkspace{display:grid!important;grid-template-columns:1fr!important;padding:0 0 calc(86px + env(safe-area-inset-bottom,0px))!important;overflow:hidden!important;min-height:0!important;background:transparent!important;}
+  /* Bate-papo */
+  body.avcomm-ios-mobile #avChatWorkspace{grid-template-columns:1fr!important;padding:0 0 calc(88px + env(safe-area-inset-bottom,0px))!important;background:transparent!important;overflow:hidden!important;min-height:0!important;}
   body.avcomm-ios-mobile #avChatWorkspace.show-list .avchat-conversations-pane{display:flex!important;}
   body.avcomm-ios-mobile #avChatWorkspace.show-list .avchat-thread-pane{display:none!important;}
   body.avcomm-ios-mobile #avChatWorkspace:not(.show-list) .avchat-conversations-pane{display:none!important;}
   body.avcomm-ios-mobile #avChatWorkspace:not(.show-list) .avchat-thread-pane{display:grid!important;}
-  body.avcomm-ios-mobile .avchat-conversations-pane,
-  body.avcomm-ios-mobile .avchat-thread-pane{min-height:0!important;background:transparent!important;}
-  body.avcomm-ios-mobile .avchat-conversations-head{height:auto!important;padding:18px 16px 12px!important;background:transparent!important;border-bottom:0!important;}
-  body.avcomm-ios-mobile .avchat-conversations-head h2{font-size:3rem!important;line-height:.95!important;letter-spacing:-.06em!important;color:#fff!important;}
+  body.avcomm-ios-mobile .avchat-conversations-pane{flex-direction:column!important;min-height:0!important;background:transparent!important;border-right:0!important;}
+  body.avcomm-ios-mobile .avchat-conversations-head{height:auto!important;min-height:0!important;padding:16px 16px 10px!important;background:transparent!important;border:0!important;}
+  body.avcomm-ios-mobile .avchat-conversations-head h2{font-size:40px!important;line-height:.98!important;letter-spacing:-.055em!important;color:#fff!important;}
   body.avcomm-ios-mobile .avchat-conversations-head small{display:none!important;}
-  body.avcomm-ios-mobile .avchat-head-actions{gap:10px!important;}
+  body.avcomm-ios-mobile .avchat-head-actions{gap:8px!important;}
   body.avcomm-ios-mobile .avchat-head-btn,
-  body.avcomm-ios-mobile .avchat-new-btn{width:52px!important;height:52px!important;border-radius:18px!important;background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.12)!important;box-shadow:none!important;}
-  body.avcomm-ios-mobile .avchat-wa-search{padding:0 16px 12px!important;background:transparent!important;}
-  body.avcomm-ios-mobile .avchat-wa-search input{height:56px!important;border-radius:18px!important;font-size:1rem!important;background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.10)!important;color:#fff!important;}
-  body.avcomm-ios-mobile .avchat-wa-search span{left:14px!important;top:15px!important;color:#d6d7db!important;}
-  body.avcomm-ios-mobile #avChatConversationList{padding:4px 14px 18px!important;overflow:auto!important;}
-  body.avcomm-ios-mobile .avchat-conversation{background:rgba(20,23,30,.88)!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:22px!important;padding:14px 14px!important;min-height:84px!important;margin-bottom:10px!important;backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important;box-shadow:0 14px 34px rgba(0,0,0,.22)!important;}
-  body.avcomm-ios-mobile .avchat-conversation.active{box-shadow:inset 0 0 0 1px rgba(246,196,38,.34),0 14px 34px rgba(0,0,0,.24)!important;background:linear-gradient(135deg,rgba(246,196,38,.16),rgba(255,255,255,.05))!important;}
-  body.avcomm-ios-mobile .avchat-avatar{width:52px!important;height:52px!important;border-radius:18px!important;background:linear-gradient(145deg,#ffd13b,#d79900)!important;color:#17130a!important;}
-  body.avcomm-ios-mobile .avchat-conv-name{font-size:1rem!important;color:#fff!important;}
-  body.avcomm-ios-mobile .avchat-conv-preview{font-size:.88rem!important;color:#AEB5C1!important;line-height:1.35!important;}
-  body.avcomm-ios-mobile .avchat-conv-meta{font-size:.78rem!important;color:#C9CED6!important;}
-  body.avcomm-ios-mobile .avchat-unread{background:#F6C426!important;color:#1b1505!important;min-width:24px!important;height:24px!important;}
-  body.avcomm-ios-mobile .avchat-thread-header{padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 10px!important;min-height:76px!important;background:linear-gradient(180deg,#23171d,#10141a)!important;border-bottom:1px solid rgba(255,255,255,.08)!important;gap:10px!important;}
-  body.avcomm-ios-mobile .avchat-thread-user strong{font-size:.98rem!important;color:#fff!important;}
-  body.avcomm-ios-mobile .avchat-thread-user small{font-size:.82rem!important;color:#ABB3C0!important;max-width:52vw!important;}
-  body.avcomm-ios-mobile .avchat-messages{padding:14px 12px!important;background:radial-gradient(circle at top left,rgba(246,196,38,.06),transparent 24%),transparent!important;}
-  body.avcomm-ios-mobile .avchat-message-line{max-width:92%!important;}
-  body.avcomm-ios-mobile .avchat-bubble{border-radius:20px!important;box-shadow:0 10px 26px rgba(0,0,0,.14)!important;}
-  body.avcomm-ios-mobile .avchat-compose{padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px))!important;background:rgba(10,13,18,.95)!important;border-top:1px solid rgba(255,255,255,.08)!important;backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important;}
-  body.avcomm-ios-mobile .avchat-wa-input-shell{border-radius:20px!important;min-height:56px!important;}
-  body.avcomm-ios-mobile .avchat-compose textarea{font-size:.95rem!important;min-height:44px!important;max-height:110px!important;}
-  body.avcomm-ios-mobile .avchat-wa-send{width:52px!important;height:52px!important;border-radius:18px!important;}
-  body.avcomm-ios-mobile .avchat-wa-attach-menu{bottom:74px!important;left:10px!important;}
-  body.avcomm-ios-mobile .avchat-reference-preview,.avchat-wa-draft-preview{margin-inline:0!important;}
-  body.avcomm-ios-mobile .avchat-mobile-back{width:44px!important;height:44px!important;border-radius:14px!important;border:1px solid rgba(255,255,255,.10)!important;background:rgba(255,255,255,.06)!important;color:#fff!important;display:grid!important;place-items:center!important;flex:none!important;}
-  body.avcomm-ios-mobile .avchat-mobile-segments{display:flex!important;gap:8px!important;padding:0 16px 10px!important;overflow:auto!important;scrollbar-width:none!important;}
+  body.avcomm-ios-mobile .avchat-new-btn{width:48px!important;height:48px!important;border-radius:16px!important;background:rgba(255,255,255,.07)!important;border:1px solid rgba(255,255,255,.11)!important;color:#fff!important;box-shadow:none!important;}
+  body.avcomm-ios-mobile .avchat-wa-search{padding:0 16px 10px!important;background:transparent!important;border:0!important;}
+  body.avcomm-ios-mobile .avchat-wa-search input{height:52px!important;border-radius:17px!important;background:rgba(255,255,255,.075)!important;border:1px solid rgba(255,255,255,.10)!important;color:#fff!important;font-size:16px!important;padding-left:44px!important;}
+  body.avcomm-ios-mobile .avchat-wa-search span{left:14px!important;top:14px!important;color:#C8CED7!important;font-size:19px!important;}
+  body.avcomm-ios-mobile .avchat-mobile-segments{display:flex!important;gap:8px!important;padding:0 16px 11px!important;overflow-x:auto!important;scrollbar-width:none!important;}
   body.avcomm-ios-mobile .avchat-mobile-segments::-webkit-scrollbar{display:none!important;}
-  body.avcomm-ios-mobile .avchat-mobile-segments button{height:42px!important;padding:0 16px!important;border-radius:999px!important;background:rgba(255,255,255,.06)!important;border:1px solid rgba(255,255,255,.10)!important;color:#E5EAF1!important;font-weight:800!important;white-space:nowrap!important;}
-  body.avcomm-ios-mobile .avchat-mobile-segments button.active{background:linear-gradient(135deg,rgba(246,196,38,.22),rgba(246,196,38,.08))!important;color:#F6C426!important;border-color:rgba(246,196,38,.32)!important;}
-  body.avcomm-ios-mobile .avchat-mobile-list-item{width:100%!important;display:grid!important;grid-template-columns:54px minmax(0,1fr) auto!important;gap:12px!important;align-items:center!important;padding:14px 14px!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:22px!important;background:rgba(20,23,30,.88)!important;color:#fff!important;text-align:left!important;margin-bottom:10px!important;}
-  body.avcomm-ios-mobile .avchat-mobile-list-item .meta strong{display:block!important;font-size:1rem!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
-  body.avcomm-ios-mobile .avchat-mobile-list-item .meta small{display:block!important;margin-top:4px!important;font-size:.84rem!important;color:#AEB5C1!important;line-height:1.35!important;}
-  body.avcomm-ios-mobile .avchat-mobile-list-item .side{display:flex!important;flex-direction:column!important;gap:6px!important;align-items:flex-end!important;font-size:.76rem!important;color:#BEC5D0!important;}
-  body.avcomm-ios-mobile .avchat-mobile-badge{min-width:24px!important;height:24px!important;padding:0 8px!important;border-radius:999px!important;background:#F6C426!important;color:#1B1505!important;display:grid!important;place-items:center!important;font-weight:900!important;}
-  body.avcomm-ios-mobile .avchat-mobile-chip{display:inline-flex!important;align-items:center!important;gap:4px!important;padding:4px 8px!important;border-radius:999px!important;background:rgba(255,255,255,.08)!important;color:#DCE1E8!important;font-size:.72rem!important;font-weight:800!important;}
+  body.avcomm-ios-mobile .avchat-mobile-segments button{height:40px!important;padding:0 15px!important;border-radius:999px!important;background:rgba(255,255,255,.055)!important;border:1px solid rgba(255,255,255,.09)!important;color:#D9DEE6!important;font-size:13px!important;font-weight:900!important;white-space:nowrap!important;}
+  body.avcomm-ios-mobile .avchat-mobile-segments button.active{background:linear-gradient(135deg,rgba(246,196,38,.22),rgba(246,196,38,.08))!important;border-color:rgba(246,196,38,.30)!important;color:#F6C426!important;}
+  body.avcomm-ios-mobile #avChatConversationList,
+  body.avcomm-ios-mobile #avChatMobileAuxPanel{padding:2px 14px 16px!important;overflow-y:auto!important;min-height:0!important;}
+  body.avcomm-ios-mobile .avchat-conversation,
+  body.avcomm-ios-mobile .avchat-mobile-list-item{width:100%!important;display:grid!important;grid-template-columns:54px minmax(0,1fr) auto!important;gap:11px!important;align-items:center!important;background:rgba(22,25,32,.92)!important;border:1px solid rgba(255,255,255,.075)!important;border-radius:20px!important;padding:13px!important;min-height:80px!important;margin:0 0 9px!important;color:#fff!important;text-align:left!important;box-shadow:0 12px 28px rgba(0,0,0,.20)!important;}
+  body.avcomm-ios-mobile .avchat-conversation.active{background:linear-gradient(135deg,rgba(246,196,38,.14),rgba(255,255,255,.04))!important;box-shadow:inset 0 0 0 1px rgba(246,196,38,.28),0 12px 28px rgba(0,0,0,.20)!important;}
+  body.avcomm-ios-mobile .avchat-avatar{width:52px!important;height:52px!important;border-radius:17px!important;background:linear-gradient(145deg,#FFD13B,#D79900)!important;color:#201602!important;display:grid!important;place-items:center!important;font-size:14px!important;font-weight:1000!important;}
+  body.avcomm-ios-mobile .avchat-conv-name,
+  body.avcomm-ios-mobile .avchat-mobile-list-item .meta strong{font-size:15px!important;line-height:1.1!important;color:#fff!important;}
+  body.avcomm-ios-mobile .avchat-conv-preview,
+  body.avcomm-ios-mobile .avchat-mobile-list-item .meta small{font-size:13px!important;line-height:1.32!important;color:#A6AFBB!important;margin-top:4px!important;}
+  body.avcomm-ios-mobile .avchat-conv-meta,
+  body.avcomm-ios-mobile .avchat-mobile-list-item .side{font-size:12px!important;color:#B9C1CC!important;}
+  body.avcomm-ios-mobile .avchat-mobile-list-item .side{display:flex!important;flex-direction:column!important;gap:6px!important;align-items:flex-end!important;}
+  body.avcomm-ios-mobile .avchat-unread,
+  body.avcomm-ios-mobile .avchat-mobile-badge{min-width:24px!important;height:24px!important;border-radius:999px!important;background:#F6C426!important;color:#201602!important;display:grid!important;place-items:center!important;padding:0 7px!important;font-size:11px!important;font-weight:1000!important;}
+  body.avcomm-ios-mobile .avchat-mobile-chip{display:inline-flex!important;padding:5px 8px!important;border-radius:999px!important;background:rgba(255,255,255,.08)!important;color:#DDE2E9!important;font-size:11px!important;font-weight:900!important;}
 
-  body.avcomm-ios-mobile .avcomm-bottom-nav{position:fixed!important;left:12px!important;right:12px!important;bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;z-index:3800!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;padding:10px!important;border-radius:24px!important;background:rgba(13,16,22,.82)!important;border:1px solid rgba(255,255,255,.10)!important;backdrop-filter:blur(20px)!important;-webkit-backdrop-filter:blur(20px)!important;box-shadow:0 20px 48px rgba(0,0,0,.38)!important;}
-  body.avcomm-ios-mobile .avcomm-bottom-nav button{height:54px!important;border:0!important;border-radius:18px!important;background:transparent!important;color:#DCE2EA!important;font-weight:900!important;letter-spacing:-.01em!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;}
-  body.avcomm-ios-mobile .avcomm-bottom-nav button.active{background:linear-gradient(135deg,rgba(246,196,38,.24),rgba(246,196,38,.10))!important;color:#F6C426!important;box-shadow:inset 0 0 0 1px rgba(246,196,38,.26)!important;}
-  body.avcomm-ios-mobile .avcomm-bottom-nav .icon{font-size:1rem!important;}
+  body.avcomm-ios-mobile .avchat-thread-pane{min-height:0!important;background:#090c11!important;}
+  body.avcomm-ios-mobile .avchat-thread-header{min-height:72px!important;padding:calc(env(safe-area-inset-top,0px) + 7px) 10px 7px!important;background:linear-gradient(180deg,#321721,#11141a)!important;border-bottom:1px solid rgba(255,255,255,.08)!important;gap:8px!important;}
+  body.avcomm-ios-mobile .avchat-mobile-back{width:42px!important;height:42px!important;border-radius:13px!important;border:1px solid rgba(255,255,255,.10)!important;background:rgba(255,255,255,.06)!important;color:#fff!important;display:grid!important;place-items:center!important;flex:none!important;font-size:20px!important;}
+  body.avcomm-ios-mobile .avchat-thread-user strong{font-size:15px!important;color:#fff!important;}
+  body.avcomm-ios-mobile .avchat-thread-user small{font-size:12px!important;color:#A9B1BD!important;max-width:46vw!important;}
+  body.avcomm-ios-mobile .avchat-wa-header-btn{width:40px!important;height:40px!important;border-radius:13px!important;}
+  body.avcomm-ios-mobile .avchat-messages{padding:13px 10px!important;background:radial-gradient(circle at top left,rgba(246,196,38,.05),transparent 26%),#090c11!important;}
+  body.avcomm-ios-mobile .avchat-message-line{max-width:91%!important;}
+  body.avcomm-ios-mobile .avchat-bubble{border-radius:18px!important;}
+  body.avcomm-ios-mobile .avchat-compose{padding:9px 10px calc(9px + env(safe-area-inset-bottom,0px))!important;background:rgba(10,13,18,.97)!important;border-top:1px solid rgba(255,255,255,.08)!important;}
+  body.avcomm-ios-mobile .avchat-wa-input-shell{min-height:50px!important;border-radius:17px!important;}
+  body.avcomm-ios-mobile .avchat-compose textarea{min-height:42px!important;max-height:108px!important;font-size:15px!important;}
+
+  /* Barra inferior única */
+  body.avcomm-ios-mobile .avcomm-bottom-nav{position:fixed!important;left:12px!important;right:12px!important;bottom:calc(9px + env(safe-area-inset-bottom,0px))!important;z-index:4100!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;padding:9px!important;border-radius:22px!important;background:rgba(12,15,20,.88)!important;border:1px solid rgba(255,255,255,.10)!important;box-shadow:0 18px 45px rgba(0,0,0,.36)!important;backdrop-filter:blur(22px)!important;-webkit-backdrop-filter:blur(22px)!important;}
+  body.avcomm-ios-mobile .avcomm-bottom-nav button{height:52px!important;border:0!important;border-radius:16px!important;background:transparent!important;color:#D7DCE4!important;font-size:14px!important;font-weight:900!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;}
+  body.avcomm-ios-mobile .avcomm-bottom-nav button.active{background:linear-gradient(135deg,rgba(246,196,38,.22),rgba(246,196,38,.08))!important;color:#F6C426!important;box-shadow:inset 0 0 0 1px rgba(246,196,38,.25)!important;}
+  body.avcomm-ios-mobile .avcomm-bottom-nav .icon{font-size:18px!important;}
 }
 </style>
-<script id="comunicacao-mobile-ios-redesign-v120-script">
+
+<script id="comunicacao-mobile-ios-redesign-v121-script">
 (function(){
-  const MOBILE_BP=820;
-  let avChatMobileTab='CONVERSAS';
-  function isMobile(){return window.innerWidth<=MOBILE_BP;}
-  function root(){return document.getElementById('comunicacaoAVStandalone');}
-  function syncBodyClass(){document.body.classList.toggle('avcomm-ios-mobile',isMobile());const r=root();if(r)r.dataset.commMode=(typeof comunicacaoModoAtual!=='undefined'?comunicacaoModoAtual:'EMAIL');}
-  function ensureBottomNav(){
-    const r=root(); if(!r) return;
+  const BP=820;
+  let mobileChatTab='CONVERSAS';
+  const isMobile=()=>window.innerWidth<=BP;
+  const currentMode=()=>String(typeof comunicacaoModoAtual!=='undefined'?comunicacaoModoAtual:'EMAIL').toUpperCase()==='CHAT'?'CHAT':'EMAIL';
+
+  function syncRoot(){
+    document.body.classList.toggle('avcomm-ios-mobile',isMobile());
+    document.body.classList.toggle('avmail-detail-open',isMobile()&&currentMode()==='EMAIL'&&!!(typeof avMailSelecionadaId!=='undefined'&&avMailSelecionadaId));
+  }
+  function ensureBottom(){
+    const root=document.getElementById('comunicacaoAVStandalone'); if(!root)return;
     let nav=document.getElementById('avCommBottomNav');
-    if(!nav){
-      nav=document.createElement('nav'); nav.id='avCommBottomNav'; nav.className='avcomm-bottom-nav';
-      nav.innerHTML=`<button type="button" data-mode="EMAIL" onclick="setModoComunicacaoAV('EMAIL')"><span class="icon">✉</span><span>E-mail</span></button><button type="button" data-mode="CHAT" onclick="setModoComunicacaoAV('CHAT')"><span class="icon">💬</span><span>Bate-papo</span></button>`;
-      r.appendChild(nav);
-    }
-    nav.hidden=!isMobile();
-    nav.querySelectorAll('button').forEach(btn=>btn.classList.toggle('active',btn.dataset.mode===String(typeof comunicacaoModoAtual!=='undefined'?comunicacaoModoAtual:'EMAIL')));
+    if(!nav){nav=document.createElement('nav');nav.id='avCommBottomNav';nav.className='avcomm-bottom-nav';nav.innerHTML='<button type="button" data-mode="EMAIL"><span class="icon">✉</span><span>E-mail</span></button><button type="button" data-mode="CHAT"><span class="icon">💬</span><span>Bate-papo</span></button>';root.appendChild(nav);nav.querySelector('[data-mode="EMAIL"]').onclick=()=>setModoComunicacaoAV('EMAIL');nav.querySelector('[data-mode="CHAT"]').onclick=()=>setModoComunicacaoAV('CHAT');}
+    nav.hidden=!isMobile(); nav.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.mode===currentMode()));
   }
   function ensureChatTabs(){
-    const pane=document.querySelector('#avChatWorkspace .avchat-conversations-pane');
-    const search=document.querySelector('#avChatWorkspace .avchat-wa-search');
-    if(!pane||!search||document.getElementById('avChatMobileTabs')) return;
-    const seg=document.createElement('div');
-    seg.id='avChatMobileTabs'; seg.className='avchat-mobile-segments';
-    seg.innerHTML=`<button type="button" data-tab="CONVERSAS" onclick="avSetChatMobileTab('CONVERSAS')">Conversas</button><button type="button" data-tab="CONTATOS" onclick="avSetChatMobileTab('CONTATOS')">Contatos</button><button type="button" data-tab="CHAMADAS" onclick="avSetChatMobileTab('CHAMADAS')">Chamadas</button>`;
-    search.insertAdjacentElement('afterend',seg);
+    const pane=document.querySelector('#avChatWorkspace .avchat-conversations-pane');const search=pane?.querySelector('.avchat-wa-search');if(!pane||!search)return;
+    let tabs=document.getElementById('avChatMobileTabs');
+    if(!tabs){tabs=document.createElement('div');tabs.id='avChatMobileTabs';tabs.className='avchat-mobile-segments';tabs.innerHTML='<button type="button" data-tab="CONVERSAS">Conversas</button><button type="button" data-tab="CONTATOS">Contatos</button><button type="button" data-tab="CHAMADAS">Chamadas</button>';search.insertAdjacentElement('afterend',tabs);tabs.querySelectorAll('button').forEach(b=>b.onclick=()=>setMobileChatTab(b.dataset.tab));}
+    let aux=document.getElementById('avChatMobileAuxPanel');if(!aux){aux=document.createElement('div');aux.id='avChatMobileAuxPanel';aux.hidden=true;document.getElementById('avChatConversationList')?.insertAdjacentElement('afterend',aux);}
+    tabs.hidden=!isMobile()||currentMode()!=='CHAT';tabs.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.tab===mobileChatTab));
   }
-  function updateChatTabsUI(){
-    const seg=document.getElementById('avChatMobileTabs'); if(!seg) return;
-    seg.hidden=!isMobile() || String(typeof comunicacaoModoAtual!=='undefined'?comunicacaoModoAtual:'EMAIL')!=='CHAT';
-    seg.querySelectorAll('button').forEach(btn=>btn.classList.toggle('active',btn.dataset.tab===avChatMobileTab));
+  function allUsers(){const atual=normalizarOperador(usuarioAtual?.operador);return (globalConfig?.usuarios||[]).filter(u=>normalizarOperador(u.operador)&&normalizarOperador(u.operador)!==atual).sort((a,b)=>String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR'));}
+  function callEvents(){const atual=normalizarOperador(usuarioAtual?.operador);return (db?.mensagens||[]).filter(m=>canalMensagem(m)==='CHAT'&&m.chatEvento==='CHAMADA'&&(normalizarOperador(m.remetenteOp)===atual||normalizarOperador(m.destinatarioOp)===atual)).sort((a,b)=>String(b.criadoEmISO||'').localeCompare(String(a.criadoEmISO||'')));}
+  function avatar(nome){return '<span class="avchat-avatar">'+escapeHTML(iniciaisComunicacaoAV(nome||'AV'))+'</span>';}
+  function renderAux(){
+    const list=document.getElementById('avChatConversationList'),aux=document.getElementById('avChatMobileAuxPanel');if(!list||!aux)return;
+    if(!isMobile()||currentMode()!=='CHAT'||mobileChatTab==='CONVERSAS'){list.hidden=false;aux.hidden=true;return;}
+    list.hidden=true;aux.hidden=false;
+    if(mobileChatTab==='CONTATOS'){
+      const arr=allUsers();aux.innerHTML=arr.length?arr.map(u=>{const nome=u.nome||'Usuário',op=normalizarOperador(u.operador),cargo=u.cargo||u.funcao||'Comunicação AV';return '<button class="avchat-mobile-list-item" type="button" data-op="'+escapeHTML(op)+'">'+avatar(nome)+'<span class="meta"><strong>'+escapeHTML(nome)+'</strong><small>'+escapeHTML(cargo)+'</small></span><span class="side"><span class="avchat-mobile-chip">Conversar</span></span></button>';}).join(''):'<div class="avmail-empty-list">Nenhum contato disponível.</div>';
+      aux.querySelectorAll('[data-op]').forEach(b=>b.onclick=()=>openMobileChat(b.dataset.op));
+    }else{
+      const atual=normalizarOperador(usuarioAtual?.operador),arr=callEvents();aux.innerHTML=arr.length?arr.map(m=>{const op=normalizarOperador(m.remetenteOp)===atual?normalizarOperador(m.destinatarioOp):normalizarOperador(m.remetenteOp);const nome=normalizarOperador(m.remetenteOp)===atual?(m.destinatarioNome||mensagemNomeOperador(op)):(m.remetenteNome||mensagemNomeOperador(op));const tipo=(m.eventoChamada?.tipo||'AUDIO')==='VIDEO'?'Vídeo':'Áudio';const result=String(m.eventoChamada?.resultado||'PERDIDA');return '<button class="avchat-mobile-list-item" type="button" data-op="'+escapeHTML(op)+'">'+avatar(nome)+'<span class="meta"><strong>'+escapeHTML(nome)+'</strong><small>'+escapeHTML(tipo)+' • '+escapeHTML(result.charAt(0)+result.slice(1).toLowerCase())+'</small></span><span class="side"><span>'+escapeHTML(dataCurtaComunicacaoAV(m))+'</span>'+(result==='PERDIDA'?'<span class="avchat-mobile-badge">!</span>':'<span class="avchat-mobile-chip">'+escapeHTML(result)+'</span>')+'</span></button>';}).join(''):'<div class="avmail-empty-list">Nenhuma chamada registrada.</div>';
+      aux.querySelectorAll('[data-op]').forEach(b=>b.onclick=()=>openMobileChat(b.dataset.op));
+    }
   }
-  function getAllUsersMobile(){
-    const atual=typeof normalizarOperador==='function'?normalizarOperador(usuarioAtual?.operador):'';
-    return (globalConfig?.usuarios||[]).filter(u=>{
-      const op=typeof normalizarOperador==='function'?normalizarOperador(u?.operador):String(u?.operador||'');
-      return op && op!==atual;
-    }).sort((a,b)=>String(a?.nome||'').localeCompare(String(b?.nome||''),'pt-BR'));
-  }
-  function getCallItemsMobile(){
-    if(!db||!Array.isArray(db.mensagens)) return [];
-    const atual=typeof normalizarOperador==='function'?normalizarOperador(usuarioAtual?.operador):'';
-    return db.mensagens.filter(m=>canalMensagem(m)==='CHAT'&&m.chatEvento==='CHAMADA'&&(normalizarOperador(m.remetenteOp)===atual||normalizarOperador(m.destinatarioOp)===atual)).sort((a,b)=>String(b.criadoEmISO||'').localeCompare(String(a.criadoEmISO||'')));
-  }
-  function avatarHTML(nome){return `<span class="avchat-avatar">${escapeHTML(iniciaisComunicacaoAV(nome||'AV'))}</span>`;}
-  function renderContactsMobile(){
-    const list=document.getElementById('avChatConversationList'); if(!list) return;
-    const arr=getAllUsersMobile();
-    list.innerHTML=arr.length?arr.map(u=>{
-      const nome=u.nome||'Usuário'; const cargo=u.cargo||u.funcao||'Comunicação AV'; const op=normalizarOperador(u.operador);
-      return `<button class="avchat-mobile-list-item" type="button" onclick="avAbrirContatoChatMobile('${escapeHTML(op)}')">${avatarHTML(nome)}<span class="meta"><strong>${escapeHTML(nome)}</strong><small>${escapeHTML(cargo)} • OP. ${escapeHTML(op)}</small></span><span class="side"><span class="avchat-mobile-chip">Abrir</span></span></button>`;
-    }).join(''):`<div class="avmail-empty-list">Nenhum contato disponível.</div>`;
-    const msgs=document.getElementById('avChatMessages'), header=document.getElementById('avChatThreadHeader'), compose=document.getElementById('avChatCompose');
-    if(header) header.innerHTML=`<div class="avchat-thread-user"><span class="avchat-avatar">👤</span><span><strong>Contatos</strong><small>Selecione uma pessoa para iniciar um bate-papo.</small></span></div>`;
-    if(msgs) msgs.innerHTML='<div class="avchat-empty"><div>👤</div><strong>Contatos internos</strong><span>Abra um contato para conversar ou ligar.</span></div>';
-    if(compose) compose.hidden=true;
-  }
-  function renderCallsMobile(){
-    const list=document.getElementById('avChatConversationList'); if(!list) return;
-    const arr=getCallItemsMobile();
-    const atual=typeof normalizarOperador==='function'?normalizarOperador(usuarioAtual?.operador):'';
-    list.innerHTML=arr.length?arr.map(m=>{
-      const op=normalizarOperador(m.remetenteOp)===atual?normalizarOperador(m.destinatarioOp):normalizarOperador(m.remetenteOp);
-      const nome=normalizarOperador(m.remetenteOp)===atual?(m.destinatarioNome||mensagemNomeOperador(op)):(m.remetenteNome||mensagemNomeOperador(op));
-      const tipo=(m.eventoChamada?.tipo||'AUDIO')==='VIDEO'?'Vídeo':'Áudio';
-      const res=(m.eventoChamada?.resultado||'PERDIDA');
-      const badge=res==='PERDIDA'?`<span class="avchat-mobile-badge">!</span>`:`<span class="avchat-mobile-chip">${escapeHTML(res)}</span>`;
-      return `<button class="avchat-mobile-list-item" type="button" onclick="avAbrirContatoChatMobile('${escapeHTML(op)}')">${avatarHTML(nome)}<span class="meta"><strong>${escapeHTML(nome)}</strong><small>${escapeHTML(tipo)} • ${escapeHTML(res.charAt(0)+res.slice(1).toLowerCase())}</small></span><span class="side"><span>${escapeHTML(dataCurtaComunicacaoAV(m))}</span>${badge}</span></button>`;
-    }).join(''):`<div class="avmail-empty-list">Nenhuma chamada registrada.</div>`;
-    const msgs=document.getElementById('avChatMessages'), header=document.getElementById('avChatThreadHeader'), compose=document.getElementById('avChatCompose');
-    if(header) header.innerHTML=`<div class="avchat-thread-user"><span class="avchat-avatar">☎</span><span><strong>Chamadas</strong><small>Histórico de chamadas de áudio e vídeo.</small></span></div>`;
-    if(msgs) msgs.innerHTML='<div class="avchat-empty"><div>☎</div><strong>Histórico de chamadas</strong><span>Toque em uma pessoa para voltar ao bate-papo.</span></div>';
-    if(compose) compose.hidden=true;
-  }
-  function syncChatLayout(){
-    const ws=document.getElementById('avChatWorkspace'); if(!ws) return;
-    if(!isMobile() || String(typeof comunicacaoModoAtual!=='undefined'?comunicacaoModoAtual:'EMAIL')!=='CHAT'){ ws.classList.remove('show-list'); return; }
-    if(avChatMobileTab!=='CONVERSAS'){ ws.classList.add('show-list'); return; }
-    const selected=((typeof avChatSelecionadoOp!=='undefined'&&avChatSelecionadoOp)||(typeof avChatSelecionadoGrupoId!=='undefined'&&avChatSelecionadoGrupoId));
-    ws.classList.toggle('show-list', !selected || ws.dataset.forceList==='1');
-  }
-  function ensureChatBack(){
-    const header=document.getElementById('avChatThreadHeader'); if(!header) return;
-    let btn=header.querySelector('.avchat-mobile-back');
-    if(!btn){ btn=document.createElement('button'); btn.type='button'; btn.className='avchat-mobile-back'; btn.textContent='←'; btn.onclick=function(){ const ws=document.getElementById('avChatWorkspace'); if(ws){ ws.dataset.forceList='1'; ws.classList.add('show-list'); } }; header.prepend(btn); }
-    btn.hidden=!isMobile() || avChatMobileTab!=='CONVERSAS';
-  }
-  function ensureMailBack(){
-    const toolbar=document.getElementById('avMailReadingToolbar'); if(!toolbar) return;
-    let btn=toolbar.querySelector('.avmail-mobile-back');
-    if(!btn){ btn=document.createElement('button'); btn.type='button'; btn.className='avmail-mobile-back'; btn.textContent='← Caixas'; btn.onclick=function(){ try{ avMailSelecionadaId=''; }catch(_){} document.body.classList.remove('avmail-detail-open'); if(typeof renderComunicacaoAVOutlook==='function') renderComunicacaoAVOutlook(); }; toolbar.prepend(btn); }
-    btn.hidden=!isMobile();
-  }
-  function syncMailDetail(){
-    ensureMailBack();
-    const open=isMobile() && String(typeof comunicacaoModoAtual!=='undefined'?comunicacaoModoAtual:'EMAIL')==='EMAIL' && !!(typeof avMailSelecionadaId!=='undefined' && avMailSelecionadaId);
-    document.body.classList.toggle('avmail-detail-open', !!open);
-  }
-  function applyTitles(){
-    const sub=document.getElementById('avCommBrandSubtitle');
-    if(sub){ sub.textContent=String(typeof comunicacaoModoAtual!=='undefined'?comunicacaoModoAtual:'EMAIL')==='EMAIL' ? 'E-mail corporativo interno' : 'Bate-papo, contatos e chamadas'; }
-  }
-  function ensureMobileShell(){ syncBodyClass(); ensureBottomNav(); ensureChatTabs(); updateChatTabsUI(); applyTitles(); ensureChatBack(); syncChatLayout(); syncMailDetail(); }
-  window.avSetChatMobileTab=function(tab){ avChatMobileTab=['CONVERSAS','CONTATOS','CHAMADAS'].includes(String(tab||'').toUpperCase())?String(tab).toUpperCase():'CONVERSAS'; if(avChatMobileTab!=='CONVERSAS'){ const ws=document.getElementById('avChatWorkspace'); if(ws) ws.dataset.forceList='1'; } if(typeof renderBatePapoAV==='function') renderBatePapoAV(); };
-  window.avAbrirContatoChatMobile=function(op){ avChatMobileTab='CONVERSAS'; const ws=document.getElementById('avChatWorkspace'); if(ws){ ws.dataset.forceList='0'; ws.classList.remove('show-list'); } if(typeof abrirChatComUsuario==='function') abrirChatComUsuario(op); };
+  function setMobileChatTab(tab){mobileChatTab=['CONVERSAS','CONTATOS','CHAMADAS'].includes(tab)?tab:'CONVERSAS';const ws=document.getElementById('avChatWorkspace');if(ws){ws.dataset.forceList='1';ws.classList.add('show-list');}ensureChatTabs();renderAux();}
+  function openMobileChat(op){mobileChatTab='CONVERSAS';const ws=document.getElementById('avChatWorkspace');if(ws){ws.dataset.forceList='0';ws.classList.remove('show-list');}if(typeof abrirChatComUsuario==='function')abrirChatComUsuario(op);ensureChatTabs();renderAux();ensureBack();}
+  window.avSetChatMobileTab=setMobileChatTab;window.avAbrirContatoChatMobile=openMobileChat;
 
-  const baseSetModo=window.setModoComunicacaoAV;
-  window.setModoComunicacaoAV=function(modo){ const r=baseSetModo?baseSetModo.apply(this,arguments):undefined; if(String(modo||'').toUpperCase()==='CHAT'){ const ws=document.getElementById('avChatWorkspace'); if(ws){ ws.dataset.forceList='1'; } } ensureMobileShell(); return r; };
+  function syncChatList(){const ws=document.getElementById('avChatWorkspace');if(!ws||!isMobile()||currentMode()!=='CHAT')return;if(mobileChatTab!=='CONVERSAS'){ws.classList.add('show-list');return;}const selected=!!((typeof avChatSelecionadoOp!=='undefined'&&avChatSelecionadoOp)||(typeof avChatSelecionadoGrupoId!=='undefined'&&avChatSelecionadoGrupoId));ws.classList.toggle('show-list',!selected||ws.dataset.forceList==='1');}
+  function ensureBack(){const header=document.getElementById('avChatThreadHeader');if(!header)return;let btn=header.querySelector('.avchat-mobile-back');if(!btn){btn=document.createElement('button');btn.type='button';btn.className='avchat-mobile-back';btn.textContent='←';btn.onclick=()=>{const ws=document.getElementById('avChatWorkspace');if(ws){ws.dataset.forceList='1';ws.classList.add('show-list');}};header.prepend(btn);}btn.hidden=!isMobile();}
+  function ensureMailBack(){const bar=document.getElementById('avMailReadingToolbar');if(!bar)return;let btn=bar.querySelector('.avmail-mobile-back');if(!btn){btn=document.createElement('button');btn.type='button';btn.className='avmail-mobile-back';btn.textContent='← Caixas';btn.onclick=()=>{try{avMailSelecionadaId='';}catch(_){}document.body.classList.remove('avmail-detail-open');if(typeof renderComunicacaoAVOutlook==='function')renderComunicacaoAVOutlook();};bar.prepend(btn);}btn.hidden=!isMobile();}
+  function syncSubtitle(){const sub=document.getElementById('avCommBrandSubtitle');if(sub)sub.textContent=currentMode()==='EMAIL'?'E-mail corporativo interno':'Bate-papo, contatos e chamadas';}
+  function syncAll(){syncRoot();ensureBottom();ensureChatTabs();renderAux();syncChatList();ensureBack();ensureMailBack();syncSubtitle();}
 
-  const baseOpenChat=window.abrirChatComUsuario;
-  window.abrirChatComUsuario=function(op){ const r=baseOpenChat?baseOpenChat.apply(this,arguments):undefined; if(isMobile()){ avChatMobileTab='CONVERSAS'; const ws=document.getElementById('avChatWorkspace'); if(ws){ ws.dataset.forceList='0'; ws.classList.remove('show-list'); } } ensureMobileShell(); return r; };
+  const _set=window.setModoComunicacaoAV;window.setModoComunicacaoAV=function(m){const r=_set?_set.apply(this,arguments):undefined;if(String(m).toUpperCase()==='CHAT'){const ws=document.getElementById('avChatWorkspace');if(ws){ws.dataset.forceList='1';ws.classList.add('show-list');}}syncAll();return r;};
+  const _openChat=window.abrirChatComUsuario;window.abrirChatComUsuario=function(op){const r=_openChat?_openChat.apply(this,arguments):undefined;if(isMobile()){mobileChatTab='CONVERSAS';const ws=document.getElementById('avChatWorkspace');if(ws){ws.dataset.forceList='0';ws.classList.remove('show-list');}}syncAll();return r;};
+  const _renderChat=window.renderBatePapoAV;window.renderBatePapoAV=function(){const r=_renderChat?_renderChat.apply(this,arguments):undefined;syncAll();return r;};
+  const _openMail=window.abrirMensagemComunicacaoAV;window.abrirMensagemComunicacaoAV=function(id){const r=_openMail?_openMail.apply(this,arguments):undefined;syncAll();return r;};
+  const _renderMail=window.renderComunicacaoAVOutlook;window.renderComunicacaoAVOutlook=function(){const r=_renderMail?_renderMail.apply(this,arguments):undefined;syncAll();return r;};
 
-  const baseOpenMail=window.abrirMensagemComunicacaoAV;
-  window.abrirMensagemComunicacaoAV=function(id){ const r=baseOpenMail?baseOpenMail.apply(this,arguments):undefined; syncMailDetail(); return r; };
-
-  const baseRenderMail=window.renderComunicacaoAVOutlook;
-  window.renderComunicacaoAVOutlook=function(){ const r=baseRenderMail?baseRenderMail.apply(this,arguments):undefined; ensureMobileShell(); syncMailDetail(); return r; };
-
-  const baseRenderChat=window.renderBatePapoAV;
-  window.renderBatePapoAV=function(){ const r=baseRenderChat?baseRenderChat.apply(this,arguments):undefined; ensureMobileShell(); if(isMobile() && String(typeof comunicacaoModoAtual!=='undefined'?comunicacaoModoAtual:'EMAIL')==='CHAT'){ if(avChatMobileTab==='CONTATOS') renderContactsMobile(); else if(avChatMobileTab==='CHAMADAS') renderCallsMobile(); } updateChatTabsUI(); syncChatLayout(); ensureChatBack(); return r; };
-
-  window.addEventListener('resize', ensureMobileShell, {passive:true});
-  window.addEventListener('orientationchange', ensureMobileShell, {passive:true});
-  document.addEventListener('DOMContentLoaded', function(){ setTimeout(ensureMobileShell, 60); });
-  setTimeout(ensureMobileShell, 120);
+  window.addEventListener('resize',syncAll,{passive:true});window.addEventListener('orientationchange',syncAll,{passive:true});document.addEventListener('DOMContentLoaded',()=>setTimeout(syncAll,80));setTimeout(syncAll,160);
 })();
 </script>
 </body>
