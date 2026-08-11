@@ -18894,6 +18894,95 @@ function exportarExcelRelatorio(){ showAppLoader('Gerando Excel', 'Montando o ar
 
 
 
+
+<style id="comunicacao-mobile-ios-refine-v131">
+@media (max-width: 820px){
+  body.avcomm-ios-mobile #comunicacaoAVStandalone{position:relative!important;overflow-x:hidden!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] #avMailWorkspace{display:flex!important;visibility:visible!important;pointer-events:auto!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] #avChatWorkspace{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] #avMailWorkspace{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] #avChatWorkspace{display:grid!important;visibility:visible!important;pointer-events:auto!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-search{display:block!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avmail-search{display:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone .avcomm-mode-switch{display:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone .avmail-topbar{padding-bottom:18px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avmail-topbar{padding-bottom:10px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avmail-brand-copy small{content:'';}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] #avMailWorkspace{padding-top:10px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-folders,
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-list-pane{background:linear-gradient(180deg,rgba(17,22,31,.98),rgba(9,13,21,.97))!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-list-head h2{font-size:1.7rem!important;letter-spacing:-.035em!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-list-pane{min-height:360px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-new{bottom:calc(98px + env(safe-area-inset-bottom,0px))!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] #avChatWorkspace{padding-top:4px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversations-head{padding-top:8px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversations-head h2{font-size:2.6rem!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversations-pane{display:flex!important;flex-direction:column!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-wa-search{padding-top:2px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-mobile-segments{padding-top:4px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-mobile-list-item,
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversation{background:linear-gradient(180deg,rgba(20,24,34,.96),rgba(13,17,27,.95))!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-thread-pane{background:#090c12!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone .avcomm-bottom-nav{grid-template-columns:1fr 1fr!important;}
+}
+</style>
+<script id="comunicacao-mobile-ios-refine-v131-script">
+(function(){
+  function isMobileAV(){ return window.innerWidth <= 820; }
+  function currentModeAV(){ return String(window.comunicacaoModoAtual || 'EMAIL').toUpperCase()==='CHAT' ? 'CHAT' : 'EMAIL'; }
+  function rootAV(){ return document.getElementById('comunicacaoAVStandalone'); }
+  function syncModeAV(){
+    const root = rootAV();
+    const mail = document.getElementById('avMailWorkspace');
+    const chat = document.getElementById('avChatWorkspace');
+    if(!root || !mail || !chat) return;
+    const mode = currentModeAV();
+    root.dataset.commMode = mode;
+    if(isMobileAV()) document.body.classList.add('avcomm-ios-mobile');
+    mail.hidden = mode !== 'EMAIL';
+    chat.hidden = mode !== 'CHAT';
+    mail.setAttribute('aria-hidden', mode !== 'EMAIL' ? 'true' : 'false');
+    chat.setAttribute('aria-hidden', mode !== 'CHAT' ? 'true' : 'false');
+    mail.style.display = mode === 'EMAIL' ? '' : 'none';
+    chat.style.display = mode === 'CHAT' ? '' : 'none';
+    const sub = document.getElementById('avCommBrandSubtitle');
+    if(sub){ sub.textContent = mode === 'EMAIL' ? 'E-mail corporativo interno' : 'Bate-papo corporativo interno'; }
+    const search = document.getElementById('avMailBusca');
+    if(search){ search.placeholder = mode === 'EMAIL' ? 'Pesquisar e-mails, assunto ou pessoa' : 'Pesquisar conversas ou pessoas'; }
+    const bottom = document.getElementById('avCommBottomNav');
+    if(bottom){ bottom.querySelectorAll('button[data-mode]').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode)); }
+  }
+  const oldSetModoAV = window.setModoComunicacaoAV;
+  window.setModoComunicacaoAV = function(modo){
+    const result = oldSetModoAV ? oldSetModoAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  const oldRenderCommAV = window.renderComunicacaoAV;
+  window.renderComunicacaoAV = function(){
+    const result = oldRenderCommAV ? oldRenderCommAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  const oldRenderMailAV = window.renderComunicacaoAVOutlook;
+  window.renderComunicacaoAVOutlook = function(){
+    const result = oldRenderMailAV ? oldRenderMailAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  const oldRenderChatAV = window.renderBatePapoAV;
+  window.renderBatePapoAV = function(){
+    const result = oldRenderChatAV ? oldRenderChatAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  window.addEventListener('resize', syncModeAV, {passive:true});
+  window.addEventListener('orientationchange', syncModeAV, {passive:true});
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(syncModeAV, 120); setTimeout(syncModeAV, 600); });
+  setTimeout(syncModeAV, 120);
+})();
+</script>
+
 </body></html>`; downloadBlob(new Blob([html], {type:'application/vnd.ms-excel'}), `relatorio_gerencial_${hojeISO()}.xls`); hideAppLoader(); }, 260); }
 
 
@@ -23671,6 +23760,95 @@ window.addEventListener('load', async () => {
 
 
 
+
+<style id="comunicacao-mobile-ios-refine-v131">
+@media (max-width: 820px){
+  body.avcomm-ios-mobile #comunicacaoAVStandalone{position:relative!important;overflow-x:hidden!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] #avMailWorkspace{display:flex!important;visibility:visible!important;pointer-events:auto!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] #avChatWorkspace{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] #avMailWorkspace{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] #avChatWorkspace{display:grid!important;visibility:visible!important;pointer-events:auto!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-search{display:block!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avmail-search{display:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone .avcomm-mode-switch{display:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone .avmail-topbar{padding-bottom:18px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avmail-topbar{padding-bottom:10px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avmail-brand-copy small{content:'';}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] #avMailWorkspace{padding-top:10px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-folders,
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-list-pane{background:linear-gradient(180deg,rgba(17,22,31,.98),rgba(9,13,21,.97))!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-list-head h2{font-size:1.7rem!important;letter-spacing:-.035em!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-list-pane{min-height:360px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-new{bottom:calc(98px + env(safe-area-inset-bottom,0px))!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] #avChatWorkspace{padding-top:4px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversations-head{padding-top:8px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversations-head h2{font-size:2.6rem!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversations-pane{display:flex!important;flex-direction:column!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-wa-search{padding-top:2px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-mobile-segments{padding-top:4px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-mobile-list-item,
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversation{background:linear-gradient(180deg,rgba(20,24,34,.96),rgba(13,17,27,.95))!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-thread-pane{background:#090c12!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone .avcomm-bottom-nav{grid-template-columns:1fr 1fr!important;}
+}
+</style>
+<script id="comunicacao-mobile-ios-refine-v131-script">
+(function(){
+  function isMobileAV(){ return window.innerWidth <= 820; }
+  function currentModeAV(){ return String(window.comunicacaoModoAtual || 'EMAIL').toUpperCase()==='CHAT' ? 'CHAT' : 'EMAIL'; }
+  function rootAV(){ return document.getElementById('comunicacaoAVStandalone'); }
+  function syncModeAV(){
+    const root = rootAV();
+    const mail = document.getElementById('avMailWorkspace');
+    const chat = document.getElementById('avChatWorkspace');
+    if(!root || !mail || !chat) return;
+    const mode = currentModeAV();
+    root.dataset.commMode = mode;
+    if(isMobileAV()) document.body.classList.add('avcomm-ios-mobile');
+    mail.hidden = mode !== 'EMAIL';
+    chat.hidden = mode !== 'CHAT';
+    mail.setAttribute('aria-hidden', mode !== 'EMAIL' ? 'true' : 'false');
+    chat.setAttribute('aria-hidden', mode !== 'CHAT' ? 'true' : 'false');
+    mail.style.display = mode === 'EMAIL' ? '' : 'none';
+    chat.style.display = mode === 'CHAT' ? '' : 'none';
+    const sub = document.getElementById('avCommBrandSubtitle');
+    if(sub){ sub.textContent = mode === 'EMAIL' ? 'E-mail corporativo interno' : 'Bate-papo corporativo interno'; }
+    const search = document.getElementById('avMailBusca');
+    if(search){ search.placeholder = mode === 'EMAIL' ? 'Pesquisar e-mails, assunto ou pessoa' : 'Pesquisar conversas ou pessoas'; }
+    const bottom = document.getElementById('avCommBottomNav');
+    if(bottom){ bottom.querySelectorAll('button[data-mode]').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode)); }
+  }
+  const oldSetModoAV = window.setModoComunicacaoAV;
+  window.setModoComunicacaoAV = function(modo){
+    const result = oldSetModoAV ? oldSetModoAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  const oldRenderCommAV = window.renderComunicacaoAV;
+  window.renderComunicacaoAV = function(){
+    const result = oldRenderCommAV ? oldRenderCommAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  const oldRenderMailAV = window.renderComunicacaoAVOutlook;
+  window.renderComunicacaoAVOutlook = function(){
+    const result = oldRenderMailAV ? oldRenderMailAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  const oldRenderChatAV = window.renderBatePapoAV;
+  window.renderBatePapoAV = function(){
+    const result = oldRenderChatAV ? oldRenderChatAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  window.addEventListener('resize', syncModeAV, {passive:true});
+  window.addEventListener('orientationchange', syncModeAV, {passive:true});
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(syncModeAV, 120); setTimeout(syncModeAV, 600); });
+  setTimeout(syncModeAV, 120);
+})();
+</script>
+
 </body>
       </html>`;
     }
@@ -24620,6 +24798,95 @@ window.addEventListener('load', async () => {
 
 
 
+
+
+<style id="comunicacao-mobile-ios-refine-v131">
+@media (max-width: 820px){
+  body.avcomm-ios-mobile #comunicacaoAVStandalone{position:relative!important;overflow-x:hidden!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] #avMailWorkspace{display:flex!important;visibility:visible!important;pointer-events:auto!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] #avChatWorkspace{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] #avMailWorkspace{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] #avChatWorkspace{display:grid!important;visibility:visible!important;pointer-events:auto!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-search{display:block!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avmail-search{display:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone .avcomm-mode-switch{display:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone .avmail-topbar{padding-bottom:18px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avmail-topbar{padding-bottom:10px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avmail-brand-copy small{content:'';}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] #avMailWorkspace{padding-top:10px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-folders,
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-list-pane{background:linear-gradient(180deg,rgba(17,22,31,.98),rgba(9,13,21,.97))!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-list-head h2{font-size:1.7rem!important;letter-spacing:-.035em!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-list-pane{min-height:360px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-new{bottom:calc(98px + env(safe-area-inset-bottom,0px))!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] #avChatWorkspace{padding-top:4px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversations-head{padding-top:8px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversations-head h2{font-size:2.6rem!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversations-pane{display:flex!important;flex-direction:column!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-wa-search{padding-top:2px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-mobile-segments{padding-top:4px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-mobile-list-item,
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversation{background:linear-gradient(180deg,rgba(20,24,34,.96),rgba(13,17,27,.95))!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-thread-pane{background:#090c12!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone .avcomm-bottom-nav{grid-template-columns:1fr 1fr!important;}
+}
+</style>
+<script id="comunicacao-mobile-ios-refine-v131-script">
+(function(){
+  function isMobileAV(){ return window.innerWidth <= 820; }
+  function currentModeAV(){ return String(window.comunicacaoModoAtual || 'EMAIL').toUpperCase()==='CHAT' ? 'CHAT' : 'EMAIL'; }
+  function rootAV(){ return document.getElementById('comunicacaoAVStandalone'); }
+  function syncModeAV(){
+    const root = rootAV();
+    const mail = document.getElementById('avMailWorkspace');
+    const chat = document.getElementById('avChatWorkspace');
+    if(!root || !mail || !chat) return;
+    const mode = currentModeAV();
+    root.dataset.commMode = mode;
+    if(isMobileAV()) document.body.classList.add('avcomm-ios-mobile');
+    mail.hidden = mode !== 'EMAIL';
+    chat.hidden = mode !== 'CHAT';
+    mail.setAttribute('aria-hidden', mode !== 'EMAIL' ? 'true' : 'false');
+    chat.setAttribute('aria-hidden', mode !== 'CHAT' ? 'true' : 'false');
+    mail.style.display = mode === 'EMAIL' ? '' : 'none';
+    chat.style.display = mode === 'CHAT' ? '' : 'none';
+    const sub = document.getElementById('avCommBrandSubtitle');
+    if(sub){ sub.textContent = mode === 'EMAIL' ? 'E-mail corporativo interno' : 'Bate-papo corporativo interno'; }
+    const search = document.getElementById('avMailBusca');
+    if(search){ search.placeholder = mode === 'EMAIL' ? 'Pesquisar e-mails, assunto ou pessoa' : 'Pesquisar conversas ou pessoas'; }
+    const bottom = document.getElementById('avCommBottomNav');
+    if(bottom){ bottom.querySelectorAll('button[data-mode]').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode)); }
+  }
+  const oldSetModoAV = window.setModoComunicacaoAV;
+  window.setModoComunicacaoAV = function(modo){
+    const result = oldSetModoAV ? oldSetModoAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  const oldRenderCommAV = window.renderComunicacaoAV;
+  window.renderComunicacaoAV = function(){
+    const result = oldRenderCommAV ? oldRenderCommAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  const oldRenderMailAV = window.renderComunicacaoAVOutlook;
+  window.renderComunicacaoAVOutlook = function(){
+    const result = oldRenderMailAV ? oldRenderMailAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  const oldRenderChatAV = window.renderBatePapoAV;
+  window.renderBatePapoAV = function(){
+    const result = oldRenderChatAV ? oldRenderChatAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  window.addEventListener('resize', syncModeAV, {passive:true});
+  window.addEventListener('orientationchange', syncModeAV, {passive:true});
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(syncModeAV, 120); setTimeout(syncModeAV, 600); });
+  setTimeout(syncModeAV, 120);
+})();
+</script>
 
 </body>
 </html>`;
@@ -30982,6 +31249,95 @@ function agExportarXlsxOuXls(sheets,filename){
 
 
 
+
+<style id="comunicacao-mobile-ios-refine-v131">
+@media (max-width: 820px){
+  body.avcomm-ios-mobile #comunicacaoAVStandalone{position:relative!important;overflow-x:hidden!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] #avMailWorkspace{display:flex!important;visibility:visible!important;pointer-events:auto!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] #avChatWorkspace{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] #avMailWorkspace{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] #avChatWorkspace{display:grid!important;visibility:visible!important;pointer-events:auto!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-search{display:block!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avmail-search{display:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone .avcomm-mode-switch{display:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone .avmail-topbar{padding-bottom:18px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avmail-topbar{padding-bottom:10px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avmail-brand-copy small{content:'';}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] #avMailWorkspace{padding-top:10px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-folders,
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-list-pane{background:linear-gradient(180deg,rgba(17,22,31,.98),rgba(9,13,21,.97))!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-list-head h2{font-size:1.7rem!important;letter-spacing:-.035em!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-list-pane{min-height:360px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-new{bottom:calc(98px + env(safe-area-inset-bottom,0px))!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] #avChatWorkspace{padding-top:4px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversations-head{padding-top:8px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversations-head h2{font-size:2.6rem!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversations-pane{display:flex!important;flex-direction:column!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-wa-search{padding-top:2px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-mobile-segments{padding-top:4px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-mobile-list-item,
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversation{background:linear-gradient(180deg,rgba(20,24,34,.96),rgba(13,17,27,.95))!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-thread-pane{background:#090c12!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone .avcomm-bottom-nav{grid-template-columns:1fr 1fr!important;}
+}
+</style>
+<script id="comunicacao-mobile-ios-refine-v131-script">
+(function(){
+  function isMobileAV(){ return window.innerWidth <= 820; }
+  function currentModeAV(){ return String(window.comunicacaoModoAtual || 'EMAIL').toUpperCase()==='CHAT' ? 'CHAT' : 'EMAIL'; }
+  function rootAV(){ return document.getElementById('comunicacaoAVStandalone'); }
+  function syncModeAV(){
+    const root = rootAV();
+    const mail = document.getElementById('avMailWorkspace');
+    const chat = document.getElementById('avChatWorkspace');
+    if(!root || !mail || !chat) return;
+    const mode = currentModeAV();
+    root.dataset.commMode = mode;
+    if(isMobileAV()) document.body.classList.add('avcomm-ios-mobile');
+    mail.hidden = mode !== 'EMAIL';
+    chat.hidden = mode !== 'CHAT';
+    mail.setAttribute('aria-hidden', mode !== 'EMAIL' ? 'true' : 'false');
+    chat.setAttribute('aria-hidden', mode !== 'CHAT' ? 'true' : 'false');
+    mail.style.display = mode === 'EMAIL' ? '' : 'none';
+    chat.style.display = mode === 'CHAT' ? '' : 'none';
+    const sub = document.getElementById('avCommBrandSubtitle');
+    if(sub){ sub.textContent = mode === 'EMAIL' ? 'E-mail corporativo interno' : 'Bate-papo corporativo interno'; }
+    const search = document.getElementById('avMailBusca');
+    if(search){ search.placeholder = mode === 'EMAIL' ? 'Pesquisar e-mails, assunto ou pessoa' : 'Pesquisar conversas ou pessoas'; }
+    const bottom = document.getElementById('avCommBottomNav');
+    if(bottom){ bottom.querySelectorAll('button[data-mode]').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode)); }
+  }
+  const oldSetModoAV = window.setModoComunicacaoAV;
+  window.setModoComunicacaoAV = function(modo){
+    const result = oldSetModoAV ? oldSetModoAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  const oldRenderCommAV = window.renderComunicacaoAV;
+  window.renderComunicacaoAV = function(){
+    const result = oldRenderCommAV ? oldRenderCommAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  const oldRenderMailAV = window.renderComunicacaoAVOutlook;
+  window.renderComunicacaoAVOutlook = function(){
+    const result = oldRenderMailAV ? oldRenderMailAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  const oldRenderChatAV = window.renderBatePapoAV;
+  window.renderBatePapoAV = function(){
+    const result = oldRenderChatAV ? oldRenderChatAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  window.addEventListener('resize', syncModeAV, {passive:true});
+  window.addEventListener('orientationchange', syncModeAV, {passive:true});
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(syncModeAV, 120); setTimeout(syncModeAV, 600); });
+  setTimeout(syncModeAV, 120);
+})();
+</script>
+
 </body></html>`;
   downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel'}),filename.replace(/\.xlsx$/i,'.xls'));
 }
@@ -31691,6 +32047,95 @@ function agImprimirResumoMeta(){
 
 
 
+
+
+<style id="comunicacao-mobile-ios-refine-v131">
+@media (max-width: 820px){
+  body.avcomm-ios-mobile #comunicacaoAVStandalone{position:relative!important;overflow-x:hidden!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] #avMailWorkspace{display:flex!important;visibility:visible!important;pointer-events:auto!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] #avChatWorkspace{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] #avMailWorkspace{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] #avChatWorkspace{display:grid!important;visibility:visible!important;pointer-events:auto!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-search{display:block!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avmail-search{display:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone .avcomm-mode-switch{display:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone .avmail-topbar{padding-bottom:18px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avmail-topbar{padding-bottom:10px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avmail-brand-copy small{content:'';}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] #avMailWorkspace{padding-top:10px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-folders,
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-list-pane{background:linear-gradient(180deg,rgba(17,22,31,.98),rgba(9,13,21,.97))!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-list-head h2{font-size:1.7rem!important;letter-spacing:-.035em!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-list-pane{min-height:360px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-new{bottom:calc(98px + env(safe-area-inset-bottom,0px))!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] #avChatWorkspace{padding-top:4px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversations-head{padding-top:8px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversations-head h2{font-size:2.6rem!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversations-pane{display:flex!important;flex-direction:column!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-wa-search{padding-top:2px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-mobile-segments{padding-top:4px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-mobile-list-item,
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversation{background:linear-gradient(180deg,rgba(20,24,34,.96),rgba(13,17,27,.95))!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-thread-pane{background:#090c12!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone .avcomm-bottom-nav{grid-template-columns:1fr 1fr!important;}
+}
+</style>
+<script id="comunicacao-mobile-ios-refine-v131-script">
+(function(){
+  function isMobileAV(){ return window.innerWidth <= 820; }
+  function currentModeAV(){ return String(window.comunicacaoModoAtual || 'EMAIL').toUpperCase()==='CHAT' ? 'CHAT' : 'EMAIL'; }
+  function rootAV(){ return document.getElementById('comunicacaoAVStandalone'); }
+  function syncModeAV(){
+    const root = rootAV();
+    const mail = document.getElementById('avMailWorkspace');
+    const chat = document.getElementById('avChatWorkspace');
+    if(!root || !mail || !chat) return;
+    const mode = currentModeAV();
+    root.dataset.commMode = mode;
+    if(isMobileAV()) document.body.classList.add('avcomm-ios-mobile');
+    mail.hidden = mode !== 'EMAIL';
+    chat.hidden = mode !== 'CHAT';
+    mail.setAttribute('aria-hidden', mode !== 'EMAIL' ? 'true' : 'false');
+    chat.setAttribute('aria-hidden', mode !== 'CHAT' ? 'true' : 'false');
+    mail.style.display = mode === 'EMAIL' ? '' : 'none';
+    chat.style.display = mode === 'CHAT' ? '' : 'none';
+    const sub = document.getElementById('avCommBrandSubtitle');
+    if(sub){ sub.textContent = mode === 'EMAIL' ? 'E-mail corporativo interno' : 'Bate-papo corporativo interno'; }
+    const search = document.getElementById('avMailBusca');
+    if(search){ search.placeholder = mode === 'EMAIL' ? 'Pesquisar e-mails, assunto ou pessoa' : 'Pesquisar conversas ou pessoas'; }
+    const bottom = document.getElementById('avCommBottomNav');
+    if(bottom){ bottom.querySelectorAll('button[data-mode]').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode)); }
+  }
+  const oldSetModoAV = window.setModoComunicacaoAV;
+  window.setModoComunicacaoAV = function(modo){
+    const result = oldSetModoAV ? oldSetModoAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  const oldRenderCommAV = window.renderComunicacaoAV;
+  window.renderComunicacaoAV = function(){
+    const result = oldRenderCommAV ? oldRenderCommAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  const oldRenderMailAV = window.renderComunicacaoAVOutlook;
+  window.renderComunicacaoAVOutlook = function(){
+    const result = oldRenderMailAV ? oldRenderMailAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  const oldRenderChatAV = window.renderBatePapoAV;
+  window.renderBatePapoAV = function(){
+    const result = oldRenderChatAV ? oldRenderChatAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  window.addEventListener('resize', syncModeAV, {passive:true});
+  window.addEventListener('orientationchange', syncModeAV, {passive:true});
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(syncModeAV, 120); setTimeout(syncModeAV, 600); });
+  setTimeout(syncModeAV, 120);
+})();
+</script>
 
 </body>
 </html>`;
@@ -33933,5 +34378,94 @@ document.addEventListener('DOMContentLoaded',()=>aplicarIconesChatV5138());
   window.addEventListener('resize',syncAll,{passive:true});window.addEventListener('orientationchange',syncAll,{passive:true});document.addEventListener('DOMContentLoaded',()=>setTimeout(syncAll,80));setTimeout(syncAll,160);
 })();
 </script>
+
+<style id="comunicacao-mobile-ios-refine-v131">
+@media (max-width: 820px){
+  body.avcomm-ios-mobile #comunicacaoAVStandalone{position:relative!important;overflow-x:hidden!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] #avMailWorkspace{display:flex!important;visibility:visible!important;pointer-events:auto!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] #avChatWorkspace{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] #avMailWorkspace{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] #avChatWorkspace{display:grid!important;visibility:visible!important;pointer-events:auto!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-search{display:block!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avmail-search{display:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone .avcomm-mode-switch{display:none!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone .avmail-topbar{padding-bottom:18px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avmail-topbar{padding-bottom:10px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avmail-brand-copy small{content:'';}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] #avMailWorkspace{padding-top:10px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-folders,
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-list-pane{background:linear-gradient(180deg,rgba(17,22,31,.98),rgba(9,13,21,.97))!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-list-head h2{font-size:1.7rem!important;letter-spacing:-.035em!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-list-pane{min-height:360px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="EMAIL"] .avmail-new{bottom:calc(98px + env(safe-area-inset-bottom,0px))!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] #avChatWorkspace{padding-top:4px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversations-head{padding-top:8px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversations-head h2{font-size:2.6rem!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversations-pane{display:flex!important;flex-direction:column!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-wa-search{padding-top:2px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-mobile-segments{padding-top:4px!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-mobile-list-item,
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-conversation{background:linear-gradient(180deg,rgba(20,24,34,.96),rgba(13,17,27,.95))!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-thread-pane{background:#090c12!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone .avcomm-bottom-nav{grid-template-columns:1fr 1fr!important;}
+}
+</style>
+<script id="comunicacao-mobile-ios-refine-v131-script">
+(function(){
+  function isMobileAV(){ return window.innerWidth <= 820; }
+  function currentModeAV(){ return String(window.comunicacaoModoAtual || 'EMAIL').toUpperCase()==='CHAT' ? 'CHAT' : 'EMAIL'; }
+  function rootAV(){ return document.getElementById('comunicacaoAVStandalone'); }
+  function syncModeAV(){
+    const root = rootAV();
+    const mail = document.getElementById('avMailWorkspace');
+    const chat = document.getElementById('avChatWorkspace');
+    if(!root || !mail || !chat) return;
+    const mode = currentModeAV();
+    root.dataset.commMode = mode;
+    if(isMobileAV()) document.body.classList.add('avcomm-ios-mobile');
+    mail.hidden = mode !== 'EMAIL';
+    chat.hidden = mode !== 'CHAT';
+    mail.setAttribute('aria-hidden', mode !== 'EMAIL' ? 'true' : 'false');
+    chat.setAttribute('aria-hidden', mode !== 'CHAT' ? 'true' : 'false');
+    mail.style.display = mode === 'EMAIL' ? '' : 'none';
+    chat.style.display = mode === 'CHAT' ? '' : 'none';
+    const sub = document.getElementById('avCommBrandSubtitle');
+    if(sub){ sub.textContent = mode === 'EMAIL' ? 'E-mail corporativo interno' : 'Bate-papo corporativo interno'; }
+    const search = document.getElementById('avMailBusca');
+    if(search){ search.placeholder = mode === 'EMAIL' ? 'Pesquisar e-mails, assunto ou pessoa' : 'Pesquisar conversas ou pessoas'; }
+    const bottom = document.getElementById('avCommBottomNav');
+    if(bottom){ bottom.querySelectorAll('button[data-mode]').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode)); }
+  }
+  const oldSetModoAV = window.setModoComunicacaoAV;
+  window.setModoComunicacaoAV = function(modo){
+    const result = oldSetModoAV ? oldSetModoAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  const oldRenderCommAV = window.renderComunicacaoAV;
+  window.renderComunicacaoAV = function(){
+    const result = oldRenderCommAV ? oldRenderCommAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  const oldRenderMailAV = window.renderComunicacaoAVOutlook;
+  window.renderComunicacaoAVOutlook = function(){
+    const result = oldRenderMailAV ? oldRenderMailAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  const oldRenderChatAV = window.renderBatePapoAV;
+  window.renderBatePapoAV = function(){
+    const result = oldRenderChatAV ? oldRenderChatAV.apply(this, arguments) : undefined;
+    requestAnimationFrame(syncModeAV);
+    return result;
+  };
+  window.addEventListener('resize', syncModeAV, {passive:true});
+  window.addEventListener('orientationchange', syncModeAV, {passive:true});
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(syncModeAV, 120); setTimeout(syncModeAV, 600); });
+  setTimeout(syncModeAV, 120);
+})();
+</script>
+
 </body>
 </html>
