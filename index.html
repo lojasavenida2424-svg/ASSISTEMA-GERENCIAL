@@ -62,7 +62,7 @@
       const SOPHIA_SESSION_KEY = 'sophiaSessaoSeguraV1';
       const SOPHIA_HISTORY_KEY = 'sophiaHistoricoSessaoV1';
       const SOPHIA_BUILD = 'V39.1-SEMPREFLIGHT';
-      const GERENCIAL_BUILD = 'V51.55-COMUNICACAO-SEPARADA';
+      const GERENCIAL_BUILD = 'V51.56-COMUNICACAO-GITHUB-PATH';
   </script>
   <style>
     :root {
@@ -15061,7 +15061,7 @@ window.addEventListener('storage',e=>{
 try{ if(gerencialAuthBroadcast) gerencialAuthBroadcast.onmessage=e=>{ /* sessão da Comunicação AV é independente */ }; }catch(_){}
 function modoComunicacaoAVAtivo(){ return false; }
 function urlComunicacaoAVStandalone(){
-  try{return new URL('Comunicacao_AV_V1_0.html', location.href).href;}catch(_){return 'Comunicacao_AV_V1_0.html';}
+  try{return new URL('./comunicacao/', location.href).href;}catch(_){return './comunicacao/';}
 }
 function restaurarHandoffComunicacaoAV(){
   if(!modoComunicacaoAVAtivo()) return;
