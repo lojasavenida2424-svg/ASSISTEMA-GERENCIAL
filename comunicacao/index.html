@@ -1,24 +1,19 @@
-```
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Assistência Gerencial de Loja - Avenida V51.8</title>
-  <!-- PWA / Ícones do Sistema Gerencial Avenida -->
+  <title>Comunicação AV</title>
+  <!-- Identidade / ícones autocontidos da Comunicação AV -->
   <meta name="theme-color" content="#291A1E">
-  <meta name="application-name" content="Gerencial Avenida">
+  <meta name="application-name" content="Comunicação AV">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Gerencial Avenida">
-
-  <link rel="icon" href="./gerencial-favicon.ico" sizes="any">
-  <link rel="icon" type="image/svg+xml" href="./gerencial-favicon.svg">
-  <link rel="icon" type="image/png" sizes="32x32" href="./icons/gerencial-favicon-32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="./icons/gerencial-favicon-16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="./icons/gerencial-apple-touch-icon.png">
-  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="apple-mobile-web-app-title" content="Comunicação AV">
+  <link rel="icon" type="image/png" sizes="64x64" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAADtklEQVR42u2bT0gUURzHv29mVwVdtToEUYpo5VpQ7RoUutsG4T/UW3oJOnUOuhQEnYsO0S0i6hSER/+sJuJ/C7OVoCLDTMxbiGaCrbvOTAdjZ97M7O7M7mzMrO+d3Oebt7/f5/ed73uzvCHeIxUS9nHjsM/bvgfgMntBpKfI1gn5u6KmxhOjHmD3xDMFkRaA0xI3CyIlAL3kzUrsfzezMScFoJ7I7olnGr8uAKMX2+X2MBqf3jguk8kjPUW28oZk8RhRrUYByonUEzjFEFPFrf4fl425OMkIDe0EU5HKl6VQDYfLt+qbjZk9DOVj9c3EzhTAADAADAADwAAwAPu3uXIx6atBAQ9fxKm+Kxd4PLjlpvpu3o9hel5MfH5yrwDnT+vX5M8O0HQjiu1/23pPMcHw00IUuG2ogL5xQdM38V7A5hb920vnZZ763D8hJJ1zdFZIJA8AzQ1c1snnBMC3HxIWlkVNf3wXGJym+4N+HmUeQiUZ3dGfd0AFRw3PNgB6x+RAeR44elhOsFelDLcLaG2UQ9iOAmPvtCr4uS5h7pMMr/oYwalqzn4ABAEYnJYTaDjL4WqTXKmvyyIWV+jboCNEV3JgUgsgPCVAVFzWGeIti9lSAFPzItY35UjbQzxaAzw4xbeoVVBbxeF4payS2Y8i1jZoSOFJWlVtQZsC6BvfTfxdWkIQ9PM4VE5w8QxHJbOrKrJSBaIIDClU9OW7iKVViVLVwTJiPwAbvyVqSWtu4OB2aRP8tSVhKkITaAvwcCmK2q+oeH+OzM9yAOEpurLtCplequfhKSa6RgkAB0oJGn1yKIsrEhZXJAgCMPxGhlruIQj4rQXgsk7+dFLX78aSjp35sOcVSil3hFwYn4tRKqiv4yhPaQvSSrGNAhZ03D3dahFWuX3AR9/bQ9OCxjA7QhZnb5UClNUv9xCMPCsE0fGp24/iGHkrJFaDax0uyt1bG3m8HNgz0rUNCaOz8rwnqzicqCSWA8haAeod3jkvp5s8APi88tctrUr4vCQaNrjOHFTfEgCTEXqP7/Mmr5ISgJ4Z1lQQ1FZpQ1LvGG0FQJ2Ery75lDUVBKUlMqDXMyJicaRVgfqZwVYe8PhOgeGxhABjzwtTjulu4dHdkhu5sx9EGAAGgAFgABgABoABYADMAHDyYSkjsTMFWEXSidXXAEh1ns7JzZKTok5SgZlY054WT3ZY2imJp8slo3OC/q6orRSRLB4jhWIvTLBXZthLU+y1OSlbiTl1CcwIAHsaZADyq/0FkDqEHy6d5J8AAAAASUVORK5CYII=">
+  <link rel="shortcut icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAADtklEQVR42u2bT0gUURzHv29mVwVdtToEUYpo5VpQ7RoUutsG4T/UW3oJOnUOuhQEnYsO0S0i6hSER/+sJuJ/C7OVoCLDTMxbiGaCrbvOTAdjZ97M7O7M7mzMrO+d3Oebt7/f5/ed73uzvCHeIxUS9nHjsM/bvgfgMntBpKfI1gn5u6KmxhOjHmD3xDMFkRaA0xI3CyIlAL3kzUrsfzezMScFoJ7I7olnGr8uAKMX2+X2MBqf3jguk8kjPUW28oZk8RhRrUYByonUEzjFEFPFrf4fl425OMkIDe0EU5HKl6VQDYfLt+qbjZk9DOVj9c3EzhTAADAADAADwAAwAPu3uXIx6atBAQ9fxKm+Kxd4PLjlpvpu3o9hel5MfH5yrwDnT+vX5M8O0HQjiu1/23pPMcHw00IUuG2ogL5xQdM38V7A5hb920vnZZ763D8hJJ1zdFZIJA8AzQ1c1snnBMC3HxIWlkVNf3wXGJym+4N+HmUeQiUZ3dGfd0AFRw3PNgB6x+RAeR44elhOsFelDLcLaG2UQ9iOAmPvtCr4uS5h7pMMr/oYwalqzn4ABAEYnJYTaDjL4WqTXKmvyyIWV+jboCNEV3JgUgsgPCVAVFzWGeIti9lSAFPzItY35UjbQzxaAzw4xbeoVVBbxeF4payS2Y8i1jZoSOFJWlVtQZsC6BvfTfxdWkIQ9PM4VE5w8QxHJbOrKrJSBaIIDClU9OW7iKVViVLVwTJiPwAbvyVqSWtu4OB2aRP8tSVhKkITaAvwcCmK2q+oeH+OzM9yAOEpurLtCplequfhKSa6RgkAB0oJGn1yKIsrEhZXJAgCMPxGhlruIQj4rQXgsk7+dFLX78aSjp35sOcVSil3hFwYn4tRKqiv4yhPaQvSSrGNAhZ03D3dahFWuX3AR9/bQ9OCxjA7QhZnb5UClNUv9xCMPCsE0fGp24/iGHkrJFaDax0uyt1bG3m8HNgz0rUNCaOz8rwnqzicqCSWA8haAeod3jkvp5s8APi88tctrUr4vCQaNrjOHFTfEgCTEXqP7/Mmr5ISgJ4Z1lQQ1FZpQ1LvGG0FQJ2Ery75lDUVBKUlMqDXMyJicaRVgfqZwVYe8PhOgeGxhABjzwtTjulu4dHdkhu5sx9EGAAGgAFgABgABoABYADMAHDyYSkjsTMFWEXSidXXAEh1ns7JzZKTok5SgZlY054WT3ZY2imJp8slo3OC/q6orRSRLB4jhWIvTLBXZthLU+y1OSlbiTl1CcwIAHsaZADyq/0FkDqEHy6d5J8AAAAASUVORK5CYII=">
+  <link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,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">
 
   <script>
     /* Aplica o tema antes da primeira pintura para impedir o clarão ao abrir ou sair. */
@@ -12407,6 +12402,28 @@ body.dark-mode .ag-dist-mini-status.no .mark{
   body.avmail-mode #appLoader{z-index:9100;}
   body.avmail-mode #comunicacaoAVStandalone{z-index:8000;}
 </style>
+
+<style id="comunicacao-av-standalone-fixes-v11">
+  /* O app independente nunca mostra a antiga análise de sistemas do Gerencial. */
+  body.avmail-mode #appLoader .app-loader-checks,
+  body.avmail-mode #appLoader.verification-mode .app-loader-checks{display:none!important;}
+
+  /* Chamadas precisam ficar acima de shell, menus, perfil e configurações. */
+  body #avCallStageOverlay.avcall-stage-overlay{z-index:30000!important;}
+  body #avCallIncoming.avcall-overlay{z-index:30010!important;}
+  body.avmail-mode #avCallStageOverlay.avcall-stage-overlay,
+  body.avmail-mode #avCallIncoming.avcall-overlay{position:fixed!important;inset:0!important;}
+  body #avCallStageOverlay[hidden],body #avCallIncoming[hidden],body #avCallStage[hidden]{display:none!important;}
+
+  /* Viewport móvel real (barra do Safari/Chrome móvel incluída). */
+  @supports (height:100dvh){
+    body.avmail-mode #comunicacaoAVStandalone{height:100dvh!important;min-height:100dvh!important;}
+    @media(max-width:760px){
+      body #avCallStageOverlay #avCallStage.video-call{height:calc(100dvh - 18px)!important;}
+      body #avCallStageOverlay #avCallStage.audio-call{max-height:calc(100dvh - 18px)!important;}
+    }
+  }
+</style>
 </head>
 <body>
   <script>
@@ -14708,95 +14725,10 @@ function verificarSistemaResultados(){
 }
 
 async function executarVerificacoesPosLogin(){
-  showAppLoader(
-    'Análise do ambiente',
-    'Etapa 1 de 2 — verificando conexão, IA e sincronização.',
-    true
-  );
-  resetAppLoaderChecks();
-  setAppLoaderStage('primary');
-
-  setAppLoaderCheck('internet','checking','Consultando a internet e o Supabase...');
-  await esperar(180);
-  const internet = await verificarConexaoInternet();
-  setAppLoaderCheck('internet', internet.ok ? 'success' : 'error', internet.detalhe);
-
-  setAppLoaderCheck('ia','checking','Executando autoteste funcional da SOPHIA...');
-  await esperar(180);
-  const ia = await verificarIAFuncionando();
-  setAppLoaderCheck('ia', ia.ok ? 'success' : 'error', ia.detalhe);
-
-  setAppLoaderCheck('sync','checking','Conferindo leitura e gravação dos dados online...');
-  await esperar(180);
-  const sync = await verificarDadosSincronizados();
-  setAppLoaderCheck('sync', sync.ok ? 'success' : 'error', sync.detalhe);
-
-  const titleEl = document.getElementById('appLoaderTitle');
-  const textEl = document.getElementById('appLoaderText');
-
-  if(textEl){
-    textEl.textContent = 'Primeira etapa concluída. Iniciando análise dos sistemas...';
-  }
-  await esperar(760);
-
-  setAppLoaderStage('systems');
-  if(titleEl) titleEl.textContent = 'Análise dos sistemas';
-  if(textEl){
-    textEl.textContent = 'Etapa 2 de 2 — verificando os endereços publicados.';
-  }
-
-  setAppLoaderCheck('gerencial','checking','Validando a entrada atual do Sistema Gerencial...');
-  await esperar(180);
-  const gerencial = await verificarSistemaGerencial();
-  setAppLoaderCheck(
-    'gerencial',
-    gerencial.ok ? 'success' : 'error',
-    gerencial.detalhe
-  );
-
-  setAppLoaderCheck('estoque','checking','Consultando o Sistema de Estoque publicado...');
-  await esperar(180);
-  const estoque = await verificarSistemaEstoque();
-  setAppLoaderCheck(
-    'estoque',
-    estoque.ok ? 'success' : 'error',
-    estoque.detalhe
-  );
-
-  setAppLoaderCheck('resultados','checking','Consultando o Sistema de Resultados publicado...');
-  await esperar(180);
-  const resultados = await verificarSistemaResultados();
-  setAppLoaderCheck(
-    'resultados',
-    resultados.ok ? 'success' : 'error',
-    resultados.detalhe
-  );
-
-  const essenciaisOk =
-    internet.ok &&
-    sync.ok &&
-    gerencial.ok &&
-    estoque.ok &&
-    resultados.ok;
-
-  if(textEl){
-    textEl.textContent = essenciaisOk
-      ? 'Todos os serviços e sistemas foram validados. Abrindo o painel...'
-      : 'Análise concluída. Abrindo com os recursos disponíveis...';
-  }
-
-  await esperar(900);
-
-  return {
-    internet,
-    ia,
-    sync,
-    gerencial,
-    estoque,
-    resultados
-  };
+  /* Comunicação AV independente: a verificação de sistemas pertence ao Gerencial.
+     Mantida como no-op por compatibilidade com fluxos legados. */
+  return { standalone:true, internet:navigator.onLine };
 }
-
 function funcionarioVazio(valor){
   return valor === undefined || valor === null || String(valor).trim() === '';
 }
@@ -18958,6 +18890,10 @@ function exportarExcelRelatorio(){ showAppLoader('Gerando Excel', 'Montando o ar
   
 
 </style></head><body><h1>Relatório Gerencial - Loja 24</h1><p>Gerente: ALANA • Exportado em ${agoraBR()}</p>${document.getElementById('tabelaRelatorio').outerHTML}
+
+
+
+
 </body></html>`; downloadBlob(new Blob([html], {type:'application/vnd.ms-excel'}), `relatorio_gerencial_${hojeISO()}.xls`); hideAppLoader(); }, 260); }
 
 
@@ -23731,7 +23667,11 @@ window.addEventListener('load', async () => {
           <div id="ataHistoricoLista" class="list"></div>
           <div id="ataHistoricoPaginacao" class="pager"></div>
         </main>
-      </body>
+      
+
+
+
+</body>
       </html>`;
     }
 
@@ -24677,6 +24617,10 @@ window.addEventListener('load', async () => {
       if(evento.key==='Escape') window.close();
     });
   <\/script>
+
+
+
+
 </body>
 </html>`;
     }
@@ -31034,7 +30978,11 @@ function agExportarXlsxOuXls(sheets,filename){
     sheets.forEach(s=>{const ws=XLSX.utils.json_to_sheet(s.rows||[]);XLSX.utils.book_append_sheet(wb,ws,String(s.nome||'Planilha').slice(0,31));});
     XLSX.writeFile(wb,filename);return;
   }
-  const html=`<!doctype html><html><head><meta charset="utf-8"></head><body>${sheets.map(s=>`<h2>${escapeHTML(s.nome)}</h2>${agTabelaHTMLExport(s.rows||[])}`).join('<br>')}</body></html>`;
+  const html=`<!doctype html><html><head><meta charset="utf-8"></head><body>${sheets.map(s=>`<h2>${escapeHTML(s.nome)}</h2>${agTabelaHTMLExport(s.rows||[])}`).join('<br>')}
+
+
+
+</body></html>`;
   downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel'}),filename.replace(/\.xlsx$/i,'.xls'));
 }
 function agTabelaHTMLExport(rows){
@@ -31740,6 +31688,10 @@ function agImprimirResumoMeta(){
 <script>
   window.addEventListener('load',()=>setTimeout(()=>window.print(),250));
 <\/script>
+
+
+
+
 </body>
 </html>`;
 
@@ -33738,6 +33690,298 @@ document.addEventListener('DOMContentLoaded',()=>aplicarIconesChatV5138());
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', ajustarStandalone);
   else ajustarStandalone();
   window.addEventListener('load',()=>setTimeout(ajustarStandalone,0));
+})();
+</script>
+
+<script id="comunicacao-av-standalone-runtime-fixes-v11">
+(function(){
+  function fecharLoaderLegado(){
+    try{
+      const loader=document.getElementById('appLoader');
+      if(loader){
+        loader.classList.remove('active','verification-mode');
+        loader.setAttribute('aria-hidden','true');
+      }
+      document.getElementById('appLoaderChecks')?.classList.remove('active');
+    }catch(_){}
+  }
+
+  function garantirTelaStandalone(){
+    try{
+      if(typeof modoComunicacaoAVAtivo==='function' && !modoComunicacaoAVAtivo()) return;
+      document.body.classList.add('avmail-mode');
+      if(typeof usuarioAtual!=='undefined' && usuarioAtual){
+        fecharLoaderLegado();
+        const login=document.getElementById('loginScreen');
+        if(login) login.style.display='none';
+        const shell=document.getElementById('comunicacaoAVStandalone');
+        if(shell){ shell.hidden=false; shell.removeAttribute('hidden'); }
+      }
+    }catch(e){ console.warn('Comunicação AV: recuperação visual standalone',e); }
+  }
+
+  // Se algum fluxo legado tentar chamar a análise do Gerencial, ela é neutralizada.
+  window.executarVerificacoesPosLogin=async function(){
+    fecharLoaderLegado();
+    return {standalone:true,internet:navigator.onLine};
+  };
+
+  window.addEventListener('pageshow',()=>setTimeout(()=>{fecharLoaderLegado();garantirTelaStandalone();},0));
+  window.addEventListener('orientationchange',()=>setTimeout(garantirTelaStandalone,120));
+  window.addEventListener('resize',()=>{ if(innerWidth<=760) garantirTelaStandalone(); });
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',fecharLoaderLegado);
+  else fecharLoaderLegado();
+})();
+</script>
+
+
+
+
+<style id="comunicacao-mobile-ios-redesign-v120">
+@media (max-width: 820px){
+  body.avcomm-ios-mobile{overflow:hidden!important;background:#080b10!important;}
+  body.avcomm-ios-mobile #comunicacaoAVStandalone{grid-template-rows:auto minmax(0,1fr)!important;background:radial-gradient(circle at top left,rgba(107,22,43,.55),transparent 34%),linear-gradient(180deg,#090c12 0%,#05070a 100%)!important;color:#F5F7FA!important;}
+  body.avcomm-ios-mobile .avcomm-mode-switch{display:none!important;}
+  body.avcomm-ios-mobile .avmail-topbar{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:14px!important;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px 14px!important;background:linear-gradient(180deg,rgba(62,14,29,.94),rgba(17,19,25,.96))!important;border-bottom:1px solid rgba(246,196,38,.22)!important;box-shadow:none!important;backdrop-filter:blur(20px)!important;-webkit-backdrop-filter:blur(20px)!important;}
+  body.avcomm-ios-mobile .avmail-brand{align-items:flex-start!important;gap:12px!important;}
+  body.avcomm-ios-mobile .avmail-mark{width:48px!important;height:48px!important;border-radius:16px!important;font-size:1.25rem!important;box-shadow:0 10px 24px rgba(246,196,38,.18)!important;}
+  body.avcomm-ios-mobile .avmail-brand-copy strong{font-size:1.15rem!important;white-space:normal!important;line-height:1.05!important;}
+  body.avcomm-ios-mobile .avmail-brand-copy small{font-size:.92rem!important;line-height:1.2!important;color:rgba(255,255,255,.76)!important;max-width:180px!important;}
+  body.avcomm-ios-mobile .avmail-top-actions{gap:10px!important;align-items:flex-start!important;}
+  body.avcomm-ios-mobile .avmail-user{display:none!important;}
+  body.avcomm-ios-mobile .avcomm-account-actions{display:flex!important;gap:10px!important;}
+  body.avcomm-ios-mobile .avcomm-top-menu-btn{width:52px!important;height:52px!important;border-radius:18px!important;padding:0!important;display:grid!important;place-items:center!important;min-width:0!important;background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:0 12px 26px rgba(0,0,0,.18)!important;}
+  body.avcomm-ios-mobile .avcomm-top-menu-btn span:last-child{display:none!important;}
+  body.avcomm-ios-mobile .avcomm-top-menu-icon, body.avcomm-ios-mobile .avcomm-profile-mini-avatar{font-size:1rem!important;}
+  body.avcomm-ios-mobile .avcomm-profile-mini-avatar{width:34px!important;height:34px!important;border-radius:999px!important;background:#F6C426!important;color:#1f1504!important;display:grid!important;place-items:center!important;font-weight:1000!important;}
+  body.avcomm-ios-mobile .avmail-search{grid-column:1/-1!important;order:3!important;padding:0!important;}
+  body.avcomm-ios-mobile .avmail-search input{height:56px!important;border-radius:18px!important;background:rgba(255,255,255,.08)!important;border:1px solid rgba(246,196,38,.22)!important;padding-left:44px!important;font-size:1rem!important;}
+  body.avcomm-ios-mobile .avmail-search::before{left:15px!important;top:14px!important;font-size:1.35rem!important;}
+  body.avcomm-ios-mobile #avCommProfileMenu,
+  body.avcomm-ios-mobile #avCommConfigMenu{top:calc(env(safe-area-inset-top,0px) + 78px)!important;right:16px!important;left:auto!important;width:min(310px,calc(100vw - 32px))!important;}
+
+  body.avcomm-ios-mobile #avMailWorkspace{display:flex!important;flex-direction:column!important;gap:14px!important;padding:12px 14px calc(92px + env(safe-area-inset-bottom,0px))!important;overflow:auto!important;min-height:0!important;}
+  body.avcomm-ios-mobile .avmail-folders,
+  body.avcomm-ios-mobile .avmail-list-pane{background:rgba(20,23,30,.88)!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:24px!important;backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important;box-shadow:0 16px 40px rgba(0,0,0,.28)!important;}
+  body.avcomm-ios-mobile .avmail-folders{padding:10px!important;border-right:0!important;}
+  body.avcomm-ios-mobile .avmail-folder-title{display:block!important;padding:6px 10px 10px!important;font-size:.68rem!important;color:#aeb6c3!important;}
+  body.avcomm-ios-mobile .avmail-folder-footer{display:none!important;}
+  body.avcomm-ios-mobile .avmail-folder{padding:13px 12px!important;border-radius:16px!important;color:#F6F7F9!important;grid-template-columns:26px minmax(0,1fr) auto!important;}
+  body.avcomm-ios-mobile .avmail-folder:hover{background:rgba(255,255,255,.05)!important;}
+  body.avcomm-ios-mobile .avmail-folder.active{background:linear-gradient(135deg,rgba(246,196,38,.2),rgba(246,196,38,.08))!important;color:#F6C426!important;box-shadow:inset 0 0 0 1px rgba(246,196,38,.28)!important;}
+  body.avcomm-ios-mobile .avmail-folder-count{background:rgba(255,255,255,.09)!important;color:#fff!important;}
+  body.avcomm-ios-mobile .avmail-folder.active .avmail-folder-count{background:#F6C426!important;color:#1F1504!important;}
+  body.avcomm-ios-mobile .avmail-new{position:fixed!important;right:18px!important;bottom:calc(92px + env(safe-area-inset-bottom,0px))!important;width:62px!important;height:62px!important;border-radius:50%!important;margin:0!important;display:grid!important;place-items:center!important;z-index:3600!important;font-size:0!important;box-shadow:0 18px 40px rgba(246,196,38,.28)!important;}
+  body.avcomm-ios-mobile .avmail-new::after{content:'✎';font-size:1.35rem!important;}
+
+  body.avcomm-ios-mobile .avmail-list-pane{border-right:0!important;min-height:420px!important;display:grid!important;grid-template-rows:auto auto minmax(0,1fr)!important;overflow:hidden!important;}
+  body.avcomm-ios-mobile .avmail-list-head{padding:18px 16px 12px!important;border-bottom:1px solid rgba(255,255,255,.08)!important;}
+  body.avcomm-ios-mobile .avmail-list-head h2{font-size:1.95rem!important;line-height:1!important;letter-spacing:-.04em!important;}
+  body.avcomm-ios-mobile .avmail-list-head small{font-size:.9rem!important;color:#9da6b3!important;}
+  body.avcomm-ios-mobile .avmail-tool-btn,
+  body.avcomm-ios-mobile .avmail-list-tools select,
+  body.avcomm-ios-mobile .avmail-action{height:44px!important;border-radius:14px!important;background:rgba(255,255,255,.05)!important;border:1px solid rgba(255,255,255,.10)!important;color:#F1F3F7!important;font-size:.88rem!important;}
+  body.avcomm-ios-mobile .avmail-tool-btn{padding:0 14px!important;font-weight:900!important;}
+  body.avcomm-ios-mobile .avmail-list-tools{padding:0 16px 14px!important;gap:10px!important;border-bottom:1px solid rgba(255,255,255,.08)!important;}
+  body.avcomm-ios-mobile .avmail-message-list{padding:0 0 8px!important;}
+  body.avcomm-ios-mobile .avmail-row{background:transparent!important;border-bottom:1px solid rgba(255,255,255,.06)!important;padding:14px 16px 14px 18px!important;min-height:92px!important;}
+  body.avcomm-ios-mobile .avmail-row.selected{background:rgba(246,196,38,.08)!important;box-shadow:inset 3px 0 0 #F6C426!important;}
+  body.avcomm-ios-mobile .avmail-row-person{font-size:.95rem!important;}
+  body.avcomm-ios-mobile .avmail-row-subject{font-size:.93rem!important;}
+  body.avcomm-ios-mobile .avmail-row-preview{font-size:.84rem!important;color:#AEB5C1!important;white-space:normal!important;display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;}
+  body.avcomm-ios-mobile .avmail-row-date{color:#AEB5C1!important;font-size:.78rem!important;}
+  body.avcomm-ios-mobile .avmail-mini-badge{background:rgba(255,255,255,.08)!important;color:#E9EDF4!important;}
+  body.avcomm-ios-mobile .avmail-mini-badge.urgent{background:rgba(239,68,68,.18)!important;color:#FCA5A5!important;}
+  body.avcomm-ios-mobile .avmail-mini-badge.high{background:rgba(245,158,11,.18)!important;color:#F9C86B!important;}
+
+  body.avcomm-ios-mobile .avmail-reading-pane{display:none!important;}
+  body.avcomm-ios-mobile.avmail-detail-open .avmail-reading-pane{display:grid!important;position:fixed!important;inset:0!important;z-index:3900!important;background:#0b0f14!important;grid-template-rows:auto minmax(0,1fr)!important;}
+  body.avcomm-ios-mobile.avmail-detail-open .avmail-reading-toolbar{padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 10px!important;flex-wrap:wrap!important;gap:8px!important;background:linear-gradient(180deg,#23171d,#10141a)!important;border-bottom:1px solid rgba(255,255,255,.08)!important;}
+  body.avcomm-ios-mobile.avmail-detail-open .avmail-reading-scroll{padding:18px 16px calc(24px + env(safe-area-inset-bottom,0px))!important;background:#0b0f14!important;}
+  body.avcomm-ios-mobile .avmail-mobile-back{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:44px!important;height:44px!important;padding:0 14px!important;border-radius:14px!important;border:1px solid rgba(255,255,255,.10)!important;background:rgba(255,255,255,.05)!important;color:#fff!important;font-weight:900!important;}
+  body.avcomm-ios-mobile .avmail-email-item{background:rgba(255,255,255,.03)!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:18px!important;padding:14px!important;}
+  body.avcomm-ios-mobile .avmail-email-subject{font-size:1.45rem!important;line-height:1.15!important;}
+  body.avcomm-ios-mobile .avmail-reading-empty{display:none!important;}
+
+  body.avcomm-ios-mobile #avChatWorkspace{display:grid!important;grid-template-columns:1fr!important;padding:0 0 calc(86px + env(safe-area-inset-bottom,0px))!important;overflow:hidden!important;min-height:0!important;background:transparent!important;}
+  body.avcomm-ios-mobile #avChatWorkspace.show-list .avchat-conversations-pane{display:flex!important;}
+  body.avcomm-ios-mobile #avChatWorkspace.show-list .avchat-thread-pane{display:none!important;}
+  body.avcomm-ios-mobile #avChatWorkspace:not(.show-list) .avchat-conversations-pane{display:none!important;}
+  body.avcomm-ios-mobile #avChatWorkspace:not(.show-list) .avchat-thread-pane{display:grid!important;}
+  body.avcomm-ios-mobile .avchat-conversations-pane,
+  body.avcomm-ios-mobile .avchat-thread-pane{min-height:0!important;background:transparent!important;}
+  body.avcomm-ios-mobile .avchat-conversations-head{height:auto!important;padding:18px 16px 12px!important;background:transparent!important;border-bottom:0!important;}
+  body.avcomm-ios-mobile .avchat-conversations-head h2{font-size:3rem!important;line-height:.95!important;letter-spacing:-.06em!important;color:#fff!important;}
+  body.avcomm-ios-mobile .avchat-conversations-head small{display:none!important;}
+  body.avcomm-ios-mobile .avchat-head-actions{gap:10px!important;}
+  body.avcomm-ios-mobile .avchat-head-btn,
+  body.avcomm-ios-mobile .avchat-new-btn{width:52px!important;height:52px!important;border-radius:18px!important;background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.12)!important;box-shadow:none!important;}
+  body.avcomm-ios-mobile .avchat-wa-search{padding:0 16px 12px!important;background:transparent!important;}
+  body.avcomm-ios-mobile .avchat-wa-search input{height:56px!important;border-radius:18px!important;font-size:1rem!important;background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.10)!important;color:#fff!important;}
+  body.avcomm-ios-mobile .avchat-wa-search span{left:14px!important;top:15px!important;color:#d6d7db!important;}
+  body.avcomm-ios-mobile #avChatConversationList{padding:4px 14px 18px!important;overflow:auto!important;}
+  body.avcomm-ios-mobile .avchat-conversation{background:rgba(20,23,30,.88)!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:22px!important;padding:14px 14px!important;min-height:84px!important;margin-bottom:10px!important;backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important;box-shadow:0 14px 34px rgba(0,0,0,.22)!important;}
+  body.avcomm-ios-mobile .avchat-conversation.active{box-shadow:inset 0 0 0 1px rgba(246,196,38,.34),0 14px 34px rgba(0,0,0,.24)!important;background:linear-gradient(135deg,rgba(246,196,38,.16),rgba(255,255,255,.05))!important;}
+  body.avcomm-ios-mobile .avchat-avatar{width:52px!important;height:52px!important;border-radius:18px!important;background:linear-gradient(145deg,#ffd13b,#d79900)!important;color:#17130a!important;}
+  body.avcomm-ios-mobile .avchat-conv-name{font-size:1rem!important;color:#fff!important;}
+  body.avcomm-ios-mobile .avchat-conv-preview{font-size:.88rem!important;color:#AEB5C1!important;line-height:1.35!important;}
+  body.avcomm-ios-mobile .avchat-conv-meta{font-size:.78rem!important;color:#C9CED6!important;}
+  body.avcomm-ios-mobile .avchat-unread{background:#F6C426!important;color:#1b1505!important;min-width:24px!important;height:24px!important;}
+  body.avcomm-ios-mobile .avchat-thread-header{padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 10px!important;min-height:76px!important;background:linear-gradient(180deg,#23171d,#10141a)!important;border-bottom:1px solid rgba(255,255,255,.08)!important;gap:10px!important;}
+  body.avcomm-ios-mobile .avchat-thread-user strong{font-size:.98rem!important;color:#fff!important;}
+  body.avcomm-ios-mobile .avchat-thread-user small{font-size:.82rem!important;color:#ABB3C0!important;max-width:52vw!important;}
+  body.avcomm-ios-mobile .avchat-messages{padding:14px 12px!important;background:radial-gradient(circle at top left,rgba(246,196,38,.06),transparent 24%),transparent!important;}
+  body.avcomm-ios-mobile .avchat-message-line{max-width:92%!important;}
+  body.avcomm-ios-mobile .avchat-bubble{border-radius:20px!important;box-shadow:0 10px 26px rgba(0,0,0,.14)!important;}
+  body.avcomm-ios-mobile .avchat-compose{padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px))!important;background:rgba(10,13,18,.95)!important;border-top:1px solid rgba(255,255,255,.08)!important;backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important;}
+  body.avcomm-ios-mobile .avchat-wa-input-shell{border-radius:20px!important;min-height:56px!important;}
+  body.avcomm-ios-mobile .avchat-compose textarea{font-size:.95rem!important;min-height:44px!important;max-height:110px!important;}
+  body.avcomm-ios-mobile .avchat-wa-send{width:52px!important;height:52px!important;border-radius:18px!important;}
+  body.avcomm-ios-mobile .avchat-wa-attach-menu{bottom:74px!important;left:10px!important;}
+  body.avcomm-ios-mobile .avchat-reference-preview,.avchat-wa-draft-preview{margin-inline:0!important;}
+  body.avcomm-ios-mobile .avchat-mobile-back{width:44px!important;height:44px!important;border-radius:14px!important;border:1px solid rgba(255,255,255,.10)!important;background:rgba(255,255,255,.06)!important;color:#fff!important;display:grid!important;place-items:center!important;flex:none!important;}
+  body.avcomm-ios-mobile .avchat-mobile-segments{display:flex!important;gap:8px!important;padding:0 16px 10px!important;overflow:auto!important;scrollbar-width:none!important;}
+  body.avcomm-ios-mobile .avchat-mobile-segments::-webkit-scrollbar{display:none!important;}
+  body.avcomm-ios-mobile .avchat-mobile-segments button{height:42px!important;padding:0 16px!important;border-radius:999px!important;background:rgba(255,255,255,.06)!important;border:1px solid rgba(255,255,255,.10)!important;color:#E5EAF1!important;font-weight:800!important;white-space:nowrap!important;}
+  body.avcomm-ios-mobile .avchat-mobile-segments button.active{background:linear-gradient(135deg,rgba(246,196,38,.22),rgba(246,196,38,.08))!important;color:#F6C426!important;border-color:rgba(246,196,38,.32)!important;}
+  body.avcomm-ios-mobile .avchat-mobile-list-item{width:100%!important;display:grid!important;grid-template-columns:54px minmax(0,1fr) auto!important;gap:12px!important;align-items:center!important;padding:14px 14px!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:22px!important;background:rgba(20,23,30,.88)!important;color:#fff!important;text-align:left!important;margin-bottom:10px!important;}
+  body.avcomm-ios-mobile .avchat-mobile-list-item .meta strong{display:block!important;font-size:1rem!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+  body.avcomm-ios-mobile .avchat-mobile-list-item .meta small{display:block!important;margin-top:4px!important;font-size:.84rem!important;color:#AEB5C1!important;line-height:1.35!important;}
+  body.avcomm-ios-mobile .avchat-mobile-list-item .side{display:flex!important;flex-direction:column!important;gap:6px!important;align-items:flex-end!important;font-size:.76rem!important;color:#BEC5D0!important;}
+  body.avcomm-ios-mobile .avchat-mobile-badge{min-width:24px!important;height:24px!important;padding:0 8px!important;border-radius:999px!important;background:#F6C426!important;color:#1B1505!important;display:grid!important;place-items:center!important;font-weight:900!important;}
+  body.avcomm-ios-mobile .avchat-mobile-chip{display:inline-flex!important;align-items:center!important;gap:4px!important;padding:4px 8px!important;border-radius:999px!important;background:rgba(255,255,255,.08)!important;color:#DCE1E8!important;font-size:.72rem!important;font-weight:800!important;}
+
+  body.avcomm-ios-mobile .avcomm-bottom-nav{position:fixed!important;left:12px!important;right:12px!important;bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;z-index:3800!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;padding:10px!important;border-radius:24px!important;background:rgba(13,16,22,.82)!important;border:1px solid rgba(255,255,255,.10)!important;backdrop-filter:blur(20px)!important;-webkit-backdrop-filter:blur(20px)!important;box-shadow:0 20px 48px rgba(0,0,0,.38)!important;}
+  body.avcomm-ios-mobile .avcomm-bottom-nav button{height:54px!important;border:0!important;border-radius:18px!important;background:transparent!important;color:#DCE2EA!important;font-weight:900!important;letter-spacing:-.01em!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;}
+  body.avcomm-ios-mobile .avcomm-bottom-nav button.active{background:linear-gradient(135deg,rgba(246,196,38,.24),rgba(246,196,38,.10))!important;color:#F6C426!important;box-shadow:inset 0 0 0 1px rgba(246,196,38,.26)!important;}
+  body.avcomm-ios-mobile .avcomm-bottom-nav .icon{font-size:1rem!important;}
+}
+</style>
+<script id="comunicacao-mobile-ios-redesign-v120-script">
+(function(){
+  const MOBILE_BP=820;
+  let avChatMobileTab='CONVERSAS';
+  function isMobile(){return window.innerWidth<=MOBILE_BP;}
+  function root(){return document.getElementById('comunicacaoAVStandalone');}
+  function syncBodyClass(){document.body.classList.toggle('avcomm-ios-mobile',isMobile());const r=root();if(r)r.dataset.commMode=(typeof comunicacaoModoAtual!=='undefined'?comunicacaoModoAtual:'EMAIL');}
+  function ensureBottomNav(){
+    const r=root(); if(!r) return;
+    let nav=document.getElementById('avCommBottomNav');
+    if(!nav){
+      nav=document.createElement('nav'); nav.id='avCommBottomNav'; nav.className='avcomm-bottom-nav';
+      nav.innerHTML=`<button type="button" data-mode="EMAIL" onclick="setModoComunicacaoAV('EMAIL')"><span class="icon">✉</span><span>E-mail</span></button><button type="button" data-mode="CHAT" onclick="setModoComunicacaoAV('CHAT')"><span class="icon">💬</span><span>Bate-papo</span></button>`;
+      r.appendChild(nav);
+    }
+    nav.hidden=!isMobile();
+    nav.querySelectorAll('button').forEach(btn=>btn.classList.toggle('active',btn.dataset.mode===String(typeof comunicacaoModoAtual!=='undefined'?comunicacaoModoAtual:'EMAIL')));
+  }
+  function ensureChatTabs(){
+    const pane=document.querySelector('#avChatWorkspace .avchat-conversations-pane');
+    const search=document.querySelector('#avChatWorkspace .avchat-wa-search');
+    if(!pane||!search||document.getElementById('avChatMobileTabs')) return;
+    const seg=document.createElement('div');
+    seg.id='avChatMobileTabs'; seg.className='avchat-mobile-segments';
+    seg.innerHTML=`<button type="button" data-tab="CONVERSAS" onclick="avSetChatMobileTab('CONVERSAS')">Conversas</button><button type="button" data-tab="CONTATOS" onclick="avSetChatMobileTab('CONTATOS')">Contatos</button><button type="button" data-tab="CHAMADAS" onclick="avSetChatMobileTab('CHAMADAS')">Chamadas</button>`;
+    search.insertAdjacentElement('afterend',seg);
+  }
+  function updateChatTabsUI(){
+    const seg=document.getElementById('avChatMobileTabs'); if(!seg) return;
+    seg.hidden=!isMobile() || String(typeof comunicacaoModoAtual!=='undefined'?comunicacaoModoAtual:'EMAIL')!=='CHAT';
+    seg.querySelectorAll('button').forEach(btn=>btn.classList.toggle('active',btn.dataset.tab===avChatMobileTab));
+  }
+  function getAllUsersMobile(){
+    const atual=typeof normalizarOperador==='function'?normalizarOperador(usuarioAtual?.operador):'';
+    return (globalConfig?.usuarios||[]).filter(u=>{
+      const op=typeof normalizarOperador==='function'?normalizarOperador(u?.operador):String(u?.operador||'');
+      return op && op!==atual;
+    }).sort((a,b)=>String(a?.nome||'').localeCompare(String(b?.nome||''),'pt-BR'));
+  }
+  function getCallItemsMobile(){
+    if(!db||!Array.isArray(db.mensagens)) return [];
+    const atual=typeof normalizarOperador==='function'?normalizarOperador(usuarioAtual?.operador):'';
+    return db.mensagens.filter(m=>canalMensagem(m)==='CHAT'&&m.chatEvento==='CHAMADA'&&(normalizarOperador(m.remetenteOp)===atual||normalizarOperador(m.destinatarioOp)===atual)).sort((a,b)=>String(b.criadoEmISO||'').localeCompare(String(a.criadoEmISO||'')));
+  }
+  function avatarHTML(nome){return `<span class="avchat-avatar">${escapeHTML(iniciaisComunicacaoAV(nome||'AV'))}</span>`;}
+  function renderContactsMobile(){
+    const list=document.getElementById('avChatConversationList'); if(!list) return;
+    const arr=getAllUsersMobile();
+    list.innerHTML=arr.length?arr.map(u=>{
+      const nome=u.nome||'Usuário'; const cargo=u.cargo||u.funcao||'Comunicação AV'; const op=normalizarOperador(u.operador);
+      return `<button class="avchat-mobile-list-item" type="button" onclick="avAbrirContatoChatMobile('${escapeHTML(op)}')">${avatarHTML(nome)}<span class="meta"><strong>${escapeHTML(nome)}</strong><small>${escapeHTML(cargo)} • OP. ${escapeHTML(op)}</small></span><span class="side"><span class="avchat-mobile-chip">Abrir</span></span></button>`;
+    }).join(''):`<div class="avmail-empty-list">Nenhum contato disponível.</div>`;
+    const msgs=document.getElementById('avChatMessages'), header=document.getElementById('avChatThreadHeader'), compose=document.getElementById('avChatCompose');
+    if(header) header.innerHTML=`<div class="avchat-thread-user"><span class="avchat-avatar">👤</span><span><strong>Contatos</strong><small>Selecione uma pessoa para iniciar um bate-papo.</small></span></div>`;
+    if(msgs) msgs.innerHTML='<div class="avchat-empty"><div>👤</div><strong>Contatos internos</strong><span>Abra um contato para conversar ou ligar.</span></div>';
+    if(compose) compose.hidden=true;
+  }
+  function renderCallsMobile(){
+    const list=document.getElementById('avChatConversationList'); if(!list) return;
+    const arr=getCallItemsMobile();
+    const atual=typeof normalizarOperador==='function'?normalizarOperador(usuarioAtual?.operador):'';
+    list.innerHTML=arr.length?arr.map(m=>{
+      const op=normalizarOperador(m.remetenteOp)===atual?normalizarOperador(m.destinatarioOp):normalizarOperador(m.remetenteOp);
+      const nome=normalizarOperador(m.remetenteOp)===atual?(m.destinatarioNome||mensagemNomeOperador(op)):(m.remetenteNome||mensagemNomeOperador(op));
+      const tipo=(m.eventoChamada?.tipo||'AUDIO')==='VIDEO'?'Vídeo':'Áudio';
+      const res=(m.eventoChamada?.resultado||'PERDIDA');
+      const badge=res==='PERDIDA'?`<span class="avchat-mobile-badge">!</span>`:`<span class="avchat-mobile-chip">${escapeHTML(res)}</span>`;
+      return `<button class="avchat-mobile-list-item" type="button" onclick="avAbrirContatoChatMobile('${escapeHTML(op)}')">${avatarHTML(nome)}<span class="meta"><strong>${escapeHTML(nome)}</strong><small>${escapeHTML(tipo)} • ${escapeHTML(res.charAt(0)+res.slice(1).toLowerCase())}</small></span><span class="side"><span>${escapeHTML(dataCurtaComunicacaoAV(m))}</span>${badge}</span></button>`;
+    }).join(''):`<div class="avmail-empty-list">Nenhuma chamada registrada.</div>`;
+    const msgs=document.getElementById('avChatMessages'), header=document.getElementById('avChatThreadHeader'), compose=document.getElementById('avChatCompose');
+    if(header) header.innerHTML=`<div class="avchat-thread-user"><span class="avchat-avatar">☎</span><span><strong>Chamadas</strong><small>Histórico de chamadas de áudio e vídeo.</small></span></div>`;
+    if(msgs) msgs.innerHTML='<div class="avchat-empty"><div>☎</div><strong>Histórico de chamadas</strong><span>Toque em uma pessoa para voltar ao bate-papo.</span></div>';
+    if(compose) compose.hidden=true;
+  }
+  function syncChatLayout(){
+    const ws=document.getElementById('avChatWorkspace'); if(!ws) return;
+    if(!isMobile() || String(typeof comunicacaoModoAtual!=='undefined'?comunicacaoModoAtual:'EMAIL')!=='CHAT'){ ws.classList.remove('show-list'); return; }
+    if(avChatMobileTab!=='CONVERSAS'){ ws.classList.add('show-list'); return; }
+    const selected=((typeof avChatSelecionadoOp!=='undefined'&&avChatSelecionadoOp)||(typeof avChatSelecionadoGrupoId!=='undefined'&&avChatSelecionadoGrupoId));
+    ws.classList.toggle('show-list', !selected || ws.dataset.forceList==='1');
+  }
+  function ensureChatBack(){
+    const header=document.getElementById('avChatThreadHeader'); if(!header) return;
+    let btn=header.querySelector('.avchat-mobile-back');
+    if(!btn){ btn=document.createElement('button'); btn.type='button'; btn.className='avchat-mobile-back'; btn.textContent='←'; btn.onclick=function(){ const ws=document.getElementById('avChatWorkspace'); if(ws){ ws.dataset.forceList='1'; ws.classList.add('show-list'); } }; header.prepend(btn); }
+    btn.hidden=!isMobile() || avChatMobileTab!=='CONVERSAS';
+  }
+  function ensureMailBack(){
+    const toolbar=document.getElementById('avMailReadingToolbar'); if(!toolbar) return;
+    let btn=toolbar.querySelector('.avmail-mobile-back');
+    if(!btn){ btn=document.createElement('button'); btn.type='button'; btn.className='avmail-mobile-back'; btn.textContent='← Caixas'; btn.onclick=function(){ try{ avMailSelecionadaId=''; }catch(_){} document.body.classList.remove('avmail-detail-open'); if(typeof renderComunicacaoAVOutlook==='function') renderComunicacaoAVOutlook(); }; toolbar.prepend(btn); }
+    btn.hidden=!isMobile();
+  }
+  function syncMailDetail(){
+    ensureMailBack();
+    const open=isMobile() && String(typeof comunicacaoModoAtual!=='undefined'?comunicacaoModoAtual:'EMAIL')==='EMAIL' && !!(typeof avMailSelecionadaId!=='undefined' && avMailSelecionadaId);
+    document.body.classList.toggle('avmail-detail-open', !!open);
+  }
+  function applyTitles(){
+    const sub=document.getElementById('avCommBrandSubtitle');
+    if(sub){ sub.textContent=String(typeof comunicacaoModoAtual!=='undefined'?comunicacaoModoAtual:'EMAIL')==='EMAIL' ? 'E-mail corporativo interno' : 'Bate-papo, contatos e chamadas'; }
+  }
+  function ensureMobileShell(){ syncBodyClass(); ensureBottomNav(); ensureChatTabs(); updateChatTabsUI(); applyTitles(); ensureChatBack(); syncChatLayout(); syncMailDetail(); }
+  window.avSetChatMobileTab=function(tab){ avChatMobileTab=['CONVERSAS','CONTATOS','CHAMADAS'].includes(String(tab||'').toUpperCase())?String(tab).toUpperCase():'CONVERSAS'; if(avChatMobileTab!=='CONVERSAS'){ const ws=document.getElementById('avChatWorkspace'); if(ws) ws.dataset.forceList='1'; } if(typeof renderBatePapoAV==='function') renderBatePapoAV(); };
+  window.avAbrirContatoChatMobile=function(op){ avChatMobileTab='CONVERSAS'; const ws=document.getElementById('avChatWorkspace'); if(ws){ ws.dataset.forceList='0'; ws.classList.remove('show-list'); } if(typeof abrirChatComUsuario==='function') abrirChatComUsuario(op); };
+
+  const baseSetModo=window.setModoComunicacaoAV;
+  window.setModoComunicacaoAV=function(modo){ const r=baseSetModo?baseSetModo.apply(this,arguments):undefined; if(String(modo||'').toUpperCase()==='CHAT'){ const ws=document.getElementById('avChatWorkspace'); if(ws){ ws.dataset.forceList='1'; } } ensureMobileShell(); return r; };
+
+  const baseOpenChat=window.abrirChatComUsuario;
+  window.abrirChatComUsuario=function(op){ const r=baseOpenChat?baseOpenChat.apply(this,arguments):undefined; if(isMobile()){ avChatMobileTab='CONVERSAS'; const ws=document.getElementById('avChatWorkspace'); if(ws){ ws.dataset.forceList='0'; ws.classList.remove('show-list'); } } ensureMobileShell(); return r; };
+
+  const baseOpenMail=window.abrirMensagemComunicacaoAV;
+  window.abrirMensagemComunicacaoAV=function(id){ const r=baseOpenMail?baseOpenMail.apply(this,arguments):undefined; syncMailDetail(); return r; };
+
+  const baseRenderMail=window.renderComunicacaoAVOutlook;
+  window.renderComunicacaoAVOutlook=function(){ const r=baseRenderMail?baseRenderMail.apply(this,arguments):undefined; ensureMobileShell(); syncMailDetail(); return r; };
+
+  const baseRenderChat=window.renderBatePapoAV;
+  window.renderBatePapoAV=function(){ const r=baseRenderChat?baseRenderChat.apply(this,arguments):undefined; ensureMobileShell(); if(isMobile() && String(typeof comunicacaoModoAtual!=='undefined'?comunicacaoModoAtual:'EMAIL')==='CHAT'){ if(avChatMobileTab==='CONTATOS') renderContactsMobile(); else if(avChatMobileTab==='CHAMADAS') renderCallsMobile(); } updateChatTabsUI(); syncChatLayout(); ensureChatBack(); return r; };
+
+  window.addEventListener('resize', ensureMobileShell, {passive:true});
+  window.addEventListener('orientationchange', ensureMobileShell, {passive:true});
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(ensureMobileShell, 60); });
+  setTimeout(ensureMobileShell, 120);
 })();
 </script>
 </body>
