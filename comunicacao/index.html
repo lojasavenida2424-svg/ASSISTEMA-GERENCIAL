@@ -16101,6 +16101,7 @@ async function salvarDadosUsuarioOnline(silencioso=false){
     storageSetSeguro(chaveBaseCompartilhado(),dadosCompartilhadosDoDB(db),{serializar:true,silencioso:true});
 
     marcarSincronizacaoConfirmada('ONLINE • salvo agora');
+    try{window.avComunicacaoBroadcastUpdate?.();}catch(_){}
     return true;
   }catch(err){
     console.error('Falha ao salvar online:', err);
@@ -16130,6 +16131,7 @@ function ativarRealtimeUsuario(){
     realtimeChannel=null;
   }
   const op=normalizarOperador(usuarioAtual?.operador); if(!op)return;
+  setTimeout(()=>window.avComunicacaoLiveStart?.(),0);
   realtimeChannel=supabaseclient.channel(`assistencia_${op}_${Date.now()}`)
    .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.usuario_${op}`},async()=>{
       const {data}=await supabaseclient.from(ONLINE_TABLE).select('dados').eq('id',`usuario_${op}`).maybeSingle();
@@ -20014,6 +20016,9 @@ body:not(.dark-mode).avmail-mode.avchat-mode .avchat-wa-icon-btn,
 body:not(.dark-mode).avmail-mode.avchat-mode .avchat-wa-input-shell,
 body:not(.dark-mode).avmail-mode.avchat-mode .avchat-wa-input-wrap{background:rgba(255,255,255,.76)!important;color:#343a42!important;border-color:rgba(32,38,46,.11)!important;}
 </style>
+
+
+
 
 
 
@@ -33717,6 +33722,8 @@ document.addEventListener('DOMContentLoaded',()=>aplicarIconesChatV5138());
     <div class="avcall-controls">
       <button id="avCallMuteBtn" class="avcall-control" type="button" onclick="avCallToggleMute()" title="Silenciar microfone"><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 0 0 3-3V7a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3z"></path><path d="M19 11a7 7 0 0 1-14 0"></path><path d="M12 18v4"></path></svg></button>
       <button id="avCallCameraBtn" class="avcall-control" type="button" onclick="avCallToggleCamera()" title="Desligar câmera"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"></rect><path d="M16 10l5-3v10l-5-3z"></path></svg></button>
+      <button id="avCallSwitchCameraBtn" class="avcall-control" type="button" onclick="avCallSwitchCamera()" title="Virar câmera"><svg viewBox="0 0 24 24"><path d="M4 8a8 8 0 0 1 13.5-3.8L20 6.7"></path><path d="M20 3v3.7h-3.7"></path><path d="M20 16a8 8 0 0 1-13.5 3.8L4 17.3"></path><path d="M4 21v-3.7h3.7"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+      <button id="avCallSpeakerBtn" class="avcall-control" type="button" onclick="avCallToggleSpeaker()" title="Viva-voz / saída de áudio"><svg viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6l-5 4H4z"></path><path d="M16 9a4 4 0 0 1 0 6"></path><path d="M18.5 6.5a8 8 0 0 1 0 11"></path></svg></button>
       <button class="avcall-control danger" type="button" onclick="avCallHangup(true)" title="Encerrar chamada"><svg viewBox="0 0 24 24"><path d="M6.6 10.8c3.6-2.2 7.2-2.2 10.8 0"></path><path d="M5 13l1.6-2.2 2.5 1.8"></path><path d="M19 13l-1.6-2.2-2.5 1.8"></path></svg></button>
     </div>
   </div>
@@ -33726,12 +33733,12 @@ document.addEventListener('DOMContentLoaded',()=>aplicarIconesChatV5138());
   .avcall-audio-unlock[hidden]{display:none!important}
   #avCallRemoteVideo{object-fit:contain!important;object-position:center!important;background:#000!important;transform:none!important}
   #avCallLocalVideo{object-fit:cover!important;transform:scaleX(-1)!important;transform-origin:center!important}
-  #avCallRemoteAudio{position:absolute!important;width:1px!important;height:1px!important;opacity:.001!important;pointer-events:none!important}
+  #avCallRemoteAudio{position:absolute!important;width:2px!important;height:2px!important;left:1px!important;bottom:1px!important;opacity:.001!important;pointer-events:none!important}
 </style>
 
 <script id="av-call-v5144-script">
 
-/* V51.52 — estabilização WebRTC: streams persistentes, áudio contínuo e vídeo sem reanexos periódicos */
+/* V51.53 — WebRTC: áudio dedicado, viva-voz, troca de câmera e mídia estável */
 (function(){
   let avCallChannel=null, avCallChannelState='CLOSED', avCallChannelPromise=null;
   let avCallCurrent=null, avCallIncoming=null, avCallTimer=null, avCallRingTimer=null, avCallStartTs=0, avCallStagePopup=null;
@@ -33740,6 +33747,8 @@ document.addEventListener('DOMContentLoaded',()=>aplicarIconesChatV5138());
   let avCallMediaWaiter=null;
   let avCallDisconnectTimer=null;
   let avCallAudioContext=null;
+  let avCallSpeakerActive=false;
+  let avCallFacingMode='user';
   const AV_CALL_CHANNEL='comunicacao_av_calls_v1';
   const AV_CALL_TAB_ID='tab_'+Math.random().toString(36).slice(2)+'_'+Date.now().toString(36);
   const AV_RTC_CONFIG={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]};
@@ -33789,7 +33798,10 @@ document.addEventListener('DOMContentLoaded',()=>aplicarIconesChatV5138());
       const mainAudio=document.getElementById('avCallRemoteAudio'),mainVideo=document.getElementById('avCallRemoteVideo');
       try{if(mainAudio){mainAudio.pause();mainAudio.muted=true;}if(mainVideo){mainVideo.pause();mainVideo.muted=true;}}catch(_){ }
     }else{
-      const el=document.getElementById(kind==='VIDEO'?'avCallRemoteVideo':'avCallRemoteAudio');ok=await avCallTryPlay(el);
+      const audio=document.getElementById('avCallRemoteAudio');
+      const video=document.getElementById('avCallRemoteVideo');
+      if(video&&kind==='VIDEO'){video.muted=true;video.autoplay=true;video.playsInline=true;try{await video.play?.();}catch(_){}}
+      ok=await avCallTryPlay(audio);
     }
     avCallSetAudioUnlock(!ok);
     return ok;
@@ -33899,7 +33911,7 @@ body.theme-dark .avp-pill{color:var(--gold)}
 body.theme-dark .avp-body{background:radial-gradient(circle at 50% 18%,rgba(247,196,42,.12),#121821 38%, #0b0f15 100%)}
 .avp-card.video .avp-body{background:#090c12}
 .avp-remote-video{width:100%;height:100%;object-fit:contain;object-position:center;background:#000;display:block;transform:none!important}.audio-mode .avp-remote-video{display:none}
-.avp-remote-audio{position:absolute!important;width:1px!important;height:1px!important;left:-9999px!important;top:0!important;opacity:.001!important;pointer-events:none!important}
+.avp-remote-audio{position:absolute!important;width:2px!important;height:2px!important;left:1px!important;bottom:1px!important;top:auto!important;opacity:.001!important;pointer-events:none!important}
 .avp-connecting{position:absolute;left:50%;top:20px;transform:translateX(-50%);padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.88);border:1px solid var(--line);color:#5a616b;font-size:.62rem;white-space:nowrap}
 body.theme-dark .avp-connecting{background:rgba(17,22,30,.80);color:#d7dbe1}.avp-connecting[hidden]{display:none}
 .avp-audio-center{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px}.video-mode .avp-audio-center{display:none}
@@ -33963,6 +33975,8 @@ body.theme-dark .avp-permission-icon{color:var(--gold)}
       <footer class="avp-footer">
         <button id="avPopupMuteBtn" class="avp-btn" type="button" onclick="window.opener?.avCallToggleMute?.()" title="Silenciar microfone"><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 0 0 3-3V7a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3z"></path><path d="M19 11a7 7 0 0 1-14 0"></path><path d="M12 18v4"></path></svg></button>
         <button id="avPopupCameraBtn" class="avp-btn" type="button" onclick="window.opener?.avCallToggleCamera?.()" title="Desligar câmera"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"></rect><path d="M16 10l5-3v10l-5-3z"></path></svg></button>
+        <button id="avPopupSwitchCameraBtn" class="avp-btn" type="button" onclick="window.__avSwitchCamera?.()" title="Virar câmera"><svg viewBox="0 0 24 24"><path d="M4 8a8 8 0 0 1 13.5-3.8L20 6.7"></path><path d="M20 3v3.7h-3.7"></path><path d="M20 16a8 8 0 0 1-13.5 3.8L4 17.3"></path><path d="M4 21v-3.7h3.7"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+        <button id="avPopupSpeakerBtn" class="avp-btn" type="button" onclick="window.__avSelectSpeaker?.()" title="Viva-voz / saída de áudio"><svg viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6l-5 4H4z"></path><path d="M16 9a4 4 0 0 1 0 6"></path><path d="M18.5 6.5a8 8 0 0 1 0 11"></path></svg></button>
         <button class="avp-btn danger" type="button" onclick="window.__avEndCall?.()" title="Encerrar chamada"><svg viewBox="0 0 24 24"><path d="M6.6 10.8c3.6-2.2 7.2-2.2 10.8 0"></path><path d="M5 13l1.6-2.2 2.5 1.8"></path><path d="M19 13l-1.6-2.2-2.5 1.8"></path></svg></button>
       </footer>
     </section>
@@ -33975,28 +33989,68 @@ window.__avEndCall=function(){
   try{window.__avClosedBySystem=true;}catch(_){ }
   setTimeout(()=>{try{window.close();}catch(_){ }},40);
 };
-window.__avRemoteMediaElement=function(kind){
-  const type=String(kind||'AUDIO').toUpperCase()==='VIDEO'?'VIDEO':'AUDIO';
-  return document.getElementById(type==='VIDEO'?'avPopupRemoteVideo':'avPopupRemoteAudio');
-};
+window.__avRemoteMediaElement=function(){return document.getElementById('avPopupRemoteAudio');};
 window.__avTryPlayRemoteMedia=async function(kind,showFallback=true){
-  const el=window.__avRemoteMediaElement(kind);
+  const type=String(kind||'AUDIO').toUpperCase()==='VIDEO'?'VIDEO':'AUDIO';
+  const audio=document.getElementById('avPopupRemoteAudio');
+  const video=document.getElementById('avPopupRemoteVideo');
   const unlock=document.getElementById('avPopupAudioUnlock');
-  if(!el)return false;
+  if(!audio)return false;
+  let audioOk=false;
   try{
-    el.autoplay=true;el.muted=false;el.volume=1;
-    const p=el.play?.();if(p&&typeof p.then==='function')await p;
-    if(unlock)unlock.hidden=true;
-    return true;
-  }catch(err){
-    if(unlock&&showFallback)unlock.hidden=false;
-    return false;
-  }
+    if(type==='VIDEO'&&video){video.autoplay=true;video.playsInline=true;video.muted=true;try{const pv=video.play?.();if(pv&&typeof pv.then==='function')await pv;}catch(_){}}
+    audio.autoplay=true;audio.muted=false;audio.volume=1;
+    const p=audio.play?.();if(p&&typeof p.then==='function')await p;
+    audioOk=true;
+  }catch(err){audioOk=false;}
+  if(unlock)unlock.hidden=audioOk?true:!showFallback;
+  return audioOk;
 };
 window.__avUnlockRemoteMedia=async function(){
   const kind=document.documentElement.getAttribute('data-av-call-kind')||'AUDIO';
   const ok=await window.__avTryPlayRemoteMedia(kind,true);
   if(!ok){const u=document.getElementById('avPopupAudioUnlock');if(u){u.hidden=false;u.textContent='TOCAR PARA OUVIR';}}
+};
+window.__avFacingMode='user';
+window.__avSelectSpeaker=async function(){
+  const audio=document.getElementById('avPopupRemoteAudio');
+  const btn=document.getElementById('avPopupSpeakerBtn');
+  if(!audio)return false;
+  try{
+    await window.__avTryPlayRemoteMedia(document.documentElement.getAttribute('data-av-call-kind')||'AUDIO',true);
+    if(typeof audio.setSinkId==='function' && navigator.mediaDevices?.selectAudioOutput){
+      const device=await navigator.mediaDevices.selectAudioOutput();
+      if(device?.deviceId)await audio.setSinkId(device.deviceId);
+    }else if(typeof audio.setSinkId==='function'){
+      try{await audio.setSinkId('');}catch(_){}
+    }
+    btn?.classList.add('active');
+    try{window.opener?.avCallSpeakerState?.(true);}catch(_){}
+    return true;
+  }catch(err){
+    console.warn('Comunicação AV: não foi possível alterar a saída de áudio.',err);
+    try{await window.__avTryPlayRemoteMedia(document.documentElement.getAttribute('data-av-call-kind')||'AUDIO',true);}catch(_){}
+    btn?.classList.add('active');
+    try{window.opener?.avCallSpeakerState?.(true);}catch(_){}
+    return false;
+  }
+};
+window.__avSwitchCamera=async function(){
+  const btn=document.getElementById('avPopupSwitchCameraBtn');
+  if(btn?.disabled)return;
+  const next=window.__avFacingMode==='environment'?'user':'environment';
+  try{
+    if(btn)btn.disabled=true;
+    const devices=await navigator.mediaDevices?.enumerateDevices?.();
+    const cams=(devices||[]).filter(d=>d.kind==='videoinput');
+    if(cams.length<2){alert('Este dispositivo não possui uma segunda câmera disponível para alternar.');return false;}
+    const stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:next},width:{ideal:960,max:1280},height:{ideal:540,max:720},frameRate:{ideal:24,max:30}}});
+    const actual=stream.getVideoTracks?.()[0]?.getSettings?.().facingMode||next;
+    window.__avFacingMode=actual;
+    try{await window.opener?.avCallReplaceVideoStream?.(stream,actual);}catch(err){try{stream.getTracks().forEach(t=>t.stop());}catch(_){}throw err;}
+    return true;
+  }catch(err){console.warn('Comunicação AV: falha ao trocar câmera.',err);alert('Não foi possível virar a câmera neste dispositivo.');return false;}
+  finally{if(btn)btn.disabled=false;}
 };
 window.__avPermissionState=async function(name){
   try{
@@ -34117,6 +34171,8 @@ window.addEventListener('beforeunload',function(){
     if(st)st.textContent=label.toUpperCase(); if(sub)sub.textContent=label; if(info)info.textContent=label;
     const c=doc.getElementById('avPopupConnecting'); if(c){ c.textContent=label||'Estabelecendo conexão...'; c.hidden = !!(avCallCurrent && avCallCurrent.status==='connected'); }
     const cam=doc.getElementById('avPopupCameraBtn'); if(cam)cam.hidden=kind!=='VIDEO';
+    const swap=doc.getElementById('avPopupSwitchCameraBtn');if(swap)swap.hidden=kind!=='VIDEO';
+    const speaker=doc.getElementById('avPopupSpeakerBtn');if(speaker)speaker.classList.toggle('active',!!avCallSpeakerActive);
     try{
       /* IMPORTANTE: não reatribuir srcObject a cada atualização do cronômetro.
          Reanexar o mesmo MediaStream reinicia o pipeline em alguns navegadores,
@@ -34133,19 +34189,16 @@ window.addEventListener('beforeunload',function(){
       const remoteA=doc.getElementById('avPopupRemoteAudio');
       const localStream=kind==='VIDEO'?(avCallCurrent?.localStream||null):null;
       const remoteStream=avCallCurrent?.remoteStream||null;
+      const audioStream=avCallEnsureAudioStream(avCallCurrent);
       bind(localV,localStream);
-      let remoteChanged=false;
+      if(localV)localV.style.transform=avCallFacingMode==='environment'?'none':'scaleX(-1)';
+      let remoteChanged=bind(remoteA,audioStream);
+      if(remoteA){remoteA.muted=false;remoteA.volume=1;remoteA.autoplay=true;}
       if(kind==='VIDEO'){
-        remoteChanged=bind(remoteV,remoteStream);
-        bind(remoteA,null);
-        if(remoteV){remoteV.muted=false;remoteV.volume=1;remoteV.autoplay=true;remoteV.playsInline=true;}
-      }else{
-        remoteChanged=bind(remoteA,remoteStream);
-        bind(remoteV,null);
-        if(remoteA){remoteA.muted=false;remoteA.volume=1;remoteA.autoplay=true;}
-      }
-      const target=kind==='VIDEO'?remoteV:remoteA;
-      if(remoteStream && (remoteChanged || target?.paused)){
+        remoteChanged=bind(remoteV,remoteStream)||remoteChanged;
+        if(remoteV){remoteV.muted=true;remoteV.volume=0;remoteV.autoplay=true;remoteV.playsInline=true;}
+      }else bind(remoteV,null);
+      if((audioStream||remoteStream) && (remoteChanged || remoteA?.paused)){
         setTimeout(()=>{try{avCallStagePopup?.__avTryPlayRemoteMedia?.(kind,true);}catch(_){ }},0);
       }
     }catch(_){ }
@@ -34166,8 +34219,8 @@ window.addEventListener('beforeunload',function(){
     const nome=nomeOp(otherOp),ini=iniciais(nome);
     ['avCallStageAvatar','avCallAudioAvatar'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=ini;});
     const n=document.getElementById('avCallStageName'),an=document.getElementById('avCallAudioName');if(n)n.textContent=nome;if(an)an.textContent=nome;
-    const media=document.getElementById('avCallMedia'),cam=document.getElementById('avCallCameraBtn');
-    if(media)media.classList.toggle('audio-only',type!=='VIDEO');if(cam)cam.hidden=type!=='VIDEO';
+    const media=document.getElementById('avCallMedia'),cam=document.getElementById('avCallCameraBtn'),swap=document.getElementById('avCallSwitchCameraBtn');
+    if(media)media.classList.toggle('audio-only',type!=='VIDEO');if(cam)cam.hidden=type!=='VIDEO';if(swap)swap.hidden=type!=='VIDEO';
     avCallSyncPopup(type, document.getElementById('avCallStageSubtitle')?.textContent||'Conectando...');
   }
 
@@ -34221,6 +34274,7 @@ window.addEventListener('beforeunload',function(){
   }
   window.avCallPopupMediaSuccess=function(stream,type){
     avCallRememberPermission(stream,type);
+    try{const facing=stream?.getVideoTracks?.()[0]?.getSettings?.().facingMode;if(facing)avCallFacingMode=facing;}catch(_){}
     const waiter=avCallMediaWaiter;
     if(waiter)waiter.resolve(stream);
     else try{stream?.getTracks?.().forEach(t=>t.stop());}catch(_){ }
@@ -34268,24 +34322,33 @@ window.addEventListener('beforeunload',function(){
     return stream;
   }
 
-  function avCallAttachLocal(stream,type){const v=document.getElementById('avCallLocalVideo');if(v)v.srcObject=type==='VIDEO'?stream:null;avCallSyncPopup(type, document.getElementById('avCallStageSubtitle')?.textContent||'Conectando...');}
+  function avCallEnsureAudioStream(call=avCallCurrent){
+    if(!call)return null;
+    if(!call.remoteAudioStream)call.remoteAudioStream=new MediaStream();
+    const existentes=new Set(call.remoteAudioStream.getAudioTracks().map(t=>t.id));
+    (call.remoteStream?.getAudioTracks?.()||[]).forEach(t=>{if(!existentes.has(t.id)){call.remoteAudioStream.addTrack(t);existentes.add(t.id);}});
+    return call.remoteAudioStream;
+  }
+  function avCallApplyLocalMirror(){
+    const mirror=avCallFacingMode!=='environment';
+    const v=document.getElementById('avCallLocalVideo');if(v)v.style.transform=mirror?'scaleX(-1)':'none';
+    const doc=avCallPopupDoc(),pv=doc?.getElementById('avPopupLocalVideo');if(pv)pv.style.transform=mirror?'scaleX(-1)':'none';
+  }
+  function avCallAttachLocal(stream,type){const v=document.getElementById('avCallLocalVideo');if(v)v.srcObject=type==='VIDEO'?stream:null;avCallApplyLocalMirror();avCallSyncPopup(type, document.getElementById('avCallStageSubtitle')?.textContent||'Conectando...');}
   function avCallAttachRemote(stream,type){
     const kind=String(type||'AUDIO').toUpperCase()==='VIDEO'?'VIDEO':'AUDIO';
     const rv=document.getElementById('avCallRemoteVideo'),ra=document.getElementById('avCallRemoteAudio');
     const popupAtivo=!!(avCallStagePopup&&!avCallStagePopup.closed);
+    const audioStream=avCallEnsureAudioStream(avCallCurrent);
     const bind=(el,value)=>{if(!el)return false;const desired=value||null;if(el.srcObject===desired)return false;el.srcObject=desired;return true;};
-    let changed=false;
+    let changed=bind(ra,audioStream);
     if(kind==='VIDEO'){
-      changed=bind(rv,stream);
-      bind(ra,null);
-      if(rv){rv.muted=popupAtivo;rv.volume=1;rv.autoplay=true;rv.playsInline=true;}
-    }else{
-      changed=bind(ra,stream);
-      bind(rv,null);
-      if(ra){ra.muted=popupAtivo;ra.volume=1;ra.autoplay=true;}
-    }
+      changed=bind(rv,stream)||changed;
+      if(rv){rv.muted=true;rv.volume=0;rv.autoplay=true;rv.playsInline=true;}
+    }else bind(rv,null);
+    if(ra){ra.muted=popupAtivo;ra.volume=1;ra.autoplay=true;}
     avCallSyncPopup(kind, document.getElementById('avCallStageSubtitle')?.textContent||'Conectando...');
-    if(changed || (kind==='VIDEO'?rv:ra)?.paused) setTimeout(()=>avCallEnsureRemotePlayback(kind),0);
+    if(changed || ra?.paused) setTimeout(()=>avCallEnsureRemotePlayback(kind),0);
   }
 
   function avCallScheduleRemotePlayback(type){
@@ -34329,6 +34392,11 @@ window.addEventListener('beforeunload',function(){
       call.remoteStream=call.remoteStream||new MediaStream();
       if(e.streams?.[0])call.remoteStream=e.streams[0];
       else if(e.track&&!call.remoteStream.getTracks().some(t=>t.id===e.track.id))call.remoteStream.addTrack(e.track);
+      call.remoteAudioStream=call.remoteAudioStream||new MediaStream();
+      const audioTracks=[...(call.remoteStream?.getAudioTracks?.()||[])];
+      if(e.track?.kind==='audio'&&!audioTracks.some(t=>t.id===e.track.id))audioTracks.push(e.track);
+      const existentes=new Set(call.remoteAudioStream.getAudioTracks().map(t=>t.id));
+      audioTracks.forEach(t=>{if(!existentes.has(t.id)){call.remoteAudioStream.addTrack(t);existentes.add(t.id);}});
       if(e.track){
         console.info('Comunicação AV: track remota recebida',e.track.kind,e.track.readyState,'muted=',e.track.muted);
         avCallPrepareRemoteTrack(call,e.track);
@@ -34373,6 +34441,8 @@ window.addEventListener('beforeunload',function(){
     if(avCallCurrent?.pc){try{avCallCurrent.pc.onicecandidate=null;avCallCurrent.pc.ontrack=null;avCallCurrent.pc.onconnectionstatechange=null;avCallCurrent.pc.oniceconnectionstatechange=null;avCallCurrent.pc.close();}catch(_){}}
     try{avCallCurrent?.localStream?.getTracks?.().forEach(t=>t.stop());}catch(_){}
     try{avCallCurrent?.remoteStream?.getTracks?.().forEach(t=>t.stop());}catch(_){}
+    try{avCallCurrent?.remoteAudioStream?.getTracks?.().forEach(t=>{if(!avCallCurrent?.remoteStream?.getTracks?.().includes(t))t.stop();});}catch(_){}
+    avCallSpeakerActive=false;avCallFacingMode='user';
     const rv=document.getElementById('avCallRemoteVideo'),lv=document.getElementById('avCallLocalVideo'),ra=document.getElementById('avCallRemoteAudio');if(rv)rv.srcObject=null;if(lv)lv.srcObject=null;if(ra)ra.srcObject=null;
     const stage=document.getElementById('avCallStage'),overlay=document.getElementById('avCallStageOverlay');if(stage){stage.hidden=true;stage.setAttribute('hidden','');stage.style.removeProperty('display');stage.classList.remove('audio-call','video-call');stage.setAttribute('aria-hidden','true');}if(overlay){overlay.hidden=true;overlay.setAttribute('hidden','');overlay.style.removeProperty('display');overlay.setAttribute('aria-hidden','true');}
     avCallClosePopup();
@@ -34395,10 +34465,12 @@ window.addEventListener('beforeunload',function(){
     avCallShowStage(incoming.from,incoming.type,incoming.type==='VIDEO'?'Preparando câmera e microfone...':'Preparando microfone...');
     try{
       const stream=await avCallGetMedia(incoming.type);
+      try{const facing=stream?.getVideoTracks?.()[0]?.getSettings?.().facingMode;if(facing)avCallFacingMode=facing;}catch(_){}
+      avCallSpeakerActive=false;
       avCallCurrent={id:incoming.id,type:incoming.type,role:'callee',otherOp:incoming.from,otherName:incoming.fromName,status:'connecting',localStream:stream,pendingCandidates:incoming.pendingCandidates||[],localCandidates:[],signalReady:false};
       avCallPendingPerson=avCallCurrent;
       avCallIncoming=null;avCallShowStage(avCallCurrent.otherOp,avCallCurrent.type,'Conectando...');avCallAttachLocal(stream,avCallCurrent.type);
-      const pc=avCallCreatePeer(avCallCurrent);stream.getTracks().forEach(t=>pc.addTrack(t,stream));await pc.setRemoteDescription(incoming.offer);await avCallFlushCandidates(avCallCurrent);
+      const pc=avCallCreatePeer(avCallCurrent);stream.getTracks().forEach(t=>{try{if(t.kind==='audio')t.contentHint='speech';if(t.kind==='video')t.contentHint='motion';}catch(_){}pc.addTrack(t,stream);});await pc.setRemoteDescription(incoming.offer);await avCallFlushCandidates(avCallCurrent);
       const answer=await pc.createAnswer();await pc.setLocalDescription(answer);await avCallSend('answer',{to:avCallCurrent.otherOp,callId:avCallCurrent.id,answer:{type:pc.localDescription.type,sdp:pc.localDescription.sdp}});
       avCallCurrent.signalReady=true;await avCallFlushLocalSignals(avCallCurrent);
     }catch(err){
@@ -34416,6 +34488,49 @@ window.addEventListener('beforeunload',function(){
 
   window.avCallToggleMute=function(){const t=avCallCurrent?.localStream?.getAudioTracks?.()[0];if(!t)return;t.enabled=!t.enabled;document.getElementById('avCallMuteBtn')?.classList.toggle('active',!t.enabled);avCallSyncPopup(avCallCurrent?.type||'AUDIO', document.getElementById('avCallStageSubtitle')?.textContent||'Em chamada');};
   window.avCallToggleCamera=function(){const t=avCallCurrent?.localStream?.getVideoTracks?.()[0];if(!t)return;t.enabled=!t.enabled;document.getElementById('avCallCameraBtn')?.classList.toggle('active',!t.enabled);avCallSyncPopup(avCallCurrent?.type||'VIDEO', document.getElementById('avCallStageSubtitle')?.textContent||'Em chamada');};
+  window.avCallSpeakerState=function(active){avCallSpeakerActive=!!active;document.getElementById('avCallSpeakerBtn')?.classList.toggle('active',avCallSpeakerActive);avCallSyncPopup(avCallCurrent?.type||'AUDIO',document.getElementById('avCallStageSubtitle')?.textContent||'Em chamada');};
+  window.avCallToggleSpeaker=async function(){
+    avCallPrimeAudio();
+    const popup=avCallStagePopup&&!avCallStagePopup.closed?avCallStagePopup:null;
+    if(popup){try{await popup.__avSelectSpeaker?.();}catch(_){await avCallEnsureRemotePlayback(avCallCurrent?.type||'AUDIO');window.avCallSpeakerState(true);}return;}
+    const audio=document.getElementById('avCallRemoteAudio');
+    try{
+      await avCallEnsureRemotePlayback(avCallCurrent?.type||'AUDIO');
+      if(audio&&typeof audio.setSinkId==='function'&&navigator.mediaDevices?.selectAudioOutput){const dev=await navigator.mediaDevices.selectAudioOutput();if(dev?.deviceId)await audio.setSinkId(dev.deviceId);}
+      else if(audio&&typeof audio.setSinkId==='function'){try{await audio.setSinkId('');}catch(_){}}
+    }catch(err){console.warn('Comunicação AV: seleção de viva-voz não disponível.',err);}
+    window.avCallSpeakerState(true);
+  };
+  window.avCallReplaceVideoStream=async function(stream,facing){
+    if(!avCallCurrent||avCallCurrent.type!=='VIDEO')throw new Error('Não há videochamada ativa.');
+    const nova=stream?.getVideoTracks?.()[0];if(!nova)throw new Error('Nova câmera não forneceu vídeo.');
+    const antiga=avCallCurrent.localStream?.getVideoTracks?.()[0]||null;
+    try{nova.enabled=antiga?antiga.enabled:true;nova.contentHint='motion';}catch(_){}
+    const sender=avCallCurrent.pc?.getSenders?.().find(s=>s.track?.kind==='video');
+    if(!sender)throw new Error('Transmissor de vídeo não encontrado.');
+    await sender.replaceTrack(nova);
+    try{if(antiga)avCallCurrent.localStream.removeTrack(antiga);}catch(_){}
+    try{avCallCurrent.localStream.addTrack(nova);}catch(_){}
+    try{antiga?.stop?.();}catch(_){}
+    try{stream.getAudioTracks?.().forEach(t=>t.stop());}catch(_){}
+    avCallFacingMode=facing||nova.getSettings?.().facingMode||avCallFacingMode;
+    avCallAttachLocal(avCallCurrent.localStream,'VIDEO');
+    avCallApplyLocalMirror();
+    avCallSyncPopup('VIDEO',document.getElementById('avCallStageSubtitle')?.textContent||'Em chamada');
+    return true;
+  };
+  window.avCallSwitchCamera=async function(){
+    if(!avCallCurrent||avCallCurrent.type!=='VIDEO')return;
+    const popup=avCallStagePopup&&!avCallStagePopup.closed?avCallStagePopup:null;
+    if(popup){try{await popup.__avSwitchCamera?.();}catch(_){}return;}
+    const next=avCallFacingMode==='environment'?'user':'environment';
+    try{
+      const devices=await navigator.mediaDevices?.enumerateDevices?.();const cams=(devices||[]).filter(d=>d.kind==='videoinput');
+      if(cams.length<2){alert('Este dispositivo não possui uma segunda câmera disponível para alternar.');return;}
+      const stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:next},width:{ideal:960,max:1280},height:{ideal:540,max:720},frameRate:{ideal:24,max:30}}});
+      await window.avCallReplaceVideoStream(stream,stream.getVideoTracks?.()[0]?.getSettings?.().facingMode||next);
+    }catch(err){console.warn('Comunicação AV: falha ao virar câmera.',err);alert('Não foi possível virar a câmera neste dispositivo.');}
+  };
 
   async function avCallStart(type){
     avCallPrimeAudio();
@@ -34439,6 +34554,8 @@ window.addEventListener('beforeunload',function(){
       if(attempt!==avCallAttemptToken) throw new Error('A chamada foi cancelada.');
       avCallSetStatus(type==='VIDEO'?'Aguardando autorização da câmera e do microfone...':'Aguardando autorização do microfone...');
       stream=await avCallGetMedia(type);
+      try{const facing=stream?.getVideoTracks?.()[0]?.getSettings?.().facingMode;if(facing)avCallFacingMode=facing;}catch(_){}
+      avCallSpeakerActive=false;
       if(attempt!==avCallAttemptToken){try{stream?.getTracks?.().forEach(t=>t.stop());}catch(_){};return;}
       id=uidCall();avCallOwnClaim(id);
       avCallCurrent={id,type,role:'caller',otherOp:other,otherName:nomeOp(other),status:'preparing',startedAt:Date.now(),localStream:stream,pendingCandidates:[],localCandidates:[],signalReady:false};
@@ -34447,7 +34564,7 @@ window.addEventListener('beforeunload',function(){
       avCallSetStatus('Preparando chamada...');
       avCallArmStartWatchdog(25000);
 
-      const pc=avCallCreatePeer(avCallCurrent);stream.getTracks().forEach(t=>pc.addTrack(t,stream));
+      const pc=avCallCreatePeer(avCallCurrent);stream.getTracks().forEach(t=>{try{if(t.kind==='audio')t.contentHint='speech';if(t.kind==='video')t.contentHint='motion';}catch(_){}pc.addTrack(t,stream);});
       const offer=await avCallTimeout(pc.createOffer(),7000,'Tempo esgotado ao preparar a chamada.');
       if(attempt!==avCallAttemptToken) throw new Error('A chamada foi cancelada.');
       await avCallTimeout(pc.setLocalDescription(offer),7000,'Tempo esgotado ao configurar a chamada.');
@@ -38140,6 +38257,83 @@ body.avmail-mode #mensagemTexto{min-height:168px!important;max-height:340px!impo
   const baseRender=window.renderAnexosMensagemEditor; if(typeof baseRender==='function'){ window.renderAnexosMensagemEditor=function(){ const r=baseRender.apply(this,arguments); updateAttachStats(); return r; }; }
   const baseClean=window.limparCompositorMensagem; if(typeof baseClean==='function'){ window.limparCompositorMensagem=function(){ const r=baseClean.apply(this,arguments); ['mensagemCopiaOculta','mensagemResponderPara','mensagemEtiqueta','mensagemDepartamento','mensagemLembrete','mensagemModelo','mensagemAssinatura'].forEach(id=>{ const el=byId(id); if(el) el.selectedIndex=0; }); ['mensagemConfLeitura','mensagemConfidencial','mensagemEntrega','mensagemAltaPrioridadeToggle'].forEach(id=>{ const el=byId(id); if(el) el.checked=false; }); updateAttachStats(); fecharMaisCompositorEmailAVV26(); return r; }; }
   document.addEventListener('click',function(ev){ if(!ev.target.closest('.avmail-more-btn-v26')&&!ev.target.closest('#avMailComposeMoreV26')) fecharMaisCompositorEmailAVV26(); });
+})();
+</script>
+<script id="comunicacao-av-realtime-v5153">
+/* V51.53 — mensagens em tempo real: Broadcast imediato + verificação leve de revisão. */
+(function(){
+  let canal=null,estado='CLOSED',iniciando=null,puxando=false,puxarPendente=false,ultimoUpdatedAt='',pollTimer=null,debounceTimer=null;
+  const CHANNEL='comunicacao_av_data_live_v1';
+  const me=()=>typeof normalizarOperador==='function'?normalizarOperador(usuarioAtual?.operador||''):String(usuarioAtual?.operador||'');
+  const client=()=>typeof supabaseclient!=='undefined'?supabaseclient:null;
+  const ativo=()=>!!(me()&&client()&&navigator.onLine);
+  function renderComunicacaoLive(){
+    try{typeof renderMensagensInternas==='function'&&renderMensagensInternas();}catch(_){}
+    try{typeof atualizarBadgesCanaisComunicacao==='function'&&atualizarBadgesCanaisComunicacao();}catch(_){}
+    try{typeof renderComunicacaoAV==='function'&&renderComunicacaoAV();}catch(_){}
+    try{if(document.body.classList.contains('avchat-mode')&&typeof renderBatePapoAV==='function')renderBatePapoAV();}catch(_){}
+    try{typeof renderComunicacaoAVOutlook==='function'&&document.body.classList.contains('avmail-mode')&&renderComunicacaoAVOutlook();}catch(_){}
+  }
+  async function lerRevisao(){
+    const c=client();if(!c)return '';
+    const {data,error}=await c.from(ONLINE_TABLE).select('updated_at').eq('id',SHARED_ROW_ID).maybeSingle();
+    if(error)throw error;return String(data?.updated_at||'');
+  }
+  async function puxar(force=false){
+    if(!ativo())return false;
+    if(puxando||salvamentoEmAndamento){puxarPendente=true;return false;}
+    puxando=true;
+    try{
+      const revisao=await lerRevisao();
+      if(!force&&revisao&&ultimoUpdatedAt&&revisao===ultimoUpdatedAt)return false;
+      const c=client();const {data,error}=await c.from(ONLINE_TABLE).select('dados,updated_at').eq('id',SHARED_ROW_ID).maybeSingle();
+      if(error)throw error;if(!data?.dados)return false;
+      const remoto=data.dados;
+      aplicandoRemoto=true;
+      try{
+        const local=dadosCompartilhadosDoDB(db),base=valorBaseSync(chaveBaseCompartilhado(),{}),mesclado=mesclarTresVias(base,local,remoto);
+        aplicarDadosCompartilhados(mesclado);prepararDBCarregado();
+        storageSetSeguro(`${STORAGE_KEY}_compartilhado`,dadosCompartilhadosDoDB(db),{serializar:true,silencioso:true});
+        storageSetSeguro(chaveBaseCompartilhado(),remoto,{serializar:true,silencioso:true});
+        ultimoUpdatedAt=String(data.updated_at||revisao||'');
+        renderComunicacaoLive();
+        marcarSincronizacaoConfirmada('ONLINE • comunicação em tempo real');
+      }finally{aplicandoRemoto=false;}
+      return true;
+    }catch(err){console.warn('Comunicação AV: falha ao atualizar mensagens em tempo real.',err);return false;}
+    finally{puxando=false;if(puxarPendente){puxarPendente=false;setTimeout(()=>puxar(false),180);}}
+  }
+  function agendarPull(ms=90){clearTimeout(debounceTimer);debounceTimer=setTimeout(()=>puxar(false),ms);}
+  async function start(){
+    if(!ativo())return null;
+    if(canal&&estado==='SUBSCRIBED')return canal;
+    if(iniciando)return iniciando;
+    if(canal){try{client()?.removeChannel(canal);}catch(_){}canal=null;}
+    iniciando=new Promise((resolve)=>{
+      const c=client();if(!c){iniciando=null;resolve(null);return;}
+      canal=c.channel(CHANNEL,{config:{broadcast:{self:false,ack:false}}})
+        .on('broadcast',{event:'shared-update'},({payload})=>{if(String(payload?.from||'')!==me())agendarPull(40);})
+        .subscribe(status=>{
+          estado=status;
+          if(status==='SUBSCRIBED'){iniciando=null;resolve(canal);agendarPull(0);}
+          else if(['CHANNEL_ERROR','TIMED_OUT','CLOSED'].includes(status)){if(status!=='CLOSED')console.warn('Comunicação AV: canal de mensagens',status);iniciando=null;}
+        });
+      setTimeout(()=>{if(iniciando){iniciando=null;resolve(canal);}},4500);
+    });
+    return iniciando;
+  }
+  window.avComunicacaoLiveStart=start;
+  window.avComunicacaoBroadcastUpdate=async function(){
+    if(!ativo())return false;
+    try{await start();if(estado!=='SUBSCRIBED'||!canal)return false;await canal.send({type:'broadcast',event:'shared-update',payload:{from:me(),at:Date.now()}});return true;}catch(_){return false;}
+  };
+  window.avComunicacaoPullAgora=()=>puxar(true);
+  function startPoll(){if(pollTimer)return;pollTimer=setInterval(()=>{if(!document.hidden&&ativo())puxar(false);if(ativo()&&estado!=='SUBSCRIBED')start();},4000);}
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){start();puxar(false);}});
+  window.addEventListener('focus',()=>{start();puxar(false);});
+  window.addEventListener('online',()=>{start();puxar(true);});
+  startPoll();
+  setTimeout(()=>{if(me()){start();puxar(true);}},1200);
 })();
 </script>
 </body>
