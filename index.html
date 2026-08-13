@@ -10623,6 +10623,243 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
     }
   </style>
 
+
+  <style id="topbar-compact-v5148">
+    /* V51.48 — cabeçalho mais compacto e proporcional no desktop */
+    @media (min-width:1101px){
+      .topbar{
+        grid-template-columns:minmax(240px,1fr) max-content !important;
+        gap:10px !important;
+        min-height:84px !important;
+        padding:10px 12px 10px 14px !important;
+        align-items:center !important;
+      }
+      .top-left{min-width:0 !important;overflow:hidden !important;}
+      .top-left h2,#pageTitle{font-size:1.34rem !important;line-height:1.08 !important;}
+      .top-left p,#pageSubtitle{font-size:.78rem !important;line-height:1.2 !important;}
+
+      .store-meta{
+        display:grid !important;
+        grid-template-columns:72px 118px minmax(178px,218px) 82px 96px 38px 38px 38px !important;
+        gap:6px !important;
+        width:max-content !important;
+        min-width:max-content !important;
+        max-width:none !important;
+        align-items:stretch !important;
+      }
+
+      .store-meta .info-tile,
+      .store-meta .header-notification,
+      .store-meta .header-theme,
+      .store-meta .header-logout{
+        min-height:50px !important;
+        height:50px !important;
+        border-radius:13px !important;
+      }
+
+      .info-tile{
+        padding:6px 7px !important;
+        gap:6px !important;
+      }
+      .info-icon{
+        flex:0 0 18px !important;
+        width:18px !important;
+        height:18px !important;
+      }
+      .info-icon svg,
+      .header-notification svg,
+      .header-logout svg{
+        width:16px !important;
+        height:16px !important;
+        stroke-width:1.95 !important;
+      }
+      .info-copy{gap:1px !important;min-width:0 !important;}
+      .info-copy small{
+        font-size:.52rem !important;
+        line-height:1.02 !important;
+        letter-spacing:.04em !important;
+      }
+      .info-copy b{
+        font-size:.73rem !important;
+        line-height:1.05 !important;
+      }
+      .info-store .info-copy b,
+      .info-operator .info-copy b,
+      .info-manager .info-copy b{
+        font-size:.84rem !important;
+      }
+      .info-month .info-copy b{
+        font-size:.76rem !important;
+      }
+      .info-user .info-copy b,
+      #headerUserName{
+        display:-webkit-box !important;
+        -webkit-line-clamp:2 !important;
+        -webkit-box-orient:vertical !important;
+        overflow:hidden !important;
+        white-space:normal !important;
+        text-overflow:ellipsis !important;
+        font-size:.70rem !important;
+        line-height:1.02 !important;
+        max-height:2.1em !important;
+      }
+      .store-meta .header-notification,
+      .store-meta .header-theme,
+      .store-meta .header-logout,
+      #notificationBtn,
+      .header-theme.theme-btn,
+      .header-logout.logout-fixed{
+        width:38px !important;
+        min-width:38px !important;
+        padding:0 !important;
+      }
+      .notification-badge{
+        top:4px !important;
+        right:4px !important;
+        min-width:15px !important;
+        height:15px !important;
+        font-size:.58rem !important;
+        line-height:15px !important;
+      }
+    }
+
+    @media (min-width:1101px) and (max-width:1450px){
+      .store-meta{
+        grid-template-columns:68px 110px minmax(165px,200px) 78px 90px 36px 36px 36px !important;
+        gap:5px !important;
+      }
+      .info-tile{padding:6px !important;}
+      .info-copy small{font-size:.49rem !important;}
+      .info-copy b{font-size:.69rem !important;}
+      .info-store .info-copy b,
+      .info-operator .info-copy b,
+      .info-manager .info-copy b{font-size:.80rem !important;}
+      .store-meta .header-notification,
+      .store-meta .header-theme,
+      .store-meta .header-logout,
+      #notificationBtn,
+      .header-theme.theme-btn,
+      .header-logout.logout-fixed{
+        width:36px !important;
+        min-width:36px !important;
+      }
+    }
+  </style>
+
+
+  <style id="topbar-loja-proporcional-v5149">
+    /* V51.49 — card LOJA 24 com largura própria e leitura sem compressão */
+    @media (min-width:1101px){
+      .store-meta{
+        grid-template-columns:94px 118px minmax(178px,218px) 82px 96px 38px 38px 38px !important;
+      }
+      .info-store{
+        min-width:94px !important;
+        padding-left:10px !important;
+        padding-right:10px !important;
+        gap:8px !important;
+      }
+      .info-store .info-icon{
+        flex:0 0 20px !important;
+        width:20px !important;
+        height:20px !important;
+      }
+      .info-store .info-icon svg{
+        width:18px !important;
+        height:18px !important;
+      }
+      .info-store .info-copy{
+        min-width:38px !important;
+        flex:1 1 auto !important;
+        align-items:flex-start !important;
+      }
+      .info-store .info-copy small{
+        font-size:.56rem !important;
+        line-height:1 !important;
+        overflow:visible !important;
+        text-overflow:clip !important;
+      }
+      .info-store .info-copy b{
+        font-size:.92rem !important;
+        line-height:1.05 !important;
+        overflow:visible !important;
+        text-overflow:clip !important;
+      }
+    }
+    @media (min-width:1101px) and (max-width:1450px){
+      .store-meta{
+        grid-template-columns:88px 110px minmax(165px,200px) 78px 90px 36px 36px 36px !important;
+      }
+      .info-store{
+        min-width:88px !important;
+        padding-left:8px !important;
+        padding-right:8px !important;
+        gap:7px !important;
+      }
+      .info-store .info-copy small{font-size:.53rem !important;}
+      .info-store .info-copy b{font-size:.88rem !important;}
+    }
+  </style>
+
+
+  <style id="topbar-mes-ano-v5150">
+    /* V51.50 — card MÊS / ANO proporcional e sem truncamento */
+    @media (min-width:1101px){
+      .store-meta{
+        grid-template-columns:94px 138px minmax(178px,218px) 82px 96px 38px 38px 38px !important;
+      }
+      .info-month{
+        min-width:138px !important;
+        padding-left:9px !important;
+        padding-right:10px !important;
+        gap:8px !important;
+      }
+      .info-month .info-icon{
+        flex:0 0 20px !important;
+        width:20px !important;
+        height:20px !important;
+      }
+      .info-month .info-icon svg{
+        width:18px !important;
+        height:18px !important;
+      }
+      .info-month .info-copy{
+        min-width:82px !important;
+        flex:1 1 auto !important;
+        align-items:flex-start !important;
+      }
+      .info-month .info-copy small{
+        font-size:.56rem !important;
+        line-height:1 !important;
+        white-space:nowrap !important;
+        overflow:visible !important;
+        text-overflow:clip !important;
+      }
+      .info-month .info-copy b,
+      #mesAtual{
+        font-size:.82rem !important;
+        line-height:1.05 !important;
+        white-space:nowrap !important;
+        overflow:visible !important;
+        text-overflow:clip !important;
+        letter-spacing:.01em !important;
+      }
+    }
+    @media (min-width:1101px) and (max-width:1450px){
+      .store-meta{
+        grid-template-columns:88px 130px minmax(165px,200px) 78px 90px 36px 36px 36px !important;
+      }
+      .info-month{
+        min-width:130px !important;
+        padding-left:8px !important;
+        padding-right:8px !important;
+        gap:7px !important;
+      }
+      .info-month .info-copy small{font-size:.53rem !important;}
+      .info-month .info-copy b,#mesAtual{font-size:.78rem !important;}
+    }
+  </style>
+
 </head>
 <body>
   <script>
@@ -12423,7 +12660,7 @@ function selecionarModuloEscalas(modulo){
 
 function hojeISO(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function agoraBR(){ return new Date().toLocaleString('pt-BR'); }
-function mesAnoBR(){ return new Date().toLocaleDateString('pt-BR', {month:'long', year:'numeric'}).replace(/^./, c => c.toUpperCase()); }
+function mesAnoBR(){ const d=new Date(); const mes=d.toLocaleDateString('pt-BR',{month:'long'}).toLocaleUpperCase('pt-BR'); return `${mes} ${d.getFullYear()}`; }
 function atualizarMesAtualCabecalho(){
   const campoMes = document.getElementById('mesAtual');
   if(campoMes) campoMes.textContent = mesAnoBR();
@@ -17402,7 +17639,130 @@ function exportarExcelRelatorio(){ showAppLoader('Gerando Excel', 'Montando o ar
 
   
 
-</style></head><body><h1>Relatório Gerencial - Loja 24</h1><p>Gerente: ALANA • Exportado em ${agoraBR()}</p>${document.getElementById('tabelaRelatorio').outerHTML}
+</style>
+  <style id="topbar-compact-v5148">
+    /* V51.48 — cabeçalho mais compacto e proporcional no desktop */
+    @media (min-width:1101px){
+      .topbar{
+        grid-template-columns:minmax(240px,1fr) max-content !important;
+        gap:10px !important;
+        min-height:84px !important;
+        padding:10px 12px 10px 14px !important;
+        align-items:center !important;
+      }
+      .top-left{min-width:0 !important;overflow:hidden !important;}
+      .top-left h2,#pageTitle{font-size:1.34rem !important;line-height:1.08 !important;}
+      .top-left p,#pageSubtitle{font-size:.78rem !important;line-height:1.2 !important;}
+
+      .store-meta{
+        display:grid !important;
+        grid-template-columns:72px 118px minmax(178px,218px) 82px 96px 38px 38px 38px !important;
+        gap:6px !important;
+        width:max-content !important;
+        min-width:max-content !important;
+        max-width:none !important;
+        align-items:stretch !important;
+      }
+
+      .store-meta .info-tile,
+      .store-meta .header-notification,
+      .store-meta .header-theme,
+      .store-meta .header-logout{
+        min-height:50px !important;
+        height:50px !important;
+        border-radius:13px !important;
+      }
+
+      .info-tile{
+        padding:6px 7px !important;
+        gap:6px !important;
+      }
+      .info-icon{
+        flex:0 0 18px !important;
+        width:18px !important;
+        height:18px !important;
+      }
+      .info-icon svg,
+      .header-notification svg,
+      .header-logout svg{
+        width:16px !important;
+        height:16px !important;
+        stroke-width:1.95 !important;
+      }
+      .info-copy{gap:1px !important;min-width:0 !important;}
+      .info-copy small{
+        font-size:.52rem !important;
+        line-height:1.02 !important;
+        letter-spacing:.04em !important;
+      }
+      .info-copy b{
+        font-size:.73rem !important;
+        line-height:1.05 !important;
+      }
+      .info-store .info-copy b,
+      .info-operator .info-copy b,
+      .info-manager .info-copy b{
+        font-size:.84rem !important;
+      }
+      .info-month .info-copy b{
+        font-size:.76rem !important;
+      }
+      .info-user .info-copy b,
+      #headerUserName{
+        display:-webkit-box !important;
+        -webkit-line-clamp:2 !important;
+        -webkit-box-orient:vertical !important;
+        overflow:hidden !important;
+        white-space:normal !important;
+        text-overflow:ellipsis !important;
+        font-size:.70rem !important;
+        line-height:1.02 !important;
+        max-height:2.1em !important;
+      }
+      .store-meta .header-notification,
+      .store-meta .header-theme,
+      .store-meta .header-logout,
+      #notificationBtn,
+      .header-theme.theme-btn,
+      .header-logout.logout-fixed{
+        width:38px !important;
+        min-width:38px !important;
+        padding:0 !important;
+      }
+      .notification-badge{
+        top:4px !important;
+        right:4px !important;
+        min-width:15px !important;
+        height:15px !important;
+        font-size:.58rem !important;
+        line-height:15px !important;
+      }
+    }
+
+    @media (min-width:1101px) and (max-width:1450px){
+      .store-meta{
+        grid-template-columns:68px 110px minmax(165px,200px) 78px 90px 36px 36px 36px !important;
+        gap:5px !important;
+      }
+      .info-tile{padding:6px !important;}
+      .info-copy small{font-size:.49rem !important;}
+      .info-copy b{font-size:.69rem !important;}
+      .info-store .info-copy b,
+      .info-operator .info-copy b,
+      .info-manager .info-copy b{font-size:.80rem !important;}
+      .store-meta .header-notification,
+      .store-meta .header-theme,
+      .store-meta .header-logout,
+      #notificationBtn,
+      .header-theme.theme-btn,
+      .header-logout.logout-fixed{
+        width:36px !important;
+        min-width:36px !important;
+      }
+    }
+  </style>
+
+</head><body><h1>Relatório Gerencial - Loja 24</h1><p>Gerente: ALANA • Exportado em ${agoraBR()}</p>${document.getElementById('tabelaRelatorio').outerHTML}
 </body></html>`; downloadBlob(new Blob([html], {type:'application/vnd.ms-excel'}), `relatorio_gerencial_${hojeISO()}.xls`); hideAppLoader(); }, 260); }
 
 
@@ -19069,7 +19429,130 @@ window.addEventListener('load', async () => {
       @media print{button{display:none!important}}
     `;
     doc.open();
-    doc.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(titulo)}</title><style>${css}</style></head><body><main class="doc">${conteudo}</main></body></html>`);
+    doc.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(titulo)}</title><style>${css}</style>
+  <style id="topbar-compact-v5148">
+    /* V51.48 — cabeçalho mais compacto e proporcional no desktop */
+    @media (min-width:1101px){
+      .topbar{
+        grid-template-columns:minmax(240px,1fr) max-content !important;
+        gap:10px !important;
+        min-height:84px !important;
+        padding:10px 12px 10px 14px !important;
+        align-items:center !important;
+      }
+      .top-left{min-width:0 !important;overflow:hidden !important;}
+      .top-left h2,#pageTitle{font-size:1.34rem !important;line-height:1.08 !important;}
+      .top-left p,#pageSubtitle{font-size:.78rem !important;line-height:1.2 !important;}
+
+      .store-meta{
+        display:grid !important;
+        grid-template-columns:72px 118px minmax(178px,218px) 82px 96px 38px 38px 38px !important;
+        gap:6px !important;
+        width:max-content !important;
+        min-width:max-content !important;
+        max-width:none !important;
+        align-items:stretch !important;
+      }
+
+      .store-meta .info-tile,
+      .store-meta .header-notification,
+      .store-meta .header-theme,
+      .store-meta .header-logout{
+        min-height:50px !important;
+        height:50px !important;
+        border-radius:13px !important;
+      }
+
+      .info-tile{
+        padding:6px 7px !important;
+        gap:6px !important;
+      }
+      .info-icon{
+        flex:0 0 18px !important;
+        width:18px !important;
+        height:18px !important;
+      }
+      .info-icon svg,
+      .header-notification svg,
+      .header-logout svg{
+        width:16px !important;
+        height:16px !important;
+        stroke-width:1.95 !important;
+      }
+      .info-copy{gap:1px !important;min-width:0 !important;}
+      .info-copy small{
+        font-size:.52rem !important;
+        line-height:1.02 !important;
+        letter-spacing:.04em !important;
+      }
+      .info-copy b{
+        font-size:.73rem !important;
+        line-height:1.05 !important;
+      }
+      .info-store .info-copy b,
+      .info-operator .info-copy b,
+      .info-manager .info-copy b{
+        font-size:.84rem !important;
+      }
+      .info-month .info-copy b{
+        font-size:.76rem !important;
+      }
+      .info-user .info-copy b,
+      #headerUserName{
+        display:-webkit-box !important;
+        -webkit-line-clamp:2 !important;
+        -webkit-box-orient:vertical !important;
+        overflow:hidden !important;
+        white-space:normal !important;
+        text-overflow:ellipsis !important;
+        font-size:.70rem !important;
+        line-height:1.02 !important;
+        max-height:2.1em !important;
+      }
+      .store-meta .header-notification,
+      .store-meta .header-theme,
+      .store-meta .header-logout,
+      #notificationBtn,
+      .header-theme.theme-btn,
+      .header-logout.logout-fixed{
+        width:38px !important;
+        min-width:38px !important;
+        padding:0 !important;
+      }
+      .notification-badge{
+        top:4px !important;
+        right:4px !important;
+        min-width:15px !important;
+        height:15px !important;
+        font-size:.58rem !important;
+        line-height:15px !important;
+      }
+    }
+
+    @media (min-width:1101px) and (max-width:1450px){
+      .store-meta{
+        grid-template-columns:68px 110px minmax(165px,200px) 78px 90px 36px 36px 36px !important;
+        gap:5px !important;
+      }
+      .info-tile{padding:6px !important;}
+      .info-copy small{font-size:.49rem !important;}
+      .info-copy b{font-size:.69rem !important;}
+      .info-store .info-copy b,
+      .info-operator .info-copy b,
+      .info-manager .info-copy b{font-size:.80rem !important;}
+      .store-meta .header-notification,
+      .store-meta .header-theme,
+      .store-meta .header-logout,
+      #notificationBtn,
+      .header-theme.theme-btn,
+      .header-logout.logout-fixed{
+        width:36px !important;
+        min-width:36px !important;
+      }
+    }
+  </style>
+
+</head><body><main class="doc">${conteudo}</main></body></html>`);
     doc.close();
     const run=()=>{try{frame.contentWindow.focus();frame.contentWindow.print();}finally{setTimeout(()=>frame.remove(),1400);}};
     setTimeout(run,320);
@@ -23020,7 +23503,130 @@ window.addEventListener('load', async () => {
             .actions{justify-content:flex-start}
           }
         </style>
-      </head>
+      
+  <style id="topbar-compact-v5148">
+    /* V51.48 — cabeçalho mais compacto e proporcional no desktop */
+    @media (min-width:1101px){
+      .topbar{
+        grid-template-columns:minmax(240px,1fr) max-content !important;
+        gap:10px !important;
+        min-height:84px !important;
+        padding:10px 12px 10px 14px !important;
+        align-items:center !important;
+      }
+      .top-left{min-width:0 !important;overflow:hidden !important;}
+      .top-left h2,#pageTitle{font-size:1.34rem !important;line-height:1.08 !important;}
+      .top-left p,#pageSubtitle{font-size:.78rem !important;line-height:1.2 !important;}
+
+      .store-meta{
+        display:grid !important;
+        grid-template-columns:72px 118px minmax(178px,218px) 82px 96px 38px 38px 38px !important;
+        gap:6px !important;
+        width:max-content !important;
+        min-width:max-content !important;
+        max-width:none !important;
+        align-items:stretch !important;
+      }
+
+      .store-meta .info-tile,
+      .store-meta .header-notification,
+      .store-meta .header-theme,
+      .store-meta .header-logout{
+        min-height:50px !important;
+        height:50px !important;
+        border-radius:13px !important;
+      }
+
+      .info-tile{
+        padding:6px 7px !important;
+        gap:6px !important;
+      }
+      .info-icon{
+        flex:0 0 18px !important;
+        width:18px !important;
+        height:18px !important;
+      }
+      .info-icon svg,
+      .header-notification svg,
+      .header-logout svg{
+        width:16px !important;
+        height:16px !important;
+        stroke-width:1.95 !important;
+      }
+      .info-copy{gap:1px !important;min-width:0 !important;}
+      .info-copy small{
+        font-size:.52rem !important;
+        line-height:1.02 !important;
+        letter-spacing:.04em !important;
+      }
+      .info-copy b{
+        font-size:.73rem !important;
+        line-height:1.05 !important;
+      }
+      .info-store .info-copy b,
+      .info-operator .info-copy b,
+      .info-manager .info-copy b{
+        font-size:.84rem !important;
+      }
+      .info-month .info-copy b{
+        font-size:.76rem !important;
+      }
+      .info-user .info-copy b,
+      #headerUserName{
+        display:-webkit-box !important;
+        -webkit-line-clamp:2 !important;
+        -webkit-box-orient:vertical !important;
+        overflow:hidden !important;
+        white-space:normal !important;
+        text-overflow:ellipsis !important;
+        font-size:.70rem !important;
+        line-height:1.02 !important;
+        max-height:2.1em !important;
+      }
+      .store-meta .header-notification,
+      .store-meta .header-theme,
+      .store-meta .header-logout,
+      #notificationBtn,
+      .header-theme.theme-btn,
+      .header-logout.logout-fixed{
+        width:38px !important;
+        min-width:38px !important;
+        padding:0 !important;
+      }
+      .notification-badge{
+        top:4px !important;
+        right:4px !important;
+        min-width:15px !important;
+        height:15px !important;
+        font-size:.58rem !important;
+        line-height:15px !important;
+      }
+    }
+
+    @media (min-width:1101px) and (max-width:1450px){
+      .store-meta{
+        grid-template-columns:68px 110px minmax(165px,200px) 78px 90px 36px 36px 36px !important;
+        gap:5px !important;
+      }
+      .info-tile{padding:6px !important;}
+      .info-copy small{font-size:.49rem !important;}
+      .info-copy b{font-size:.69rem !important;}
+      .info-store .info-copy b,
+      .info-operator .info-copy b,
+      .info-manager .info-copy b{font-size:.80rem !important;}
+      .store-meta .header-notification,
+      .store-meta .header-theme,
+      .store-meta .header-logout,
+      #notificationBtn,
+      .header-theme.theme-btn,
+      .header-logout.logout-fixed{
+        width:36px !important;
+        min-width:36px !important;
+      }
+    }
+  </style>
+
+</head>
       <body>
         <header>
           <div class="brand">
@@ -23949,6 +24555,129 @@ window.addEventListener('load', async () => {
     }
 
 </style>
+
+  <style id="topbar-compact-v5148">
+    /* V51.48 — cabeçalho mais compacto e proporcional no desktop */
+    @media (min-width:1101px){
+      .topbar{
+        grid-template-columns:minmax(240px,1fr) max-content !important;
+        gap:10px !important;
+        min-height:84px !important;
+        padding:10px 12px 10px 14px !important;
+        align-items:center !important;
+      }
+      .top-left{min-width:0 !important;overflow:hidden !important;}
+      .top-left h2,#pageTitle{font-size:1.34rem !important;line-height:1.08 !important;}
+      .top-left p,#pageSubtitle{font-size:.78rem !important;line-height:1.2 !important;}
+
+      .store-meta{
+        display:grid !important;
+        grid-template-columns:72px 118px minmax(178px,218px) 82px 96px 38px 38px 38px !important;
+        gap:6px !important;
+        width:max-content !important;
+        min-width:max-content !important;
+        max-width:none !important;
+        align-items:stretch !important;
+      }
+
+      .store-meta .info-tile,
+      .store-meta .header-notification,
+      .store-meta .header-theme,
+      .store-meta .header-logout{
+        min-height:50px !important;
+        height:50px !important;
+        border-radius:13px !important;
+      }
+
+      .info-tile{
+        padding:6px 7px !important;
+        gap:6px !important;
+      }
+      .info-icon{
+        flex:0 0 18px !important;
+        width:18px !important;
+        height:18px !important;
+      }
+      .info-icon svg,
+      .header-notification svg,
+      .header-logout svg{
+        width:16px !important;
+        height:16px !important;
+        stroke-width:1.95 !important;
+      }
+      .info-copy{gap:1px !important;min-width:0 !important;}
+      .info-copy small{
+        font-size:.52rem !important;
+        line-height:1.02 !important;
+        letter-spacing:.04em !important;
+      }
+      .info-copy b{
+        font-size:.73rem !important;
+        line-height:1.05 !important;
+      }
+      .info-store .info-copy b,
+      .info-operator .info-copy b,
+      .info-manager .info-copy b{
+        font-size:.84rem !important;
+      }
+      .info-month .info-copy b{
+        font-size:.76rem !important;
+      }
+      .info-user .info-copy b,
+      #headerUserName{
+        display:-webkit-box !important;
+        -webkit-line-clamp:2 !important;
+        -webkit-box-orient:vertical !important;
+        overflow:hidden !important;
+        white-space:normal !important;
+        text-overflow:ellipsis !important;
+        font-size:.70rem !important;
+        line-height:1.02 !important;
+        max-height:2.1em !important;
+      }
+      .store-meta .header-notification,
+      .store-meta .header-theme,
+      .store-meta .header-logout,
+      #notificationBtn,
+      .header-theme.theme-btn,
+      .header-logout.logout-fixed{
+        width:38px !important;
+        min-width:38px !important;
+        padding:0 !important;
+      }
+      .notification-badge{
+        top:4px !important;
+        right:4px !important;
+        min-width:15px !important;
+        height:15px !important;
+        font-size:.58rem !important;
+        line-height:15px !important;
+      }
+    }
+
+    @media (min-width:1101px) and (max-width:1450px){
+      .store-meta{
+        grid-template-columns:68px 110px minmax(165px,200px) 78px 90px 36px 36px 36px !important;
+        gap:5px !important;
+      }
+      .info-tile{padding:6px !important;}
+      .info-copy small{font-size:.49rem !important;}
+      .info-copy b{font-size:.69rem !important;}
+      .info-store .info-copy b,
+      .info-operator .info-copy b,
+      .info-manager .info-copy b{font-size:.80rem !important;}
+      .store-meta .header-notification,
+      .store-meta .header-theme,
+      .store-meta .header-logout,
+      #notificationBtn,
+      .header-theme.theme-btn,
+      .header-logout.logout-fixed{
+        width:36px !important;
+        min-width:36px !important;
+      }
+    }
+  </style>
+
 </head>
 <body id="av24HistoryPopup">
   <header class="topbar">
