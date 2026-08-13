@@ -33724,11 +33724,14 @@ document.addEventListener('DOMContentLoaded',()=>aplicarIconesChatV5138());
 <style id="av-call-media-reliability-v5151">
   .avcall-audio-unlock{position:absolute;left:50%;bottom:88px;transform:translateX(-50%);z-index:8;min-height:40px;padding:0 16px;border:1px solid #d8ad21;border-radius:12px;background:linear-gradient(145deg,#ffd54a,#e0b61f);color:#17130a;font-weight:900;font-size:.70rem;box-shadow:0 8px 24px rgba(0,0,0,.18);cursor:pointer}
   .avcall-audio-unlock[hidden]{display:none!important}
+  #avCallRemoteVideo{object-fit:contain!important;object-position:center!important;background:#000!important;transform:none!important}
+  #avCallLocalVideo{object-fit:cover!important;transform:scaleX(-1)!important;transform-origin:center!important}
+  #avCallRemoteAudio{position:absolute!important;width:1px!important;height:1px!important;opacity:.001!important;pointer-events:none!important}
 </style>
 
 <script id="av-call-v5144-script">
 
-/* V51.51 — confiabilidade de chamadas: áudio remoto, permissões e encerramento seguro */
+/* V51.52 — estabilização WebRTC: streams persistentes, áudio contínuo e vídeo sem reanexos periódicos */
 (function(){
   let avCallChannel=null, avCallChannelState='CLOSED', avCallChannelPromise=null;
   let avCallCurrent=null, avCallIncoming=null, avCallTimer=null, avCallRingTimer=null, avCallStartTs=0, avCallStagePopup=null;
@@ -33895,13 +33898,13 @@ body.theme-dark .avp-pill{color:var(--gold)}
 .avp-body{position:relative;min-height:0;background:radial-gradient(circle at 50% 18%,#fff9dc 0%, #f6f7f9 38%, #eceef2 100%);overflow:hidden}
 body.theme-dark .avp-body{background:radial-gradient(circle at 50% 18%,rgba(247,196,42,.12),#121821 38%, #0b0f15 100%)}
 .avp-card.video .avp-body{background:#090c12}
-.avp-remote-video{width:100%;height:100%;object-fit:cover;background:#090c12;display:block}.audio-mode .avp-remote-video{display:none}
-.avp-remote-audio{display:none}
+.avp-remote-video{width:100%;height:100%;object-fit:contain;object-position:center;background:#000;display:block;transform:none!important}.audio-mode .avp-remote-video{display:none}
+.avp-remote-audio{position:absolute!important;width:1px!important;height:1px!important;left:-9999px!important;top:0!important;opacity:.001!important;pointer-events:none!important}
 .avp-connecting{position:absolute;left:50%;top:20px;transform:translateX(-50%);padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.88);border:1px solid var(--line);color:#5a616b;font-size:.62rem;white-space:nowrap}
 body.theme-dark .avp-connecting{background:rgba(17,22,30,.80);color:#d7dbe1}.avp-connecting[hidden]{display:none}
 .avp-audio-center{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px}.video-mode .avp-audio-center{display:none}
 .avp-center-avatar{width:112px;height:112px;border-radius:34px;font-size:1.75rem;margin:0 auto}.avp-audio-center strong{display:block;font-size:1.15rem;margin-top:14px}.avp-audio-center small{display:block;color:var(--muted);font-size:.76rem;margin-top:6px}
-.avp-local-video{position:absolute;right:18px;bottom:18px;width:min(230px,26vw);aspect-ratio:16/10;border-radius:18px;object-fit:cover;background:#171c24;border:1px solid rgba(224,190,67,.42);box-shadow:0 18px 44px rgba(0,0,0,.28)}
+.avp-local-video{position:absolute;right:18px;bottom:18px;width:min(230px,26vw);aspect-ratio:16/10;border-radius:18px;object-fit:cover;background:#171c24;border:1px solid rgba(224,190,67,.42);box-shadow:0 18px 44px rgba(0,0,0,.28);transform:scaleX(-1);transform-origin:center}
 .audio-mode .avp-local-video{display:none}
 .avp-permission{position:absolute;inset:0;z-index:12;display:grid;place-items:center;padding:28px;background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(245,246,248,.98));text-align:center}
 body.theme-dark .avp-permission{background:linear-gradient(180deg,rgba(15,20,27,.97),rgba(10,14,20,.99))}
@@ -34014,7 +34017,7 @@ window.__avAcquireMedia=async function(kind){
     const audio={echoCancellation:true,noiseSuppression:true,autoGainControl:true};
     let stream;
     if(type==='VIDEO'){
-      try{stream=await navigator.mediaDevices.getUserMedia({audio,video:{width:{ideal:1280},height:{ideal:720},aspectRatio:{ideal:16/9},facingMode:'user'}});}
+      try{stream=await navigator.mediaDevices.getUserMedia({audio,video:{width:{ideal:960,max:1280},height:{ideal:540,max:720},frameRate:{ideal:24,max:30},aspectRatio:{ideal:16/9},facingMode:'user'}});}
       catch(err){
         const n=String(err?.name||'');
         if(['OverconstrainedError','ConstraintNotSatisfiedError'].includes(n))stream=await navigator.mediaDevices.getUserMedia({audio,video:true});
@@ -34115,16 +34118,36 @@ window.addEventListener('beforeunload',function(){
     const c=doc.getElementById('avPopupConnecting'); if(c){ c.textContent=label||'Estabelecendo conexão...'; c.hidden = !!(avCallCurrent && avCallCurrent.status==='connected'); }
     const cam=doc.getElementById('avPopupCameraBtn'); if(cam)cam.hidden=kind!=='VIDEO';
     try{
-      const localV=doc.getElementById('avPopupLocalVideo'); if(localV)localV.srcObject=kind==='VIDEO'?(avCallCurrent?.localStream||null):null;
-      const remoteV=doc.getElementById('avPopupRemoteVideo'); const remoteA=doc.getElementById('avPopupRemoteAudio');
+      /* IMPORTANTE: não reatribuir srcObject a cada atualização do cronômetro.
+         Reanexar o mesmo MediaStream reinicia o pipeline em alguns navegadores,
+         causando vídeo piscando/congelando e áudio sem continuidade. */
+      const bind=(el,stream)=>{
+        if(!el)return false;
+        const desired=stream||null;
+        if(el.srcObject===desired)return false;
+        el.srcObject=desired;
+        return true;
+      };
+      const localV=doc.getElementById('avPopupLocalVideo');
+      const remoteV=doc.getElementById('avPopupRemoteVideo');
+      const remoteA=doc.getElementById('avPopupRemoteAudio');
+      const localStream=kind==='VIDEO'?(avCallCurrent?.localStream||null):null;
+      const remoteStream=avCallCurrent?.remoteStream||null;
+      bind(localV,localStream);
+      let remoteChanged=false;
       if(kind==='VIDEO'){
-        if(remoteV){remoteV.srcObject=avCallCurrent?.remoteStream||null;remoteV.muted=false;remoteV.volume=1;}
-        if(remoteA)remoteA.srcObject=null;
+        remoteChanged=bind(remoteV,remoteStream);
+        bind(remoteA,null);
+        if(remoteV){remoteV.muted=false;remoteV.volume=1;remoteV.autoplay=true;remoteV.playsInline=true;}
       }else{
-        if(remoteA){remoteA.srcObject=avCallCurrent?.remoteStream||null;remoteA.muted=false;remoteA.volume=1;}
-        if(remoteV)remoteV.srcObject=null;
+        remoteChanged=bind(remoteA,remoteStream);
+        bind(remoteV,null);
+        if(remoteA){remoteA.muted=false;remoteA.volume=1;remoteA.autoplay=true;}
       }
-      if(avCallCurrent?.remoteStream){setTimeout(()=>{try{avCallStagePopup?.__avTryPlayRemoteMedia?.(kind,true);}catch(_){ }},0);}
+      const target=kind==='VIDEO'?remoteV:remoteA;
+      if(remoteStream && (remoteChanged || target?.paused)){
+        setTimeout(()=>{try{avCallStagePopup?.__avTryPlayRemoteMedia?.(kind,true);}catch(_){ }},0);
+      }
     }catch(_){ }
     const at=avCallCurrent?.localStream?.getAudioTracks?.()[0];
     const vt=avCallCurrent?.localStream?.getVideoTracks?.()[0];
@@ -34238,7 +34261,7 @@ window.addEventListener('beforeunload',function(){
     let stream;
     if(kind!=='VIDEO')stream=await navigator.mediaDevices.getUserMedia({audio,video:false});
     else{
-      try{stream=await navigator.mediaDevices.getUserMedia({audio,video:{width:{ideal:1280},height:{ideal:720},aspectRatio:{ideal:16/9},facingMode:'user'}});}
+      try{stream=await navigator.mediaDevices.getUserMedia({audio,video:{width:{ideal:960,max:1280},height:{ideal:540,max:720},frameRate:{ideal:24,max:30},aspectRatio:{ideal:16/9},facingMode:'user'}});}
       catch(err){const name=String(err?.name||'');if(['OverconstrainedError','ConstraintNotSatisfiedError'].includes(name))stream=await navigator.mediaDevices.getUserMedia({audio,video:true});else throw err;}
     }
     avCallRememberPermission(stream,kind);
@@ -34247,11 +34270,47 @@ window.addEventListener('beforeunload',function(){
 
   function avCallAttachLocal(stream,type){const v=document.getElementById('avCallLocalVideo');if(v)v.srcObject=type==='VIDEO'?stream:null;avCallSyncPopup(type, document.getElementById('avCallStageSubtitle')?.textContent||'Conectando...');}
   function avCallAttachRemote(stream,type){
+    const kind=String(type||'AUDIO').toUpperCase()==='VIDEO'?'VIDEO':'AUDIO';
     const rv=document.getElementById('avCallRemoteVideo'),ra=document.getElementById('avCallRemoteAudio');
     const popupAtivo=!!(avCallStagePopup&&!avCallStagePopup.closed);
-    if(type==='VIDEO'){if(rv){rv.srcObject=stream;rv.muted=popupAtivo;rv.volume=1;}if(ra)ra.srcObject=null;}else{if(ra){ra.srcObject=stream;ra.muted=popupAtivo;ra.volume=1;}if(rv)rv.srcObject=null;}
-    avCallSyncPopup(type, document.getElementById('avCallStageSubtitle')?.textContent||'Conectando...');
-    setTimeout(()=>avCallEnsureRemotePlayback(type),0);
+    const bind=(el,value)=>{if(!el)return false;const desired=value||null;if(el.srcObject===desired)return false;el.srcObject=desired;return true;};
+    let changed=false;
+    if(kind==='VIDEO'){
+      changed=bind(rv,stream);
+      bind(ra,null);
+      if(rv){rv.muted=popupAtivo;rv.volume=1;rv.autoplay=true;rv.playsInline=true;}
+    }else{
+      changed=bind(ra,stream);
+      bind(rv,null);
+      if(ra){ra.muted=popupAtivo;ra.volume=1;ra.autoplay=true;}
+    }
+    avCallSyncPopup(kind, document.getElementById('avCallStageSubtitle')?.textContent||'Conectando...');
+    if(changed || (kind==='VIDEO'?rv:ra)?.paused) setTimeout(()=>avCallEnsureRemotePlayback(kind),0);
+  }
+
+  function avCallScheduleRemotePlayback(type){
+    const kind=String(type||'AUDIO').toUpperCase()==='VIDEO'?'VIDEO':'AUDIO';
+    [0,180,650,1500,3000].forEach(ms=>setTimeout(()=>{
+      if(!avCallCurrent||avCallCurrent.type!==kind)return;
+      avCallEnsureRemotePlayback(kind).catch(()=>{});
+    },ms));
+  }
+
+  function avCallPrepareRemoteTrack(call,track){
+    if(!call||!track)return;
+    try{track.enabled=true;}catch(_){ }
+    const refresh=()=>{
+      if(avCallCurrent!==call || track.readyState==='ended')return;
+      avCallAttachRemote(call.remoteStream,call.type);
+      if(track.kind==='audio')avCallScheduleRemotePlayback(call.type);
+    };
+    track.onunmute=refresh;
+    track.onended=()=>{
+      if(avCallCurrent===call && track.kind==='audio'){
+        console.warn('Comunicação AV: track de áudio remoto encerrada inesperadamente.');
+      }
+    };
+    refresh();
   }
 
   async function avCallFlushLocalSignals(call){
@@ -34266,7 +34325,15 @@ window.addEventListener('beforeunload',function(){
       const c=e.candidate.toJSON?e.candidate.toJSON():e.candidate;
       if(call.signalReady)avCallSend('candidate',{to:call.otherOp,callId:call.id,candidate:c}).catch(()=>{});else call.localCandidates.push(c);
     };
-    pc.ontrack=e=>{call.remoteStream=call.remoteStream||new MediaStream();if(e.streams?.[0])call.remoteStream=e.streams[0];else if(e.track&&!call.remoteStream.getTracks().some(t=>t.id===e.track.id))call.remoteStream.addTrack(e.track);avCallAttachRemote(call.remoteStream,call.type);};
+    pc.ontrack=e=>{
+      call.remoteStream=call.remoteStream||new MediaStream();
+      if(e.streams?.[0])call.remoteStream=e.streams[0];
+      else if(e.track&&!call.remoteStream.getTracks().some(t=>t.id===e.track.id))call.remoteStream.addTrack(e.track);
+      if(e.track){
+        console.info('Comunicação AV: track remota recebida',e.track.kind,e.track.readyState,'muted=',e.track.muted);
+        avCallPrepareRemoteTrack(call,e.track);
+      }else avCallAttachRemote(call.remoteStream,call.type);
+    };
     const avaliarConexao=()=>{
       const st=String(pc.connectionState||''),ice=String(pc.iceConnectionState||'');
       if(st==='connected'||ice==='connected'||ice==='completed'){clearTimeout(avCallDisconnectTimer);avCallDisconnectTimer=null;avCallOnConnected();return;}
@@ -34284,8 +34351,21 @@ window.addEventListener('beforeunload',function(){
   }
 
   function avCallOnConnected(){
-    if(!avCallCurrent)return;avCallCurrent.status='connected';avCallSetStatus('Em chamada');const c=document.getElementById('avCallConnecting');if(c)c.hidden=true;avCallSyncPopup(avCallCurrent.type,'Em chamada');avCallEnsureRemotePlayback(avCallCurrent.type).catch(()=>{});
-    if(!avCallStartTs)avCallStartTs=Date.now();if(!avCallTimer)avCallTimer=setInterval(()=>{const sec=Math.floor((Date.now()-avCallStartTs)/1000),m=Math.floor(sec/60),s=String(sec%60).padStart(2,'0');avCallSetStatus(m+':'+s);},1000);
+    if(!avCallCurrent)return;
+    const firstConnect=avCallCurrent.status!=='connected';
+    avCallCurrent.status='connected';
+    avCallSetStatus('Em chamada');
+    const c=document.getElementById('avCallConnecting');if(c)c.hidden=true;
+    avCallSyncPopup(avCallCurrent.type,'Em chamada');
+    if(firstConnect){
+      const receivers=avCallCurrent.pc?.getReceivers?.()||[];
+      const audio=receivers.find(r=>r.track?.kind==='audio')?.track;
+      const video=receivers.find(r=>r.track?.kind==='video')?.track;
+      console.info('Comunicação AV: mídia conectada',{audio:audio?{state:audio.readyState,muted:audio.muted}:null,video:video?{state:video.readyState,muted:video.muted}:null});
+      avCallScheduleRemotePlayback(avCallCurrent.type);
+    }
+    if(!avCallStartTs)avCallStartTs=Date.now();
+    if(!avCallTimer)avCallTimer=setInterval(()=>{const sec=Math.floor((Date.now()-avCallStartTs)/1000),m=Math.floor(sec/60),s=String(sec%60).padStart(2,'0');avCallSetStatus(m+':'+s);},1000);
   }
 
   function avCallCleanupLocal(){
