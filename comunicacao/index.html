@@ -38336,5 +38336,387 @@ body.avmail-mode #mensagemTexto{min-height:168px!important;max-height:340px!impo
   setTimeout(()=>{if(me()){start();puxar(true);}},1200);
 })();
 </script>
+<style id="chat-realtime-presence-v5154-style">
+/* V51.54 — atividade efêmera, grupos instantâneos e boas-vindas */
+body.avmail-mode.avchat-mode .avchat-live-activity-v5154,
+#comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-live-activity-v5154{
+  color:#d7ad21!important;
+  font-weight:900!important;
+  letter-spacing:.035em!important;
+}
+body.avmail-mode.avchat-mode .avchat-live-activity-v5154::before,
+#comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-live-activity-v5154::before{
+  content:"";
+  display:inline-block;
+  width:6px;height:6px;
+  margin-right:6px;
+  border-radius:999px;
+  background:#d7ad21;
+  vertical-align:1px;
+  animation:avchat-live-pulse-v5154 1s ease-in-out infinite;
+}
+@keyframes avchat-live-pulse-v5154{0%,100%{opacity:.35;transform:scale(.78)}50%{opacity:1;transform:scale(1.15)}}
+body.avmail-mode.avchat-mode .avchat-group-welcome-v5154,
+#comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-group-welcome-v5154{
+  width:max-content;
+  max-width:min(86%,620px);
+  margin:10px auto 14px;
+  padding:7px 13px;
+  border:1px solid rgba(215,173,33,.30);
+  border-radius:999px;
+  background:rgba(25,25,25,.82);
+  color:#f2d77a;
+  box-shadow:0 6px 18px rgba(0,0,0,.16);
+  font-size:.67rem;
+  line-height:1.25;
+  font-weight:900;
+  letter-spacing:.025em;
+  text-align:center;
+  text-transform:none;
+}
+body:not(.dark-mode).avmail-mode.avchat-mode .avchat-group-welcome-v5154,
+body:not(.dark-mode) #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-group-welcome-v5154{
+  background:#fff9df;
+  color:#6c5410;
+  border-color:#e0bd47;
+}
+#avChatWelcomeToastV5154{
+  position:fixed;
+  left:50%;
+  top:86px;
+  transform:translate(-50%,-12px);
+  z-index:10080;
+  max-width:min(88vw,680px);
+  padding:9px 15px;
+  border:1px solid rgba(215,173,33,.42);
+  border-radius:999px;
+  background:rgba(24,24,24,.96);
+  color:#f4dc82;
+  box-shadow:0 14px 42px rgba(0,0,0,.28);
+  font-size:.72rem;
+  line-height:1.25;
+  font-weight:900;
+  text-align:center;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .18s ease,transform .18s ease;
+}
+#avChatWelcomeToastV5154.show{opacity:1;transform:translate(-50%,0)}
+body:not(.dark-mode) #avChatWelcomeToastV5154{background:#fff9df;color:#604a0c;border-color:#d6aa21}
+@media(max-width:760px){
+  #avChatWelcomeToastV5154{top:68px;font-size:.68rem;max-width:92vw;border-radius:18px}
+  body.avmail-mode.avchat-mode .avchat-group-welcome-v5154,
+  #comunicacaoAVStandalone[data-comm-mode="CHAT"] .avchat-group-welcome-v5154{max-width:92%;border-radius:16px}
+}
+</style>
+<script id="chat-realtime-presence-v5154-script">
+/* =============================================================
+   V51.54 — Comunicação AV realmente ao vivo
+   - grupos chegam por Broadcast antes da confirmação do banco;
+   - DIGITANDO / GRAVANDO ÁUDIO / ENVIANDO MÍDIA são efêmeros;
+   - gravações e mensagens forçam persistência imediata;
+   - boas-vindas do grupo são persistidas como evento de sistema.
+   ============================================================= */
+(function(){
+  const CHANNEL='comunicacao_av_chat_interacao_v5154';
+  const activityMap=new Map();
+  let channel=null,channelStatus='CLOSED',starting=null;
+  let typingStopTimer=null,recordKeepTimer=null,mediaKeepTimer=null,toastTimer=null;
+  let lastActivity={key:'',state:'',at:0};
+
+  const opNorm=v=>{try{return normalizarOperador(v)}catch(_){return String(v||'').replace(/\D/g,'')}};
+  const me=()=>opNorm(usuarioAtual?.operador||'');
+  const client=()=>typeof supabaseclient!=='undefined'?supabaseclient:null;
+  const active=()=>!!(me()&&client()&&navigator.onLine);
+  const lojaAtual=()=>String(db?.meta?.loja||'24').trim()||'24';
+  const directKey=(a,b)=>'u:'+([opNorm(a),opNorm(b)].filter(Boolean).sort().join(':'));
+  const currentInfo=()=>{
+    const atual=me();if(!atual)return null;
+    if(typeof avChatSelecionadoGrupoId!=='undefined'&&avChatSelecionadoGrupoId){
+      const g=typeof grupoChatPorId==='function'?grupoChatPorId(avChatSelecionadoGrupoId):null;
+      if(!g)return null;
+      const targets=(typeof membrosGrupoChat==='function'?membrosGrupoChat(g):[]).filter(x=>x!==atual);
+      return {key:'g:'+String(g.id),tipo:'GRUPO',groupId:String(g.id),targets};
+    }
+    const outro=opNorm(typeof avChatSelecionadoOp!=='undefined'?avChatSelecionadoOp:'');
+    if(!outro)return null;
+    return {key:directKey(atual,outro),tipo:'DIRETO',op:outro,targets:[outro]};
+  };
+
+  async function start(){
+    if(!active())return null;
+    if(channel&&channelStatus==='SUBSCRIBED')return channel;
+    if(starting)return starting;
+    if(channel){try{client()?.removeChannel(channel)}catch(_){}channel=null;}
+    starting=new Promise(resolve=>{
+      const c=client();if(!c){starting=null;resolve(null);return;}
+      channel=c.channel(CHANNEL,{config:{broadcast:{self:false,ack:false}}})
+        .on('broadcast',{event:'chat-live'},({payload})=>handlePayload(payload||{}))
+        .subscribe(status=>{
+          channelStatus=status;
+          if(status==='SUBSCRIBED'){const p=starting;starting=null;resolve(channel);}
+          else if(['CHANNEL_ERROR','TIMED_OUT','CLOSED'].includes(status)){if(status!=='CLOSED')console.warn('Comunicação AV: interação ao vivo',status);starting=null;}
+        });
+      setTimeout(()=>{if(starting){starting=null;resolve(channel)}},4000);
+    });
+    return starting;
+  }
+
+  async function broadcast(payload){
+    if(!active())return false;
+    try{
+      await start();if(channelStatus!=='SUBSCRIBED'||!channel)return false;
+      await channel.send({type:'broadcast',event:'chat-live',payload:{...payload,from:me(),at:Date.now()}});
+      return true;
+    }catch(err){console.warn('Comunicação AV: falha no Broadcast de interação.',err);return false;}
+  }
+
+  function payloadParaMim(p){
+    const targets=(Array.isArray(p?.targetOps)?p.targetOps:[]).map(opNorm).filter(Boolean);
+    return !targets.length||targets.includes(me());
+  }
+
+  function activityLabel(state){
+    return state==='DIGITANDO'?'DIGITANDO…':state==='GRAVANDO_AUDIO'?'GRAVANDO ÁUDIO…':state==='ENVIANDO_MIDIA'?'ENVIANDO MÍDIA…':'';
+  }
+  function activityKey(conv,op){return String(conv||'')+'|'+opNorm(op)}
+  function validActivities(conv){
+    const now=Date.now(),out=[];
+    for(const [k,v] of activityMap.entries()){
+      if(!v||v.expiresAt<=now){activityMap.delete(k);continue;}
+      if(v.conv===conv&&v.op!==me())out.push(v);
+    }
+    return out.sort((a,b)=>b.at-a.at);
+  }
+  function activityTextFor(conv,tipo='DIRETO'){
+    const arr=validActivities(conv);if(!arr.length)return '';
+    const v=arr[0],label=activityLabel(v.state);if(!label)return '';
+    if(tipo==='GRUPO'){
+      if(arr.length>1&&arr.every(x=>x.state===v.state))return `${arr.length} PESSOAS — ${label}`;
+      return `${String(v.nome||'USUÁRIO').toUpperCase()} — ${label}`;
+    }
+    return label;
+  }
+
+  function applyActivityUI(){
+    try{
+      const convs=typeof resumoConversasChat==='function'?resumoConversasChat():[];
+      const buttons=[...document.querySelectorAll('#avChatConversationList .avchat-conversation')];
+      buttons.forEach((btn,i)=>{
+        const c=convs[i];if(!c)return;
+        const key=c.tipo==='GRUPO'?'g:'+String(c.grupoId):directKey(me(),c.op);
+        const txt=activityTextFor(key,c.tipo);
+        const prev=btn.querySelector('.avchat-conv-preview');if(!prev)return;
+        if(!prev.dataset.avBaseV5154)prev.dataset.avBaseV5154=prev.textContent||'';
+        if(txt){prev.textContent=txt;prev.classList.add('avchat-live-activity-v5154');}
+        else{prev.textContent=prev.dataset.avBaseV5154;prev.classList.remove('avchat-live-activity-v5154');}
+      });
+      const info=currentInfo(),small=document.querySelector('#avChatThreadHeader .avchat-thread-user small');
+      if(small){
+        if(!small.dataset.avBaseV5154)small.dataset.avBaseV5154=small.textContent||'';
+        const txt=info?activityTextFor(info.key,info.tipo):'';
+        if(txt){small.textContent=txt;small.classList.add('avchat-live-activity-v5154');}
+        else{small.textContent=small.dataset.avBaseV5154;small.classList.remove('avchat-live-activity-v5154');}
+      }
+    }catch(err){console.warn('Comunicação AV: falha ao aplicar atividade visual.',err);}
+  }
+
+  async function sendActivity(state,{force=false,ttl=4500}={}){
+    const info=currentInfo();if(!info||!info.targets.length)return false;
+    const now=Date.now();
+    if(!force&&lastActivity.key===info.key&&lastActivity.state===state&&now-lastActivity.at<650)return true;
+    lastActivity={key:info.key,state,at:now};
+    return broadcast({kind:'activity',conv:info.key,state,targetOps:info.targets,nome:usuarioAtual?.nome||'',ttl});
+  }
+  function stopActivity(force=true){return sendActivity('IDLE',{force,ttl:1});}
+
+  function showWelcomeToast(text){
+    let el=document.getElementById('avChatWelcomeToastV5154');
+    if(!el){el=document.createElement('div');el.id='avChatWelcomeToastV5154';document.body.appendChild(el);}
+    el.textContent=String(text||'');el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),5200);
+  }
+
+  function upsertGroupLocal(group){
+    if(!group||!group.id||!db)return;
+    if(typeof garantirEstruturaChatV5129==='function')garantirEstruturaChatV5129();
+    const idx=(db.chatGrupos||[]).findIndex(g=>String(g.id)===String(group.id));
+    const copia={...group,membrosOps:Array.isArray(group.membrosOps)?group.membrosOps.map(opNorm).filter(Boolean):[]};
+    if(idx>=0)db.chatGrupos[idx]={...db.chatGrupos[idx],...copia};else db.chatGrupos.push(copia);
+  }
+
+  function refreshChatVisual(){
+    try{typeof renderMensagensInternas==='function'&&renderMensagensInternas()}catch(_){}
+    try{typeof atualizarBadgesCanaisComunicacao==='function'&&atualizarBadgesCanaisComunicacao()}catch(_){}
+    try{typeof renderComunicacaoAV==='function'&&renderComunicacaoAV()}catch(_){}
+    try{typeof renderBatePapoAV==='function'&&renderBatePapoAV()}catch(_){}
+    setTimeout(()=>{applyActivityUI();applyWelcomeInline()},0);
+  }
+
+  function handlePayload(p){
+    if(!p||String(p.from||'')===me()||!payloadParaMim(p))return;
+    if(p.kind==='activity'){
+      const op=opNorm(p.from),key=activityKey(p.conv,op);
+      if(!p.conv||!op)return;
+      if(p.state==='IDLE')activityMap.delete(key);
+      else activityMap.set(key,{conv:String(p.conv),op,nome:String(p.nome||''),state:String(p.state||''),at:Number(p.at||Date.now()),expiresAt:Date.now()+Math.max(1200,Number(p.ttl||4500))});
+      applyActivityUI();return;
+    }
+    if(p.kind==='group-membership'&&p.group){
+      upsertGroupLocal(p.group);
+      const added=(p.addedOps||[]).map(opNorm),removed=(p.removedOps||[]).map(opNorm);
+      if(removed.includes(me())&&String(avChatSelecionadoGrupoId||'')===String(p.group.id||'')){
+        try{avChatSelecionadoGrupoId='';avChatSelecionadoOp=''}catch(_){}
+      }
+      refreshChatVisual();
+      if(added.includes(me())&&p.welcomeText)showWelcomeToast(p.welcomeText);
+      setTimeout(()=>window.avComunicacaoPullAgora?.(),650);
+      setTimeout(()=>window.avComunicacaoPullAgora?.(),1800);
+      return;
+    }
+    if(p.kind==='saved'){
+      setTimeout(()=>window.avComunicacaoPullAgora?.(),20);
+    }
+  }
+
+  function welcomeText(group){return `SEJA-BEM VINDO "${String(group?.nome||'GRUPO')}" da LOJA "${lojaAtual()}".`;}
+  function createWelcomeMessage(group,targetOp){
+    const op=opNorm(targetOp),now=new Date().toISOString(),id=`chatwelcome_${String(group.id)}_${op}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
+    return {id,grupoEnvioId:id,canal:'CHAT',chatTipo:'GRUPO',chatGrupoId:String(group.id),chatId:`group:${group.id}`,threadId:`group:${group.id}`,remetenteOp:'',remetenteNome:'',destinatarioOp:'',destinatarioNome:String(group.nome||'Grupo'),destinatariosOps:[op],lidaPor:[],assunto:'',mensagem:'',tipo:'Sistema',chatEvento:'BOAS_VINDAS_GRUPO',boasVindasTexto:welcomeText(group),prioridade:'Normal',prazo:'',horaPrazo:'',requerCiencia:false,respostaDe:'',encaminhadaDe:'',anexos:[],referenciasSistema:[],criadoEmISO:now,criadoEm:typeof agoraBR==='function'?agoraBR():now,lidaEmISO:'',cienteEmISO:'',arquivadaPor:[],favoritaPor:[]};
+  }
+
+  async function flushNow(kind='saved'){
+    try{clearTimeout(salvamentoTimer);salvamentoTimer=null}catch(_){}
+    let ok=false;
+    try{ok=await salvarDadosUsuarioOnline(true)}catch(_){}
+    if(ok){try{await window.avComunicacaoBroadcastUpdate?.()}catch(_){};await broadcast({kind,targetOps:[]});}
+    return ok;
+  }
+
+  /* Grupo: identifica exatamente quem entrou/saiu e avisa antes do round-trip do banco. */
+  const baseSaveGroup=window.salvarGrupoChat;
+  if(typeof baseSaveGroup==='function'){
+    window.salvarGrupoChat=async function(){
+      const atual=me(),idAntes=String(document.getElementById('avChatGroupId')?.value||''),idsAntes=new Set((db?.chatGrupos||[]).map(g=>String(g.id)));
+      const oldGroup=idAntes&&typeof grupoChatPorId==='function'?grupoChatPorId(idAntes):null;
+      const oldMembers=new Set((oldGroup&&typeof membrosGrupoChat==='function'?membrosGrupoChat(oldGroup):[atual]).map(opNorm));
+      const nomeCapturado=String(document.getElementById('avChatGroupName')?.value||'').trim();
+      const r=await Promise.resolve(baseSaveGroup.apply(this,arguments));
+      let g=idAntes&&typeof grupoChatPorId==='function'?grupoChatPorId(idAntes):null;
+      if(!g){g=(db?.chatGrupos||[]).find(x=>!idsAntes.has(String(x.id)))||null;}
+      if(!g)return r;
+      const newMembers=(typeof membrosGrupoChat==='function'?membrosGrupoChat(g):[]).map(opNorm),added=newMembers.filter(op=>op!==atual&&!oldMembers.has(op)),removed=[...oldMembers].filter(op=>op!==atual&&!newMembers.includes(op));
+      if(added.length){
+        db.mensagens=Array.isArray(db.mensagens)?db.mensagens:[];
+        added.forEach(op=>db.mensagens.push(createWelcomeMessage(g,op)));
+        try{saveDB()}catch(_){}
+      }
+      const notify=[...new Set([...newMembers,...oldMembers].filter(op=>op&&op!==atual))];
+      const safeGroup={id:g.id,nome:g.nome||'',descricao:g.descricao||'',criadorOp:g.criadorOp||'',criadorNome:g.criadorNome||'',membrosOps:[...newMembers],ativo:g.ativo!==false,criadoEmISO:g.criadoEmISO||'',atualizadoEmISO:g.atualizadoEmISO||new Date().toISOString(),atualizadoPor:g.atualizadoPor||''};
+      if(notify.length)await broadcast({kind:'group-membership',group:safeGroup,addedOps:added,removedOps:removed,targetOps:notify,welcomeText:added.length?welcomeText(g):''});
+      flushNow();
+      return r;
+    };
+  }
+
+  /* Eventos de digitação. */
+  document.addEventListener('input',ev=>{
+    if(ev.target?.id!=='avChatInput')return;
+    clearTimeout(typingStopTimer);
+    const value=String(ev.target.value||'');
+    if(value.trim()){
+      sendActivity('DIGITANDO',{ttl:4200});
+      typingStopTimer=setTimeout(()=>stopActivity(true),1300);
+    }else stopActivity(true);
+  },true);
+  document.addEventListener('focusout',ev=>{if(ev.target?.id==='avChatInput')stopActivity(true)},true);
+
+  /* Gravação de áudio: mantém estado vivo enquanto MediaRecorder realmente estiver gravando. */
+  const baseRecord=window.iniciarGravacaoAudioChatV5130;
+  if(typeof baseRecord==='function')window.iniciarGravacaoAudioChatV5130=async function(){
+    const r=await Promise.resolve(baseRecord.apply(this,arguments));
+    clearInterval(recordKeepTimer);
+    if(typeof chatMediaRecorder!=='undefined'&&chatMediaRecorder?.state==='recording'){
+      sendActivity('GRAVANDO_AUDIO',{force:true,ttl:4200});
+      recordKeepTimer=setInterval(()=>{
+        if(chatMediaRecorder?.state==='recording')sendActivity('GRAVANDO_AUDIO',{force:true,ttl:4200});
+        else if(chatMediaRecorder?.state==='paused')stopActivity(true);
+        else{clearInterval(recordKeepTimer);recordKeepTimer=null;stopActivity(true);}
+      },1700);
+    }
+    return r;
+  };
+  const basePause=window.pausarRetomarAudioChatV5130;
+  if(typeof basePause==='function')window.pausarRetomarAudioChatV5130=function(){const r=basePause.apply(this,arguments);setTimeout(()=>{if(chatMediaRecorder?.state==='recording')sendActivity('GRAVANDO_AUDIO',{force:true});else stopActivity(true)},20);return r;};
+  const baseCancel=window.cancelarGravacaoAudioChatV5130;
+  if(typeof baseCancel==='function')window.cancelarGravacaoAudioChatV5130=function(){clearInterval(recordKeepTimer);recordKeepTimer=null;stopActivity(true);return baseCancel.apply(this,arguments);};
+  const baseSendAudio=window.enviarAudioGravadoChatV5130;
+  if(typeof baseSendAudio==='function')window.enviarAudioGravadoChatV5130=function(){clearInterval(recordKeepTimer);recordKeepTimer=null;sendActivity('ENVIANDO_MIDIA',{force:true,ttl:7000});return baseSendAudio.apply(this,arguments);};
+
+  /* Seleção/processamento de mídia. */
+  const baseSelectMedia=window.selecionarAnexosChat;
+  if(typeof baseSelectMedia==='function')window.selecionarAnexosChat=async function(){
+    sendActivity('ENVIANDO_MIDIA',{force:true,ttl:7000});
+    clearInterval(mediaKeepTimer);mediaKeepTimer=setInterval(()=>sendActivity('ENVIANDO_MIDIA',{force:true,ttl:7000}),2200);
+    try{return await Promise.resolve(baseSelectMedia.apply(this,arguments));}
+    finally{clearInterval(mediaKeepTimer);mediaKeepTimer=null;stopActivity(true);}
+  };
+
+  /* Mensagens: remove a espera de 550 ms e dispara persistência imediatamente. */
+  const baseSend=window.enviarMensagemChatAtual;
+  if(typeof baseSend==='function')window.enviarMensagemChatAtual=function(){
+    const tinhaMidia=typeof chatAnexosRascunho!=='undefined'&&Array.isArray(chatAnexosRascunho)&&chatAnexosRascunho.length>0;
+    clearTimeout(typingStopTimer);typingStopTimer=null;
+    if(tinhaMidia){
+      sendActivity('ENVIANDO_MIDIA',{force:true,ttl:8000});
+      clearInterval(mediaKeepTimer);mediaKeepTimer=setInterval(()=>sendActivity('ENVIANDO_MIDIA',{force:true,ttl:8000}),2200);
+    }else stopActivity(true);
+    const r=baseSend.apply(this,arguments);
+    Promise.resolve(flushNow()).finally(()=>{clearInterval(mediaKeepTimer);mediaKeepTimer=null;stopActivity(true)});
+    return r;
+  };
+
+  /* Ao trocar de conversa, encerra o estado efêmero da conversa anterior. */
+  const baseOpenUser=window.abrirChatComUsuario;
+  if(typeof baseOpenUser==='function')window.abrirChatComUsuario=function(){stopActivity(true);const r=baseOpenUser.apply(this,arguments);setTimeout(applyActivityUI,0);return r;};
+  const baseOpenGroup=window.abrirChatGrupo;
+  if(typeof baseOpenGroup==='function')window.abrirChatGrupo=function(){stopActivity(true);const r=baseOpenGroup.apply(this,arguments);setTimeout(()=>{applyActivityUI();applyWelcomeInline()},0);return r;};
+
+  /* O evento de boas-vindas é desenhado com a mesma linguagem visual do separador HOJE. */
+  const basePreview=window.previewMensagemChat;
+  if(typeof basePreview==='function')window.previewMensagemChat=function(m){if(String(m?.chatEvento||'')==='BOAS_VINDAS_GRUPO')return String(m?.boasVindasTexto||'Você foi adicionado ao grupo.');return basePreview.apply(this,arguments);};
+  function currentThread(){
+    try{return avChatSelecionadoGrupoId?mensagensChatDoGrupo(avChatSelecionadoGrupoId):mensagensChatComUsuario(avChatSelecionadoOp)}catch(_){return []}
+  }
+  function applyWelcomeInline(){
+    try{
+      const box=document.getElementById('avChatMessages');if(!box)return;
+      const thread=currentThread(),lines=[...box.querySelectorAll('.avchat-message-line')];
+      thread.forEach((m,i)=>{
+        if(String(m?.chatEvento||'')!=='BOAS_VINDAS_GRUPO')return;
+        const line=lines[i];if(!line||line.classList.contains('avchat-group-welcome-v5154'))return;
+        const pill=document.createElement('div');pill.className='avchat-group-welcome-v5154';pill.textContent=String(m.boasVindasTexto||welcomeText(grupoChatPorId?.(m.chatGrupoId)));
+        line.replaceWith(pill);
+      });
+    }catch(err){console.warn('Comunicação AV: falha ao mostrar boas-vindas do grupo.',err);}
+  }
+  window.avChatApplyRealtimeActivityV5154=applyActivityUI;
+  window.avChatApplyWelcomeV5154=applyWelcomeInline;
+
+  const baseRender=window.renderBatePapoAV;
+  if(typeof baseRender==='function')window.renderBatePapoAV=function(){const r=baseRender.apply(this,arguments);setTimeout(()=>{applyWelcomeInline();applyActivityUI()},0);return r;};
+
+  /* Expira estados perdidos sem deixar “digitando” preso na interface. */
+  setInterval(()=>{let changed=false,now=Date.now();for(const [k,v] of activityMap.entries())if(!v||v.expiresAt<=now){activityMap.delete(k);changed=true;}if(changed)applyActivityUI();if(active()&&channelStatus!=='SUBSCRIBED')start();},700);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){start();applyActivityUI()}else stopActivity(true)});
+  window.addEventListener('focus',()=>start());
+  window.addEventListener('online',()=>start());
+  window.addEventListener('pagehide',()=>{try{stopActivity(true)}catch(_){}});
+
+  const baseAtivarRealtime=window.ativarRealtimeUsuario;
+  if(typeof baseAtivarRealtime==='function')window.ativarRealtimeUsuario=function(){const r=baseAtivarRealtime.apply(this,arguments);setTimeout(start,0);return r;};
+  window.avChatRealtimeV5154Start=start;
+  setTimeout(()=>{if(me())start()},500);
+})();
+</script>
 </body>
 </html>
