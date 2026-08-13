@@ -87,7 +87,7 @@
       const SOPHIA_SESSION_KEY = 'sophiaSessaoSeguraV1';
       const SOPHIA_HISTORY_KEY = 'sophiaHistoricoSessaoV1';
       const SOPHIA_BUILD = 'V39.1-SEMPREFLIGHT';
-      const GERENCIAL_BUILD = 'V51.45-ACOMP-GERENCIAL-ZERADO';
+      const GERENCIAL_BUILD = 'V51.47-LOGIN-NOME-COMPLETO';
   </script>
   <style>
     :root {
@@ -208,7 +208,22 @@
       opacity: .72;
       margin-bottom: 2px;
     }
-    .login-user-preview b { font-size: .98rem; }
+    .login-user-preview > div {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .login-user-preview b {
+      display: block;
+      width: 100%;
+      max-width: none;
+      font-size: .98rem;
+      line-height: 1.22;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+      overflow-wrap: anywhere;
+      word-break: normal;
+    }
     .login-user-preview .preview-operator {
       background: var(--preto-logo);
       color: var(--amarelo);
@@ -216,6 +231,8 @@
       padding: 6px 10px;
       font-size: .78rem;
       white-space: nowrap;
+      flex: 0 0 auto;
+      align-self: flex-start;
     }
     .login-user-preview.not-found {
       background: rgba(220,38,38,.10);
@@ -12334,7 +12351,7 @@ const departamentosLoja = [...new Set(Object.values(areasTarefaPorSetor).flat())
 
 const usuariosOficiais = [
   { nome:'ALANA ARAUJO', operadorPadrao:'139', cargo:'GERENTE DE LOJA' },
-  { nome:'JOAO PEDRO', operadorPadrao:'133', cargo:'VISUAL MERCHANDISING' },
+  { nome:'JOAO PEDRO DE OLIVEIRA SILVA', operadorPadrao:'133', cargo:'VISUAL MERCHANDISING' },
   { nome:'KAILANY', operadorPadrao:'144', cargo:'ADMINISTRATIVO' }
 ];
 
@@ -12342,7 +12359,7 @@ const funcionariosPadrao = [
   { id:'func_alana', nome:'ALANA ARAUJO', operador:'139', matricula:'AV24-0139', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'ATIVO', cargo:'GERENTE DE LOJA', setor:'GERÊNCIA', entrada:'', obs:'Gerência da loja 24.' },
   { id:'func_cassio', nome:'CASSIO GABRIEL', operador:'', matricula:'', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'INATIVO', cargo:'FISCAL', setor:'FISCAL', entrada:'', obs:'Apoio fiscal, conferência e prevenção.' },
   { id:'func_richard', nome:'RICHARD BAPTISTE', operador:'', matricula:'', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'INATIVO', cargo:'FISCAL', setor:'FISCAL', entrada:'', obs:'Apoio fiscal, monitoramento e recebimento.' },
-  { id:'func_joao', nome:'JOAO PEDRO', operador:'133', matricula:'AV24-0133', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'ATIVO', cargo:'VISUAL MERCHANDISING', setor:'VISUAL MERCHANDISING', entrada:'', obs:'Visual Merchandising e organização visual da loja.' },
+  { id:'func_joao', nome:'JOAO PEDRO DE OLIVEIRA SILVA', operador:'133', matricula:'AV24-0133', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'ATIVO', cargo:'VISUAL MERCHANDISING', setor:'VISUAL MERCHANDISING', entrada:'', obs:'Visual Merchandising e organização visual da loja.' },
   { id:'func_kailany', nome:'KAILANY', operador:'144', matricula:'AV24-0144', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'ATIVO', cargo:'ADMINISTRATIVO', setor:'ADMINISTRATIVO', entrada:'', obs:'Apoio administrativo da loja.' },
   { id:'func_celio', nome:'CELIO VACARE', operador:'', matricula:'', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'INATIVO', cargo:'PRODUTOS FINANCEIROS', setor:'PRODUTOS FINANCEIROS', entrada:'', obs:'Apoio em produtos financeiros.' },
   { id:'func_helen', nome:'HELEN CRISTINA', operador:'', matricula:'', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'INATIVO', cargo:'VISUAL MERCHANDISING', setor:'VISUAL MERCHANDISING', entrada:'', obs:'Visual Merchandising e suporte visual.' }
@@ -13846,7 +13863,7 @@ function defaultDB(){
 function aplicarOperadoresLoginFixos(){
   const fixos = [
     { nome:'ALANA ARAUJO', operador:'139', oldOperadores:['101'] },
-    { nome:'JOAO PEDRO', operador:'133', oldOperadores:[] },
+    { nome:'JOAO PEDRO', nomeCompleto:'JOAO PEDRO DE OLIVEIRA SILVA', operador:'133', oldOperadores:[] },
     { nome:'KAILANY', operador:'144', oldOperadores:['102'] }
   ];
   fixos.forEach(item => {
@@ -13861,6 +13878,12 @@ function aplicarOperadoresLoginFixos(){
     alvo.operador = item.operador;
     alvo.matricula = matriculaPorOperador(item.operador);
     alvo.caixaOperacional = 'ATIVO';
+    // V51.47: completa nomes oficiais que versões antigas mantinham abreviados.
+    if(item.nomeCompleto){
+      const atual=String(alvo.nome||'').trim();
+      const completo=String(item.nomeCompleto||'').trim();
+      if(completo && (!atual || completo.length > atual.length)) alvo.nome=norm(completo);
+    }
     // Evita que outro cadastro fique preso no mesmo operador oficial.
     (db.funcionarios || []).forEach(f => {
       if(f !== alvo && normalizarOperador(f.operador) === item.operador){
@@ -19113,7 +19136,10 @@ window.addEventListener('load', async () => {
     const d=currentDB();
     const reg=registro || (d?.funcionarios||[]).find(f=>String(f.operador||'').replace(/\D/g,'')===op);
     const acc=acesso || ((typeof globalConfig!=='undefined' ? globalConfig?.usuarios : [])||[]).find(u=>String(u.operador||'').replace(/\D/g,'')===op);
-    return String(reg?.nome||acc?.nome||'').trim();
+    const oficial=(typeof usuariosOficiais!=='undefined' ? usuariosOficiais : []).find(u=>String(u.operadorPadrao||'').replace(/\D/g,'')===op);
+    const candidatos=[reg?.nomeCompleto,reg?.nome,acc?.nomeCompleto,acc?.nome,oficial?.nome]
+      .map(v=>String(v||'').trim()).filter(Boolean);
+    return candidatos.sort((a,b)=>b.length-a.length)[0]||'';
   };
   g.nomeCompletoUsuarioPorOperadorAsync=async(operador,acesso=null)=>g.nomeCompletoUsuarioPorOperadorLocal(operador,null,acesso);
   g.bindLoginPreviewTabFullName=()=>{
