@@ -16585,22 +16585,29 @@ function agCalendarAndroidIntent(e,descricao,local){
 }
 
 function agCalendarWindowsNativeUrl(e,descricao,local){
+  /*
+   * Outlook para Windows aceita o protocolo ms-outlook://events/new.
+   * Para a tela de NOVO EVENTO, os parâmetros de data usados pelo
+   * protocolo são start/end (há versões que também reconhecem
+   * startdt/enddt). Enviamos ambos para maximizar compatibilidade.
+   */
+  const start=e.allDay
+    ? `${e.isoStart}T00:00:00`
+    : `${e.isoStart}T${e.horaStart||'00:00'}:00`;
+  const end=e.allDay
+    ? `${agCalendarAddDays(e.isoEnd||e.isoStart,1)}T00:00:00`
+    : `${e.isoEnd||e.isoStart}T${e.horaEnd||'00:00'}:00`;
+
   const params={
     title:e.titulo,
     description:descricao||'',
-    location:local||''
+    location:local||'',
+    start,
+    end,
+    startdt:start,
+    enddt:end
   };
 
-  if(e.allDay){
-    params.start=e.isoStart+'T00:00:00';
-    params.end=agCalendarAddDays(e.isoEnd||e.isoStart,1)+'T00:00:00';
-  }else{
-    params.start=`${e.isoStart}T${e.horaStart||'00:00'}:00`;
-    params.end=`${e.isoEnd||e.isoStart}T${e.horaEnd||'00:00'}:00`;
-  }
-
-  /* ms-outlook://events/new é o protocolo usado pelo Outlook para Windows
-     para abrir a tela nativa de novo evento. */
   return `ms-outlook://events/new?${agCalendarQuery(params)}`;
 }
 
