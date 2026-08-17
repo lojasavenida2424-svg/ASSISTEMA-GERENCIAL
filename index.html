@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="referrer" content="no-referrer" />
-  <title>Assistência Gerencial de Loja - Avenida V51.32 • Sincronização Gerencial Isolada</title>
+  <title>Assistência Gerencial de Loja • Sincronização Gerencial Isolada</title>
   <!-- PWA / Ícones do Sistema Gerencial Avenida -->
   <meta name="theme-color" content="#291A1E">
   <meta name="application-name" content="Gerencial Avenida">
@@ -16462,6 +16462,151 @@ function cardMini(x){
   return `<div class="task-card"><h4>${escapeHTML(x.atividade||x.titulo||x.resumo)}</h4><div class="task-meta">${badgeSetor(x.setor)} ${badgePrioridade(x.prioridade||'Normal')} ${badgeStatus(x.status)}</div><p><b>Agendamento:</b> ${escapeHTML(prazo)} • <b>Resp.:</b> ${escapeHTML(resp)}${dep}</p><p>${escapeHTML(x.descricao||x.resumo||'')}</p></div>`;
 }
 
+/* ================================================================
+   CALENDÁRIO DO DISPOSITIVO — ANOTAÇÕES / TAREFAS
+   Gera um evento iCalendar (.ics) sem depender de API externa.
+   Compatível com Apple Calendar, Google Calendar e calendários Android.
+   ================================================================ */
+function agCalendarEscape(valor){
+  return String(valor??'')
+    .replace(/\\/g,'\\\\')
+    .replace(/;/g,'\\;')
+    .replace(/,/g,'\\,')
+    .replace(/\r?\n/g,'\\n');
+}
+function agCalendarFold(text){
+  const linhas=[];
+  const bruto=String(text||'');
+  for(let i=0;i<bruto.length;i+=70) linhas.push((i?' ':'')+bruto.slice(i,i+70));
+  return linhas.join('\\r\\n');
+}
+function agCalendarDate(iso){
+  const valor=String(iso||'').slice(0,10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(valor) ? valor.replace(/-/g,'') : '';
+}
+function agCalendarDateTime(iso,hora){
+  const data=agCalendarDate(iso), hm=String(hora||'');
+  if(!data || !/^\d{2}:\d{2}$/.test(hm)) return '';
+  return `${data}T${hm.replace(':','')}00`;
+}
+function agCalendarDateFromDate(d){
+  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+}
+function agCalendarAddDays(iso,dias){
+  const valor=String(iso||'').slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(valor)) return '';
+  const [a,m,d]=valor.split('-').map(Number), dt=new Date(a,m-1,d,12,0,0,0);
+  dt.setDate(dt.getDate()+Number(dias||0));
+  return agCalendarDateFromDate(dt);
+}
+function agCalendarNowStamp(){
+  const d=new Date(), p=n=>String(n).padStart(2,'0');
+  return `${d.getUTCFullYear()}${p(d.getUTCMonth()+1)}${p(d.getUTCDate())}T${p(d.getUTCHours())}${p(d.getUTCMinutes())}${p(d.getUTCSeconds())}Z`;
+}
+function agCalendarUid(tipo,id){
+  const base=String(id||uid('calendar')).replace(/[^a-zA-Z0-9_-]/g,'');
+  return `${tipo}-${base}@assistenciagerencialavenida`;
+}
+function agCalendarLocation(item){
+  const local=String(item?.local||item?.localizacao||item?.endereco||'').trim();
+  if(local) return local;
+  const loja=String(db?.meta?.loja||'24').trim();
+  const setor=String(item?.setor||'').trim(), dep=String(item?.departamento||'').trim();
+  const complemento=[setor&&setor!=='GERAL'?setor:'',dep&&dep!=='Loja toda'?dep:''].filter(Boolean).join(' — ');
+  return `Loja ${loja} — Assistência Gerencial Avenida${complemento?` — ${complemento}`:''}`;
+}
+function agCalendarDescription(item,tipo){
+  const partes=[], resumo=String(item?.resumo||'').trim(), descricao=String(item?.descricao||'').trim();
+  const resp=[item?.responsavel,item?.responsavel2].filter(Boolean).join(' + '), setor=String(item?.setor||'').trim(), dep=String(item?.departamento||'').trim();
+  if(resumo) partes.push(`Resumo: ${resumo}`);
+  if(descricao && descricao!==resumo) partes.push(`Descrição: ${descricao}`);
+  if(resp) partes.push(`Responsável: ${resp}`);
+  if(setor) partes.push(`Setor: ${setor}`);
+  if(dep && dep!=='Loja toda') partes.push(`Departamento: ${dep}`);
+  if(tipo==='TAREFA' && item?.prioridade) partes.push(`Prioridade: ${item.prioridade}`);
+  if(tipo==='NOTA' && item?.tipo) partes.push(`Tipo: ${item.tipo}`);
+  partes.push('Origem: Assistência Gerencial Avenida');
+  return partes.join('\n');
+}
+function agCalendarRRuleTarefa(t){
+  if(normalizarTipoAgendamentoTarefa(t)!=='REPETICAO') return '';
+  const tipo=String(t.repeticaoLembrete||'').toUpperCase();
+  if(tipo==='DIARIA') return 'RRULE:FREQ=DAILY';
+  if(tipo==='SEMANAL'){
+    const mapa={0:'SU',1:'MO',2:'TU',3:'WE',4:'TH',5:'FR',6:'SA'}, dia=mapa[Number(t.diaSemanaRepeticao)];
+    return dia?`RRULE:FREQ=WEEKLY;BYDAY=${dia}`:'';
+  }
+  if(tipo==='MENSAL'){
+    const dia=Number(t.diaMesRepeticao);
+    return dia>=1&&dia<=31?`RRULE:FREQ=MONTHLY;BYMONTHDAY=${dia}`:'';
+  }
+  return '';
+}
+function agCalendarEventData(item,tipo){
+  if(!item) return null;
+  const isTarefa=tipo==='TAREFA', titulo=String(isTarefa?(item.atividade||item.titulo||'Tarefa'):(item.titulo||'Anotação')).trim();
+  let inicio=String(item.inicio||'').slice(0,10), fim=String(item.fim||item.prazo||'').slice(0,10);
+  let horaInicio=isTarefa?String(item.horaInicio||''):'', horaFim=isTarefa?String(item.horaFim||''):'';
+  if(isTarefa && normalizarTipoAgendamentoTarefa(item)==='REPETICAO'){
+    inicio=inicio||String(item.dataISO||hojeISO()).slice(0,10);
+    horaInicio=horaInicio||String(item.horaRepeticao||'');
+  }
+  if(!inicio && fim) inicio=fim;
+  if(!inicio) return {titulo,semData:true};
+  const inicioComHora=agCalendarDateTime(inicio,horaInicio);
+  let fimComHora=agCalendarDateTime(fim,horaFim);
+  if(inicioComHora){
+    if(!fimComHora){
+      const [a,m,d]=inicio.split('-').map(Number), [hh,mm]=horaInicio.split(':').map(Number), dt=new Date(a,m-1,d,hh,mm,0,0);
+      dt.setHours(dt.getHours()+1);
+      fimComHora=`${agCalendarDateFromDate(dt)}T${String(dt.getHours()).padStart(2,'0')}${String(dt.getMinutes()).padStart(2,'0')}00`;
+    }
+    return {titulo,allDay:false,dtStart:inicioComHora,dtEnd:fimComHora,rrule:isTarefa?agCalendarRRuleTarefa(item):''};
+  }
+  const endDate=fim&&fim>=inicio?agCalendarAddDays(fim,1):agCalendarAddDays(inicio,1);
+  return {titulo,allDay:true,dtStart:agCalendarDate(inicio),dtEnd:endDate,rrule:isTarefa?agCalendarRRuleTarefa(item):''};
+}
+async function adicionarAoCalendario(tipo,id){
+  try{
+    const colecao=tipo==='TAREFA'?db?.tarefas:db?.notas, item=Array.isArray(colecao)?colecao.find(x=>x.id===id):null;
+    if(!item){ alert(`${tipo==='TAREFA'?'Tarefa':'Anotação'} não encontrada.`); return; }
+    const evento=agCalendarEventData(item,tipo);
+    if(!evento || evento.semData){
+      alert('Defina uma data de início ou prazo antes de adicionar ao calendário.');
+      if(tipo==='TAREFA') editarTarefa(id); else editarNota(id);
+      return;
+    }
+    const descricao=agCalendarDescription(item,tipo), location=agCalendarLocation(item);
+    const linhas=[
+      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Assistencia Gerencial Avenida//Calendario//PT-BR','CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
+      `UID:${agCalendarUid(tipo,id)}`,`DTSTAMP:${agCalendarNowStamp()}`,`SUMMARY:${agCalendarEscape(evento.titulo)}`,
+      `LOCATION:${agCalendarEscape(location)}`,`DESCRIPTION:${agCalendarEscape(descricao)}`,
+      `STATUS:${isConcluido(item)?'CANCELLED':'CONFIRMED'}`,
+      evento.allDay?`DTSTART;VALUE=DATE:${evento.dtStart}`:`DTSTART:${evento.dtStart}`,
+      evento.allDay?`DTEND;VALUE=DATE:${evento.dtEnd}`:`DTEND:${evento.dtEnd}`,
+      evento.rrule,'BEGIN:VALARM','ACTION:DISPLAY',`DESCRIPTION:${agCalendarEscape(evento.titulo)}`,
+      evento.allDay?'TRIGGER:-P1D':'TRIGGER:-PT15M','END:VALARM','END:VEVENT','END:VCALENDAR'
+    ].filter(Boolean).map(agCalendarFold).join('\r\n')+'\r\n';
+    const blob=new Blob([`\ufeff${linhas}`],{type:'text/calendar;charset=utf-8'}), nomeBase=(evento.titulo||tipo).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,70)||'evento';
+    const file=new File([blob],`${nomeBase}.ics`,{type:'text/calendar'});
+    if(navigator.share && navigator.canShare){
+      try{
+        if(navigator.canShare({files:[file]})){
+          await navigator.share({title:evento.titulo,text:'Adicionar ao calendário',files:[file]});
+          return;
+        }
+      }catch(erroCompartilhamento){ if(erroCompartilhamento?.name==='AbortError') return; }
+    }
+    const url=URL.createObjectURL(blob), a=document.createElement('a');
+    a.href=url; a.download=file.name; a.rel='noopener'; a.style.display='none'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),10000);
+    alert('Arquivo de calendário criado. Abra o arquivo .ics para adicionar o evento ao calendário do dispositivo.');
+  }catch(erro){
+    console.error('Falha ao adicionar ao calendário:',erro);
+    alert('Não foi possível preparar o evento para o calendário deste dispositivo.');
+  }
+}
+
 function renderNotas(){
   const fs = document.getElementById('fNotaSetor')?.value || 'TODOS';
   const st = document.getElementById('fNotaStatus')?.value || 'TODOS';
@@ -16515,6 +16660,7 @@ function renderNotas(){
         <button class="btn small secondary" onclick="editarNota('${n.id}')">Editar</button>
         <button class="btn small secondary" onclick="duplicarNota('${n.id}')">Duplicar</button>
         <button class="btn small secondary" onclick="copiarNota('${n.id}')">📋 Copiar</button>
+        <button class="btn small secondary" onclick="adicionarAoCalendario('NOTA','${n.id}')">📅 Calendário</button>
         <button class="btn small secondary" onclick="transformarNotaEmTarefa('${n.id}')">✓ Criar tarefa</button>
         ${statusNotaArquivado(n)
           ? `<button class="btn small good" onclick="restaurarNota('${n.id}')">Restaurar</button>`
@@ -16795,7 +16941,7 @@ function renderKanban(){
         return `<article class="task-row">
           <div class="task-row-main"><h4>${escapeHTML(t.atividade || t.titulo)}</h4><div class="task-meta">${badgeSetor(t.setor)} ${badgePrioridade(t.prioridade)} ${badgeRepeticaoLembreteTarefa(t)} ${badgeAnexosTarefa(t)}</div><p><b>Departamento:</b> ${escapeHTML(t.departamento || 'Loja toda')}</p></div>
           <div class="task-row-meta"><p><b>Agendamento:</b> ${escapeHTML(periodo)}</p><p><b>Responsável:</b> ${escapeHTML(responsaveis)}</p></div>
-          <div class="actions task-row-actions no-print"><button class="btn small secondary" onclick="abrirModalTarefa('${t.id}')">Editar</button>${st!=='Concluída'?`<button class="btn small good" onclick="setTarefaStatus('${t.id}','Concluída')">Concluir</button>`:''}<button class="btn small danger" onclick="excluirTarefa('${t.id}')">Excluir</button></div>
+          <div class="actions task-row-actions no-print"><button class="btn small secondary" onclick="abrirModalTarefa('${t.id}')">Editar</button><button class="btn small secondary" onclick="adicionarAoCalendario('TAREFA','${t.id}')">📅 Calendário</button>${st!=='Concluída'?`<button class="btn small good" onclick="setTarefaStatus('${t.id}','Concluída')">Concluir</button>`:''}<button class="btn small danger" onclick="excluirTarefa('${t.id}')">Excluir</button></div>
           ${(t.descricao||anexosTarefa(t).length)?`<details class="task-row-details"><summary>Ver detalhes da tarefa${anexosTarefa(t).length?` • ${anexosTarefa(t).length} anexo(s)`:''}</summary>${t.descricao?`<p>${escapeHTML(t.descricao)}</p>`:''}${renderAnexosTarefaCard(t)}</details>`:''}
         </article>`;
       }).join(''):'<div class="empty">Sem itens neste status.</div>'}</div>
