@@ -16605,9 +16605,15 @@ function agCalendarGoogleUrl(e,descricao,local){
 }
 
 function agCalendarAppleDateUrl(e){
-  const stamp=(e.isoStart||'').replace(/-/g,'')+
-    (e.horaStart?`T${e.horaStart.replace(':','')}00`:'');
-  return stamp ? `calshow:${stamp}` : 'calshow:';
+  const iso=String(e.isoStart||'').slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return 'calshow:';
+  const hora=e.horaStart && /^\d{2}:\d{2}$/.test(e.horaStart) ? e.horaStart : '00:00';
+  /* calshow usa segundos desde o epoch de referência do Apple Calendar:
+     2001-01-01 00:00:00 UTC. Não enviar YYYYMMDD/HHMM. */
+  const alvo=new Date(`${iso}T${hora}:00`);
+  const referencia=new Date('2001-01-01T00:00:00Z');
+  const segundos=Math.floor((alvo.getTime()-referencia.getTime())/1000);
+  return Number.isFinite(segundos) ? `calshow:${segundos}` : 'calshow:';
 }
 
 function agCalendarDetectPlatform(){
