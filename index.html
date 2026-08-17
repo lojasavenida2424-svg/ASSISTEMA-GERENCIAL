@@ -16554,7 +16554,7 @@ function agCalendarQuery(params){
 
 /* Calendário: abertura automática por plataforma.
    Não apresenta seletor e não gera/baixa arquivos.
-   Windows 11: usa o protocolo nativo do novo Outlook/Calendário.
+   Windows 11: usa a ponte nativa agcal:// -> AppointmentManager.
    Android: usa o Intent nativo de inserção de evento.
    iOS/iPadOS: abre o Calendário Apple na data do evento; o Safari não
    oferece uma API web pública equivalente ao Intent do Android para
@@ -16585,30 +16585,13 @@ function agCalendarAndroidIntent(e,descricao,local){
 }
 
 function agCalendarWindowsNativeUrl(e,descricao,local){
-  /*
-   * Outlook para Windows aceita o protocolo ms-outlook://events/new.
-   * Para a tela de NOVO EVENTO, os parâmetros de data usados pelo
-   * protocolo são start/end (há versões que também reconhecem
-   * startdt/enddt). Enviamos ambos para maximizar compatibilidade.
-   */
   const start=e.allDay
-    ? `${e.isoStart}T00:00:00`
-    : `${e.isoStart}T${e.horaStart||'00:00'}:00`;
+    ? `${e.isoStart}T00:00`
+    : `${e.isoStart}T${e.horaStart||'00:00'}`;
   const end=e.allDay
-    ? `${agCalendarAddDays(e.isoEnd||e.isoStart,1)}T00:00:00`
-    : `${e.isoEnd||e.isoStart}T${e.horaEnd||'00:00'}:00`;
-
-  const params={
-    title:e.titulo,
-    description:descricao||'',
-    location:local||'',
-    start,
-    end,
-    startdt:start,
-    enddt:end
-  };
-
-  return `ms-outlook://events/new?${agCalendarQuery(params)}`;
+    ? `${agCalendarAddDays(e.isoEnd||e.isoStart,1)}T00:00`
+    : `${e.isoEnd||e.isoStart}T${e.horaEnd||'00:00'}`;
+  return `agcal://event?${agCalendarQuery({title:e.titulo,description:descricao||'',location:local||'',start,end,allDay:e.allDay?'1':'0',reminderMinutes:e.allDay?'1440':'15'})}`;
 }
 
 function agCalendarGoogleUrl(e,descricao,local){
@@ -16661,8 +16644,8 @@ function agCalendarOpenAutomatic(evento,descricao,local){
   }
 
   if(p.isWindows){
-    /* Windows 11 atual: o aplicativo Calendário/Mail foi migrado
-       para o novo Outlook; o protocolo ms-outlook abre o cliente nativo. */
+    /* Windows 11: ponte nativa do Gerencial usa AppointmentManager
+       para abrir a tela NOVO COMPROMISSO já preenchida. */
     return agCalendarOpenNative(
       agCalendarWindowsNativeUrl(evento,descricao,local)
     );
