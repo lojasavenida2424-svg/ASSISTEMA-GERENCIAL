@@ -87,7 +87,7 @@
       const SOPHIA_SESSION_KEY = 'sophiaSessaoSeguraV1';
       const SOPHIA_HISTORY_KEY = 'sophiaHistoricoSessaoV1';
       const SOPHIA_BUILD = 'V39.1-SEMPREFLIGHT';
-      const GERENCIAL_BUILD = 'V51.47-LOGIN-NOME-COMPLETO';
+      const GERENCIAL_BUILD = 'V51.45-ACOMP-GERENCIAL-ZERADO';
   </script>
   <style>
     :root {
@@ -208,22 +208,7 @@
       opacity: .72;
       margin-bottom: 2px;
     }
-    .login-user-preview > div {
-      flex: 1 1 auto;
-      min-width: 0;
-    }
-    .login-user-preview b {
-      display: block;
-      width: 100%;
-      max-width: none;
-      font-size: .98rem;
-      line-height: 1.22;
-      white-space: normal;
-      overflow: visible;
-      text-overflow: clip;
-      overflow-wrap: anywhere;
-      word-break: normal;
-    }
+    .login-user-preview b { font-size: .98rem; }
     .login-user-preview .preview-operator {
       background: var(--preto-logo);
       color: var(--amarelo);
@@ -231,8 +216,6 @@
       padding: 6px 10px;
       font-size: .78rem;
       white-space: nowrap;
-      flex: 0 0 auto;
-      align-self: flex-start;
     }
     .login-user-preview.not-found {
       background: rgba(220,38,38,.10);
@@ -10486,7 +10469,7 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
       border:1px solid var(--border);
       border-radius:18px;
       background:var(--page-2);
-      padding:16px 14px 14px;
+      padding:42px 14px 14px;
       display:grid;
       grid-template-columns:repeat(12,minmax(0,1fr));
       gap:10px 12px;
@@ -10501,11 +10484,12 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
     .acomp-task-edit-row>.field:nth-of-type(6){grid-column:span 4;}
     .acomp-task-edit-row label{font-size:.70rem;}
     .acomp-task-edit-row input,.acomp-task-edit-row select{min-height:44px;min-width:0;max-width:100%;}
-    .acomp-task-number{position:absolute;top:-9px;left:14px;background:var(--preto-logo);color:var(--amarelo);border-radius:999px;padding:3px 9px;font-size:.68rem;font-weight:1000;letter-spacing:.04em;box-shadow:0 4px 10px rgba(15,23,42,.16);}
+    .acomp-task-number{position:absolute;top:10px;left:14px;background:var(--preto-logo);color:var(--amarelo);border-radius:999px;padding:3px 9px;font-size:.68rem;font-weight:1000;letter-spacing:.04em;box-shadow:0 4px 10px rgba(15,23,42,.16);}
     .acomp-remove-task{position:absolute;top:10px;right:12px;display:none;align-items:center;gap:5px;padding:5px 9px;border:1px solid color-mix(in srgb,var(--red) 48%,var(--border));border-radius:999px;background:color-mix(in srgb,var(--red-bg) 55%,transparent);color:var(--red);font-size:.66rem;line-height:1;font-weight:1000;cursor:pointer;z-index:2;}
     .acomp-remove-task.visible{display:inline-flex;}
     .acomp-remove-task:hover{background:var(--red-bg);border-color:var(--red);}
     .acomp-task-edit-row.has-remove-action{padding-top:42px;}
+    .acomp-task-edit-row .acomp-task-note-field{grid-column:1/-1;}
     .acomp-observacoes{margin-top:16px;}
     .acomp-form-actions{margin-top:14px;}
     .acomp-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px;}
@@ -10620,243 +10604,6 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
       .task-attachment-item{grid-template-columns:1fr;}
       .task-attachment-actions{justify-content:flex-start;}
       .task-attachment-card-item{align-items:flex-start;flex-direction:column;}
-    }
-  </style>
-
-
-  <style id="topbar-compact-v5148">
-    /* V51.48 — cabeçalho mais compacto e proporcional no desktop */
-    @media (min-width:1101px){
-      .topbar{
-        grid-template-columns:minmax(240px,1fr) max-content !important;
-        gap:10px !important;
-        min-height:84px !important;
-        padding:10px 12px 10px 14px !important;
-        align-items:center !important;
-      }
-      .top-left{min-width:0 !important;overflow:hidden !important;}
-      .top-left h2,#pageTitle{font-size:1.34rem !important;line-height:1.08 !important;}
-      .top-left p,#pageSubtitle{font-size:.78rem !important;line-height:1.2 !important;}
-
-      .store-meta{
-        display:grid !important;
-        grid-template-columns:72px 118px minmax(178px,218px) 82px 96px 38px 38px 38px !important;
-        gap:6px !important;
-        width:max-content !important;
-        min-width:max-content !important;
-        max-width:none !important;
-        align-items:stretch !important;
-      }
-
-      .store-meta .info-tile,
-      .store-meta .header-notification,
-      .store-meta .header-theme,
-      .store-meta .header-logout{
-        min-height:50px !important;
-        height:50px !important;
-        border-radius:13px !important;
-      }
-
-      .info-tile{
-        padding:6px 7px !important;
-        gap:6px !important;
-      }
-      .info-icon{
-        flex:0 0 18px !important;
-        width:18px !important;
-        height:18px !important;
-      }
-      .info-icon svg,
-      .header-notification svg,
-      .header-logout svg{
-        width:16px !important;
-        height:16px !important;
-        stroke-width:1.95 !important;
-      }
-      .info-copy{gap:1px !important;min-width:0 !important;}
-      .info-copy small{
-        font-size:.52rem !important;
-        line-height:1.02 !important;
-        letter-spacing:.04em !important;
-      }
-      .info-copy b{
-        font-size:.73rem !important;
-        line-height:1.05 !important;
-      }
-      .info-store .info-copy b,
-      .info-operator .info-copy b,
-      .info-manager .info-copy b{
-        font-size:.84rem !important;
-      }
-      .info-month .info-copy b{
-        font-size:.76rem !important;
-      }
-      .info-user .info-copy b,
-      #headerUserName{
-        display:-webkit-box !important;
-        -webkit-line-clamp:2 !important;
-        -webkit-box-orient:vertical !important;
-        overflow:hidden !important;
-        white-space:normal !important;
-        text-overflow:ellipsis !important;
-        font-size:.70rem !important;
-        line-height:1.02 !important;
-        max-height:2.1em !important;
-      }
-      .store-meta .header-notification,
-      .store-meta .header-theme,
-      .store-meta .header-logout,
-      #notificationBtn,
-      .header-theme.theme-btn,
-      .header-logout.logout-fixed{
-        width:38px !important;
-        min-width:38px !important;
-        padding:0 !important;
-      }
-      .notification-badge{
-        top:4px !important;
-        right:4px !important;
-        min-width:15px !important;
-        height:15px !important;
-        font-size:.58rem !important;
-        line-height:15px !important;
-      }
-    }
-
-    @media (min-width:1101px) and (max-width:1450px){
-      .store-meta{
-        grid-template-columns:68px 110px minmax(165px,200px) 78px 90px 36px 36px 36px !important;
-        gap:5px !important;
-      }
-      .info-tile{padding:6px !important;}
-      .info-copy small{font-size:.49rem !important;}
-      .info-copy b{font-size:.69rem !important;}
-      .info-store .info-copy b,
-      .info-operator .info-copy b,
-      .info-manager .info-copy b{font-size:.80rem !important;}
-      .store-meta .header-notification,
-      .store-meta .header-theme,
-      .store-meta .header-logout,
-      #notificationBtn,
-      .header-theme.theme-btn,
-      .header-logout.logout-fixed{
-        width:36px !important;
-        min-width:36px !important;
-      }
-    }
-  </style>
-
-
-  <style id="topbar-loja-proporcional-v5149">
-    /* V51.49 — card LOJA 24 com largura própria e leitura sem compressão */
-    @media (min-width:1101px){
-      .store-meta{
-        grid-template-columns:94px 118px minmax(178px,218px) 82px 96px 38px 38px 38px !important;
-      }
-      .info-store{
-        min-width:94px !important;
-        padding-left:10px !important;
-        padding-right:10px !important;
-        gap:8px !important;
-      }
-      .info-store .info-icon{
-        flex:0 0 20px !important;
-        width:20px !important;
-        height:20px !important;
-      }
-      .info-store .info-icon svg{
-        width:18px !important;
-        height:18px !important;
-      }
-      .info-store .info-copy{
-        min-width:38px !important;
-        flex:1 1 auto !important;
-        align-items:flex-start !important;
-      }
-      .info-store .info-copy small{
-        font-size:.56rem !important;
-        line-height:1 !important;
-        overflow:visible !important;
-        text-overflow:clip !important;
-      }
-      .info-store .info-copy b{
-        font-size:.92rem !important;
-        line-height:1.05 !important;
-        overflow:visible !important;
-        text-overflow:clip !important;
-      }
-    }
-    @media (min-width:1101px) and (max-width:1450px){
-      .store-meta{
-        grid-template-columns:88px 110px minmax(165px,200px) 78px 90px 36px 36px 36px !important;
-      }
-      .info-store{
-        min-width:88px !important;
-        padding-left:8px !important;
-        padding-right:8px !important;
-        gap:7px !important;
-      }
-      .info-store .info-copy small{font-size:.53rem !important;}
-      .info-store .info-copy b{font-size:.88rem !important;}
-    }
-  </style>
-
-
-  <style id="topbar-mes-ano-v5150">
-    /* V51.50 — card MÊS / ANO proporcional e sem truncamento */
-    @media (min-width:1101px){
-      .store-meta{
-        grid-template-columns:94px 138px minmax(178px,218px) 82px 96px 38px 38px 38px !important;
-      }
-      .info-month{
-        min-width:138px !important;
-        padding-left:9px !important;
-        padding-right:10px !important;
-        gap:8px !important;
-      }
-      .info-month .info-icon{
-        flex:0 0 20px !important;
-        width:20px !important;
-        height:20px !important;
-      }
-      .info-month .info-icon svg{
-        width:18px !important;
-        height:18px !important;
-      }
-      .info-month .info-copy{
-        min-width:82px !important;
-        flex:1 1 auto !important;
-        align-items:flex-start !important;
-      }
-      .info-month .info-copy small{
-        font-size:.56rem !important;
-        line-height:1 !important;
-        white-space:nowrap !important;
-        overflow:visible !important;
-        text-overflow:clip !important;
-      }
-      .info-month .info-copy b,
-      #mesAtual{
-        font-size:.82rem !important;
-        line-height:1.05 !important;
-        white-space:nowrap !important;
-        overflow:visible !important;
-        text-overflow:clip !important;
-        letter-spacing:.01em !important;
-      }
-    }
-    @media (min-width:1101px) and (max-width:1450px){
-      .store-meta{
-        grid-template-columns:88px 130px minmax(165px,200px) 78px 90px 36px 36px 36px !important;
-      }
-      .info-month{
-        min-width:130px !important;
-        padding-left:8px !important;
-        padding-right:8px !important;
-        gap:7px !important;
-      }
-      .info-month .info-copy small{font-size:.53rem !important;}
-      .info-month .info-copy b,#mesAtual{font-size:.78rem !important;}
     }
   </style>
 
@@ -11455,7 +11202,7 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
           </div>
           <div class="notice privacy-note">🔒 Dados como CPF/RG e data de nascimento são informações pessoais. Eles ficam salvos apenas neste navegador/backup do sistema.<br>🧾 A matrícula é calculada pelo número de operador. Ex.: operador 133 = matrícula AV24-0133.</div>
           <div class="employee-grid" id="funcCards"></div>
-          <div class="table-wrap" style="margin-top:16px;"><table><thead><tr><th>Funcionário</th><th>Operador</th><th>Matrícula</th><th>Cargo</th><th>Setor</th><th>Entrada</th><th>Tempo</th><th>Nascimento</th><th>Estado civil</th><th>Documento</th><th>Status</th><th>Caixa</th><th>Observação</th><th class="no-print">Ações</th></tr></thead><tbody id="tbodyFuncionarios"></tbody></table></div>
+          <div class="table-wrap" style="margin-top:16px;"><table><thead><tr><th>Funcionário</th><th>Operador</th><th>Matrícula</th><th>Cargo</th><th>Setor</th><th>Departamento</th><th>Entrada</th><th>Tempo</th><th>Nascimento</th><th>Estado civil</th><th>Documento</th><th>Status</th><th>Caixa</th><th>Observação</th><th class="no-print">Ações</th></tr></thead><tbody id="tbodyFuncionarios"></tbody></table></div>
         </div>
       </section>
 
@@ -11504,11 +11251,12 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
             <div class="form-grid">
               <div class="field w4"><label>Nome do funcionário</label><input id="funcNome" required placeholder="Ex.: MARIA SILVA" /></div>
               <div class="field w2"><label>Nº de operador</label><input id="funcOperador" type="number" min="1" placeholder="Ex.: 133" oninput="atualizarMatriculaPreview()" /></div>
-              <div class="field w2"><label>Matrícula automática</label><input id="funcMatricula" readonly placeholder="Baseada no operador" /></div>
+              <div class="field w2"><label>Matrícula</label><input id="funcMatricula" placeholder="Ex.: AV24-0133" /></div>
               <div class="field w2"><label>Data de nascimento</label><input id="funcNascimento" type="date" /></div>
               <div class="field w4"><label>Estado civil</label><select id="funcEstadoCivil"><option value="">Não informado</option><option>Solteiro(a)</option><option>Casado(a)</option><option>União estável</option><option>Divorciado(a)</option><option>Viúvo(a)</option><option>Outro</option></select></div>
-              <div class="field w4"><label>Cargo</label><select id="funcCargo"><option>GERENTE DE LOJA</option><option>VISUAL MERCHANDISING</option><option>FISCAL</option><option>ADMINISTRATIVO</option><option>PRODUTOS FINANCEIROS</option><option>PF</option><option>LIMPEZA</option><option>ASSESSOR DE CLIENTE</option><option>OPERADOR(A) DE CAIXA</option><option>OUTROS</option></select></div>
+              <div class="field w4"><label>Cargo</label><select id="funcCargo" onchange="aplicarDepartamentoAutomaticoPorCargo()"><option>GERENTE DE LOJA</option><option>VISUAL MERCHANDISING</option><option>FISCAL</option><option>ADMINISTRATIVO</option><option>PRODUTOS FINANCEIROS</option><option>LÍDER DE PRODUTO FINANCEIRO</option><option>PF</option><option>DEPARTAMENTO</option><option>LIMPEZA</option><option>ASSESSOR DE CLIENTE</option><option>OPERADOR(A) DE CAIXA</option><option>OUTROS</option></select></div>
               <div class="field w4"><label>Setor principal</label><select id="funcSetor"><option>GERÊNCIA</option><option>VISUAL MERCHANDISING</option><option>FISCAL</option><option>ADMINISTRATIVO</option><option>PRODUTOS FINANCEIROS</option><option>LIMPEZA</option><option>VENDAS</option><option>LOJA GERAL</option></select></div>
+              <div class="field w4"><label>Departamento de atuação</label><select id="funcDepartamento" required><option value="">Selecione o departamento</option></select></div>
               <div class="field w2"><label>Data de entrada na loja</label><input id="funcEntrada" type="date" /></div>
               <div class="field w2"><label>Status</label><select id="funcStatus"><option>ATIVO</option><option>FÉRIAS</option><option>AFASTADO</option><option>DESLIGADO</option></select></div>
               <div class="field w2"><label>Caixa operacional</label><select id="funcCaixaOperacional"><option>ATIVO</option><option>INATIVO</option></select></div>
@@ -11902,15 +11650,15 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
             <input type="hidden" id="diarioId" />
             <div class="acomp-base-grid">
               <div class="field"><label>Data</label><input id="diarioData" type="date" required /></div>
-              <div class="field"><label>Assessor / Funcionário</label><select id="diarioResp" required></select></div>
-              <div class="field"><label>Departamento</label><select id="diarioDepartamento" required onchange="atualizarHierarquiaTodasTarefas()"></select></div>
+              <div class="field"><label>Assessor / Funcionário</label><select id="diarioResp" required onchange="preencherDepartamentoAcompanhamentoPorAssessor()"></select></div>
+              <div class="field"><label>Departamento <span style="font-size:.72em;opacity:.7">(automático)</span></label><select id="diarioDepartamento" required disabled></select></div>
             </div>
 
             <div id="acompTaskPanel" class="acomp-task-panel active">
               <div class="acomp-editor-head">
                 <div>
                   <h3>Tarefas designadas</h3>
-                  <p>Família e subfamília respeitam o departamento escolhido.</p>
+                  <p>Família e subfamília respeitam automaticamente o departamento cadastrado para o funcionário.</p>
                 </div>
                 <div class="acomp-panel-actions no-print">
                   <button class="btn secondary acomp-add-task" type="button" onclick="adicionarTarefaAcompanhamento()">＋ Adicionar outra tarefa</button>
@@ -11928,10 +11676,25 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
         </div>
 
         <div id="acompResumoDia" class="acomp-summary-grid"></div>
+        <div class="acomp-control-bar no-print">
+          <div class="acomp-control-group"><label>Data</label><select id="acompFiltroData" onchange="renderDiario()"><option value="HOJE">Hoje</option><option value="TODOS">Todos</option><option value="ATRASADAS">Atrasadas</option><option value="PROXIMAS">Próximas</option></select></div>
+          <div class="acomp-control-group"><label>Funcionário</label><select id="acompFiltroFuncionario" onchange="renderDiario()"><option value="TODOS">Todos</option></select></div>
+          <div class="acomp-control-group"><label>Departamento</label><select id="acompFiltroDepartamento" onchange="renderDiario()"><option value="TODOS">Todos</option></select></div>
+          <div class="acomp-control-group"><label>Status</label><select id="acompFiltroStatus" onchange="renderDiario()"><option value="TODOS">Todos</option><option>PENDENTE</option><option>EM ANDAMENTO</option><option>BLOQUEADA</option><option>CONCLUÍDA</option><option>CANCELADA</option><option>ATRASADA</option></select></div>
+          <div class="acomp-control-group"><label>Prioridade</label><select id="acompFiltroPrioridade" onchange="renderDiario()"><option value="TODOS">Todas</option><option>BAIXA</option><option>MÉDIA</option><option>ALTA</option><option>CRÍTICA</option></select></div>
+          <div class="acomp-control-group acomp-control-search"><label>Buscar</label><input id="acompFiltroBusca" type="search" placeholder="Tarefa, família, subfamília..." oninput="renderDiario()"></div>
+          <div class="acomp-view-switch" role="tablist" aria-label="Visualização"><button type="button" class="acomp-view-btn active" data-view="FUNCIONARIO" onclick="definirVisaoAcompanhamento('FUNCIONARIO')">👤 Funcionários</button><button type="button" class="acomp-view-btn" data-view="TAREFA" onclick="definirVisaoAcompanhamento('TAREFA')">📋 Tarefas</button><button type="button" class="acomp-view-btn" data-view="DEPARTAMENTO" onclick="definirVisaoAcompanhamento('DEPARTAMENTO')">🏬 Departamentos</button></div>
+        </div>
         <div id="acompanhamentoLista" class="acomp-list"></div>
       </section>
 
       
+<style id="acompanhamento-dia-v52-enhancements">
+.acomp-control-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:16px 0;padding:14px;border:1px solid var(--border);border-radius:18px;background:var(--page);box-shadow:0 6px 18px rgba(15,23,42,.045)}
+.acomp-control-group{display:flex;flex-direction:column;gap:5px;min-width:145px}.acomp-control-group label{font-size:.68rem;font-weight:900;text-transform:uppercase;color:var(--muted)}.acomp-control-group select,.acomp-control-group input{min-height:38px;border:1px solid var(--border);border-radius:10px;background:var(--page);color:var(--text);padding:8px 10px;font-weight:700}.acomp-control-search{flex:1;min-width:210px}.acomp-view-switch{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}.acomp-view-btn{border:1px solid var(--border);background:var(--page);color:var(--text);border-radius:10px;padding:9px 12px;font-weight:850;cursor:pointer}.acomp-view-btn.active{background:var(--soft);border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}.acomp-task-actions{display:flex;align-items:center;justify-content:flex-end;gap:5px;flex-wrap:wrap}.acomp-task-actions .btn.small{min-width:30px;padding:7px 8px}.acomp-status-chip{background:var(--soft);border:1px solid var(--border)}.acomp-task-card.bloqueada{border-left:4px solid #d97706}.acomp-task-card.cancelada{opacity:.65}.acomp-task-observation{margin-top:7px;padding:8px 10px;border-radius:10px;background:var(--soft);font-size:.78rem;color:var(--muted)}
+@media(max-width:900px){.acomp-control-bar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.acomp-control-search,.acomp-view-switch{grid-column:1/-1;margin-left:0}}@media(max-width:600px){.acomp-control-bar{grid-template-columns:1fr}.acomp-control-search,.acomp-view-switch{grid-column:auto}.acomp-view-switch{display:grid;grid-template-columns:1fr 1fr 1fr}.acomp-view-btn{font-size:.72rem;padding:8px 5px}}
+</style>
+
 <style id="acompanhamento-gerencial-v51-42-lock-day-style">
 .ag-day-lock-note{display:block;margin-top:4px;color:var(--muted);font-size:.62rem;font-weight:900;white-space:nowrap;}
 #agDistHighBody tr:has(.ag-day-lock-note){background:color-mix(in srgb,var(--soft) 55%,var(--page));}
@@ -12434,7 +12197,7 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
               <span class="sistema-av-open">ABRIR SISTEMA ↗</span>
             </a>
 
-            <a class="sistema-av-button" data-sistema-av-link="comunicacao" onclick="return validarAcessoSistemaAv(event,'comunicacao')" href="./comunicacao/index.html" target="_blank" rel="noopener noreferrer" aria-label="Abrir Comunicação AV">
+            <a class="sistema-av-button" data-sistema-av-link="comunicacao" onclick="return validarAcessoSistemaAv(event,'comunicacao')" href="./Comunicacao_AV.html" target="_blank" rel="noopener noreferrer" aria-label="Abrir Comunicação AV">
               <div class="sistema-av-logo">
                 <span class="logo-fallback" aria-hidden="true">AV</span>
               </div>
@@ -12588,7 +12351,7 @@ const departamentosLoja = [...new Set(Object.values(areasTarefaPorSetor).flat())
 
 const usuariosOficiais = [
   { nome:'ALANA ARAUJO', operadorPadrao:'139', cargo:'GERENTE DE LOJA' },
-  { nome:'JOAO PEDRO DE OLIVEIRA SILVA', operadorPadrao:'133', cargo:'VISUAL MERCHANDISING' },
+  { nome:'JOAO PEDRO', operadorPadrao:'133', cargo:'VISUAL MERCHANDISING' },
   { nome:'KAILANY', operadorPadrao:'144', cargo:'ADMINISTRATIVO' }
 ];
 
@@ -12596,7 +12359,7 @@ const funcionariosPadrao = [
   { id:'func_alana', nome:'ALANA ARAUJO', operador:'139', matricula:'AV24-0139', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'ATIVO', cargo:'GERENTE DE LOJA', setor:'GERÊNCIA', entrada:'', obs:'Gerência da loja 24.' },
   { id:'func_cassio', nome:'CASSIO GABRIEL', operador:'', matricula:'', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'INATIVO', cargo:'FISCAL', setor:'FISCAL', entrada:'', obs:'Apoio fiscal, conferência e prevenção.' },
   { id:'func_richard', nome:'RICHARD BAPTISTE', operador:'', matricula:'', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'INATIVO', cargo:'FISCAL', setor:'FISCAL', entrada:'', obs:'Apoio fiscal, monitoramento e recebimento.' },
-  { id:'func_joao', nome:'JOAO PEDRO DE OLIVEIRA SILVA', operador:'133', matricula:'AV24-0133', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'ATIVO', cargo:'VISUAL MERCHANDISING', setor:'VISUAL MERCHANDISING', entrada:'', obs:'Visual Merchandising e organização visual da loja.' },
+  { id:'func_joao', nome:'JOAO PEDRO', operador:'133', matricula:'AV24-0133', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'ATIVO', cargo:'VISUAL MERCHANDISING', setor:'VISUAL MERCHANDISING', entrada:'', obs:'Visual Merchandising e organização visual da loja.' },
   { id:'func_kailany', nome:'KAILANY', operador:'144', matricula:'AV24-0144', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'ATIVO', cargo:'ADMINISTRATIVO', setor:'ADMINISTRATIVO', entrada:'', obs:'Apoio administrativo da loja.' },
   { id:'func_celio', nome:'CELIO VACARE', operador:'', matricula:'', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'INATIVO', cargo:'PRODUTOS FINANCEIROS', setor:'PRODUTOS FINANCEIROS', entrada:'', obs:'Apoio em produtos financeiros.' },
   { id:'func_helen', nome:'HELEN CRISTINA', operador:'', matricula:'', nascimento:'', estadoCivil:'', documentoTipo:'', documentoNumero:'', telefone:'', email:'', status:'ATIVO', caixaOperacional:'INATIVO', cargo:'VISUAL MERCHANDISING', setor:'VISUAL MERCHANDISING', entrada:'', obs:'Visual Merchandising e suporte visual.' }
@@ -12660,7 +12423,7 @@ function selecionarModuloEscalas(modulo){
 
 function hojeISO(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function agoraBR(){ return new Date().toLocaleString('pt-BR'); }
-function mesAnoBR(){ const d=new Date(); const mes=d.toLocaleDateString('pt-BR',{month:'long'}).toLocaleUpperCase('pt-BR'); return `${mes} ${d.getFullYear()}`; }
+function mesAnoBR(){ return new Date().toLocaleDateString('pt-BR', {month:'long', year:'numeric'}).replace(/^./, c => c.toUpperCase()); }
 function atualizarMesAtualCabecalho(){
   const campoMes = document.getElementById('mesAtual');
   if(campoMes) campoMes.textContent = mesAnoBR();
@@ -12799,7 +12562,7 @@ function garantirOperadorLoginFuncionario(nome, operadorPadrao){
   if(opPadrao && normalizarOperador(f.operador) !== opPadrao){
     f.operador = opPadrao;
   }
-  f.matricula = matriculaPorOperador(f.operador);
+  if(!String(f.matricula || '').trim() && f.operador) f.matricula = matriculaPorOperador(f.operador);
   if(f.operador && !['ATIVO','INATIVO'].includes(String(f.caixaOperacional || '').toUpperCase())) f.caixaOperacional = 'ATIVO';
   return f;
 }
@@ -12850,7 +12613,9 @@ function gerarOperadorAutomatico(){
 function atualizarMatriculaPreview(){
   const op = document.getElementById('funcOperador')?.value || '';
   const el = document.getElementById('funcMatricula');
-  if(el) el.value = matriculaPorOperador(op);
+  if(!el) return;
+  // A matrícula é editável. O operador só fornece uma sugestão quando o campo ainda está vazio.
+  if(!String(el.value || '').trim() && op) el.value = matriculaPorOperador(op);
 }
 function escapeHTML(s){ return String(s||'').replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m])); }
 function num(v){ return Number(v||0); }
@@ -14100,7 +13865,7 @@ function defaultDB(){
 function aplicarOperadoresLoginFixos(){
   const fixos = [
     { nome:'ALANA ARAUJO', operador:'139', oldOperadores:['101'] },
-    { nome:'JOAO PEDRO', nomeCompleto:'JOAO PEDRO DE OLIVEIRA SILVA', operador:'133', oldOperadores:[] },
+    { nome:'JOAO PEDRO', operador:'133', oldOperadores:[] },
     { nome:'KAILANY', operador:'144', oldOperadores:['102'] }
   ];
   fixos.forEach(item => {
@@ -14115,12 +13880,6 @@ function aplicarOperadoresLoginFixos(){
     alvo.operador = item.operador;
     alvo.matricula = matriculaPorOperador(item.operador);
     alvo.caixaOperacional = 'ATIVO';
-    // V51.47: completa nomes oficiais que versões antigas mantinham abreviados.
-    if(item.nomeCompleto){
-      const atual=String(alvo.nome||'').trim();
-      const completo=String(item.nomeCompleto||'').trim();
-      if(completo && (!atual || completo.length > atual.length)) alvo.nome=norm(completo);
-    }
     // Evita que outro cadastro fique preso no mesmo operador oficial.
     (db.funcionarios || []).forEach(f => {
       if(f !== alvo && normalizarOperador(f.operador) === item.operador){
@@ -14353,6 +14112,7 @@ function popularSelects(){
   popularFiltroFuncionarios();
   ajustarCamposTarefa();
   popularDepartamentosAcompanhamento();
+  popularDepartamentosFuncionario();
   renderSectorTabs();
 }
 
@@ -15632,14 +15392,44 @@ function limparFormTarefa(fechar=true){
 }
 
 const HIERARQUIA_ACOMPANHAMENTO = {
+  'LOJA TODA': {
+    'OPERAÇÃO GERAL': ['ABASTECIMENTO','ORGANIZAÇÃO','EXPOSIÇÃO','PRECIFICAÇÃO','VITRINE','LIMPEZA']
+  },
   'MASCULINO': {
-    'URBANO': [],
-    'CASUAL': [],
-    'ESPORTE': [],
-    'JEANS': []
+    'URBANO': [], 'JEANS': [], 'CASUAL': [], 'PRAIA': [], 'ESPORTE': [], 'UNDERWARE': [], 'REMARCADO': []
+  },
+  'FEMININO': {
+    'TROPICAL': [], 'JEANS': [], 'BÁSICO': [], 'VERSA': [], 'PLUS SIZE': [], 'ESPORTE': [], 'LINGERIE': [], 'REMARCADO': []
+  },
+  'INFANTIL': {
+    'FEMININO': ['RN (0 - 24)','INFANTIL (2 - 7)','JOVEM (7 - 14)'],
+    'MASCULINO': ['RN (0 - 24)','INFANTIL (2 - 7)','JOVEM (7 - 14)']
   },
   'CALÇADO': {
-    'MASCULINO': ['ESPORTIVO']
+    'INFANTIL': ['FEMININO','MASCULINO'],
+    'MASCULINO': ['ESPORTE','SOCIAL','CASUAL','URBANO'],
+    'FEMININO': ['ESPORTE','SOCIAL','CASUAL','JOVEM']
+  },
+  'BOLSAS E ACESSÓRIOS': {
+    'BOLSAS': [], 'CARTEIRAS': [], 'CINTOS': [], 'ÓCULOS': [], 'ACESSÓRIOS': [], 'REMARCADO': []
+  },
+  'RELÓGIOS': {
+    'MASCULINO': [], 'FEMININO': [], 'INFANTIL': [], 'REMARCADO': []
+  },
+  'MALAS': {
+    'VIAGEM': [], 'EXECUTIVA': [], 'ESCOLAR': [], 'ACESSÓRIOS': [], 'REMARCADO': []
+  },
+  'CAPACETES': {
+    'URBANO': [], 'ESPORTIVO': [], 'INFANTIL': [], 'REMARCADO': []
+  },
+  'MODA ÍNTIMA': {
+    'FEMININO': [], 'MASCULINO': [], 'INFANTIL': [], 'REMARCADO': []
+  },
+  'PROVADORES': {
+    'FEMININO': [], 'MASCULINO': [], 'INFANTIL': []
+  },
+  'LAR': {
+    'DECORAÇÃO': [], 'BANHO': [], 'MESA': []
   }
 };
 
@@ -15649,7 +15439,62 @@ function normalizarTextoAcomp(v){
   return String(v || '').trim();
 }
 function departamentosAcompanhamento(){
-  return ['LOJA TODA','MASCULINO','FEMININO','INFANTIL','CALÇADO','BOLSAS E ACESSÓRIOS','RELÓGIOS','MALAS','CAPACETES','MODA ÍNTIMA','PROVADORES'];
+  return ['MASCULINO','FEMININO','INFANTIL','CALÇADO','LAR','UNI-FILA','ESTOQUE','CAIXA','LIMPEZA','LOJA TODA'];
+}
+function popularDepartamentosFuncionario(selecionado=''){
+  const el=document.getElementById('funcDepartamento');
+  if(!el) return;
+  const deps=departamentosAcompanhamento();
+  const atual=selecionado || el.value || '';
+  el.innerHTML='<option value="">Selecione o departamento</option>'+deps.map(d=>`<option value="${escapeHTML(d)}">${escapeHTML(d)}</option>`).join('');
+  if(atual && deps.includes(atual)) el.value=atual;
+}
+function departamentoAutomaticoPorCargo(cargo){
+  const c=normalizarTextoAcomp(cargo).toUpperCase();
+  const cargosLojaToda=['VISUAL MERCHANDISING','FISCAL','LÍDER DE PRODUTO FINANCEIRO','PRODUTOS FINANCEIROS','PF','DEPARTAMENTO','GERENTE DE LOJA'];
+  return cargosLojaToda.includes(c) ? 'LOJA TODA' : '';
+}
+function aplicarDepartamentoAutomaticoPorCargo(){
+  const cargo=document.getElementById('funcCargo')?.value || '';
+  const dep=document.getElementById('funcDepartamento');
+  if(!dep) return;
+  const automatico=departamentoAutomaticoPorCargo(cargo);
+  if(automatico){
+    popularDepartamentosFuncionario(automatico);
+    dep.value=automatico;
+    dep.title='Departamento definido automaticamente pelo cargo.';
+  }
+}
+function departamentoFuncionarioParaAcompanhamento(funcionario){
+  if(!funcionario) return '';
+  const deps=departamentosAcompanhamento();
+  const candidato=normalizarTextoAcomp(funcionario.departamento || '');
+  if(candidato && deps.includes(candidato)) return candidato;
+  // Compatibilidade com cadastros antigos: só aproveita o setor quando ele já for exatamente um departamento válido.
+  const setor=normalizarTextoAcomp(funcionario.setor || '');
+  return deps.includes(setor) ? setor : '';
+}
+function preencherDepartamentoAcompanhamentoPorAssessor(){
+  const resp=document.getElementById('diarioResp');
+  const dep=document.getElementById('diarioDepartamento');
+  if(!resp || !dep) return;
+  const nome=normalizarTextoAcomp(resp.value);
+  const funcionario=(db?.funcionarios||[]).find(f=>normalizarTextoAcomp(f.nome)===nome);
+  const departamento=departamentoFuncionarioParaAcompanhamento(funcionario);
+  if(departamento){
+    popularDepartamentosAcompanhamento(departamento);
+    dep.value=departamento;
+    dep.disabled=true;
+    atualizarHierarquiaTodasTarefas();
+    dep.title='Preenchido automaticamente pelo Departamento cadastrado no Quadro de Funcionários. Não pode ser alterado nesta aba.';
+  }else{
+    popularDepartamentosAcompanhamento('');
+    dep.value='';
+    dep.disabled=true;
+    dep.title='Cadastre o Departamento de atuação deste funcionário no Quadro de Funcionários.';
+    const editor=document.getElementById('acompTarefasEditor');
+    if(editor) editor.innerHTML='';
+  }
 }
 function popularDepartamentosAcompanhamento(selecionado=''){
   const el=document.getElementById('diarioDepartamento');
@@ -15714,6 +15559,10 @@ function abrirFormularioAcompanhamento(modo='novo'){
   if(!painel) return;
   painel.classList.add('active');
   if(titulo) titulo.textContent=modo==='editar' ? 'Editar acompanhamento' : 'Nova tarefa';
+  if(modo==='novo'){
+    const dep=document.getElementById('diarioDepartamento');
+    if(dep && !document.getElementById('diarioResp')?.value) dep.disabled=true;
+  }
 }
 function formularioAcompanhamentoPossuiConteudo(){
   const id=normalizarTextoAcomp(document.getElementById('diarioId')?.value);
@@ -15728,6 +15577,7 @@ function resetarFormularioAcompanhamento(criarPrimeiraTarefa=false){
   const id=document.getElementById('diarioId'); if(id) id.value='';
   const data=document.getElementById('diarioData'); if(data) data.value=hojeISO();
   const obs=document.getElementById('diarioObs'); if(obs) obs.value='';
+  const depEl=document.getElementById('diarioDepartamento'); if(depEl) depEl.disabled=true;
   popularDepartamentosAcompanhamento();
   const editor=document.getElementById('acompTarefasEditor'); if(editor) editor.innerHTML='';
   if(criarPrimeiraTarefa) adicionarTarefaAcompanhamento();
@@ -15763,7 +15613,8 @@ function tarefasAcompanhamentoPossuemConteudo(){
     linha.querySelector('.acomp-descricao')?.value,
     linha.querySelector('.acomp-familia')?.value,
     linha.querySelector('.acomp-subfamilia')?.value,
-    linha.querySelector('.acomp-prazo')?.value
+    linha.querySelector('.acomp-prazo')?.value,
+    linha.querySelector('.acomp-observacao')?.value
   ].some(valor=>normalizarTextoAcomp(valor)));
 }
 function fecharPainelTarefasAcompanhamento(forcar=false){
@@ -15811,7 +15662,8 @@ function adicionarTarefaAcompanhamento(dados={}){
     <div class="field"><label>Subfamília</label><select class="acomp-subfamilia"></select></div>
     <div class="field"><label>Prazo</label><input class="acomp-prazo" type="datetime-local" value="${escapeHTML(dados.prazo||'')}"></div>
     <div class="field"><label>Importância</label><select class="acomp-prioridade"><option>BAIXA</option><option>MÉDIA</option><option>ALTA</option><option>CRÍTICA</option></select></div>
-    <div class="field"><label>Status</label><select class="acomp-status"><option>PENDENTE</option><option>EM ANDAMENTO</option><option>CONCLUÍDA</option></select></div>
+    <div class="field"><label>Status</label><select class="acomp-status"><option>PENDENTE</option><option>EM ANDAMENTO</option><option>BLOQUEADA</option><option>CONCLUÍDA</option><option>CANCELADA</option></select></div>
+    <div class="field acomp-task-note-field"><label>Observação da tarefa</label><input class="acomp-observacao" value="${escapeHTML(dados.observacao||'')}" placeholder="Observação específica desta tarefa"></div>
     <button class="acomp-remove-task" type="button" title="Remover esta tarefa" aria-label="Remover esta tarefa" onclick="removerTarefaAcompanhamento(this)">Remover tarefa</button>`;
   editor.appendChild(linha);
   linha.querySelector('.acomp-prioridade').value=dados.prioridade||'MÉDIA';
@@ -15843,9 +15695,18 @@ function coletarTarefasAcompanhamento(){
     familia: normalizarTextoAcomp(linha.querySelector('.acomp-familia')?.value),
     subfamilia: normalizarTextoAcomp(linha.querySelector('.acomp-subfamilia')?.value),
     prazo: normalizarTextoAcomp(linha.querySelector('.acomp-prazo')?.value),
+    observacao: normalizarTextoAcomp(linha.querySelector('.acomp-observacao')?.value),
     prioridade: normalizarTextoAcomp(linha.querySelector('.acomp-prioridade')?.value) || 'MÉDIA',
     status: normalizarTextoAcomp(linha.querySelector('.acomp-status')?.value) || 'PENDENTE'
   })).filter(t=>t.descricao);
+}
+function adicionarHistoricoTarefa(t, evento, detalhes=''){
+  if(!t) return;
+  if(!Array.isArray(t.historico)) t.historico=[];
+  t.historico.push({id:uid('hist'),emISO:new Date().toISOString(),em:agoraBR(),por:usuarioAtual?.nome||'Sistema',evento,detalhes});
+}
+function garantirHistoricoTarefa(t, evento='CRIADA', detalhes=''){
+  if(!Array.isArray(t.historico)||!t.historico.length){ t.historico=[]; adicionarHistoricoTarefa(t,evento,detalhes); }
 }
 function salvarDiario(e){
   e.preventDefault();
@@ -15857,23 +15718,38 @@ function salvarDiario(e){
   if(!tarefas.length){ alert('Adicione pelo menos uma tarefa ao acompanhamento.'); return; }
   const id=document.getElementById('diarioId').value || uid('dia');
   const existente=db.diario.find(d=>d.id===id);
+  const anteriores=Array.isArray(existente?.tarefas)?existente.tarefas:[];
+  tarefas.forEach(t=>{
+    const anterior=anteriores.find(x=>x.id===t.id);
+    t.responsavel=anterior?.responsavel||funcionario;
+    t.historico=Array.isArray(anterior?.historico)?anterior.historico:[];
+    if(anterior){
+      if(anterior.status!==t.status) adicionarHistoricoTarefa(t,'STATUS ALTERADO',`${anterior.status||'PENDENTE'} → ${t.status}`);
+      if(anterior.observacao!==t.observacao && t.observacao) adicionarHistoricoTarefa(t,'OBSERVAÇÃO',t.observacao);
+      if(!t.historico.length) garantirHistoricoTarefa(t,'MIGRADA','Histórico preservado.');
+    }else{
+      garantirHistoricoTarefa(t,'CRIADA',`Tarefa designada para ${t.responsavel}.`);
+    }
+    if(t.status==='CONCLUÍDA' && anterior?.status!=='CONCLUÍDA'){
+      t.concluidaEmISO=new Date().toISOString(); t.concluidaPor=usuarioAtual?.nome||t.responsavel;
+      adicionarHistoricoTarefa(t,'CONCLUÍDA',`Concluída por ${t.concluidaPor}.`);
+    }
+    if(t.status!=='CONCLUÍDA'){ delete t.concluidaEmISO; delete t.concluidaPor; }
+  });
   const item={
-    id,
-    versaoAcompanhamento:2,
-    criadoEm:existente?.criadoEm || agoraBR(),
-    dataISO:document.getElementById('diarioData').value || hojeISO(),
-    responsavel:funcionario,
-    departamento,
-    tarefas,
+    id,versaoAcompanhamento:3,criadoEm:existente?.criadoEm||agoraBR(),
+    dataISO:document.getElementById('diarioData').value||hojeISO(),
+    responsavel:funcionario,departamento,tarefas,
     obs:normalizarTextoAcomp(document.getElementById('diarioObs')?.value),
-    atualizadoPor:usuarioAtual.nome,
-    atualizadoEm:agoraBR()
+    atualizadoPor:usuarioAtual.nome,atualizadoEm:agoraBR(),
+    historicoResponsavel:Array.isArray(existente?.historicoResponsavel)?existente.historicoResponsavel:[]
   };
+  if(!existente) item.historicoResponsavel.push({em:agoraBR(),por:usuarioAtual?.nome||'Sistema',de:'',para:funcionario});
+  if(existente && existente.responsavel!==funcionario) item.historicoResponsavel.push({em:agoraBR(),por:usuarioAtual?.nome||'Sistema',de:existente.responsavel||'',para:funcionario});
   if(existente) Object.assign(existente,item); else db.diario.unshift(item);
-  saveDB();
-  fecharFormularioAcompanhamento(true);
-  renderAll();
+  saveDB(); fecharFormularioAcompanhamento(true); renderAll();
 }
+
 function editarDiario(id){
   const d=db.diario.find(x=>x.id===id); if(!d) return;
   showPage('acompanhamento');
@@ -15882,8 +15758,13 @@ function editarDiario(id){
   document.getElementById('diarioId').value=d.id;
   document.getElementById('diarioData').value=d.dataISO || hojeISO();
   document.getElementById('diarioResp').value=d.responsavel||'';
-  popularDepartamentosAcompanhamento(d.departamento||'');
-  document.getElementById('diarioDepartamento').value=d.departamento||'';
+  preencherDepartamentoAcompanhamentoPorAssessor();
+  const depEdit=document.getElementById('diarioDepartamento');
+  if(d.departamento && departamentosAcompanhamento().includes(d.departamento)){
+    popularDepartamentosAcompanhamento(d.departamento);
+    depEdit.value=d.departamento;
+    depEdit.disabled=true;
+  }
   document.getElementById('diarioObs').value=d.obs||'';
   const editor=document.getElementById('acompTarefasEditor');
   editor.innerHTML='';
@@ -15917,13 +15798,48 @@ function limparFormDiario(){
   }
 }
 function alterarStatusTarefaAcompanhamento(registroId,tarefaId,status){
-  const d=db.diario.find(x=>x.id===registroId); if(!d || !Array.isArray(d.tarefas)) return;
+  const d=db.diario.find(x=>x.id===registroId); if(!d||!Array.isArray(d.tarefas)) return;
   const t=d.tarefas.find(x=>x.id===tarefaId); if(!t) return;
+  const anterior=t.status||'PENDENTE'; if(anterior===status) return;
   t.status=status;
-  d.atualizadoPor=usuarioAtual?.nome||d.atualizadoPor;
-  d.atualizadoEm=agoraBR();
+  if(status==='CONCLUÍDA'){ t.concluidaEmISO=new Date().toISOString(); t.concluidaPor=usuarioAtual?.nome||t.responsavel||d.responsavel||'Sistema'; }
+  else { delete t.concluidaEmISO; delete t.concluidaPor; }
+  adicionarHistoricoTarefa(t,'STATUS ALTERADO',`${anterior} → ${status}`);
+  d.atualizadoPor=usuarioAtual?.nome||d.atualizadoPor; d.atualizadoEm=agoraBR();
   saveDB(); renderDiario(); renderRelatorio();
 }
+function reatribuirTarefaAcompanhamento(registroId,tarefaId){
+  const d=db.diario.find(x=>x.id===registroId); if(!d) return;
+  const t=d.tarefas?.find(x=>x.id===tarefaId); if(!t) return;
+  const funcionarios=[...(db.funcionarios||[])].map(f=>f.nome).filter(Boolean);
+  if(!funcionarios.length){alert('Nenhum funcionário cadastrado.');return;}
+  const atual=t.responsavel||d.responsavel||'';
+  const novo=prompt(`Reatribuir "${t.descricao||'tarefa'}" para:\n\n${funcionarios.join('\n')}`,atual);
+  if(novo===null)return;
+  const nome=normalizarTextoAcomp(novo);
+  if(!nome||!funcionarios.includes(nome)){alert('Funcionário inválido. Selecione um nome cadastrado.');return;}
+  const anterior=t.responsavel||d.responsavel||'';
+  t.responsavel=nome; adicionarHistoricoTarefa(t,'REATRIBUÍDA',`${anterior||'Sem responsável'} → ${nome}`);
+  d.atualizadoPor=usuarioAtual?.nome||d.atualizadoPor; d.atualizadoEm=agoraBR();
+  saveDB(); renderDiario(); renderRelatorio();
+}
+function adicionarObservacaoTarefaAcompanhamento(registroId,tarefaId){
+  const d=db.diario.find(x=>x.id===registroId); if(!d) return;
+  const t=d.tarefas?.find(x=>x.id===tarefaId); if(!t) return;
+  const texto=prompt('Observação específica desta tarefa:',t.observacao||'');
+  if(texto===null)return;
+  t.observacao=normalizarTextoAcomp(texto);
+  if(t.observacao) adicionarHistoricoTarefa(t,'OBSERVAÇÃO',t.observacao);
+  d.atualizadoPor=usuarioAtual?.nome||d.atualizadoPor; d.atualizadoEm=agoraBR();
+  saveDB(); renderDiario(); renderRelatorio();
+}
+function verHistoricoTarefaAcompanhamento(registroId,tarefaId){
+  const d=db.diario.find(x=>x.id===registroId); if(!d)return;
+  const t=d.tarefas?.find(x=>x.id===tarefaId); if(!t)return;
+  const hist=Array.isArray(t.historico)?t.historico:[];
+  alert(`HISTÓRICO DA TAREFA\n\n${hist.length?hist.map(h=>`${h.em||'-'} • ${h.por||'-'}\n${h.evento||'EVENTO'}${h.detalhes?` — ${h.detalhes}`:''}`).join('\n\n'):'Nenhum histórico registrado.'}`);
+}
+
 function prazoAcompanhamentoTexto(valor){
   if(!valor) return 'Sem prazo definido';
   const d=new Date(valor);
@@ -15931,7 +15847,7 @@ function prazoAcompanhamentoTexto(valor){
   return d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
 }
 function tarefaAcompanhamentoAtrasada(t){
-  if(!t?.prazo || t.status==='CONCLUÍDA') return false;
+  if(!t?.prazo || ['CONCLUÍDA','CANCELADA'].includes(String(t.status||'').toUpperCase())) return false;
   const d=new Date(t.prazo); return !isNaN(d.getTime()) && d.getTime()<Date.now();
 }
 function classePrioridadeAcomp(p){
@@ -15984,6 +15900,7 @@ function garantirCamposFuncionarios(){
     f.documentoNumero ??= '';
     f.telefone ??= '';
     f.email ??= '';
+    f.departamento ??= '';
     f.status ??= 'ATIVO';
     if(!['ATIVO','INATIVO'].includes(String(f.caixaOperacional || '').toUpperCase())) { f.caixaOperacional = normalizarOperador(f.operador) ? 'ATIVO' : 'INATIVO'; alterou = true; }
     if(!normalizarOperador(f.operador) && f.caixaOperacional !== 'INATIVO') { f.caixaOperacional = 'INATIVO'; alterou = true; }
@@ -16044,8 +15961,8 @@ function renderFuncionarios(){
   garantirCamposFuncionarios();
   popularFiltroFuncionarios();
   const arr = getFuncionariosFiltrados();
-  document.getElementById('funcCards').innerHTML = arr.length ? arr.slice(0, 8).map(f => `<div class="employee-card"><h3>${escapeHTML(f.nome)}</h3><span class="role">${escapeHTML(f.cargo)}</span><p><b>Operador:</b> ${escapeHTML(f.operador || 'Não informado')}<br><b>Matrícula:</b> ${escapeHTML(f.matricula || 'Não informada')}<br><b>Setor:</b> ${escapeHTML(f.setor || '-')}<br><b>Entrada:</b> ${escapeHTML(f.entrada || 'Não informada')}<br><b>Tempo:</b> ${tempoLojaTexto(f.entrada)}<br><b>Status:</b> ${escapeHTML(f.status || 'ATIVO')}</p><p>${escapeHTML(f.obs || '')}</p></div>`).join('') : '<div class="empty">Nenhum funcionário encontrado.</div>';
-  document.getElementById('tbodyFuncionarios').innerHTML = arr.length ? arr.map(f => `<tr><td><b>${escapeHTML(f.nome)}</b><br><small>${escapeHTML(f.telefone || '')}</small></td><td>${escapeHTML(f.operador || '-')}</td><td>${escapeHTML(f.matricula || '-')}</td><td>${escapeHTML(f.cargo || '-')}</td><td>${escapeHTML(f.setor || '-')}</td><td>${escapeHTML(f.entrada || 'Não informada')}</td><td>${tempoLojaTexto(f.entrada)}</td><td>${idadeTexto(f.nascimento)}</td><td>${escapeHTML(f.estadoCivil || '-')}</td><td><span class="masked-doc">${escapeHTML(mascararDocumento(f.documentoTipo, f.documentoNumero))}</span></td><td>${escapeHTML(f.status || 'ATIVO')}</td><td>${badgeCaixaOperacional(f.caixaOperacional)}</td><td>${escapeHTML(f.obs || '-')}</td><td class="no-print"><button class="btn small secondary" onclick="editarFuncionario('${f.id}')">Editar</button> <button class="btn small danger" onclick="excluirFuncionario('${f.id}')">Excluir</button></td></tr>`).join('') : '<tr><td colspan="14" class="empty">Nenhum funcionário encontrado.</td></tr>';
+  document.getElementById('funcCards').innerHTML = arr.length ? arr.slice(0, 8).map(f => `<div class="employee-card"><h3>${escapeHTML(f.nome)}</h3><span class="role">${escapeHTML(f.cargo)}</span><p><b>Operador:</b> ${escapeHTML(f.operador || 'Não informado')}<br><b>Matrícula:</b> ${escapeHTML(f.matricula || 'Não informada')}<br><b>Setor:</b> ${escapeHTML(f.setor || '-')}<br><b>Departamento:</b> ${escapeHTML(f.departamento || '-')}<br><b>Entrada:</b> ${escapeHTML(f.entrada || 'Não informada')}<br><b>Tempo:</b> ${tempoLojaTexto(f.entrada)}<br><b>Status:</b> ${escapeHTML(f.status || 'ATIVO')}</p><p>${escapeHTML(f.obs || '')}</p></div>`).join('') : '<div class="empty">Nenhum funcionário encontrado.</div>';
+  document.getElementById('tbodyFuncionarios').innerHTML = arr.length ? arr.map(f => `<tr><td><b>${escapeHTML(f.nome)}</b><br><small>${escapeHTML(f.telefone || '')}</small></td><td>${escapeHTML(f.operador || '-')}</td><td>${escapeHTML(f.matricula || '-')}</td><td>${escapeHTML(f.cargo || '-')}</td><td>${escapeHTML(f.setor || '-')}</td><td>${escapeHTML(f.departamento || '-')}</td><td>${escapeHTML(f.entrada || 'Não informada')}</td><td>${tempoLojaTexto(f.entrada)}</td><td>${idadeTexto(f.nascimento)}</td><td>${escapeHTML(f.estadoCivil || '-')}</td><td><span class="masked-doc">${escapeHTML(mascararDocumento(f.documentoTipo, f.documentoNumero))}</span></td><td>${escapeHTML(f.status || 'ATIVO')}</td><td>${badgeCaixaOperacional(f.caixaOperacional)}</td><td>${escapeHTML(f.obs || '-')}</td><td class="no-print"><button class="btn small secondary" onclick="editarFuncionario('${f.id}')">Editar</button> <button class="btn small danger" onclick="excluirFuncionario('${f.id}')">Excluir</button></td></tr>`).join('') : '<tr><td colspan="15" class="empty">Nenhum funcionário encontrado.</td></tr>';
 }
 
 function badgeCaixaOperacional(status){
@@ -16103,7 +16020,9 @@ function abrirModalFuncionario(id){
     document.getElementById('modalFuncionarioTitulo').textContent = 'Adicionar funcionário';
     document.getElementById('funcOperador').value = '';
     document.getElementById('funcMatricula').value = '';
-    document.getElementById('funcMatricula').placeholder = 'Baseada no operador';
+    document.getElementById('funcMatricula').placeholder = 'Ex.: AV24-0133';
+    popularDepartamentosFuncionario('');
+    aplicarDepartamentoAutomaticoPorCargo();
     document.getElementById('modalFuncionario').classList.add('active');
   }
 }
@@ -16118,12 +16037,15 @@ function editarFuncionario(id){
   document.getElementById('funcNome').value = f.nome || '';
   document.getElementById('funcOperador').value = f.operador || (f.matricula ? String(extrairSeqMatricula(f.matricula)) : '');
   atualizarMatriculaPreview();
-  document.getElementById('funcMatricula').value = matriculaPorOperador(document.getElementById('funcOperador').value) || f.matricula || '';
-  document.getElementById('funcMatricula').placeholder = 'Matrícula bloqueada';
+  document.getElementById('funcMatricula').value = f.matricula || matriculaPorOperador(document.getElementById('funcOperador').value) || '';
+  document.getElementById('funcMatricula').placeholder = 'Ex.: AV24-0133';
   document.getElementById('funcNascimento').value = f.nascimento || '';
   document.getElementById('funcEstadoCivil').value = [...document.getElementById('funcEstadoCivil').options].some(o=>o.value===f.estadoCivil) ? f.estadoCivil : '';
   document.getElementById('funcCargo').value = [...document.getElementById('funcCargo').options].some(o=>o.value===f.cargo) ? f.cargo : 'OUTROS';
   document.getElementById('funcSetor').value = [...document.getElementById('funcSetor').options].some(o=>o.value===f.setor) ? f.setor : 'LOJA GERAL';
+  popularDepartamentosFuncionario(f.departamento || '');
+  document.getElementById('funcDepartamento').value = departamentoFuncionarioParaAcompanhamento(f) || departamentoAutomaticoPorCargo(f.cargo);
+  if(!f.departamento) aplicarDepartamentoAutomaticoPorCargo();
   document.getElementById('funcEntrada').value = f.entrada || '';
   document.getElementById('funcStatus').value = [...document.getElementById('funcStatus').options].some(o=>o.value===f.status) ? f.status : 'ATIVO';
   document.getElementById('funcCaixaOperacional').value = String(f.caixaOperacional || 'INATIVO').toUpperCase() === 'ATIVO' ? 'ATIVO' : 'INATIVO';
@@ -16161,15 +16083,17 @@ function salvarFuncionario(e){
     return;
   }
 
+  const matricula = String(document.getElementById('funcMatricula')?.value || '').trim();
   const item = {
     id,
     nome: nomeNormalizado,
     operador,
-    matricula: matriculaPorOperador(operador),
+    matricula,
     nascimento: document.getElementById('funcNascimento').value,
     estadoCivil: document.getElementById('funcEstadoCivil').value,
     cargo: document.getElementById('funcCargo').value,
     setor: document.getElementById('funcSetor').value,
+    departamento: document.getElementById('funcDepartamento').value,
     entrada: document.getElementById('funcEntrada').value,
     status: document.getElementById('funcStatus').value,
     caixaOperacional: document.getElementById('funcCaixaOperacional').value,
@@ -16213,7 +16137,9 @@ function limparFormFuncionario(fechar=true){
   document.getElementById('funcId').value = '';
   document.getElementById('funcOperador').value = '';
   document.getElementById('funcMatricula').value = '';
-  document.getElementById('funcMatricula').placeholder = 'Baseada no operador';
+  document.getElementById('funcMatricula').placeholder = 'Ex.: AV24-0133';
+  popularDepartamentosFuncionario('');
+  if(document.getElementById('funcDepartamento')) document.getElementById('funcDepartamento').value = '';
   if(document.getElementById('funcCaixaOperacional')) document.getElementById('funcCaixaOperacional').value = 'ATIVO';
   document.getElementById('modalFuncionarioTitulo').textContent = 'Adicionar funcionário';
   if(fechar) document.getElementById('modalFuncionario').classList.remove('active');
@@ -16462,252 +16388,6 @@ function cardMini(x){
   return `<div class="task-card"><h4>${escapeHTML(x.atividade||x.titulo||x.resumo)}</h4><div class="task-meta">${badgeSetor(x.setor)} ${badgePrioridade(x.prioridade||'Normal')} ${badgeStatus(x.status)}</div><p><b>Agendamento:</b> ${escapeHTML(prazo)} • <b>Resp.:</b> ${escapeHTML(resp)}${dep}</p><p>${escapeHTML(x.descricao||x.resumo||'')}</p></div>`;
 }
 
-/* ================================================================
-   CALENDÁRIO UNIVERSAL — ANOTAÇÕES / TAREFAS
-   Direciona o evento para o calendário do dispositivo ou serviço
-   escolhido. NÃO cria nem baixa arquivos .ics.
-   ================================================================ */
-function agCalendarDate(iso){
-  const valor=String(iso||'').slice(0,10);
-  return /^\d{4}-\d{2}-\d{2}$/.test(valor) ? valor.replace(/-/g,'') : '';
-}
-function agCalendarDateTime(iso,hora){
-  const data=agCalendarDate(iso), hm=String(hora||'');
-  if(!data || !/^\d{2}:\d{2}$/.test(hm)) return '';
-  return `${data}T${hm.replace(':','')}00`;
-}
-function agCalendarDateFromDate(d){
-  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
-}
-function agCalendarAddDays(iso,dias){
-  const valor=String(iso||'').slice(0,10);
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(valor)) return '';
-  const [a,m,d]=valor.split('-').map(Number),dt=new Date(a,m-1,d,12,0,0,0);
-  dt.setDate(dt.getDate()+Number(dias||0));
-  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
-}
-function agCalendarRRuleTarefa(t){
-  if(normalizarTipoAgendamentoTarefa(t)!=='REPETICAO') return '';
-  const tipo=String(t.repeticaoLembrete||'').toUpperCase();
-  if(tipo==='DIARIA') return 'RRULE:FREQ=DAILY';
-  if(tipo==='SEMANAL'){
-    const mapa={0:'SU',1:'MO',2:'TU',3:'WE',4:'TH',5:'FR',6:'SA'},dia=mapa[Number(t.diaSemanaRepeticao)];
-    return dia?`RRULE:FREQ=WEEKLY;BYDAY=${dia}`:'';
-  }
-  if(tipo==='MENSAL'){
-    const dia=Number(t.diaMesRepeticao);
-    return dia>=1&&dia<=31?`RRULE:FREQ=MONTHLY;BYMONTHDAY=${dia}`:'';
-  }
-  return '';
-}
-function agCalendarLocation(item){
-  const local=String(item?.local||item?.localizacao||item?.endereco||'').trim();
-  if(local) return local;
-  const loja=String(db?.meta?.loja||'24').trim();
-  const setor=String(item?.setor||'').trim(),dep=String(item?.departamento||'').trim();
-  const complemento=[setor&&setor!=='GERAL'?setor:'',dep&&dep!=='Loja toda'?dep:''].filter(Boolean).join(' — ');
-  return `Loja ${loja} — Assistência Gerencial Avenida${complemento?` — ${complemento}`:''}`;
-}
-function agCalendarDescription(item,tipo){
-  const partes=[],resumo=String(item?.resumo||'').trim(),descricao=String(item?.descricao||'').trim();
-  const resp=[item?.responsavel,item?.responsavel2].filter(Boolean).join(' + '),setor=String(item?.setor||'').trim(),dep=String(item?.departamento||'').trim();
-  if(resumo) partes.push(`Resumo: ${resumo}`);
-  if(descricao&&descricao!==resumo) partes.push(`Descrição: ${descricao}`);
-  if(resp) partes.push(`Responsável: ${resp}`);
-  if(setor) partes.push(`Setor: ${setor}`);
-  if(dep&&dep!=='Loja toda') partes.push(`Departamento: ${dep}`);
-  if(tipo==='TAREFA'&&item?.prioridade) partes.push(`Prioridade: ${item.prioridade}`);
-  if(tipo==='NOTA'&&item?.tipo) partes.push(`Tipo: ${item.tipo}`);
-  partes.push('Origem: Assistência Gerencial Avenida');
-  return partes.join('\n');
-}
-function agCalendarEventData(item,tipo){
-  if(!item) return null;
-  const isTarefa=tipo==='TAREFA',titulo=String(isTarefa?(item.atividade||item.titulo||'Tarefa'):(item.titulo||'Anotação')).trim();
-  let inicio=String(item.inicio||'').slice(0,10),fim=String(item.fim||item.prazo||'').slice(0,10);
-  let horaInicio=isTarefa?String(item.horaInicio||''):'',horaFim=isTarefa?String(item.horaFim||''):'';
-  if(isTarefa&&normalizarTipoAgendamentoTarefa(item)==='REPETICAO'){
-    inicio=inicio||String(item.dataISO||hojeISO()).slice(0,10);
-    horaInicio=horaInicio||String(item.horaRepeticao||'');
-  }
-  if(!inicio&&fim) inicio=fim;
-  if(!inicio) return {titulo,semData:true};
-  const inicioComHora=agCalendarDateTime(inicio,horaInicio);
-  let fimComHora=agCalendarDateTime(fim,horaFim);
-  if(inicioComHora){
-    if(!fimComHora){
-      const [a,m,d]=inicio.split('-').map(Number),[hh,mm]=horaInicio.split(':').map(Number),dt=new Date(a,m-1,d,hh,mm,0,0);
-      dt.setHours(dt.getHours()+1);
-      fimComHora=`${agCalendarDateFromDate(dt)}T${String(dt.getHours()).padStart(2,'0')}${String(dt.getMinutes()).padStart(2,'0')}00`;
-    }
-    return {titulo,allDay:false,dtStart:inicioComHora,dtEnd:fimComHora,isoStart:inicio,isoEnd:fim||inicio,horaStart:horaInicio,horaEnd:horaFim,rrule:isTarefa?agCalendarRRuleTarefa(item):''};
-  }
-  const endDate=fim&&fim>=inicio?agCalendarAddDays(fim,1):agCalendarAddDays(inicio,1);
-  return {titulo,allDay:true,dtStart:agCalendarDate(inicio),dtEnd:agCalendarDate(endDate),isoStart:inicio,isoEnd:fim||inicio,horaStart:'',horaEnd:'',rrule:isTarefa?agCalendarRRuleTarefa(item):''};
-}
-function agCalendarQuery(params){
-  return Object.entries(params)
-    .filter(([,v])=>v!==undefined&&v!==null&&String(v)!=='')
-    .map(([k,v])=>`${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
-    .join('&');
-}
-
-/* Calendário: abertura automática por plataforma.
-   Não apresenta seletor e não gera/baixa arquivos.
-   Windows 11: usa a ponte nativa agcal:// -> AppointmentManager.
-   Android: usa o Intent nativo de inserção de evento.
-   iOS/iPadOS: abre o Calendário Apple na data do evento; o Safari não
-   oferece uma API web pública equivalente ao Intent do Android para
-   preencher um novo evento no Calendário Apple. */
-
-function agCalendarAndroidIntent(e,descricao,local){
-  const start=e.allDay
-    ? new Date(`${e.isoStart}T00:00:00`).getTime()
-    : new Date(`${e.isoStart}T${e.horaStart||'00:00'}:00`).getTime();
-  const end=e.allDay
-    ? new Date(`${e.isoEnd}T00:00:00`).getTime()
-    : new Date(`${e.isoEnd}T${e.horaEnd||'00:00'}:00`).getTime();
-
-  return [
-    'intent://calendars/events',
-    '#Intent;',
-    'scheme=content;',
-    'action=android.intent.action.INSERT;',
-    'type=vnd.android.cursor.item/event;',
-    `S.title=${encodeURIComponent(e.titulo)};`,
-    `S.description=${encodeURIComponent(descricao||'')};`,
-    `S.eventLocation=${encodeURIComponent(local||'')};`,
-    `l.beginTime=${start};`,
-    `l.endTime=${end};`,
-    e.allDay?'B.allDay=true;':'',
-    'end'
-  ].join('');
-}
-
-function agCalendarWindowsNativeUrl(e,descricao,local){
-  const start=e.allDay
-    ? `${e.isoStart}T00:00`
-    : `${e.isoStart}T${e.horaStart||'00:00'}`;
-  const end=e.allDay
-    ? `${agCalendarAddDays(e.isoEnd||e.isoStart,1)}T00:00`
-    : `${e.isoEnd||e.isoStart}T${e.horaEnd||'00:00'}`;
-  return `agcal://event?${agCalendarQuery({title:e.titulo,description:descricao||'',location:local||'',start,end,allDay:e.allDay?'1':'0',reminderMinutes:e.allDay?'1440':'15'})}`;
-}
-
-function agCalendarGoogleUrl(e,descricao,local){
-  const dates=`${e.dtStart}/${e.dtEnd}`;
-  return `https://calendar.google.com/calendar/render?action=TEMPLATE&${agCalendarQuery({
-    text:e.titulo,
-    dates,
-    details:descricao||'',
-    location:local||''
-  })}`;
-}
-
-function agCalendarAppleDateUrl(e){
-  const iso=String(e.isoStart||'').slice(0,10);
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return 'calshow:';
-  const hora=e.horaStart && /^\d{2}:\d{2}$/.test(e.horaStart) ? e.horaStart : '00:00';
-  /* calshow usa segundos desde o epoch de referência do Apple Calendar:
-     2001-01-01 00:00:00 UTC. Não enviar YYYYMMDD/HHMM. */
-  const alvo=new Date(`${iso}T${hora}:00`);
-  const referencia=new Date('2001-01-01T00:00:00Z');
-  const segundos=Math.floor((alvo.getTime()-referencia.getTime())/1000);
-  return Number.isFinite(segundos) ? `calshow:${segundos}` : 'calshow:';
-}
-
-function agCalendarDetectPlatform(){
-  const ua=navigator.userAgent||'';
-  const platform=navigator.platform||'';
-  const isAndroid=/Android/i.test(ua);
-  const isIOS=/iPhone|iPad|iPod/i.test(ua) ||
-    (platform==='MacIntel' && navigator.maxTouchPoints>1);
-  const isWindows=/Windows NT/i.test(ua);
-  const isMac=/Macintosh|Mac OS X/i.test(ua) && !isIOS;
-  return {isAndroid,isIOS,isWindows,isMac};
-}
-
-function agCalendarOpenNative(url){
-  if(!url) return false;
-  try{
-    /* A abertura ocorre diretamente após o clique do usuário,
-       permitindo que o navegador/OS entregue o protocolo ao aplicativo. */
-    window.location.assign(url);
-    return true;
-  }catch(err){
-    console.error('Calendário nativo:',err);
-    return false;
-  }
-}
-
-function agCalendarOpenAutomatic(evento,descricao,local){
-  const p=agCalendarDetectPlatform();
-
-  if(p.isAndroid){
-    return agCalendarOpenNative(
-      agCalendarAndroidIntent(evento,descricao,local)
-    );
-  }
-
-  if(p.isWindows){
-    /* Windows 11: ponte nativa do Gerencial usa AppointmentManager
-       para abrir a tela NOVO COMPROMISSO já preenchida. */
-    return agCalendarOpenNative(
-      agCalendarWindowsNativeUrl(evento,descricao,local)
-    );
-  }
-
-  if(p.isIOS){
-    /* O Safari pode chamar o Calendário Apple com calshow, mas não
-       consegue preencher campos de um novo evento via uma API web
-       pública. Abrimos diretamente na data correta, sem download. */
-    return agCalendarOpenNative(agCalendarAppleDateUrl(evento));
-  }
-
-  if(p.isMac){
-    /* Em macOS via navegador, não existe um protocolo web público
-       confiável para pré-preencher um novo evento no Calendário Apple.
-       Usamos Google Calendar web como fallback sem criar arquivo. */
-    return agCalendarOpenNative(
-      agCalendarGoogleUrl(evento,descricao,local)
-    );
-  }
-
-  /* Outros desktops: Google Calendar web como fallback universal. */
-  return agCalendarOpenNative(
-    agCalendarGoogleUrl(evento,descricao,local)
-  );
-}
-
-function adicionarAoCalendario(tipo,id){
-  try{
-    const colecao=tipo==='TAREFA'?db?.tarefas:db?.notas;
-    const item=Array.isArray(colecao)?colecao.find(x=>x.id===id):null;
-
-    if(!item){
-      alert(`${tipo==='TAREFA'?'Tarefa':'Anotação'} não encontrada.`);
-      return;
-    }
-
-    const evento=agCalendarEventData(item,tipo);
-
-    if(!evento||evento.semData){
-      alert('Defina uma data de início ou prazo antes de adicionar ao calendário.');
-      if(tipo==='TAREFA') editarTarefa(id);
-      else editarNota(id);
-      return;
-    }
-
-    const descricao=agCalendarDescription(item,tipo);
-    const local=agCalendarLocation(item);
-
-    agCalendarOpenAutomatic(evento,descricao,local);
-  }catch(erro){
-    console.error('Falha ao abrir calendário:',erro);
-    alert('Não foi possível abrir o calendário deste dispositivo.');
-  }
-}
-
 function renderNotas(){
   const fs = document.getElementById('fNotaSetor')?.value || 'TODOS';
   const st = document.getElementById('fNotaStatus')?.value || 'TODOS';
@@ -16761,7 +16441,6 @@ function renderNotas(){
         <button class="btn small secondary" onclick="editarNota('${n.id}')">Editar</button>
         <button class="btn small secondary" onclick="duplicarNota('${n.id}')">Duplicar</button>
         <button class="btn small secondary" onclick="copiarNota('${n.id}')">📋 Copiar</button>
-        <button class="btn small secondary" onclick="adicionarAoCalendario('NOTA','${n.id}')">📅 Calendário</button>
         <button class="btn small secondary" onclick="transformarNotaEmTarefa('${n.id}')">✓ Criar tarefa</button>
         ${statusNotaArquivado(n)
           ? `<button class="btn small good" onclick="restaurarNota('${n.id}')">Restaurar</button>`
@@ -17042,7 +16721,7 @@ function renderKanban(){
         return `<article class="task-row">
           <div class="task-row-main"><h4>${escapeHTML(t.atividade || t.titulo)}</h4><div class="task-meta">${badgeSetor(t.setor)} ${badgePrioridade(t.prioridade)} ${badgeRepeticaoLembreteTarefa(t)} ${badgeAnexosTarefa(t)}</div><p><b>Departamento:</b> ${escapeHTML(t.departamento || 'Loja toda')}</p></div>
           <div class="task-row-meta"><p><b>Agendamento:</b> ${escapeHTML(periodo)}</p><p><b>Responsável:</b> ${escapeHTML(responsaveis)}</p></div>
-          <div class="actions task-row-actions no-print"><button class="btn small secondary" onclick="abrirModalTarefa('${t.id}')">Editar</button><button class="btn small secondary" onclick="adicionarAoCalendario('TAREFA','${t.id}')">📅 Calendário</button>${st!=='Concluída'?`<button class="btn small good" onclick="setTarefaStatus('${t.id}','Concluída')">Concluir</button>`:''}<button class="btn small danger" onclick="excluirTarefa('${t.id}')">Excluir</button></div>
+          <div class="actions task-row-actions no-print"><button class="btn small secondary" onclick="abrirModalTarefa('${t.id}')">Editar</button>${st!=='Concluída'?`<button class="btn small good" onclick="setTarefaStatus('${t.id}','Concluída')">Concluir</button>`:''}<button class="btn small danger" onclick="excluirTarefa('${t.id}')">Excluir</button></div>
           ${(t.descricao||anexosTarefa(t).length)?`<details class="task-row-details"><summary>Ver detalhes da tarefa${anexosTarefa(t).length?` • ${anexosTarefa(t).length} anexo(s)`:''}</summary>${t.descricao?`<p>${escapeHTML(t.descricao)}</p>`:''}${renderAnexosTarefaCard(t)}</details>`:''}
         </article>`;
       }).join(''):'<div class="empty">Sem itens neste status.</div>'}</div>
@@ -17088,52 +16767,51 @@ function renderSetores(){
     </div>`;
 }
 
+let acompVisaoAtual='FUNCIONARIO';
+function preencherFiltrosAcompanhamento(registros){
+  const f=document.getElementById('acompFiltroFuncionario'), d=document.getElementById('acompFiltroDepartamento');
+  if(f){const atual=f.value||'TODOS', nomes=[...new Set(registros.map(x=>x.responsavel).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')); f.innerHTML='<option value="TODOS">Todos</option>'+nomes.map(n=>`<option value="${escapeHTML(n)}">${escapeHTML(n)}</option>`).join(''); f.value=nomes.includes(atual)?atual:'TODOS';}
+  if(d){const atual=d.value||'TODOS', deps=departamentosAcompanhamento(); d.innerHTML='<option value="TODOS">Todos</option>'+deps.map(x=>`<option value="${escapeHTML(x)}">${escapeHTML(x)}</option>`).join(''); d.value=deps.includes(atual)?atual:'TODOS';}
+}
+function definirVisaoAcompanhamento(v){acompVisaoAtual=['FUNCIONARIO','TAREFA','DEPARTAMENTO'].includes(v)?v:'FUNCIONARIO';document.querySelectorAll('.acomp-view-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===acompVisaoAtual));renderDiario();}
+function normalizarStatusAcompVisual(t){return tarefaAcompanhamentoAtrasada(t)?'ATRASADA':String(t?.status||'PENDENTE').toUpperCase();}
+function tarefaAcompPassaFiltros(d,t){
+  const data=document.getElementById('acompFiltroData')?.value||'HOJE', func=document.getElementById('acompFiltroFuncionario')?.value||'TODOS', dep=document.getElementById('acompFiltroDepartamento')?.value||'TODOS', st=document.getElementById('acompFiltroStatus')?.value||'TODOS', pr=document.getElementById('acompFiltroPrioridade')?.value||'TODOS', busca=normalizarTextoAcomp(document.getElementById('acompFiltroBusca')?.value).toLowerCase();
+  if(func!=='TODOS'&&(t.responsavel||d.responsavel)!==func)return false;
+  if(dep!=='TODOS'&&d.departamento!==dep)return false;
+  if(pr!=='TODOS'&&String(t.prioridade||'MÉDIA').toUpperCase()!==pr)return false;
+  if(st!=='TODOS'&&normalizarStatusAcompVisual(t)!==st)return false;
+  if(busca&&!`${t.descricao||''} ${t.familia||''} ${t.subfamilia||''} ${t.observacao||''} ${t.responsavel||''} ${d.responsavel||''} ${d.departamento||''}`.toLowerCase().includes(busca))return false;
+  if(data==='HOJE'&&d.dataISO!==hojeISO())return false;
+  if(data==='ATRASADAS'&&!tarefaAcompanhamentoAtrasada(t))return false;
+  if(data==='PROXIMAS'){if(!t.prazo||['CONCLUÍDA','CANCELADA'].includes(String(t.status||'').toUpperCase()))return false;const dt=new Date(t.prazo),ag=Date.now(),lim=ag+48*60*60*1000;if(isNaN(dt.getTime())||dt.getTime()<ag||dt.getTime()>lim)return false;}
+  return true;
+}
+function tarefaAcompCardHTML(d,t){
+  const atrasada=tarefaAcompanhamentoAtrasada(t), status=normalizarStatusAcompVisual(t), rota=[d.departamento,t.familia,t.subfamilia].filter(Boolean).join(' › '), hist=Array.isArray(t.historico)?t.historico.length:0;
+  const opts=['PENDENTE','EM ANDAMENTO','BLOQUEADA','CONCLUÍDA','CANCELADA'];
+  return `<div class="acomp-task-card ${status==='CONCLUÍDA'?'concluida':''} ${status==='BLOQUEADA'?'bloqueada':''} ${status==='CANCELADA'?'cancelada':''}">
+    <div class="acomp-task-main"><div class="acomp-task-name">${escapeHTML(t.descricao||'-')}</div><div class="acomp-task-route">${escapeHTML(rota||d.departamento||'-')}</div><div class="acomp-task-meta"><span class="acomp-chip ${classePrioridadeAcomp(t.prioridade)}">${escapeHTML(t.prioridade||'MÉDIA')}</span><span class="acomp-chip acomp-status-chip">${escapeHTML(status)}</span>${atrasada?'<span class="acomp-chip acomp-prio-critica">ATRASADA</span>':''}</div>${t.observacao?`<div class="acomp-task-observation"><b>Observação:</b> ${escapeHTML(t.observacao)}</div>`:''}</div>
+    <div class="acomp-deadline ${atrasada?'atrasada':''}"><b>Prazo</b><br>${escapeHTML(prazoAcompanhamentoTexto(t.prazo))}</div>
+    <div class="no-print acomp-task-actions"><select class="acomp-status-select" onchange="alterarStatusTarefaAcompanhamento('${d.id}','${t.id}',this.value)">${opts.map(x=>`<option ${status===x?'selected':''}>${x}</option>`).join('')}</select><button class="btn small secondary" type="button" onclick="adicionarObservacaoTarefaAcompanhamento('${d.id}','${t.id}')" title="Observação">📝</button><button class="btn small secondary" type="button" onclick="reatribuirTarefaAcompanhamento('${d.id}','${t.id}')" title="Reatribuir">↪</button><button class="btn small secondary" type="button" onclick="verHistoricoTarefaAcompanhamento('${d.id}','${t.id}')" title="Histórico">🕘 ${hist}</button></div>
+  </div>`;
+}
 function renderDiario(){
-  const lista=document.getElementById('acompanhamentoLista');
-  const resumo=document.getElementById('acompResumoDia');
-  if(!lista) return;
-  const registros=Array.isArray(db.diario)?db.diario:[];
-  const tarefas=registros.flatMap(d=>Array.isArray(d.tarefas)?d.tarefas:[]);
-  const pendentes=tarefas.filter(t=>t.status!=='CONCLUÍDA').length;
-  const criticas=tarefas.filter(t=>t.status!=='CONCLUÍDA' && t.prioridade==='CRÍTICA').length;
-  const atrasadas=tarefas.filter(t=>tarefaAcompanhamentoAtrasada(t)).length;
-  if(resumo) resumo.innerHTML=`
-    <div class="acomp-summary-card"><div><small>Funcionários acompanhados</small><b>${new Set(registros.map(d=>d.responsavel).filter(Boolean)).size}</b></div><span class="acomp-summary-icon">👥</span></div>
-    <div class="acomp-summary-card"><div><small>Tarefas pendentes</small><b>${pendentes}</b></div><span class="acomp-summary-icon">📋</span></div>
-    <div class="acomp-summary-card"><div><small>Críticas</small><b>${criticas}</b></div><span class="acomp-summary-icon">🔴</span></div>
-    <div class="acomp-summary-card"><div><small>Atrasadas</small><b>${atrasadas}</b></div><span class="acomp-summary-icon">⏰</span></div>`;
-
-  if(!registros.length){
-    lista.innerHTML='<div class="section-card empty">Nenhum acompanhamento de funcionário registrado.</div>';
-    return;
+  const lista=document.getElementById('acompanhamentoLista'), resumo=document.getElementById('acompResumoDia'); if(!lista)return;
+  const registros=Array.isArray(db.diario)?db.diario:[]; preencherFiltrosAcompanhamento(registros);
+  const todos=registros.flatMap(d=>(Array.isArray(d.tarefas)?d.tarefas:[]).map(t=>({d,t}))), vis=todos.filter(x=>tarefaAcompPassaFiltros(x.d,x.t));
+  const pend=vis.filter(x=>!['CONCLUÍDA','CANCELADA'].includes(String(x.t.status||'').toUpperCase())).length, concl=vis.filter(x=>x.t.status==='CONCLUÍDA').length, bloq=vis.filter(x=>x.t.status==='BLOQUEADA').length, crit=vis.filter(x=>!['CONCLUÍDA','CANCELADA'].includes(String(x.t.status||'').toUpperCase())&&x.t.prioridade==='CRÍTICA').length, atras=vis.filter(x=>tarefaAcompanhamentoAtrasada(x.t)).length, funcs=new Set(vis.map(x=>x.t.responsavel||x.d.responsavel).filter(Boolean)).size;
+  if(resumo)resumo.innerHTML=`<div class="acomp-summary-card"><div><small>Funcionários</small><b>${funcs}</b><span>com tarefas no filtro</span></div><span class="acomp-summary-icon">👥</span></div><div class="acomp-summary-card"><div><small>Tarefas pendentes</small><b>${pend}</b><span>${concl} concluídas</span></div><span class="acomp-summary-icon">📋</span></div><div class="acomp-summary-card"><div><small>Críticas</small><b>${crit}</b><span>${bloq} bloqueadas</span></div><span class="acomp-summary-icon">🔴</span></div><div class="acomp-summary-card"><div><small>Atrasadas</small><b>${atras}</b><span>exigem atenção</span></div><span class="acomp-summary-icon">⏰</span></div>`;
+  if(!vis.length){lista.innerHTML='<div class="section-card empty">Nenhuma tarefa encontrada nos filtros atuais.</div>';return;}
+  if(acompVisaoAtual==='TAREFA'){
+    lista.innerHTML=[...vis].sort((a,b)=>(a.t.prazo||'9999').localeCompare(b.t.prazo||'9999')).map(x=>`<article class="acomp-employee-card acomp-flat-task"><div class="acomp-employee-head"><div class="acomp-employee-title"><div class="acomp-avatar">${iniciaisAcompanhamento(x.t.responsavel||x.d.responsavel)}</div><div><h3>${escapeHTML(x.t.descricao||'-')}</h3><div class="acomp-path">${escapeHTML(x.t.responsavel||x.d.responsavel||'-')} • ${escapeHTML(x.d.departamento||'-')}</div></div></div></div><div class="acomp-task-list">${tarefaAcompCardHTML(x.d,x.t)}</div></article>`).join('');return;
   }
-
-  lista.innerHTML=registros.map(d=>{
-    const modernas=Array.isArray(d.tarefas) && d.tarefas.length;
-    if(!modernas){
-      return `<article class="acomp-employee-card acomp-legacy">
-        <div class="acomp-employee-head"><div class="acomp-employee-title"><div class="acomp-avatar">${iniciaisAcompanhamento(d.responsavel)}</div><div><h3>${escapeHTML(d.responsavel||'Registro anterior')}</h3><div class="acomp-path">Registro criado na versão anterior do Acompanhamento do Dia</div><span class="acomp-date">📅 ${escapeHTML(d.dataISO||'-')}</span></div></div><div class="actions no-print"><button class="btn small secondary" onclick="editarDiario('${d.id}')">Editar / converter</button><button class="btn small danger" onclick="excluirDiario('${d.id}')">Excluir</button></div></div>
-        <div class="acomp-task-list"><div class="acomp-task-card"><div><div class="acomp-task-name">${escapeHTML(d.resumo||'Acompanhamento anterior')}</div><div class="acomp-task-route">VM: ${escapeHTML(d.vm||'-')} • Fiscal: ${escapeHTML(d.fiscal||'-')} • ADM: ${escapeHTML(d.adm||'-')} • PF: ${escapeHTML(d.pf||'-')}</div></div><div class="acomp-deadline">${escapeHTML(d.turno||'-')}</div><div></div></div></div>
-        ${d.obs?`<div class="acomp-card-notes"><b>Observações:</b> ${escapeHTML(d.obs)}</div>`:''}
-      </article>`;
-    }
-    return `<article class="acomp-employee-card">
-      <div class="acomp-employee-head">
-        <div class="acomp-employee-title"><div class="acomp-avatar">${iniciaisAcompanhamento(d.responsavel)}</div><div><h3>${escapeHTML(d.responsavel||'-')}</h3><div class="acomp-path">${escapeHTML(d.departamento||'Sem departamento')}</div><span class="acomp-date">📅 ${escapeHTML(d.dataISO||'-')} • ${d.tarefas.length} tarefa(s)</span></div></div>
-        <div class="actions no-print"><button class="btn small secondary" onclick="editarDiario('${d.id}')">Editar</button><button class="btn small danger" onclick="excluirDiario('${d.id}')">Excluir</button></div>
-      </div>
-      <div class="acomp-task-list">${d.tarefas.map(t=>{
-        const atrasada=tarefaAcompanhamentoAtrasada(t);
-        const rota=[d.departamento,t.familia,t.subfamilia].filter(Boolean).join(' › ');
-        return `<div class="acomp-task-card ${t.status==='CONCLUÍDA'?'concluida':''}">
-          <div><div class="acomp-task-name">${escapeHTML(t.descricao||'-')}</div><div class="acomp-task-route">${escapeHTML(rota||d.departamento||'-')}</div><div class="acomp-task-meta"><span class="acomp-chip ${classePrioridadeAcomp(t.prioridade)}">${escapeHTML(t.prioridade||'MÉDIA')}</span>${atrasada?'<span class="acomp-chip acomp-prio-critica">ATRASADA</span>':''}</div></div>
-          <div class="acomp-deadline ${atrasada?'atrasada':''}"><b>Prazo</b><br>${escapeHTML(prazoAcompanhamentoTexto(t.prazo))}</div>
-          <div class="no-print"><select class="acomp-status-select" onchange="alterarStatusTarefaAcompanhamento('${d.id}','${t.id}',this.value)"><option ${t.status==='PENDENTE'?'selected':''}>PENDENTE</option><option ${t.status==='EM ANDAMENTO'?'selected':''}>EM ANDAMENTO</option><option ${t.status==='CONCLUÍDA'?'selected':''}>CONCLUÍDA</option></select></div>
-        </div>`;
-      }).join('')}</div>
-      ${d.obs?`<div class="acomp-card-notes"><b>Observações:</b> ${escapeHTML(d.obs)}</div>`:''}
-    </article>`;
-  }).join('');
+  if(acompVisaoAtual==='DEPARTAMENTO'){
+    const grupos={};vis.forEach(x=>(grupos[x.d.departamento||'Sem departamento']??=[]).push(x));
+    lista.innerHTML=Object.entries(grupos).sort((a,b)=>a[0].localeCompare(b[0],'pt-BR')).map(([dep,it])=>`<article class="acomp-employee-card"><div class="acomp-employee-head"><div class="acomp-employee-title"><div class="acomp-avatar">🏬</div><div><h3>${escapeHTML(dep)}</h3><div class="acomp-path">${it.length} tarefa(s) • ${new Set(it.map(x=>x.t.responsavel||x.d.responsavel)).size} funcionário(s)</div></div></div></div><div class="acomp-task-list">${it.map(x=>tarefaAcompCardHTML(x.d,x.t)).join('')}</div></article>`).join('');return;
+  }
+  const grupos={};vis.forEach(x=>{const k=`${x.d.id}::${x.t.responsavel||x.d.responsavel||''}`;(grupos[k]??={d:x.d,responsavel:x.t.responsavel||x.d.responsavel,tarefas:[]}).tarefas.push(x.t);});
+  lista.innerHTML=Object.values(grupos).sort((a,b)=>(a.responsavel||'').localeCompare(b.responsavel||'','pt-BR')).map(g=>`<article class="acomp-employee-card"><div class="acomp-employee-head"><div class="acomp-employee-title"><div class="acomp-avatar">${iniciaisAcompanhamento(g.responsavel||g.d.responsavel)}</div><div><h3>${escapeHTML(g.responsavel||g.d.responsavel||'-')}</h3><div class="acomp-path">${escapeHTML(g.d.departamento||'Sem departamento')}</div><span class="acomp-date">📅 ${escapeHTML(g.d.dataISO||'-')} • ${g.tarefas.length} tarefa(s)</span></div></div><div class="actions no-print"><button class="btn small secondary" onclick="editarDiario('${g.d.id}')">Editar</button><button class="btn small danger" onclick="excluirDiario('${g.d.id}')">Excluir</button></div></div><div class="acomp-task-list">${g.tarefas.map(t=>tarefaAcompCardHTML(g.d,t)).join('')}</div>${g.d.obs?`<div class="acomp-card-notes"><b>Observações gerais:</b> ${escapeHTML(g.d.obs)}</div>`:''}</article>`).join('');
 }
 
 function getRelatorio(){
@@ -17146,7 +16824,7 @@ function getRelatorio(){
   if(tipo==='TODOS'||tipo==='TAREFAS') db.tarefas.forEach(t=>rows.push({data:t.dataISO,tipo:'Tarefa',setor:t.setor,titulo:t.atividade||t.titulo,responsavel:[t.responsavel,t.responsavel2].filter(Boolean).join(' + '),prioridade:t.prioridade,status:t.status,prazo:t.fim||t.prazo,obs:`Departamento: ${t.departamento||'-'} | Agendamento: ${resumoAgendamentoTarefa(t)} | Observação: ${t.descricao||'-'}`,atualizadoPor:t.atualizadoPor}));
   if(tipo==='TODOS'||tipo==='DIARIO') db.diario.forEach(d=>{
     if(Array.isArray(d.tarefas)&&d.tarefas.length){
-      d.tarefas.forEach(t=>rows.push({data:d.dataISO,tipo:'Acompanhamento',setor:'GERAL',titulo:t.descricao,responsavel:d.responsavel,prioridade:t.prioridade||'-',status:tarefaAcompanhamentoAtrasada(t)?'ATRASADA':(t.status||'-'),prazo:t.prazo||'-',obs:`${[d.departamento,t.familia,t.subfamilia].filter(Boolean).join(' > ')}${d.obs?' | '+d.obs:''}`,atualizadoPor:d.atualizadoPor}));
+      d.tarefas.forEach(t=>rows.push({data:d.dataISO,tipo:'Acompanhamento',setor:'GERAL',titulo:t.descricao,responsavel:d.responsavel,prioridade:t.prioridade||'-',status:tarefaAcompanhamentoAtrasada(t)?'ATRASADA':(t.status||'-'),prazo:t.prazo||'-',obs:`${[d.departamento,t.familia,t.subfamilia].filter(Boolean).join(' > ')}${t.observacao?' | Tarefa: '+t.observacao:''}${d.obs?' | Geral: '+d.obs:''}`,atualizadoPor:d.atualizadoPor}));
     } else {
       rows.push({data:d.dataISO,tipo:'Acompanhamento',setor:'GERAL',titulo:d.resumo||'Registro anterior',responsavel:d.responsavel,prioridade:'-',status:`VM:${d.vm||'-'} Fiscal:${d.fiscal||'-'} ADM:${d.adm||'-'} PF:${d.pf||'-'}`,prazo:'-',obs:d.obs,atualizadoPor:d.atualizadoPor});
     }
@@ -17886,130 +17564,7 @@ function exportarExcelRelatorio(){ showAppLoader('Gerando Excel', 'Montando o ar
 
   
 
-</style>
-  <style id="topbar-compact-v5148">
-    /* V51.48 — cabeçalho mais compacto e proporcional no desktop */
-    @media (min-width:1101px){
-      .topbar{
-        grid-template-columns:minmax(240px,1fr) max-content !important;
-        gap:10px !important;
-        min-height:84px !important;
-        padding:10px 12px 10px 14px !important;
-        align-items:center !important;
-      }
-      .top-left{min-width:0 !important;overflow:hidden !important;}
-      .top-left h2,#pageTitle{font-size:1.34rem !important;line-height:1.08 !important;}
-      .top-left p,#pageSubtitle{font-size:.78rem !important;line-height:1.2 !important;}
-
-      .store-meta{
-        display:grid !important;
-        grid-template-columns:72px 118px minmax(178px,218px) 82px 96px 38px 38px 38px !important;
-        gap:6px !important;
-        width:max-content !important;
-        min-width:max-content !important;
-        max-width:none !important;
-        align-items:stretch !important;
-      }
-
-      .store-meta .info-tile,
-      .store-meta .header-notification,
-      .store-meta .header-theme,
-      .store-meta .header-logout{
-        min-height:50px !important;
-        height:50px !important;
-        border-radius:13px !important;
-      }
-
-      .info-tile{
-        padding:6px 7px !important;
-        gap:6px !important;
-      }
-      .info-icon{
-        flex:0 0 18px !important;
-        width:18px !important;
-        height:18px !important;
-      }
-      .info-icon svg,
-      .header-notification svg,
-      .header-logout svg{
-        width:16px !important;
-        height:16px !important;
-        stroke-width:1.95 !important;
-      }
-      .info-copy{gap:1px !important;min-width:0 !important;}
-      .info-copy small{
-        font-size:.52rem !important;
-        line-height:1.02 !important;
-        letter-spacing:.04em !important;
-      }
-      .info-copy b{
-        font-size:.73rem !important;
-        line-height:1.05 !important;
-      }
-      .info-store .info-copy b,
-      .info-operator .info-copy b,
-      .info-manager .info-copy b{
-        font-size:.84rem !important;
-      }
-      .info-month .info-copy b{
-        font-size:.76rem !important;
-      }
-      .info-user .info-copy b,
-      #headerUserName{
-        display:-webkit-box !important;
-        -webkit-line-clamp:2 !important;
-        -webkit-box-orient:vertical !important;
-        overflow:hidden !important;
-        white-space:normal !important;
-        text-overflow:ellipsis !important;
-        font-size:.70rem !important;
-        line-height:1.02 !important;
-        max-height:2.1em !important;
-      }
-      .store-meta .header-notification,
-      .store-meta .header-theme,
-      .store-meta .header-logout,
-      #notificationBtn,
-      .header-theme.theme-btn,
-      .header-logout.logout-fixed{
-        width:38px !important;
-        min-width:38px !important;
-        padding:0 !important;
-      }
-      .notification-badge{
-        top:4px !important;
-        right:4px !important;
-        min-width:15px !important;
-        height:15px !important;
-        font-size:.58rem !important;
-        line-height:15px !important;
-      }
-    }
-
-    @media (min-width:1101px) and (max-width:1450px){
-      .store-meta{
-        grid-template-columns:68px 110px minmax(165px,200px) 78px 90px 36px 36px 36px !important;
-        gap:5px !important;
-      }
-      .info-tile{padding:6px !important;}
-      .info-copy small{font-size:.49rem !important;}
-      .info-copy b{font-size:.69rem !important;}
-      .info-store .info-copy b,
-      .info-operator .info-copy b,
-      .info-manager .info-copy b{font-size:.80rem !important;}
-      .store-meta .header-notification,
-      .store-meta .header-theme,
-      .store-meta .header-logout,
-      #notificationBtn,
-      .header-theme.theme-btn,
-      .header-logout.logout-fixed{
-        width:36px !important;
-        min-width:36px !important;
-      }
-    }
-  </style>
-
-</head><body><h1>Relatório Gerencial - Loja 24</h1><p>Gerente: ALANA • Exportado em ${agoraBR()}</p>${document.getElementById('tabelaRelatorio').outerHTML}
+</style></head><body><h1>Relatório Gerencial - Loja 24</h1><p>Gerente: ALANA • Exportado em ${agoraBR()}</p>${document.getElementById('tabelaRelatorio').outerHTML}
 </body></html>`; downloadBlob(new Blob([html], {type:'application/vnd.ms-excel'}), `relatorio_gerencial_${hojeISO()}.xls`); hideAppLoader(); }, 260); }
 
 
@@ -19676,130 +19231,7 @@ window.addEventListener('load', async () => {
       @media print{button{display:none!important}}
     `;
     doc.open();
-    doc.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(titulo)}</title><style>${css}</style>
-  <style id="topbar-compact-v5148">
-    /* V51.48 — cabeçalho mais compacto e proporcional no desktop */
-    @media (min-width:1101px){
-      .topbar{
-        grid-template-columns:minmax(240px,1fr) max-content !important;
-        gap:10px !important;
-        min-height:84px !important;
-        padding:10px 12px 10px 14px !important;
-        align-items:center !important;
-      }
-      .top-left{min-width:0 !important;overflow:hidden !important;}
-      .top-left h2,#pageTitle{font-size:1.34rem !important;line-height:1.08 !important;}
-      .top-left p,#pageSubtitle{font-size:.78rem !important;line-height:1.2 !important;}
-
-      .store-meta{
-        display:grid !important;
-        grid-template-columns:72px 118px minmax(178px,218px) 82px 96px 38px 38px 38px !important;
-        gap:6px !important;
-        width:max-content !important;
-        min-width:max-content !important;
-        max-width:none !important;
-        align-items:stretch !important;
-      }
-
-      .store-meta .info-tile,
-      .store-meta .header-notification,
-      .store-meta .header-theme,
-      .store-meta .header-logout{
-        min-height:50px !important;
-        height:50px !important;
-        border-radius:13px !important;
-      }
-
-      .info-tile{
-        padding:6px 7px !important;
-        gap:6px !important;
-      }
-      .info-icon{
-        flex:0 0 18px !important;
-        width:18px !important;
-        height:18px !important;
-      }
-      .info-icon svg,
-      .header-notification svg,
-      .header-logout svg{
-        width:16px !important;
-        height:16px !important;
-        stroke-width:1.95 !important;
-      }
-      .info-copy{gap:1px !important;min-width:0 !important;}
-      .info-copy small{
-        font-size:.52rem !important;
-        line-height:1.02 !important;
-        letter-spacing:.04em !important;
-      }
-      .info-copy b{
-        font-size:.73rem !important;
-        line-height:1.05 !important;
-      }
-      .info-store .info-copy b,
-      .info-operator .info-copy b,
-      .info-manager .info-copy b{
-        font-size:.84rem !important;
-      }
-      .info-month .info-copy b{
-        font-size:.76rem !important;
-      }
-      .info-user .info-copy b,
-      #headerUserName{
-        display:-webkit-box !important;
-        -webkit-line-clamp:2 !important;
-        -webkit-box-orient:vertical !important;
-        overflow:hidden !important;
-        white-space:normal !important;
-        text-overflow:ellipsis !important;
-        font-size:.70rem !important;
-        line-height:1.02 !important;
-        max-height:2.1em !important;
-      }
-      .store-meta .header-notification,
-      .store-meta .header-theme,
-      .store-meta .header-logout,
-      #notificationBtn,
-      .header-theme.theme-btn,
-      .header-logout.logout-fixed{
-        width:38px !important;
-        min-width:38px !important;
-        padding:0 !important;
-      }
-      .notification-badge{
-        top:4px !important;
-        right:4px !important;
-        min-width:15px !important;
-        height:15px !important;
-        font-size:.58rem !important;
-        line-height:15px !important;
-      }
-    }
-
-    @media (min-width:1101px) and (max-width:1450px){
-      .store-meta{
-        grid-template-columns:68px 110px minmax(165px,200px) 78px 90px 36px 36px 36px !important;
-        gap:5px !important;
-      }
-      .info-tile{padding:6px !important;}
-      .info-copy small{font-size:.49rem !important;}
-      .info-copy b{font-size:.69rem !important;}
-      .info-store .info-copy b,
-      .info-operator .info-copy b,
-      .info-manager .info-copy b{font-size:.80rem !important;}
-      .store-meta .header-notification,
-      .store-meta .header-theme,
-      .store-meta .header-logout,
-      #notificationBtn,
-      .header-theme.theme-btn,
-      .header-logout.logout-fixed{
-        width:36px !important;
-        min-width:36px !important;
-      }
-    }
-  </style>
-
-</head><body><main class="doc">${conteudo}</main></body></html>`);
+    doc.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(titulo)}</title><style>${css}</style></head><body><main class="doc">${conteudo}</main></body></html>`);
     doc.close();
     const run=()=>{try{frame.contentWindow.focus();frame.contentWindow.print();}finally{setTimeout(()=>frame.remove(),1400);}};
     setTimeout(run,320);
@@ -19866,10 +19298,7 @@ window.addEventListener('load', async () => {
     const d=currentDB();
     const reg=registro || (d?.funcionarios||[]).find(f=>String(f.operador||'').replace(/\D/g,'')===op);
     const acc=acesso || ((typeof globalConfig!=='undefined' ? globalConfig?.usuarios : [])||[]).find(u=>String(u.operador||'').replace(/\D/g,'')===op);
-    const oficial=(typeof usuariosOficiais!=='undefined' ? usuariosOficiais : []).find(u=>String(u.operadorPadrao||'').replace(/\D/g,'')===op);
-    const candidatos=[reg?.nomeCompleto,reg?.nome,acc?.nomeCompleto,acc?.nome,oficial?.nome]
-      .map(v=>String(v||'').trim()).filter(Boolean);
-    return candidatos.sort((a,b)=>b.length-a.length)[0]||'';
+    return String(reg?.nome||acc?.nome||'').trim();
   };
   g.nomeCompletoUsuarioPorOperadorAsync=async(operador,acesso=null)=>g.nomeCompletoUsuarioPorOperadorLocal(operador,null,acesso);
   g.bindLoginPreviewTabFullName=()=>{
@@ -23750,130 +23179,7 @@ window.addEventListener('load', async () => {
             .actions{justify-content:flex-start}
           }
         </style>
-      
-  <style id="topbar-compact-v5148">
-    /* V51.48 — cabeçalho mais compacto e proporcional no desktop */
-    @media (min-width:1101px){
-      .topbar{
-        grid-template-columns:minmax(240px,1fr) max-content !important;
-        gap:10px !important;
-        min-height:84px !important;
-        padding:10px 12px 10px 14px !important;
-        align-items:center !important;
-      }
-      .top-left{min-width:0 !important;overflow:hidden !important;}
-      .top-left h2,#pageTitle{font-size:1.34rem !important;line-height:1.08 !important;}
-      .top-left p,#pageSubtitle{font-size:.78rem !important;line-height:1.2 !important;}
-
-      .store-meta{
-        display:grid !important;
-        grid-template-columns:72px 118px minmax(178px,218px) 82px 96px 38px 38px 38px !important;
-        gap:6px !important;
-        width:max-content !important;
-        min-width:max-content !important;
-        max-width:none !important;
-        align-items:stretch !important;
-      }
-
-      .store-meta .info-tile,
-      .store-meta .header-notification,
-      .store-meta .header-theme,
-      .store-meta .header-logout{
-        min-height:50px !important;
-        height:50px !important;
-        border-radius:13px !important;
-      }
-
-      .info-tile{
-        padding:6px 7px !important;
-        gap:6px !important;
-      }
-      .info-icon{
-        flex:0 0 18px !important;
-        width:18px !important;
-        height:18px !important;
-      }
-      .info-icon svg,
-      .header-notification svg,
-      .header-logout svg{
-        width:16px !important;
-        height:16px !important;
-        stroke-width:1.95 !important;
-      }
-      .info-copy{gap:1px !important;min-width:0 !important;}
-      .info-copy small{
-        font-size:.52rem !important;
-        line-height:1.02 !important;
-        letter-spacing:.04em !important;
-      }
-      .info-copy b{
-        font-size:.73rem !important;
-        line-height:1.05 !important;
-      }
-      .info-store .info-copy b,
-      .info-operator .info-copy b,
-      .info-manager .info-copy b{
-        font-size:.84rem !important;
-      }
-      .info-month .info-copy b{
-        font-size:.76rem !important;
-      }
-      .info-user .info-copy b,
-      #headerUserName{
-        display:-webkit-box !important;
-        -webkit-line-clamp:2 !important;
-        -webkit-box-orient:vertical !important;
-        overflow:hidden !important;
-        white-space:normal !important;
-        text-overflow:ellipsis !important;
-        font-size:.70rem !important;
-        line-height:1.02 !important;
-        max-height:2.1em !important;
-      }
-      .store-meta .header-notification,
-      .store-meta .header-theme,
-      .store-meta .header-logout,
-      #notificationBtn,
-      .header-theme.theme-btn,
-      .header-logout.logout-fixed{
-        width:38px !important;
-        min-width:38px !important;
-        padding:0 !important;
-      }
-      .notification-badge{
-        top:4px !important;
-        right:4px !important;
-        min-width:15px !important;
-        height:15px !important;
-        font-size:.58rem !important;
-        line-height:15px !important;
-      }
-    }
-
-    @media (min-width:1101px) and (max-width:1450px){
-      .store-meta{
-        grid-template-columns:68px 110px minmax(165px,200px) 78px 90px 36px 36px 36px !important;
-        gap:5px !important;
-      }
-      .info-tile{padding:6px !important;}
-      .info-copy small{font-size:.49rem !important;}
-      .info-copy b{font-size:.69rem !important;}
-      .info-store .info-copy b,
-      .info-operator .info-copy b,
-      .info-manager .info-copy b{font-size:.80rem !important;}
-      .store-meta .header-notification,
-      .store-meta .header-theme,
-      .store-meta .header-logout,
-      #notificationBtn,
-      .header-theme.theme-btn,
-      .header-logout.logout-fixed{
-        width:36px !important;
-        min-width:36px !important;
-      }
-    }
-  </style>
-
-</head>
+      </head>
       <body>
         <header>
           <div class="brand">
@@ -24802,129 +24108,6 @@ window.addEventListener('load', async () => {
     }
 
 </style>
-
-  <style id="topbar-compact-v5148">
-    /* V51.48 — cabeçalho mais compacto e proporcional no desktop */
-    @media (min-width:1101px){
-      .topbar{
-        grid-template-columns:minmax(240px,1fr) max-content !important;
-        gap:10px !important;
-        min-height:84px !important;
-        padding:10px 12px 10px 14px !important;
-        align-items:center !important;
-      }
-      .top-left{min-width:0 !important;overflow:hidden !important;}
-      .top-left h2,#pageTitle{font-size:1.34rem !important;line-height:1.08 !important;}
-      .top-left p,#pageSubtitle{font-size:.78rem !important;line-height:1.2 !important;}
-
-      .store-meta{
-        display:grid !important;
-        grid-template-columns:72px 118px minmax(178px,218px) 82px 96px 38px 38px 38px !important;
-        gap:6px !important;
-        width:max-content !important;
-        min-width:max-content !important;
-        max-width:none !important;
-        align-items:stretch !important;
-      }
-
-      .store-meta .info-tile,
-      .store-meta .header-notification,
-      .store-meta .header-theme,
-      .store-meta .header-logout{
-        min-height:50px !important;
-        height:50px !important;
-        border-radius:13px !important;
-      }
-
-      .info-tile{
-        padding:6px 7px !important;
-        gap:6px !important;
-      }
-      .info-icon{
-        flex:0 0 18px !important;
-        width:18px !important;
-        height:18px !important;
-      }
-      .info-icon svg,
-      .header-notification svg,
-      .header-logout svg{
-        width:16px !important;
-        height:16px !important;
-        stroke-width:1.95 !important;
-      }
-      .info-copy{gap:1px !important;min-width:0 !important;}
-      .info-copy small{
-        font-size:.52rem !important;
-        line-height:1.02 !important;
-        letter-spacing:.04em !important;
-      }
-      .info-copy b{
-        font-size:.73rem !important;
-        line-height:1.05 !important;
-      }
-      .info-store .info-copy b,
-      .info-operator .info-copy b,
-      .info-manager .info-copy b{
-        font-size:.84rem !important;
-      }
-      .info-month .info-copy b{
-        font-size:.76rem !important;
-      }
-      .info-user .info-copy b,
-      #headerUserName{
-        display:-webkit-box !important;
-        -webkit-line-clamp:2 !important;
-        -webkit-box-orient:vertical !important;
-        overflow:hidden !important;
-        white-space:normal !important;
-        text-overflow:ellipsis !important;
-        font-size:.70rem !important;
-        line-height:1.02 !important;
-        max-height:2.1em !important;
-      }
-      .store-meta .header-notification,
-      .store-meta .header-theme,
-      .store-meta .header-logout,
-      #notificationBtn,
-      .header-theme.theme-btn,
-      .header-logout.logout-fixed{
-        width:38px !important;
-        min-width:38px !important;
-        padding:0 !important;
-      }
-      .notification-badge{
-        top:4px !important;
-        right:4px !important;
-        min-width:15px !important;
-        height:15px !important;
-        font-size:.58rem !important;
-        line-height:15px !important;
-      }
-    }
-
-    @media (min-width:1101px) and (max-width:1450px){
-      .store-meta{
-        grid-template-columns:68px 110px minmax(165px,200px) 78px 90px 36px 36px 36px !important;
-        gap:5px !important;
-      }
-      .info-tile{padding:6px !important;}
-      .info-copy small{font-size:.49rem !important;}
-      .info-copy b{font-size:.69rem !important;}
-      .info-store .info-copy b,
-      .info-operator .info-copy b,
-      .info-manager .info-copy b{font-size:.80rem !important;}
-      .store-meta .header-notification,
-      .store-meta .header-theme,
-      .store-meta .header-logout,
-      #notificationBtn,
-      .header-theme.theme-btn,
-      .header-logout.logout-fixed{
-        width:36px !important;
-        min-width:36px !important;
-      }
-    }
-  </style>
-
 </head>
 <body id="av24HistoryPopup">
   <header class="topbar">
