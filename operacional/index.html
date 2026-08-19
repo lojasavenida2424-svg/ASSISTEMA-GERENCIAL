@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#291A1E">
 <title>Sistema Operacional V1.3.1 • Loja 24</title>
+<script>try{if(sessionStorage.getItem('operacionalAutoRefreshPending')==='1')document.documentElement.classList.add('auto-refresh-restoring')}catch(_){}</script>
 <script src="https://unpkg.com/@supabase/supabase-js@2.112.3"></script>
 <style>
 :root{--yellow:#F6C426;--yellow2:#DEB022;--ink:#291A1E;--bg:#F1F4F8;--card:#fff;--soft:#F7F8FA;--text:#172033;--muted:#6B7280;--border:#DCE2E8;--green:#15803D;--greenbg:#DCFCE7;--red:#B91C1C;--redbg:#FEE2E2;--orange:#B45309;--orangebg:#FEF3C7;--blue:#1D4ED8;--bluebg:#DBEAFE;--shadow:0 18px 45px rgba(15,23,42,.10)}
@@ -13,6 +14,8 @@
 @media(max-width:560px){.topbar-inner{padding:10px 14px}.shell{padding:16px 13px 85px}.hero{border-radius:22px;padding:20px}.hero h2{font-size:1.35rem}.summary{gap:8px}.metric{border-radius:16px;padding:13px}.metric b{font-size:1.35rem}.metric-icon{width:34px;height:34px}.toolbar{grid-template-columns:1fr}.toolbar .field.search{grid-column:auto}.task{border-radius:18px}.task-actions{display:grid;grid-template-columns:1fr 1fr}.task-actions .btn:first-child{grid-column:1/-1}.bottom-nav{position:fixed;display:grid;grid-template-columns:repeat(4,1fr);left:0;right:0;bottom:0;z-index:40;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-top:1px solid var(--border);padding:7px 8px max(7px,env(safe-area-inset-bottom))}.bottom-nav button{border:0;background:transparent;padding:6px 2px;font-size:.65rem;font-weight:850;color:var(--muted)}.bottom-nav button span{display:block;font-size:1.08rem;margin-bottom:2px}.bottom-nav button.active{color:var(--ink)}.modal-back{padding:0;align-items:flex-end}.modal{border-radius:24px 24px 0 0;max-height:92vh}.login-card{border-radius:22px}.login-brand,.login-body{padding-left:22px;padding-right:22px}}
 
 .completion-page{position:fixed;inset:0;z-index:120;background:var(--bg);display:none;overflow:auto}.completion-page.active{display:block}.completion-top{position:sticky;top:0;z-index:2;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}.completion-top-inner{max-width:760px;margin:auto;padding:12px 18px;display:flex;align-items:center;gap:12px}.completion-back{width:42px;height:42px;border-radius:13px;border:1px solid var(--border);background:#fff;font-weight:1000;cursor:pointer}.completion-main{max-width:760px;margin:auto;padding:22px 18px 90px}.completion-hero{background:linear-gradient(135deg,var(--ink),#4a2633);color:#fff;border-radius:24px;padding:22px;text-align:center}.completion-hero small{display:block;color:rgba(255,255,255,.65);font-weight:900;text-transform:uppercase;letter-spacing:.08em}.live-clock{font-variant-numeric:tabular-nums;font-size:2.35rem;font-weight:1000;letter-spacing:-.03em;margin:7px 0}.completion-date{color:rgba(255,255,255,.76);font-size:.82rem;font-weight:750}.completion-card{margin-top:14px;background:#fff;border:1px solid var(--border);border-radius:22px;padding:18px;box-shadow:0 9px 24px rgba(15,23,42,.055)}.completion-card h3{margin:0 0 5px}.completion-card p{margin:0;color:var(--muted);font-size:.8rem;line-height:1.45}.photo-drop{margin-top:14px;border:2px dashed #CBD5E1;border-radius:18px;padding:18px;text-align:center;background:var(--soft);cursor:pointer;transition:.2s}.photo-drop:hover{border-color:var(--yellow2);background:#FFFBEA}.photo-drop.required{border-color:#F59E0B;background:#FFFBEB}.photo-drop strong{display:block;margin-top:7px}.photo-drop small{display:block;margin-top:5px;color:var(--muted)}.photo-input{display:none}.photo-preview-wrap{display:none;margin-top:14px}.photo-preview-wrap.active{display:block}.photo-preview{display:block;width:100%;max-height:420px;object-fit:contain;border-radius:16px;background:#111}.photo-meta{margin-top:8px;color:var(--muted);font-size:.73rem;font-weight:750}.require-banner{display:flex;gap:9px;align-items:flex-start;margin-top:12px;padding:11px 12px;border-radius:14px;background:var(--orangebg);color:var(--orange);font-size:.78rem;font-weight:800;line-height:1.45}.optional-banner{background:var(--bluebg);color:var(--blue)}.completion-submit{margin-top:14px;display:grid;gap:9px}.completion-submit .btn{min-height:48px}.completion-submit .btn:disabled{opacity:.45;cursor:not-allowed}.completion-error{min-height:20px;color:var(--red);font-size:.78rem;font-weight:850;margin-top:8px}
+
+.auto-refresh-loader{position:fixed;inset:0;z-index:1000;background:#F1F4F8;display:none;place-items:center;padding:24px}.auto-refresh-restoring .auto-refresh-loader,.auto-refresh-loader.active{display:grid}.auto-refresh-loader-card{width:min(420px,100%);background:#fff;border:1px solid #DCE2E8;border-radius:24px;padding:28px;text-align:center;box-shadow:0 24px 70px rgba(15,23,42,.16)}.auto-refresh-spinner{width:42px;height:42px;border:4px solid #E5E7EB;border-top-color:#291A1E;border-radius:50%;margin:0 auto 15px;animation:autoSpin .8s linear infinite}.auto-refresh-loader b{display:block;font-size:1rem}.auto-refresh-loader small{display:block;color:#6B7280;margin-top:7px;font-weight:700;line-height:1.4}@keyframes autoSpin{to{transform:rotate(360deg)}}
 </style>
 
 <style id="operacional-tarefas-avancadas-v1-2-9">
@@ -27,19 +30,17 @@
 
 </head>
 <body>
+<div id="autoRefreshLoader" class="auto-refresh-loader"><div class="auto-refresh-loader-card"><div class="auto-refresh-spinner"></div><b>Atualizando Sistema Operacional</b><small>Restaurando sua sessão e a tela em que você estava...</small></div></div>
 <section id="login" class="login">
   <div class="login-card">
-    <div class="login-brand"><div class="brand-row"><div class="brand-mark">AV</div><div><h1>SISTEMA OPERACIONAL</h1><p>Execução e acompanhamento de tarefas</p></div></div></div>
+    <div class="login-brand"><div class="brand-row"><div class="brand-mark">AV</div><div><h1>SISTEMA OPERACIONAL</h1></div></div></div>
     <div class="login-body">
-      <div class="eyebrow">Loja 24 • acesso do funcionário</div>
       <form id="loginForm">
         <label for="loginOperador">Operador</label><input id="loginOperador" inputmode="numeric" autocomplete="username" placeholder="Digite seu operador" required>
-        <label for="loginSenha">Senha operacional</label><input id="loginSenha" type="password" autocomplete="current-password" placeholder="Senha ou matrícula (piloto)" required>
-        <div class="login-actions"><button class="btn full" type="submit">Entrar no Operacional</button><button id="demoBtn" class="btn secondary full" type="button">Entrar em modo demonstração</button></div>
+        <label for="loginSenha">Senha operacional</label><input id="loginSenha" type="password" autocomplete="current-password" placeholder="Digite sua senha" required>
+        <div class="login-actions"><button class="btn full" type="submit">Entrar no Operacional</button></div>
       </form>
       <div id="loginError" class="login-error"></div>
-      <div class="login-note"><b>Acesso operacional:</b> após ser liberado pelo líder no Gerencial, use como senha inicial <b>operador + 24</b> (ex.: operador 29 = <b>2924</b>). Também permanecem compatíveis a senha do Gerencial e a matrícula cadastrada.</div>
-      <div class="statusline"><span id="loginDot" class="dot"></span><span id="loginStatus">Verificando conexão...</span></div>
     </div>
   </div>
 </section>
@@ -91,16 +92,66 @@ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim
 const opnorm=s=>{const n=String(s||'').replace(/\D/g,'');return n?String(Number(n)):''};
 const nowBR=()=>new Date().toLocaleString('pt-BR'); const uid=p=>`${p}_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
 const today=()=>{let d=new Date(),o=d.getTimezoneOffset();return new Date(d.getTime()-o*60000).toISOString().slice(0,10)};
+const AUTO_REFRESH_TEST_MS=60*60*1000; // Produção: 1 hora.
+const AUTO_REFRESH_UI_KEY='operacionalAutoRefreshStateV1',AUTO_REFRESH_PENDING_KEY='operacionalAutoRefreshPending';
+let autoRefreshTimerOperacional=null;
+function salvarEstadoOperacionalAntesReload(){
+  const st={tab:state.tab||'TODAS',filterDate:$('filterDate')?.value||'HOJE',filterSearch:$('filterSearch')?.value||'',scrollX:window.scrollX||0,scrollY:window.scrollY||0,selected:state.selected||null,salvoEm:Date.now()};
+  try{sessionStorage.setItem(AUTO_REFRESH_UI_KEY,JSON.stringify(st));sessionStorage.setItem(AUTO_REFRESH_PENDING_KEY,'1')}catch(_){ }
+}
+function restaurarEstadoOperacionalAposReload(){
+  let st=null;try{st=JSON.parse(sessionStorage.getItem(AUTO_REFRESH_UI_KEY)||'null')}catch(_){ }
+  try{sessionStorage.removeItem(AUTO_REFRESH_UI_KEY);sessionStorage.removeItem(AUTO_REFRESH_PENDING_KEY)}catch(_){ }
+  document.documentElement.classList.remove('auto-refresh-restoring');$('autoRefreshLoader')?.classList.remove('active');
+  if(!st)return;
+  if($('filterDate'))$('filterDate').value=st.filterDate||'HOJE';
+  if($('filterSearch'))$('filterSearch').value=st.filterSearch||'';
+  state.tab=st.tab||'TODAS';
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===state.tab));
+  document.querySelectorAll('.bottom-nav button').forEach((b,i)=>{const tabs=['TODAS','PENDENTE','EM ANDAMENTO','CONCLUÍDA'];b.classList.toggle('active',tabs[i]===state.tab)});
+  render();
+  if(st.selected?.did&&st.selected?.tid){try{openTask(st.selected.did,st.selected.tid)}catch(_){ }}
+  requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo(st.scrollX||0,st.scrollY||0)));
+}
+function interfaceOperacionalEmAcaoCritica(){
+  return $('completionPage')?.classList.contains('active')||$('rescheduleBack')?.classList.contains('active')||document.activeElement&&['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName);
+}
+function executarAutoAtualizacaoOperacional(){
+  if(!state.employee)return;
+  if(interfaceOperacionalEmAcaoCritica()){autoRefreshTimerOperacional=setTimeout(executarAutoAtualizacaoOperacional,15000);return}
+  salvarEstadoOperacionalAntesReload();$('autoRefreshLoader')?.classList.add('active');setTimeout(()=>location.reload(),180);
+}
+function iniciarAutoAtualizacaoOperacional(){if(autoRefreshTimerOperacional)clearTimeout(autoRefreshTimerOperacional);autoRefreshTimerOperacional=setTimeout(executarAutoAtualizacaoOperacional,AUTO_REFRESH_TEST_MS)}
+async function restaurarSessaoOperacional(){
+  let sess=null;try{sess=JSON.parse(sessionStorage.getItem('operacionalSessaoV1')||'null')}catch(_){ }
+  if(!sess?.operator)return false;
+  $('autoRefreshLoader')?.classList.add('active');
+  try{
+    const op=opnorm(sess.operator);
+    if(sess.mode==='demo'){
+      state.mode='demo';state.employee={id:'demo1',nome:sess.name||'FUNCIONÁRIO TESTE',operador:op||'245',matricula:`AV24-${String(Number(op||245)).padStart(4,'0')}`,cargo:'ASSESSOR DE LOJA',departamento:'FEMININO',status:'ATIVO'};state.data=demoData();startApp();restaurarEstadoOperacionalAposReload();return true;
+    }
+    if(!client)throw new Error('Conexão indisponível');
+    const [sharedRes,globalRes]=await Promise.all([client.from(ONLINE_TABLE).select('dados').eq('id',SHARED_ROW_ID).maybeSingle(),client.from(ONLINE_TABLE).select('dados').eq('id',GLOBAL_ROW_ID).maybeSingle()]);
+    if(sharedRes.error)throw sharedRes.error;if(globalRes.error)throw globalRes.error;
+    const data=sharedRes.data?.dados||{},cfg=globalRes.data?.dados||{};
+    const emp=(data.funcionarios||[]).find(f=>opnorm(f.operador)===op&&!['DESLIGADO','INATIVO'].includes(norm(f.status||'ATIVO')));
+    if(!emp)throw new Error('Funcionário não encontrado');
+    const acessos=cfg.operacionalAcessos&&typeof cfg.operacionalAcessos==='object'?cfg.operacionalAcessos:{};
+    if(acessos[op]!==true)throw new Error('Acesso operacional não liberado');
+    state.mode='online';state.employee=emp;state.data=data;startApp();subscribeRealtime();restaurarEstadoOperacionalAposReload();return true;
+  }catch(err){console.error('Falha ao restaurar sessão operacional:',err);sessionStorage.removeItem('operacionalSessaoV1');sessionStorage.removeItem(AUTO_REFRESH_PENDING_KEY);document.documentElement.classList.remove('auto-refresh-restoring');$('autoRefreshLoader')?.classList.remove('active');return false}
+}
+
 function initials(n){let p=String(n||'').trim().split(/\s+/).filter(Boolean);return p.length?((p[0][0]||'')+(p.length>1?(p[p.length-1][0]||''):'')).toUpperCase():'AV'}
 function toast(t){let e=$('toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)}
 function syncStatus(text,type='online'){let p=$('syncPill');if(!p)return;p.innerHTML=`<span class="dot ${type}"></span><span>${esc(text)}</span>`}
-function loginStatus(text,type=''){ $('loginStatus').textContent=text; $('loginDot').className='dot '+type; }
+function loginStatus(text,type=''){const s=$('loginStatus'),d=$('loginDot');if(s)s.textContent=text;if(d)d.className='dot '+type;}
 async function ping(){if(!client){loginStatus('Biblioteca de conexão indisponível','offline');return}try{let {error}=await client.from(ONLINE_TABLE).select('id').eq('id',SHARED_ROW_ID).maybeSingle();if(error)throw error;loginStatus('Banco gerencial conectado','online')}catch(e){loginStatus('Sem acesso ao banco — demonstração disponível','warn')}}
 ping();
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();$('loginError').textContent='';let op=opnorm($('loginOperador').value),pass=$('loginSenha').value;if(!op||!pass)return;try{loginStatus('Validando funcionário...','warn');let [sharedRes,globalRes]=await Promise.all([client.from(ONLINE_TABLE).select('dados').eq('id',SHARED_ROW_ID).maybeSingle(),client.from(ONLINE_TABLE).select('dados').eq('id',GLOBAL_ROW_ID).maybeSingle()]);if(sharedRes.error)throw sharedRes.error;if(globalRes.error)throw globalRes.error;let data=sharedRes.data?.dados||{};let cfg=globalRes.data?.dados||{};let emp=(data.funcionarios||[]).find(f=>opnorm(f.operador)===op && !['DESLIGADO','INATIVO'].includes(norm(f.status||'ATIVO')));if(!emp)throw new Error('Operador não encontrado entre os funcionários ativos.');let acessos=cfg.operacionalAcessos&&typeof cfg.operacionalAcessos==='object'?cfg.operacionalAcessos:{};if(acessos[op]!==true)throw new Error('Seu acesso ao Sistema Operacional não está liberado. Procure o líder responsável.');let users=cfg.usuarios||[];let gu=users.find(u=>opnorm(u.operador)===op);let passTrim=String(pass||'').trim(),passUpper=passTrim.toUpperCase(),senhaGerencial=String(gu?.senha||''),matricula=String(emp.matricula||'').trim().toUpperCase(),senhaOperacionalPadrao=`${op}24`;let ok=(senhaGerencial&&senhaGerencial===passTrim)||(matricula&&matricula===passUpper)||passTrim===senhaOperacionalPadrao;if(!ok)throw new Error('Senha não reconhecida. Use a senha operacional inicial (operador + 24), a senha do Gerencial ou a matrícula cadastrada.');state.mode='online';state.employee=emp;state.data=data;startApp();subscribeRealtime();}catch(err){$('loginError').textContent=err.message||'Não foi possível entrar.';loginStatus('Falha no acesso conectado','offline')}});
-$('demoBtn').onclick=()=>{state.mode='demo';state.employee={id:'demo1',nome:'FUNCIONÁRIO TESTE',operador:'245',matricula:'AV24-0245',cargo:'ASSESSOR DE LOJA',departamento:'FEMININO',status:'ATIVO'};state.data=demoData();startApp()};
 function demoData(){let n=new Date(),h=x=>{let d=new Date(n.getTime()+x*3600000);return d.toISOString().slice(0,16)};return{funcionarios:[state.employee],diario:[{id:'dia_demo',dataISO:today(),responsavel:state.employee.nome,departamento:'FEMININO',obs:'Priorizar organização antes do pico de movimento.',tarefas:[{id:'t1',descricao:'Organizar parede de jeans',familia:'CONFECÇÃO',subfamilia:'JEANS',prioridade:'ALTA',status:'PENDENTE',prazo:h(2),observacao:'Completar grade e alinhar exposição.',responsavel:state.employee.nome,criadoPor:'LÍDER TESTE',criadoPorOperador:'133',exigirFotoConclusao:true,tempoEstimadoMin:30,criterioConclusao:'Parede organizada por tamanho, sem cabides vazios.',checklist:[{id:'c1',texto:'Conferir grade de tamanhos',concluido:false},{id:'c2',texto:'Alinhar cabides e peças',concluido:false}],exigirAprovacaoLider:true,historico:[{id:'h1',emISO:new Date().toISOString(),em:nowBR(),por:'LÍDER TESTE',evento:'CRIADA',detalhes:'Tarefa designada para execução.'}]},{id:'t2',descricao:'Revisar araras promocionais',familia:'CONFECÇÃO',subfamilia:'PROMOÇÃO',prioridade:'MÉDIA',status:'EM ANDAMENTO',prazo:h(4),observacao:'Separar peças sem etiqueta.',responsavel:state.employee.nome,criadoPor:'LÍDER TESTE',criadoPorOperador:'133',exigirFotoConclusao:false,historico:[]},{id:'t3',descricao:'Conferir provador feminino',familia:'OPERAÇÃO',subfamilia:'PROVADOR',prioridade:'CRÍTICA',status:'PENDENTE',prazo:h(-1),observacao:'Retirar peças acumuladas e devolver ao salão.',responsavel:state.employee.nome,criadoPor:'LÍDER TESTE',criadoPorOperador:'133',historico:[]}]}]}}
-function startApp(){sessionStorage.setItem('operacionalSessaoV1',JSON.stringify({mode:state.mode,operator:state.employee.operador,name:state.employee.nome}));$('login').classList.add('hidden');$('app').classList.remove('hidden');$('userNameTop').textContent=state.employee.nome;$('userRoleTop').textContent=`OP. ${opnorm(state.employee.operador)} • ${state.employee.cargo||'Equipe'}`;$('avatarTop').textContent=initials(state.employee.nome);$('helloName').textContent=`Olá, ${String(state.employee.nome||'').split(' ')[0]||'Funcionário'} 👋`;$('heroCopy').textContent=`${state.employee.cargo||'Equipe'} • OP. ${opnorm(state.employee.operador)} • ${state.employee.matricula||'Loja 24'}`;syncStatus(state.mode==='demo'?'Modo demonstração — alterações locais':'Online • conectado ao Gerencial',state.mode==='demo'?'warn':'online');render()}
+function startApp(){sessionStorage.setItem('operacionalSessaoV1',JSON.stringify({mode:state.mode,operator:state.employee.operador,name:state.employee.nome}));$('login').classList.add('hidden');$('app').classList.remove('hidden');$('userNameTop').textContent=state.employee.nome;$('userRoleTop').textContent=`OP. ${opnorm(state.employee.operador)} • ${state.employee.cargo||'Equipe'}`;$('avatarTop').textContent=initials(state.employee.nome);$('helloName').textContent=`Olá, ${String(state.employee.nome||'').split(' ')[0]||'Funcionário'} 👋`;$('heroCopy').textContent=`${state.employee.cargo||'Equipe'} • OP. ${opnorm(state.employee.operador)} • ${state.employee.matricula||'Loja 24'}`;syncStatus(state.mode==='demo'?'Modo demonstração — alterações locais':'Online • conectado ao Gerencial',state.mode==='demo'?'warn':'online');render();iniciarAutoAtualizacaoOperacional()}
 function taskBelongsToLoggedUser(d,t){
   const employee=state.employee||{};
   const empOp=opnorm(employee.operador||'');
@@ -183,7 +234,8 @@ function quickTab(tab,btn){document.querySelectorAll('.bottom-nav button').forEa
 async function refreshOnline(){if(state.mode==='demo'){render();toast('Dados de demonstração atualizados');return}try{syncStatus('Atualizando...','warn');let {data,error}=await client.from(ONLINE_TABLE).select('dados').eq('id',SHARED_ROW_ID).maybeSingle();if(error)throw error;state.data=data?.dados||{};syncStatus('Online • dados atualizados','online');render();toast('Atualizado')}catch(e){syncStatus('Falha na atualização','offline');alert(e.message)}}
 async function validarAcessoOperacionalAtual(){if(state.mode!=='online'||!client||!state.employee)return true;try{const {data,error}=await client.from(ONLINE_TABLE).select('dados').eq('id',GLOBAL_ROW_ID).maybeSingle();if(error)throw error;const op=opnorm(state.employee.operador),acessos=data?.dados?.operacionalAcessos||{};if(acessos[op]!==true){syncStatus('Acesso revogado pelo Gerencial','offline');toast('Seu acesso ao Sistema Operacional foi bloqueado.');setTimeout(()=>logout(),1200);return false}return true}catch(err){console.error('Falha ao validar acesso operacional:',err);return true}}
 function subscribeRealtime(){if(state.mode!=='online'||!client)return;if(state.channel)try{client.removeChannel(state.channel)}catch{}state.channel=client.channel('operacional_'+opnorm(state.employee.operador)+'_'+Date.now()).on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${SHARED_ROW_ID}`},async()=>{await refreshOnline()}).on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${GLOBAL_ROW_ID}`},async()=>{await validarAcessoOperacionalAtual()}).subscribe(status=>{if(status==='SUBSCRIBED')syncStatus('Online • tempo real ativo','online')})}
-function logout(){if(state.channel)try{client.removeChannel(state.channel)}catch{}sessionStorage.removeItem('operacionalSessaoV1');location.reload()}
+function logout(){if(autoRefreshTimerOperacional)clearTimeout(autoRefreshTimerOperacional);if(state.channel)try{client.removeChannel(state.channel)}catch{}sessionStorage.removeItem('operacionalSessaoV1');sessionStorage.removeItem(AUTO_REFRESH_UI_KEY);sessionStorage.removeItem(AUTO_REFRESH_PENDING_KEY);location.reload()}
+setTimeout(()=>{restaurarSessaoOperacional().then(restaurada=>{if(!restaurada){document.documentElement.classList.remove('auto-refresh-restoring');$('autoRefreshLoader')?.classList.remove('active')}})},0);
 </script>
 
 

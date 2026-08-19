@@ -14375,6 +14375,49 @@ async function trySession(){
 }
 
 
+const AUTO_REFRESH_TEST_MS = 60 * 60 * 1000; // Produção: 1 hora.
+const AUTO_REFRESH_STATE_KEY = 'assistenciaGerencialAutoRefreshStateV1';
+let autoRefreshTimerGerencial=null;
+function estadoInterfaceGerencialAtual(){
+  const pagina=document.querySelector('.page.active')?.id||'painel';
+  const agTab=document.querySelector('#acompgerencial .ag-tab-btn.active')?.dataset?.agTab||'';
+  return {pagina,agTab,scrollX:window.scrollX||0,scrollY:window.scrollY||0,salvoEm:Date.now()};
+}
+function salvarEstadoAntesAtualizacaoGerencial(){
+  try{sessionStorage.setItem(AUTO_REFRESH_STATE_KEY,JSON.stringify(estadoInterfaceGerencialAtual()));}catch(_){ }
+}
+function restaurarEstadoAposAtualizacaoGerencial(){
+  let st=null;
+  try{st=JSON.parse(sessionStorage.getItem(AUTO_REFRESH_STATE_KEY)||'null');}catch(_){ }
+  if(!st)return;
+  sessionStorage.removeItem(AUTO_REFRESH_STATE_KEY);
+  const id=document.getElementById(st.pagina)?st.pagina:'painel';
+  try{showPage(id);}catch(_){ }
+  if(id==='acompgerencial'&&st.agTab&&typeof window.agAbrirSubaba==='function'){
+    const btn=document.querySelector(`#acompgerencial .ag-tab-btn[data-ag-tab="${CSS.escape(st.agTab)}"]`);
+    try{window.agAbrirSubaba(st.agTab,btn||null);}catch(_){ }
+  }
+  requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo(st.scrollX||0,st.scrollY||0)));
+}
+function interfaceGerencialEmAcaoCritica(){
+  const modalAberto=[...document.querySelectorAll('.modal-backdrop.active,.modal-backdrop[style*="display: flex"],.modal-backdrop[style*="display:flex"]')].some(el=>getComputedStyle(el).display!=='none');
+  const formFocado=document.activeElement&&['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName);
+  return modalAberto||formFocado;
+}
+function executarAutoAtualizacaoGerencial(){
+  if(!usuarioAtual)return;
+  if(interfaceGerencialEmAcaoCritica()){
+    autoRefreshTimerGerencial=setTimeout(executarAutoAtualizacaoGerencial,15000);
+    return;
+  }
+  salvarEstadoAntesAtualizacaoGerencial();
+  showAppLoader('Atualizando sistema','Salvando sua posição e carregando os dados mais recentes...');
+  setTimeout(()=>location.reload(),180);
+}
+function iniciarAutoAtualizacaoGerencial(){
+  if(autoRefreshTimerGerencial)clearTimeout(autoRefreshTimerGerencial);
+  autoRefreshTimerGerencial=setTimeout(executarAutoAtualizacaoGerencial,AUTO_REFRESH_TEST_MS);
+}
 function logout(){ sessionStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(SOPHIA_SESSION_KEY); sessionStorage.removeItem(SOPHIA_HISTORY_KEY); localStorage.removeItem(SESSION_KEY); location.reload(); }
 
 function initApp(){
@@ -14394,7 +14437,9 @@ function initApp(){
   iniciarMonitorStatusTarefas();
   try { renderAll(); } catch(e) { console.error('Erro ao renderizar o sistema:', e); try { renderConfig(); } catch(_){} }
   iniciarCentralNotificacoes();
+  iniciarAutoAtualizacaoGerencial();
 }
+
 
 function popularSelects(){
   const setorOpts = setores.map(s => `<option value="${s.id}">${s.nome}</option>`).join('');
@@ -19130,8 +19175,9 @@ window.addEventListener('load', async () => {
   const restaurada=await trySession();
   if(restaurada){
     try{
-      await executarVerificacoesPosLogin();
+      // Sessão já autenticada: recarregamento automático não repete o checklist de login.
       initApp();
+      restaurarEstadoAposAtualizacaoGerencial();
       ativarRealtimeUsuario();
       atualizarStatusConexao();
     } finally {
@@ -28392,7 +28438,9 @@ window.addEventListener('load', async () => {
     finally{if(botao){botao.disabled=false;botao.innerHTML=original||'💾 Salvar acessos';}}
   };
 })();
-</script>\n\n<div id="modalAcessoOperacional" class="operacional-access-modal no-print" role="dialog" aria-modal="true" aria-labelledby="tituloAcessoOperacional" onclick="if(event.target===this)fecharConfiguracaoAcessoOperacional()">
+</script>
+
+<div id="modalAcessoOperacional" class="operacional-access-modal no-print" role="dialog" aria-modal="true" aria-labelledby="tituloAcessoOperacional" onclick="if(event.target===this)fecharConfiguracaoAcessoOperacional()">
   <div class="operacional-access-dialog">
     <div class="operacional-access-head">
       <div><h2 id="tituloAcessoOperacional">⚙ Acesso ao Sistema Operacional</h2><p>Defina quais funcionários da loja estão autorizados a fazer login no Sistema Operacional.</p></div>
