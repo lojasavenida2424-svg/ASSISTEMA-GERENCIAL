@@ -11537,7 +11537,7 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
             </div>
             <div class="actions no-print">
               <button class="btn" type="button" onclick="abrirCriadorEscala(true)">➕ Criar</button>
-              <button class="btn secondary" onclick="printActivePage()">🖨️ Imprimir</button>
+              <button class="btn secondary" type="button" onclick="abrirImpressaoEscalaTrabalho()">🖨️ Imprimir</button>
             </div>
           </div>
 
@@ -11631,6 +11631,27 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
               </div>
             </div>
           </div>
+          </div>
+        </div>
+
+        <div id="modalImpressaoEscalaTrabalho" class="modal-backdrop no-print" style="display:none;" onclick="fecharImpressaoEscalaTrabalho(event)">
+          <div class="modal" style="max-width:560px;" onclick="event.stopPropagation()">
+            <div class="modal-head">
+              <div>
+                <h2>Imprimir Escala de Trabalho</h2>
+                <p>Escolha um domingo já salvo para gerar o documento de impressão.</p>
+              </div>
+              <button class="icon-btn" type="button" onclick="fecharImpressaoEscalaTrabalho()">✕</button>
+            </div>
+            <div class="field" style="margin-top:14px;">
+              <label>DOMINGO SALVO</label>
+              <select id="escalaPrintDomingoSelect"></select>
+            </div>
+            <div id="escalaPrintDomingoInfo" class="acomp-print-help" style="margin-top:12px;"></div>
+            <div class="modal-actions">
+              <button class="btn secondary" type="button" onclick="fecharImpressaoEscalaTrabalho()">Cancelar</button>
+              <button class="btn primary" type="button" onclick="imprimirDomingoEscalaSelecionado()">Imprimir domingo</button>
+            </div>
           </div>
         </div>
 
@@ -17301,7 +17322,7 @@ function dataReagendamentoAcompTexto(iso){const p=String(iso||'').slice(0,10).sp
 function liderPodeDecidirReagendamento(d,t){const atual=normalizarOperador(usuarioAtual?.operador),criador=normalizarOperador(t?.criadoPorOperador||d?.criadoPorOperador);return !!atual&&!!criador&&atual===criador;}
 function prazoComNovaDataAcompanhamento(prazoAtual,novaData){const data=String(novaData||'').slice(0,10);if(!data)return String(prazoAtual||'');const atual=String(prazoAtual||''),hora=atual.includes('T')?atual.slice(10):'';return data+hora;}
 function decidirReagendamentoAcompanhamento(registroId,tarefaId,aprovar){const d=db.diario.find(x=>x.id===registroId);if(!d)return;const t=d.tarefas?.find(x=>x.id===tarefaId);if(!t)return;const r=t.reagendamento;if(!r||r.status!=='PENDENTE')return;if(!liderPodeDecidirReagendamento(d,t)){alert('Somente o líder responsável pela criação desta tarefa pode decidir este reagendamento.');return;}const antes=t.prazo||r.prazoOriginal||'';if(aprovar){const depois=prazoComNovaDataAcompanhamento(antes,r.dataSolicitada);t.prazo=depois;r.status='APROVADO';r.prazoAprovado=depois;r.decididoEmISO=new Date().toISOString();r.decididoEm=agoraBR();r.decididoPor=usuarioAtual?.nome||'Líder';r.decididoPorOperador=normalizarOperador(usuarioAtual?.operador);adicionarHistoricoTarefa(t,'REAGENDAMENTO APROVADO',`${dataReagendamentoAcompTexto(String(antes).slice(0,10))} → ${dataReagendamentoAcompTexto(r.dataSolicitada)} • aprovado por ${r.decididoPor}.`);}else{r.status='RECUSADO';r.decididoEmISO=new Date().toISOString();r.decididoEm=agoraBR();r.decididoPor=usuarioAtual?.nome||'Líder';r.decididoPorOperador=normalizarOperador(usuarioAtual?.operador);adicionarHistoricoTarefa(t,'REAGENDAMENTO RECUSADO',`Solicitação para ${dataReagendamentoAcompTexto(r.dataSolicitada)} recusada por ${r.decididoPor}. Prazo original mantido.`);}d.atualizadoPor=usuarioAtual?.nome||d.atualizadoPor;d.atualizadoEm=agoraBR();saveDB();renderDiario();renderRelatorio();}
-const SISTEMA_OPERACIONAL_ARQUIVO_WHATSAPP='SISTEMA_OPERACIONAL_V1_3_1_ICONES_100_VETORIAIS.html';
+const SISTEMA_OPERACIONAL_URL_OFICIAL='https://lojasavenida2424-svg.github.io/ASSISTEMA-GERENCIAL/operacional/';
 const SISTEMA_OPERACIONAL_LINK_KEY='sistemaOperacionalLinkPublicoV1';
 function normalizarTelefoneWhatsApp(valor){
   let digitos=String(valor||'').replace(/\D/g,'');
@@ -17320,21 +17341,7 @@ function funcionarioResponsavelAcompanhamento(d,t){
     ||lista.find(f=>norm(f.nome)===norm(nome))||null;
 }
 function obterLinkSistemaOperacionalWhatsApp(){
-  try{
-    if(/^https?:$/i.test(location.protocol)) return new URL(SISTEMA_OPERACIONAL_ARQUIVO_WHATSAPP,location.href).href;
-  }catch(_){ }
-  let salvo='';
-  try{salvo=String(localStorage.getItem(SISTEMA_OPERACIONAL_LINK_KEY)||'').trim();}catch(_){ }
-  if(salvo) return salvo;
-  const informado=prompt('Informe o link público do SISTEMA OPERACIONAL para enviar pelo WhatsApp.\n\nExemplo: https://suaempresa.com/sistema-operacional');
-  if(!informado) return '';
-  const link=String(informado).trim();
-  if(!/^https?:\/\//i.test(link)){
-    alert('Informe um link iniciado por http:// ou https://.');
-    return '';
-  }
-  try{localStorage.setItem(SISTEMA_OPERACIONAL_LINK_KEY,link);}catch(_){ }
-  return link;
+  return SISTEMA_OPERACIONAL_URL_OFICIAL;
 }
 function enviarTarefaAcompanhamentoWhatsApp(diarioId,tarefaId){
   const d=(db.diario||[]).find(x=>String(x.id)===String(diarioId));
@@ -17357,16 +17364,16 @@ function enviarTarefaAcompanhamentoWhatsApp(diarioId,tarefaId){
     '',
     'Você recebeu uma nova tarefa no Sistema Operacional:',
     '',
-    `📋 *Tarefa:* ${t.descricao||'-'}`,
-    rota?`🏬 *Área:* ${rota}`:'',
-    `⚡ *Prioridade:* ${t.prioridade||'MÉDIA'}`,
-    `📅 *Prazo:* ${prazo}`,
-    t.exigirFotoConclusao?'📷 *Conclusão:* foto obrigatória':'',
-    t.tempoEstimadoMin?`⏱ *Tempo estimado:* ${t.tempoEstimadoMin} min`:'',
-    t.criterioConclusao?`✅ *Critério de conclusão:* ${t.criterioConclusao}`:'',
-    Array.isArray(t.checklist)&&t.checklist.length?`☑ *Checklist:* ${t.checklist.map(i=>i.texto).filter(Boolean).join(' | ')}`:'',
-    t.exigirAprovacaoLider?'👤 *Validação:* conclusão sujeita à aprovação do líder':'',
-    t.observacao?`📝 *Orientação:* ${t.observacao}`:'',
+    `*Tarefa:* ${t.descricao||'-'}`,
+    rota?`*Área:* ${rota}`:'',
+    `*Prioridade:* ${t.prioridade||'MÉDIA'}`,
+    `*Prazo:* ${prazo}`,
+    t.exigirFotoConclusao?'*Conclusão:* foto obrigatória':'',
+    t.tempoEstimadoMin?`*Tempo estimado:* ${t.tempoEstimadoMin} min`:'',
+    t.criterioConclusao?`*Critério de conclusão:* ${t.criterioConclusao}`:'',
+    Array.isArray(t.checklist)&&t.checklist.length?`*Checklist:* ${t.checklist.map(i=>i.texto).filter(Boolean).join(' | ')}`:'',
+    t.exigirAprovacaoLider?'*Validação:* conclusão sujeita à aprovação do líder':'',
+    t.observacao?`*Orientação:* ${t.observacao}`:'',
     '',
     'Acesse o Sistema Operacional para acompanhar e executar a tarefa:',
     link
@@ -17375,13 +17382,10 @@ function enviarTarefaAcompanhamentoWhatsApp(diarioId,tarefaId){
   window.open(url,'_blank','noopener,noreferrer');
 }
 function redefinirLinkSistemaOperacionalWhatsApp(){
-  const atual=(()=>{try{return localStorage.getItem(SISTEMA_OPERACIONAL_LINK_KEY)||''}catch(_){return ''}})();
-  const informado=prompt('Link público do SISTEMA OPERACIONAL:',atual);
-  if(informado===null) return;
-  const link=String(informado).trim();
-  if(link&&!/^https?:\/\//i.test(link)){alert('Informe um link iniciado por http:// ou https://.');return;}
-  try{if(link)localStorage.setItem(SISTEMA_OPERACIONAL_LINK_KEY,link);else localStorage.removeItem(SISTEMA_OPERACIONAL_LINK_KEY);}catch(_){ }
-  alert(link?'Link do Sistema Operacional atualizado.':'Link salvo removido.');
+  try{localStorage.removeItem(SISTEMA_OPERACIONAL_LINK_KEY);}catch(_){ }
+  alert(`O link do Sistema Operacional está definido como:
+
+${SISTEMA_OPERACIONAL_URL_OFICIAL}`);
 }
 
 function liderPodeDecidirValidacaoConclusao(d,t){const atual=normalizarOperador(usuarioAtual?.operador),criador=normalizarOperador(t?.criadoPorOperador||d?.criadoPorOperador);return !!atual&&!!criador&&atual===criador;}
@@ -17663,6 +17667,93 @@ function abrirCriadorEscala(novaEscala = false){
 function fecharCriadorEscala(){
   const painel = document.getElementById('escalaCreatorPanel');
   if(painel) painel.classList.remove('active');
+}
+
+function domingosSalvosEscalaTrabalho(){
+  return (Array.isArray(db.escalas)?db.escalas:[])
+    .filter(e=>String(e.tipo||'').toUpperCase()==='DOMINGO' && e.data)
+    .slice()
+    .sort((a,b)=>String(b.data||'').localeCompare(String(a.data||'')));
+}
+function labelDomingoEscalaTrabalho(e){
+  const data=e?.data?dataBRSimples(e.data):'-';
+  const resp=nomeFuncionarioPorId(e?.responsavel)||e?.responsavel||'Sem líder';
+  const total=(e?.abertura?.length||0)+(e?.fechamento?.length||0);
+  return `${data} — ${resp} — ${total} pessoa(s)`;
+}
+function atualizarInfoImpressaoEscalaTrabalho(){
+  const sel=document.getElementById('escalaPrintDomingoSelect');
+  const info=document.getElementById('escalaPrintDomingoInfo');
+  if(!sel||!info)return;
+  const e=(db.escalas||[]).find(x=>x.id===sel.value);
+  if(!e){ info.textContent='Nenhum domingo salvo disponível para impressão.'; return; }
+  const resp=nomeFuncionarioPorId(e.responsavel)||e.responsavel||'-';
+  info.innerHTML=`<b>${escapeHTML(dataBRSimples(e.data))}</b><br>Responsável: ${escapeHTML(resp)}<br>${(e.abertura||[]).length} abertura · ${(e.fechamento||[]).length} fechamento · ${(e.folgas||[]).length} folga(s)`;
+}
+function abrirImpressaoEscalaTrabalho(){
+  const modal=document.getElementById('modalImpressaoEscalaTrabalho');
+  const sel=document.getElementById('escalaPrintDomingoSelect');
+  if(!modal||!sel)return;
+  const domingos=domingosSalvosEscalaTrabalho();
+  if(!domingos.length){
+    alert('Ainda não há domingos salvos para impressão.');
+    return;
+  }
+  sel.innerHTML=domingos.map(e=>`<option value="${escapeHTML(e.id)}">${escapeHTML(labelDomingoEscalaTrabalho(e))}</option>`).join('');
+  sel.onchange=atualizarInfoImpressaoEscalaTrabalho;
+  atualizarInfoImpressaoEscalaTrabalho();
+  modal.style.display='flex';
+}
+function fecharImpressaoEscalaTrabalho(ev){
+  if(ev && ev.target!==ev.currentTarget)return;
+  const modal=document.getElementById('modalImpressaoEscalaTrabalho');
+  if(modal)modal.style.display='none';
+}
+function horarioResumoEscalaImpressao(lista){
+  const arr=Array.isArray(lista)?lista:[];
+  const pares=[...new Set(arr.map(p=>[p.entrada,p.saida].filter(Boolean).join(' às ')).filter(Boolean))];
+  return pares.length?pares.join(' / '):'Horário não informado';
+}
+function linhaPessoaEscalaImpressao(p){
+  const nome=p?.nome||nomeFuncionarioPorId(p?.id)||'-';
+  const obs=p?.obs?`<small>${escapeHTML(p.obs)}</small>`:'';
+  return `<li><b>${escapeHTML(nome)}</b>${obs}</li>`;
+}
+function imprimirDomingoEscalaSelecionado(){
+  const id=document.getElementById('escalaPrintDomingoSelect')?.value||'';
+  const e=(db.escalas||[]).find(x=>x.id===id && String(x.tipo||'').toUpperCase()==='DOMINGO');
+  if(!e){alert('Selecione um domingo salvo para imprimir.');return;}
+  const responsavel=nomeFuncionarioPorId(e.responsavel)||e.responsavel||'-';
+  const abertura=(e.abertura||[]).map(linhaPessoaEscalaImpressao).join('')||'<li>Nenhuma pessoa registrada.</li>';
+  const fechamento=(e.fechamento||[]).map(linhaPessoaEscalaImpressao).join('')||'<li>Nenhuma pessoa registrada.</li>';
+  const folgas=(e.folgas||[]).map(p=>{
+    const nome=p?.nome||nomeFuncionarioPorId(p?.id)||'-';
+    const dataFolga=p?.diaFolga||p?.folgaData||'';
+    const label=p?.diaFolgaLabel||(dataFolga?`${nomeDiaSemanaData(dataFolga)} — ${dataBRSimples(dataFolga)}`:'Data não informada');
+    return `<li><b>${escapeHTML(nome)}</b><span>${escapeHTML(label)}</span>${p?.obs?`<small>${escapeHTML(p.obs)}</small>`:''}</li>`;
+  }).join('')||'<li>Nenhuma folga registrada.</li>';
+  const conteudo=`
+    <section class="ag-doc-summary">
+      <div class="ag-doc-card"><small>Abertura</small><b>${(e.abertura||[]).length}</b></div>
+      <div class="ag-doc-card"><small>Fechamento</small><b>${(e.fechamento||[]).length}</b></div>
+      <div class="ag-doc-card"><small>Folgas</small><b>${(e.folgas||[]).length}</b></div>
+      <div class="ag-doc-card"><small>Total escalado</small><b>${(e.abertura||[]).length+(e.fechamento||[]).length}</b></div>
+    </section>
+    <section class="ag-doc-section escala-print-grid">
+      <article class="escala-print-box"><h2>ABERTURA</h2><p class="escala-print-hour">${escapeHTML(horarioResumoEscalaImpressao(e.abertura))}</p><ul>${abertura}</ul></article>
+      <article class="escala-print-box"><h2>FECHAMENTO</h2><p class="escala-print-hour">${escapeHTML(horarioResumoEscalaImpressao(e.fechamento))}</p><ul>${fechamento}</ul></article>
+    </section>
+    <section class="ag-doc-section escala-print-box"><h2>FOLGAS</h2><ul class="escala-print-folgas">${folgas}</ul></section>
+    ${e.obs?`<section class="ag-doc-section"><h2>OBSERVAÇÕES GERAIS</h2><div class="ag-doc-note">${escapeHTML(e.obs)}</div></section>`:''}
+  `;
+  fecharImpressaoEscalaTrabalho();
+  const extraStyle='<style>.escala-print-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.escala-print-box{border:1px solid #d8d8d8;border-radius:12px;padding:14px;background:#fff}.escala-print-box h2{margin:0 0 5px;font-size:13pt;border-bottom:2px solid #c89a2b;padding-bottom:6px}.escala-print-hour{font-size:9pt;font-weight:700;color:#555;margin:6px 0 10px}.escala-print-box ul{margin:0;padding:0;list-style:none}.escala-print-box li{padding:7px 0;border-bottom:1px solid #eee;display:flex;gap:8px;align-items:baseline;justify-content:space-between}.escala-print-box li:last-child{border-bottom:0}.escala-print-box li small{display:block;color:#666;font-weight:400}.escala-print-folgas li span{color:#555}</style>';
+  agAbrirDocumentoImpressao('ESCALA DE TRABALHO — DOMINGO', extraStyle+conteudo, 'portrait', [
+    {label:'Data:',value:dataBRSimples(e.data)},
+    {label:'Líder responsável:',value:responsavel},
+    {label:'Loja:',value:'24 — Avenida'},
+    {label:'Atualizado em:',value:e.atualizadoEm||'-'}
+  ]);
 }
 
 function renderEscalas(){
@@ -18731,14 +18822,15 @@ function montarTextoEscalaWhatsApp(e){
   return [
     `*ESCALA DE TRABALHO — ${e.tipo || 'DOMINGO'}*`,
     `*Loja 24 — Avenida*`,
-    `📅 *Data:* ${dataEscalaWhatsApp(e.data)}`,
-    `👤 *Líder responsável:* ${responsavel}`,
-    `🧾 *Resumo:* ${totalAbertura} abertura · ${totalFechamento} fechamento · ${totalFolgas} folga(s)`,
-    grupoEscalaWhatsApp(`🕑 *ABERTURA*${horarioGrupoEscala(e.abertura || [])}`, e.abertura || [], 'abertura'),
-    grupoEscalaWhatsApp(`🕗 *FECHAMENTO*${horarioGrupoEscala(e.fechamento || [])}`, e.fechamento || [], 'fechamento'),
-    grupoEscalaWhatsApp('🎉 *FOLGAS*', e.folgas || [], 'folgas'),
+    ``,
+    `*Data:* ${dataEscalaWhatsApp(e.data)}`,
+    `*Líder responsável:* ${responsavel}`,
+    `*Resumo:* ${totalAbertura} abertura · ${totalFechamento} fechamento · ${totalFolgas} folga(s)`,
+    grupoEscalaWhatsApp(`*ABERTURA*${horarioGrupoEscala(e.abertura || [])}`, e.abertura || [], 'abertura'),
+    grupoEscalaWhatsApp(`*FECHAMENTO*${horarioGrupoEscala(e.fechamento || [])}`, e.fechamento || [], 'fechamento'),
+    grupoEscalaWhatsApp('*FOLGAS*', e.folgas || [], 'folgas'),
     `\nGerado pelo Sistema Gerencial — Loja 24.`
-  ].filter(Boolean).join('\n');
+  ].filter(v=>v!==null&&v!==undefined).join('\n');
 }
 
 
