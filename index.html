@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="referrer" content="no-referrer" />
-  <title>Assistência Gerencial de Loja • Sincronização Gerencial Isolada</title>
+  <title>Assistência Gerencial de Loja - Avenida V51.32 • Sincronização Gerencial Isolada</title>
   <!-- PWA / Ícones do Sistema Gerencial Avenida -->
   <meta name="theme-color" content="#291A1E">
   <meta name="application-name" content="Gerencial Avenida">
@@ -87,7 +87,7 @@
       const SOPHIA_SESSION_KEY = 'sophiaSessaoSeguraV1';
       const SOPHIA_HISTORY_KEY = 'sophiaHistoricoSessaoV1';
       const SOPHIA_BUILD = 'V39.1-SEMPREFLIGHT';
-      const GERENCIAL_BUILD = 'V51.45-ACOMP-GERENCIAL-ZERADO';
+      const GERENCIAL_BUILD = 'V51.54-CONFIG-ACESSO-OPERACIONAL';
   </script>
   <style>
     :root {
@@ -10520,6 +10520,8 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
     .acomp-deadline{font-size:.78rem;font-weight:850;color:var(--muted);line-height:1.4;}
     .acomp-deadline.atrasada{color:var(--red);font-weight:1000;}
     .acomp-status-select{min-height:40px;padding:8px 10px;font-size:.78rem;font-weight:900;}
+    .acomp-status-readonly{min-height:40px;display:flex;align-items:center;padding:8px 10px;border:1px solid var(--border);border-radius:10px;background:var(--soft);color:var(--text);font-size:.78rem;font-weight:900;letter-spacing:.03em;cursor:default;user-select:none;}
+    .acomp-status-readonly-card{min-width:118px;justify-content:center;}
     .acomp-card-notes{padding:0 16px 15px;color:var(--muted);font-size:.80rem;font-weight:750;line-height:1.45;}
     .acomp-legacy{border-style:dashed;}
 
@@ -10607,8 +10609,243 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
     }
   </style>
 
+
+<style id="impressao-unificada-v1">
+/* Impressão unificada do sistema — conteúdo operacional */
+@media print {
+  html, body { background:#fff !important; color:#111 !important; }
+
+  body.printing-system .no-print,
+  body.printing-system .actions,
+  body.printing-system .btn,
+  body.printing-system button,
+  body.printing-system .modal-backdrop,
+  body.printing-system .filter-row,
+  body.printing-system .tabs,
+  body.printing-system .task-view-switch,
+  body.printing-system .acomp-control-bar,
+  body.printing-system .acomp-form-actions,
+  body.printing-system .acomp-task-actions,
+  body.printing-system .acomp-add-task {
+    display:none !important;
+  }
+
+  body.printing-system .page.active {
+    display:block !important;
+    visibility:visible !important;
+  }
+
+  body.printing-system .section-card,
+  body.printing-system .acomp-employee-card,
+  body.printing-system .acomp-summary-card {
+    box-shadow:none !important;
+    break-inside:avoid;
+  }
+
+  /* Acompanhamento do Dia: imprimir as demandas, não o formulário. */
+  body.printing-system #acompanhamento .acomp-form-panel form {
+    display:none !important;
+  }
+  body.printing-system #acompanhamento .acomp-form-panel .acomp-editor-head,
+  body.printing-system #acompanhamento .acomp-form-panel .acomp-observacoes {
+    display:none !important;
+  }
+  body.printing-system #acompanhamento #acompResumoDia {
+    display:grid !important;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:8px;
+    margin:0 0 10px !important;
+  }
+  body.printing-system #acompanhamento #acompanhamentoLista {
+    display:block !important;
+  }
+  body.printing-system #acompanhamento .acomp-task-card {
+    grid-template-columns:minmax(0,1fr) 130px !important;
+    break-inside:avoid;
+  }
+  body.printing-system #acompanhamento .acomp-employee-card {
+    break-inside:avoid;
+    margin-bottom:10px !important;
+  }
+
+  /* Tabelas */
+  body.printing-system table {
+    width:100% !important;
+    min-width:0 !important;
+    border-collapse:collapse !important;
+    font-size:8.5pt !important;
+  }
+  body.printing-system thead { display:table-header-group; }
+  body.printing-system tr { break-inside:avoid; }
+  body.printing-system th,
+  body.printing-system td {
+    padding:4px 5px !important;
+    border:1px solid #aaa !important;
+    color:#111 !important;
+  }
+  body.printing-system th {
+    background:#eee !important;
+    color:#111 !important;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+
+  body.printing-system .table-wrap,
+  body.printing-system .table-container,
+  body.printing-system .config-users-table-wrap {
+    overflow:visible !important;
+    max-width:none !important;
+  }
+
+  /* Escalas: não imprimir os controles de criação/seleção. */
+  body.printing-system #escalas .escala-hub-card,
+  body.printing-system #escalas .modal-backdrop {
+    display:none !important;
+  }
+
+  /* Impressão própria de Operações permanece independente. */
+  body.printing-system .operation-fixed-message {
+    display:none !important;
+  }
+}
+</style>
+
+
+<style id="acomp-print-options-style">
+.acomp-print-modal{width:min(760px,calc(100vw - 32px));}
+.acomp-print-options-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+.acomp-print-help{margin-top:14px;padding:12px 14px;border-radius:12px;background:rgba(127,127,127,.08);font-size:.88rem;line-height:1.45;}
+#impressaoAcompanhamentoRelatorio{display:none;}
+@media print{
+  body.printing-acomp-report > *:not(#impressaoAcompanhamentoRelatorio){display:none !important;}
+  body.printing-acomp-report #impressaoAcompanhamentoRelatorio{display:block !important;}
+  body.printing-acomp-report #impressaoAcompanhamentoRelatorio .print-report{display:block !important;}
+  body.printing-acomp-report #impressaoAcompanhamentoRelatorio table{width:100%;border-collapse:collapse;font-size:9pt;}
+  body.printing-acomp-report #impressaoAcompanhamentoRelatorio th,
+  body.printing-acomp-report #impressaoAcompanhamentoRelatorio td{border:1px solid #aaa;padding:6px 7px;text-align:left;vertical-align:top;}
+  body.printing-acomp-report #impressaoAcompanhamentoRelatorio th{background:#eee !important;color:#111 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  body.printing-acomp-report #impressaoAcompanhamentoRelatorio tr{break-inside:avoid;}
+  body.printing-acomp-report #impressaoAcompanhamentoRelatorio thead{display:table-header-group;}
+  body.printing-acomp-report #impressaoAcompanhamentoRelatorio .print-report-header{border-bottom:2px solid #111;margin-bottom:14px;padding-bottom:10px;}
+  body.printing-acomp-report #impressaoAcompanhamentoRelatorio .print-report-header h1{margin:0 0 4px;font-size:18pt;}
+  body.printing-acomp-report #impressaoAcompanhamentoRelatorio .print-report-header p{margin:2px 0;font-size:9pt;}
+  body.printing-acomp-report #impressaoAcompanhamentoRelatorio .print-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 14px;}
+  body.printing-acomp-report #impressaoAcompanhamentoRelatorio .print-summary div{border:1px solid #aaa;padding:7px;}
+  body.printing-acomp-report #impressaoAcompanhamentoRelatorio .print-summary b{display:block;font-size:13pt;}
+  body.printing-acomp-report #impressaoAcompanhamentoRelatorio .print-dept-title{font-size:12pt;font-weight:700;margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid #777;}
+  @page{size:A4 portrait;margin:12mm;}
+}
+@media (max-width:760px){
+  .acomp-print-options-grid{grid-template-columns:1fr;}
+}
+</style>
+
+<style id="sistema-operacional-integracao-v51-46">
+#acompanhamento .acomp-operacional-bridge{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:14px;align-items:center;margin:-4px 0 18px;padding:14px 16px;border:1px solid color-mix(in srgb,var(--amarelo) 42%,var(--border));border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--amarelo) 8%,var(--page)),var(--page));box-shadow:0 7px 18px rgba(15,23,42,.045)}
+#acompanhamento .acomp-operacional-bridge-icon{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--preto-logo);color:var(--amarelo);font-size:1.15rem;font-weight:1000}
+#acompanhamento .acomp-operacional-bridge-copy{min-width:0}
+#acompanhamento .acomp-operacional-bridge-copy strong{display:block;font-size:.88rem;line-height:1.3}
+#acompanhamento .acomp-operacional-bridge-copy span{display:block;margin-top:4px;color:var(--muted);font-size:.74rem;font-weight:750;line-height:1.45}
+#acompanhamento .acomp-operacional-bridge-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+#acompanhamento .acomp-operacional-bridge-status{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;background:var(--green-bg);color:var(--green);font-size:.66rem;font-weight:1000;white-space:nowrap;border:1px solid color-mix(in srgb,var(--green) 26%,var(--green-bg))}
+@media(max-width:820px){#acompanhamento .acomp-operacional-bridge{grid-template-columns:44px minmax(0,1fr)}#acompanhamento .acomp-operacional-bridge-actions{grid-column:1/-1;justify-content:flex-start;padding-left:58px}}
+@media(max-width:560px){#acompanhamento .acomp-operacional-bridge{grid-template-columns:38px minmax(0,1fr);padding:13px}#acompanhamento .acomp-operacional-bridge-icon{width:38px;height:38px}#acompanhamento .acomp-operacional-bridge-actions{padding-left:0}#acompanhamento .acomp-operacional-bridge-actions .btn{width:100%}}
+
+#acompanhamento .acomp-whatsapp-btn{background:#16a34a;color:#fff;border-color:#16a34a;box-shadow:0 4px 10px rgba(22,163,74,.16)}
+#acompanhamento .acomp-whatsapp-btn:hover{filter:brightness(.96)}
+</style>
+
+
+<style id="acompanhamento-foto-conclusao-v51-47">
+#acompanhamento .acomp-photo-field{grid-column:span 4;align-self:end}
+#acompanhamento .acomp-photo-toggle{min-height:44px;display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:color-mix(in srgb,var(--page) 88%,var(--amarelo) 12%);cursor:pointer}
+#acompanhamento .acomp-photo-toggle input{width:18px;height:18px;accent-color:var(--preto-logo);margin:0;flex:0 0 auto}
+#acompanhamento .acomp-photo-toggle span{font-size:.76rem;font-weight:900;line-height:1.3}
+#acompanhamento .acomp-photo-toggle small{display:block;margin-top:2px;color:var(--muted);font-size:.66rem;font-weight:700;text-transform:none}
+#acompanhamento .acomp-photo-chip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:5px 8px;font-size:.65rem;font-weight:950;border:1px solid color-mix(in srgb,var(--amarelo) 55%,var(--border));background:color-mix(in srgb,var(--amarelo) 16%,var(--page));color:var(--preto-logo)}
+#acompanhamento .acomp-photo-chip.done{background:var(--green-bg);color:var(--green);border-color:color-mix(in srgb,var(--green) 30%,var(--green-bg))}
+#acompanhamento .acomp-photo-proof{grid-column:1/-1;margin-top:2px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:10px;border-top:1px dashed var(--border)}
+#acompanhamento .acomp-photo-thumb{width:74px;height:74px;border-radius:12px;object-fit:cover;border:1px solid var(--border);background:var(--soft)}
+@media(max-width:820px){#acompanhamento .acomp-photo-field{grid-column:1/-1}}
+#acompanhamento .acomp-photo-control-row{display:grid;grid-template-columns:minmax(0,1fr) 42px;gap:8px;align-items:stretch}
+#acompanhamento .acomp-add-assessor{width:42px;min-width:42px;border:1px solid var(--border);border-radius:12px;background:var(--preto-logo);color:var(--amarelo);font-size:1.35rem;font-weight:1000;cursor:pointer;display:grid;place-items:center;box-shadow:0 5px 12px rgba(41,26,30,.12)}
+#acompanhamento .acomp-add-assessor:hover{transform:translateY(-1px)}
+#acompanhamento .acomp-extra-assessores{display:grid;gap:8px;margin-top:8px}
+#acompanhamento .acomp-extra-assessor-row{display:grid;grid-template-columns:minmax(0,1fr) auto 34px;gap:8px;align-items:center;padding:9px;border:1px solid var(--border);border-radius:12px;background:var(--soft)}
+#acompanhamento .acomp-extra-assessor-row select{min-width:0}
+#acompanhamento .acomp-extra-foto-label{display:flex;align-items:center;gap:6px;font-size:.68rem;font-weight:900;white-space:nowrap;color:var(--muted)}
+#acompanhamento .acomp-extra-foto-label input{width:16px;height:16px;margin:0;accent-color:var(--preto-logo)}
+#acompanhamento .acomp-extra-remove{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--page);color:var(--danger);font-weight:1000;cursor:pointer}
+#acompanhamento .acomp-extra-title{display:flex;align-items:center;gap:6px;margin-top:2px;font-size:.66rem;font-weight:950;text-transform:uppercase;color:var(--muted)}
+@media(max-width:560px){#acompanhamento .acomp-extra-assessor-row{grid-template-columns:1fr 34px}#acompanhamento .acomp-extra-foto-label{grid-column:1/-1;grid-row:2}#acompanhamento .acomp-extra-remove{grid-column:2;grid-row:1}}
+
+.acomp-reschedule-request{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px solid #f59e0b;border-radius:14px;background:#fffbeb;color:#92400e}.acomp-reschedule-request>div:first-child{display:flex;flex-direction:column;gap:3px}.acomp-reschedule-request b{font-size:.84rem}.acomp-reschedule-request span,.acomp-reschedule-request small{font-size:.74rem}.acomp-reschedule-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}@media(max-width:820px){.acomp-reschedule-request{align-items:flex-start;flex-direction:column}.acomp-reschedule-actions{width:100%}.acomp-reschedule-actions .btn{flex:1}}
+</style>
+\n<style id="acesso-operacional-v51-54">
+.operacional-access-modal{position:fixed;inset:0;z-index:12000;background:rgba(15,23,42,.58);display:none;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(4px)}
+.operacional-access-modal.active{display:flex}
+.operacional-access-dialog{width:min(980px,100%);max-height:min(88vh,900px);display:flex;flex-direction:column;background:var(--page);border:1px solid var(--border);border-radius:24px;box-shadow:0 30px 90px rgba(15,23,42,.28);overflow:hidden}
+.operacional-access-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:20px 22px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,color-mix(in srgb,var(--preto-logo) 96%,#fff),color-mix(in srgb,var(--preto-logo) 86%,var(--amarelo)))}
+.operacional-access-head h2{margin:0;color:#fff;font-size:1.25rem}.operacional-access-head p{margin:6px 0 0;color:rgba(255,255,255,.78);font-weight:700;font-size:.8rem;line-height:1.45}
+.operacional-access-close{width:38px;height:38px;border:1px solid rgba(255,255,255,.25);border-radius:12px;background:rgba(255,255,255,.08);color:#fff;font-size:1rem;cursor:pointer}
+.operacional-access-toolbar{display:flex;gap:10px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border);background:var(--page-2)}
+.operacional-access-toolbar input{flex:1;min-width:0}
+.operacional-access-count{white-space:nowrap;padding:9px 12px;border-radius:999px;background:var(--soft);font-size:.72rem;font-weight:950;color:var(--muted)}
+.operacional-access-list{padding:12px 18px 18px;overflow:auto;display:grid;gap:9px}
+.operacional-access-row{display:grid;grid-template-columns:minmax(220px,1.5fr) 100px minmax(130px,.8fr) minmax(130px,.8fr) 118px;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:15px;background:var(--page)}
+.operacional-access-person{min-width:0}.operacional-access-person b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.operacional-access-person small{display:block;margin-top:3px;color:var(--muted);font-weight:750}
+.operacional-access-cell{font-size:.77rem;font-weight:850;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.operacional-access-toggle{display:flex;align-items:center;justify-content:flex-end;gap:8px;cursor:pointer;font-size:.72rem;font-weight:950}.operacional-access-toggle input{width:19px;height:19px;accent-color:#16a34a}.operacional-access-toggle span{min-width:72px;text-align:right}.operacional-access-toggle input:checked+span{color:#15803d}.operacional-access-toggle input:not(:checked)+span{color:#991b1b}
+.operacional-access-empty{padding:30px;text-align:center;color:var(--muted);font-weight:800;border:1px dashed var(--border);border-radius:16px}
+.operacional-access-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px;border-top:1px solid var(--border);background:var(--page-2)}
+.operacional-access-note{font-size:.72rem;color:var(--muted);font-weight:750;max-width:620px;line-height:1.45}.operacional-access-actions{display:flex;gap:9px}
+@media(max-width:760px){.operacional-access-row{grid-template-columns:1fr 90px}.operacional-access-row .op-access-matricula,.operacional-access-row .op-access-cargo{display:none}.operacional-access-toggle{grid-column:2;grid-row:1/3}.operacional-access-toolbar{align-items:stretch;flex-direction:column}.operacional-access-count{align-self:flex-start}.operacional-access-foot{align-items:stretch;flex-direction:column}.operacional-access-actions .btn{flex:1}.operacional-access-actions{display:flex}}
+</style>\n
+<style id="acompanhamento-tarefas-avancadas-v51-58">
+#acompanhamento .acomp-advanced{grid-column:1/-1;border:1px solid var(--border);border-radius:15px;background:color-mix(in srgb,var(--page) 96%,var(--amarelo) 4%);overflow:hidden}
+#acompanhamento .acomp-advanced>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 13px;cursor:pointer;font-size:.72rem;font-weight:1000;color:var(--text);user-select:none}
+#acompanhamento .acomp-advanced>summary::-webkit-details-marker{display:none}
+#acompanhamento .acomp-advanced>summary:after{content:'＋';width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:var(--soft);border:1px solid var(--border);font-size:.9rem}
+#acompanhamento .acomp-advanced[open]>summary:after{content:'−'}
+#acompanhamento .acomp-advanced-copy{display:flex;flex-direction:column;gap:2px}
+#acompanhamento .acomp-advanced-copy small{font-size:.64rem;font-weight:700;color:var(--muted);text-transform:none}
+#acompanhamento .acomp-advanced-body{border-top:1px solid var(--border);padding:12px;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:10px 12px;background:var(--page)}
+#acompanhamento .acomp-advanced-body .field{min-width:0}
+#acompanhamento .acomp-time-field{grid-column:span 3}
+#acompanhamento .acomp-approval-field{grid-column:span 4}
+#acompanhamento .acomp-reference-field{grid-column:span 5}
+#acompanhamento .acomp-criterion-field{grid-column:1/-1}
+#acompanhamento .acomp-criterion-field textarea{width:100%;min-height:72px;resize:vertical}
+#acompanhamento .acomp-approval-toggle{min-height:44px;display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid var(--border);border-radius:11px;background:var(--soft);font-size:.70rem;font-weight:900;line-height:1.3;cursor:pointer}
+#acompanhamento .acomp-approval-toggle input{width:17px;height:17px;margin:0;accent-color:var(--preto-logo);flex:0 0 auto}
+#acompanhamento .acomp-reference-row{display:flex;align-items:center;gap:8px;min-height:44px}
+#acompanhamento .acomp-reference-btn{position:relative;overflow:hidden;flex:0 0 auto;min-height:40px;display:inline-flex;align-items:center;justify-content:center;padding:8px 11px;border:1px solid var(--border);border-radius:10px;background:var(--soft);font-size:.68rem;font-weight:950;cursor:pointer}
+#acompanhamento .acomp-reference-btn input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+#acompanhamento .acomp-reference-state{min-width:0;flex:1;color:var(--muted);font-size:.66rem;font-weight:800;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#acompanhamento .acomp-reference-clear{display:none;width:30px;height:30px;border:1px solid var(--border);border-radius:8px;background:var(--page);color:var(--danger);cursor:pointer;font-weight:1000}
+#acompanhamento .acomp-reference-clear.visible{display:inline-grid;place-items:center}
+#acompanhamento .acomp-checklist-field{grid-column:1/-1;border-top:1px dashed var(--border);padding-top:10px}
+#acompanhamento .acomp-checklist-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+#acompanhamento .acomp-checklist-head label{margin:0}
+#acompanhamento .acomp-checklist-add{border:1px solid var(--border);border-radius:9px;background:var(--preto-logo);color:var(--amarelo);padding:7px 10px;font-size:.66rem;font-weight:1000;cursor:pointer}
+#acompanhamento .acomp-checklist-editor{display:grid;gap:7px}
+#acompanhamento .acomp-checklist-row{display:grid;grid-template-columns:28px minmax(0,1fr) 32px;gap:7px;align-items:center}
+#acompanhamento .acomp-checklist-index{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--soft);border:1px solid var(--border);font-size:.65rem;font-weight:1000;color:var(--muted)}
+#acompanhamento .acomp-checklist-row input{min-height:38px!important;height:38px}
+#acompanhamento .acomp-checklist-remove{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--page);color:var(--danger);font-weight:1000;cursor:pointer}
+#acompanhamento .acomp-advanced-chip{background:var(--blue-bg);color:var(--blue);border-color:color-mix(in srgb,var(--blue) 30%,var(--blue-bg))}
+#acompanhamento .acomp-validation-request{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px solid #60a5fa;border-radius:14px;background:#eff6ff;color:#1e40af}
+#acompanhamento .acomp-validation-request>div:first-child{display:flex;flex-direction:column;gap:3px}
+#acompanhamento .acomp-validation-request b{font-size:.84rem}.acomp-validation-request span,.acomp-validation-request small{font-size:.74rem}
+#acompanhamento .acomp-validation-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+@media(max-width:820px){#acompanhamento .acomp-time-field,#acompanhamento .acomp-approval-field,#acompanhamento .acomp-reference-field{grid-column:1/-1}#acompanhamento .acomp-validation-request{align-items:flex-start;flex-direction:column}#acompanhamento .acomp-validation-actions{width:100%}#acompanhamento .acomp-validation-actions .btn{flex:1}}
+@media(max-width:560px){#acompanhamento .acomp-advanced-body{grid-template-columns:1fr}#acompanhamento .acomp-reference-row{align-items:stretch;flex-wrap:wrap}#acompanhamento .acomp-reference-state{flex-basis:100%;white-space:normal}.acomp-checklist-head{align-items:flex-start!important}}
+</style>
+
 </head>
 <body>
+<div id="impressaoAcompanhamentoRelatorio" aria-hidden="true"></div>
+
   <script>
     /* Executado antes da interface para manter o tema correto sem piscar. */
     (() => {
@@ -10797,7 +11034,7 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
         </button>
         <button class="theme-btn header-theme" id="themeBtn" onclick="toggleTheme()" title="Ativar modo escuro" aria-label="Ativar modo escuro">🌙</button>
         <button class="logout-fixed header-logout" onclick="logout()" title="Sair do sistema" aria-label="Sair do sistema">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v9m-5.5-6.5A8 8 0 1 0 17.5 5.5"/></svg>
+          <svg class="ui-svg-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/><path d="M14 8l4 4-4 4M18 12H8"/></svg>
         </button>
       </div>
     </header>
@@ -11623,7 +11860,52 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
 
 
 
-      <section id="acompanhamento" class="page">
+      
+<!-- Modal de opções de impressão — Acompanhamento do Dia -->
+<div id="modalImpressaoAcompanhamento" class="modal-backdrop no-print" style="display:none;">
+  <div class="modal-card acomp-print-modal" role="dialog" aria-modal="true" aria-labelledby="tituloImpressaoAcompanhamento">
+    <div class="modal-header">
+      <div>
+        <h2 id="tituloImpressaoAcompanhamento">🖨️ Imprimir Acompanhamento do Dia</h2>
+        <p>Escolha exatamente quais demandas deseja imprimir.</p>
+      </div>
+      <button class="btn secondary" type="button" onclick="fecharOpcoesImpressaoAcompanhamento()">✕</button>
+    </div>
+
+    <div class="form-grid acomp-print-options-grid">
+      <div class="field">
+        <label>TIPO DE IMPRESSÃO</label>
+        <select id="acompPrintTipo">
+          <option value="DEMANDAS">DEMANDAS</option>
+          <option value="POR_FUNCIONARIO">POR FUNCIONÁRIO</option>
+          <option value="POR_DEPARTAMENTO">POR DEPARTAMENTO</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>DATA</label>
+        <input id="acompPrintData" type="date">
+      </div>
+
+      <div class="field">
+        <label>DEPARTAMENTO</label>
+        <select id="acompPrintDepartamento"></select>
+      </div>
+    </div>
+
+    <div class="acomp-print-help">
+      <b>Como funciona:</b> a impressão considera somente as demandas cadastradas para a data selecionada.
+      O departamento pode ser usado para restringir o relatório. Em <b>DEMANDAS</b>, todas as demandas da data são exibidas.
+    </div>
+
+    <div class="modal-actions no-print">
+      <button class="btn secondary" type="button" onclick="fecharOpcoesImpressaoAcompanhamento()">Cancelar</button>
+      <button class="btn primary" type="button" onclick="gerarImpressaoAcompanhamento()">🖨️ GERAR IMPRESSÃO</button>
+    </div>
+  </div>
+</div>
+
+<section id="acompanhamento" class="page">
         <div class="section-card acomp-page-head">
           <div class="section-title">
             <div>
@@ -11632,8 +11914,23 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
             </div>
             <div class="acomp-page-actions no-print">
               <button class="btn acomp-new-task-btn" type="button" onclick="novaTarefaAcompanhamento()">＋ NOVA TAREFA</button>
-              <button class="btn secondary" type="button" onclick="printActivePage()">🖨️ Imprimir</button>
+              <button id="acompRefreshBtn" class="btn secondary" type="button" onclick="atualizarAcompanhamentoDia(this)" title="Buscar agora as últimas alterações do Sistema Operacional sem recarregar a página">↻ Atualizar</button>
+              <button class="btn secondary" type="button" onclick="abrirOpcoesImpressaoAcompanhamento()">🖨️ Imprimir</button>
+              <button class="btn secondary" type="button" onclick="abrirConfiguracaoAcessoOperacional()" title="Definir quem pode entrar no Sistema Operacional">⚙ Configuração</button>
             </div>
+          </div>
+        </div>
+
+        <div class="acomp-operacional-bridge no-print" id="acompOperacionalBridge">
+          <div class="acomp-operacional-bridge-icon" aria-hidden="true">↔</div>
+          <div class="acomp-operacional-bridge-copy">
+            <strong>SISTEMA OPERACIONAL conectado ao Acompanhamento do Dia</strong>
+            <span>Demandas criadas aqui utilizam os dados compartilhados do Gerencial. O Operacional pode acompanhar e atualizar as tarefas destinadas ao funcionário.</span>
+          </div>
+          <div class="acomp-operacional-bridge-actions">
+            <span class="acomp-operacional-bridge-status">● INTEGRAÇÃO ATIVA</span>
+            <button class="btn small secondary" type="button" onclick="window.open('SISTEMA_OPERACIONAL_V1_3_1_ICONES_100_VETORIAIS.html','_blank','noopener,noreferrer')">Abrir Operacional</button>
+            <button class="btn small secondary" type="button" onclick="redefinirLinkSistemaOperacionalWhatsApp()" title="Definir o link público enviado pelo WhatsApp">🔗 Link WhatsApp</button>
           </div>
         </div>
 
@@ -15486,6 +15783,7 @@ function preencherDepartamentoAcompanhamentoPorAssessor(){
     dep.value=departamento;
     dep.disabled=true;
     atualizarHierarquiaTodasTarefas();
+    atualizarOpcoesAssessoresAdicionaisAcompanhamento();
     dep.title='Preenchido automaticamente pelo Departamento cadastrado no Quadro de Funcionários. Não pode ser alterado nesta aba.';
   }else{
     popularDepartamentosAcompanhamento('');
@@ -15494,6 +15792,7 @@ function preencherDepartamentoAcompanhamentoPorAssessor(){
     dep.title='Cadastre o Departamento de atuação deste funcionário no Quadro de Funcionários.';
     const editor=document.getElementById('acompTarefasEditor');
     if(editor) editor.innerHTML='';
+    atualizarOpcoesAssessoresAdicionaisAcompanhamento();
   }
 }
 function popularDepartamentosAcompanhamento(selecionado=''){
@@ -15614,8 +15913,12 @@ function tarefasAcompanhamentoPossuemConteudo(){
     linha.querySelector('.acomp-familia')?.value,
     linha.querySelector('.acomp-subfamilia')?.value,
     linha.querySelector('.acomp-prazo')?.value,
-    linha.querySelector('.acomp-observacao')?.value
-  ].some(valor=>normalizarTextoAcomp(valor)));
+    linha.querySelector('.acomp-observacao')?.value,
+    linha.querySelector('.acomp-tempo-estimado')?.value,
+    linha.querySelector('.acomp-criterio-conclusao')?.value,
+    [...(linha.querySelectorAll('.acomp-check-text')||[])].map(x=>x.value).join(' '),
+    linha._referenciaArquivo?.nome||''
+  ].some(valor=>normalizarTextoAcomp(valor)) || !!linha.querySelector('.acomp-exigir-aprovacao')?.checked || !!linha.querySelector('.acomp-foto-obrigatoria')?.checked || !!linha.querySelector('.acomp-extra-assessor')?.value);
 }
 function fecharPainelTarefasAcompanhamento(forcar=false){
   const painel=document.getElementById('acompTaskPanel');
@@ -15645,6 +15948,83 @@ function renumerarTarefasAcompanhamento(){
   });
   atualizarControlesRemocaoAcompanhamento();
 }
+function opcoesAssessorAdicionalAcompanhamento(valorAtual=''){
+  const principal=normalizarTextoAcomp(document.getElementById('diarioResp')?.value);
+  const lista=(Array.isArray(db?.funcionarios)?db.funcionarios:[])
+    .filter(f=>normalizarTextoAcomp(f?.nome) && !['DESLIGADO','INATIVO'].includes(String(f?.status||'ATIVO').toUpperCase()))
+    .filter(f=>normalizarTextoAcomp(f.nome)!==principal)
+    .slice().sort((a,b)=>String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR'));
+  return '<option value="">Selecione o assessor adicional</option>'+lista.map(f=>`<option value="${escapeHTML(f.nome||'')}" ${normalizarTextoAcomp(f.nome)===normalizarTextoAcomp(valorAtual)?'selected':''}>${escapeHTML(f.nome||'')} — OP. ${escapeHTML(normalizarOperador(f.operador)||'-')}</option>`).join('');
+}
+function atualizarOpcoesAssessoresAdicionaisAcompanhamento(){
+  document.querySelectorAll('#acompTarefasEditor .acomp-extra-assessor').forEach(sel=>{
+    const atual=sel.value;
+    sel.innerHTML=opcoesAssessorAdicionalAcompanhamento(atual);
+    if(atual && [...sel.options].some(o=>o.value===atual)) sel.value=atual;
+  });
+}
+function adicionarAssessorAdicionalAcompanhamento(botao,dados={}){
+  const linha=botao?.closest('.acomp-task-edit-row'); if(!linha)return;
+  const caixa=linha.querySelector('.acomp-extra-assessores'); if(!caixa)return;
+  const nomeAtual=normalizarTextoAcomp(dados.nome||dados.responsavel||'');
+  const existentes=[...caixa.querySelectorAll('.acomp-extra-assessor')].map(x=>normalizarTextoAcomp(x.value)).filter(Boolean);
+  if(nomeAtual && existentes.includes(nomeAtual)) return;
+  const item=document.createElement('div'); item.className='acomp-extra-assessor-row';
+  item.innerHTML=`<select class="acomp-extra-assessor" aria-label="Assessor adicional">${opcoesAssessorAdicionalAcompanhamento(nomeAtual)}</select><label class="acomp-extra-foto-label" title="Defina se este assessor adicional precisa anexar foto ao concluir"><input class="acomp-extra-foto" type="checkbox" ${dados.exigirFotoConclusao?'checked':''}> Foto obrigatória</label><button class="acomp-extra-remove" type="button" title="Remover assessor adicional" aria-label="Remover assessor adicional">×</button>`;
+  item.querySelector('.acomp-extra-remove').onclick=()=>item.remove();
+  caixa.appendChild(item);
+}
+function coletarAssessoresAdicionaisLinhaAcompanhamento(linha){
+  const principal=normalizarTextoAcomp(document.getElementById('diarioResp')?.value);
+  const vistos=new Set();
+  return [...(linha?.querySelectorAll('.acomp-extra-assessor-row')||[])].map(item=>{
+    const nome=normalizarTextoAcomp(item.querySelector('.acomp-extra-assessor')?.value);
+    if(!nome || nome===principal || vistos.has(nome)) return null;
+    vistos.add(nome);
+    const f=(db?.funcionarios||[]).find(x=>normalizarTextoAcomp(x.nome)===nome)||{};
+    return {nome,id:String(f.id||''),operador:normalizarOperador(f.operador),matricula:String(f.matricula||''),exigirFotoConclusao:!!item.querySelector('.acomp-extra-foto')?.checked};
+  }).filter(Boolean);
+}
+
+function checklistAcompanhamentoTemDados(dados){return Array.isArray(dados?.checklist)&&dados.checklist.some(i=>normalizarTextoAcomp(i?.texto));}
+function adicionarItemChecklistAcompanhamento(alvo,dados={}){
+  const linha=alvo?.classList?.contains('acomp-task-edit-row')?alvo:alvo?.closest?.('.acomp-task-edit-row'); if(!linha)return;
+  const editor=linha.querySelector('.acomp-checklist-editor'); if(!editor)return;
+  const item=document.createElement('div'); item.className='acomp-checklist-row';
+  item.dataset.checkId=String(dados.id||uid('chk'));
+  item.dataset.concluido=dados.concluido?'1':'0';
+  item.dataset.concluidoEmISO=String(dados.concluidoEmISO||'');
+  item.dataset.concluidoPor=String(dados.concluidoPor||'');
+  item.innerHTML=`<span class="acomp-checklist-index"></span><input class="acomp-check-text" value="${escapeHTML(dados.texto||'')}" placeholder="Etapa do checklist"><button class="acomp-checklist-remove" type="button" title="Remover etapa">×</button>`;
+  item.querySelector('.acomp-checklist-remove').onclick=()=>{item.remove();renumerarChecklistAcompanhamento(linha)};
+  editor.appendChild(item); renumerarChecklistAcompanhamento(linha); item.querySelector('input')?.focus();
+}
+function renumerarChecklistAcompanhamento(linha){[...(linha?.querySelectorAll('.acomp-checklist-row')||[])].forEach((x,i)=>{const n=x.querySelector('.acomp-checklist-index');if(n)n.textContent=String(i+1)});}
+function coletarChecklistLinhaAcompanhamento(linha){return [...(linha?.querySelectorAll('.acomp-checklist-row')||[])].map(x=>({id:String(x.dataset.checkId||uid('chk')),texto:normalizarTextoAcomp(x.querySelector('.acomp-check-text')?.value),concluido:x.dataset.concluido==='1',concluidoEmISO:String(x.dataset.concluidoEmISO||''),concluidoPor:String(x.dataset.concluidoPor||'')})).filter(x=>x.texto);}
+function mesclarChecklistExecucaoAcompanhamento(base,anterior){
+  const old=Array.isArray(anterior)?anterior:[];
+  return (Array.isArray(base)?base:[]).map(i=>{const a=old.find(x=>String(x?.id||'')===String(i?.id||''))||old.find(x=>normalizarTextoAcomp(x?.texto)===normalizarTextoAcomp(i?.texto));return {id:String(i?.id||uid('chk')),texto:normalizarTextoAcomp(i?.texto),concluido:!!a?.concluido,concluidoEmISO:String(a?.concluidoEmISO||''),concluidoPor:String(a?.concluidoPor||'')}}).filter(x=>x.texto);
+}
+function atualizarEstadoReferenciaAcompanhamento(linha){
+  if(!linha)return;const ref=linha._referenciaArquivo||null,state=linha.querySelector('.acomp-reference-state'),clear=linha.querySelector('.acomp-reference-clear');
+  if(state)state.textContent=ref?.nome?`Anexado: ${ref.nome}`:'Nenhum arquivo anexado'; if(clear)clear.classList.toggle('visible',!!ref?.dataUrl);
+}
+function tamanhoDataURLAcompanhamento(dataUrl){const b64=String(dataUrl||'').split(',')[1]||'';return Math.ceil(b64.length*3/4)}
+function otimizarImagemReferenciaAcompanhamento(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=()=>reject(new Error('Não foi possível ler a imagem.'));reader.onload=()=>{const img=new Image();img.onerror=()=>reject(new Error('Imagem inválida.'));img.onload=()=>{const max=1200,scale=Math.min(1,max/Math.max(img.width,img.height)),w=Math.max(1,Math.round(img.width*scale)),h=Math.max(1,Math.round(img.height*scale)),canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);let q=.78,data=canvas.toDataURL('image/jpeg',q);while(tamanhoDataURLAcompanhamento(data)>380000&&q>.42){q-=.08;data=canvas.toDataURL('image/jpeg',q)}resolve({nome:file.name||'referencia.jpg',tipo:'image/jpeg',dataUrl:data,tamanho:tamanhoDataURLAcompanhamento(data)})};img.src=reader.result};reader.readAsDataURL(file)})}
+async function carregarReferenciaTarefaAcompanhamento(input){
+  const linha=input?.closest('.acomp-task-edit-row'),file=input?.files?.[0];if(!linha||!file)return;
+  const state=linha.querySelector('.acomp-reference-state');if(state)state.textContent='Preparando arquivo...';
+  try{
+    let ref;if(String(file.type||'').startsWith('image/')) ref=await otimizarImagemReferenciaAcompanhamento(file);
+    else if(file.type==='application/pdf'||/\.pdf$/i.test(file.name||'')){
+      if(file.size>750000)throw new Error('O PDF de referência deve ter no máximo 750 KB.');
+      ref=await new Promise((resolve,reject)=>{const r=new FileReader();r.onerror=()=>reject(new Error('Não foi possível ler o PDF.'));r.onload=()=>resolve({nome:file.name||'referencia.pdf',tipo:'application/pdf',dataUrl:r.result,tamanho:file.size||0});r.readAsDataURL(file)});
+    }else throw new Error('Use uma imagem ou PDF como referência.');
+    linha._referenciaArquivo=ref;atualizarEstadoReferenciaAcompanhamento(linha);
+  }catch(e){input.value='';linha._referenciaArquivo=null;atualizarEstadoReferenciaAcompanhamento(linha);alert(e.message||'Não foi possível anexar a referência.');}
+}
+function removerReferenciaTarefaAcompanhamento(btn){const linha=btn?.closest('.acomp-task-edit-row');if(!linha)return;linha._referenciaArquivo=null;const input=linha.querySelector('.acomp-reference-input');if(input)input.value='';atualizarEstadoReferenciaAcompanhamento(linha);}
+
 function adicionarTarefaAcompanhamento(dados={}){
   const editor=document.getElementById('acompTarefasEditor');
   if(!editor) return;
@@ -15655,6 +16035,9 @@ function adicionarTarefaAcompanhamento(dados={}){
   linha.className='acomp-task-edit-row';
   linha.dataset.taskId=id;
   linha.dataset.seq=String(seq);
+  linha.dataset.statusOriginal=String(dados.status||'PENDENTE').toUpperCase();
+  linha._referenciaArquivo=dados.referenciaArquivo&&typeof dados.referenciaArquivo==='object'?cloneJSONSeguro(dados.referenciaArquivo,dados.referenciaArquivo):null;
+  const temAvancado=Number(dados.tempoEstimadoMin||0)>0||normalizarTextoAcomp(dados.criterioConclusao)||checklistAcompanhamentoTemDados(dados)||!!dados.exigirAprovacaoLider||!!linha._referenciaArquivo;
   linha.innerHTML=`
     <span class="acomp-task-number">TAREFA</span>
     <div class="field"><label>Atividade / tarefa</label><input class="acomp-descricao" value="${escapeHTML(dados.descricao||'')}" placeholder="Ex.: Abastecimento de mercadoria" required></div>
@@ -15662,12 +16045,22 @@ function adicionarTarefaAcompanhamento(dados={}){
     <div class="field"><label>Subfamília</label><select class="acomp-subfamilia"></select></div>
     <div class="field"><label>Prazo</label><input class="acomp-prazo" type="datetime-local" value="${escapeHTML(dados.prazo||'')}"></div>
     <div class="field"><label>Importância</label><select class="acomp-prioridade"><option>BAIXA</option><option>MÉDIA</option><option>ALTA</option><option>CRÍTICA</option></select></div>
-    <div class="field"><label>Status</label><select class="acomp-status"><option>PENDENTE</option><option>EM ANDAMENTO</option><option>BLOQUEADA</option><option>CONCLUÍDA</option><option>CANCELADA</option></select></div>
+    <div class="field"><label>Status</label><div class="acomp-status-readonly" title="O status é atualizado pelas ações do assessor no Sistema Operacional">${escapeHTML(String(dados.status||'PENDENTE').toUpperCase())}</div></div>
+    <div class="field acomp-photo-field"><label>Comprovação da conclusão</label><div class="acomp-photo-control-row"><label class="acomp-photo-toggle"><input class="acomp-foto-obrigatoria" type="checkbox" ${dados.exigirFotoConclusao?'checked':''}><span>Exigir foto na conclusão<small>O funcionário só poderá finalizar após anexar uma imagem.</small></span></label><button class="acomp-add-assessor" type="button" title="Adicionar outro assessor à mesma tarefa" aria-label="Adicionar outro assessor" onclick="adicionarAssessorAdicionalAcompanhamento(this)">+</button></div><div class="acomp-extra-assessores"></div></div>
     <div class="field acomp-task-note-field"><label>Observação da tarefa</label><input class="acomp-observacao" value="${escapeHTML(dados.observacao||'')}" placeholder="Observação específica desta tarefa"></div>
+    <details class="acomp-advanced" ${temAvancado?'open':''}><summary><span class="acomp-advanced-copy">Opções avançadas<small>Checklist, tempo, critério, referência e validação do líder</small></span></summary><div class="acomp-advanced-body">
+      <div class="field acomp-time-field"><label>Tempo estimado (min)</label><input class="acomp-tempo-estimado" type="number" min="5" step="5" value="${Number(dados.tempoEstimadoMin||0)||''}" placeholder="Ex.: 30"></div>
+      <div class="field acomp-approval-field"><label>Validação final</label><label class="acomp-approval-toggle"><input class="acomp-exigir-aprovacao" type="checkbox" ${dados.exigirAprovacaoLider?'checked':''}><span>Exigir aprovação do líder para finalizar</span></label></div>
+      <div class="field acomp-reference-field"><label>Referência (imagem/PDF)</label><div class="acomp-reference-row"><label class="acomp-reference-btn">📎 Anexar<input class="acomp-reference-input" type="file" accept="image/*,application/pdf" onchange="carregarReferenciaTarefaAcompanhamento(this)"></label><span class="acomp-reference-state">Nenhum arquivo anexado</span><button class="acomp-reference-clear" type="button" title="Remover referência" onclick="removerReferenciaTarefaAcompanhamento(this)">×</button></div></div>
+      <div class="field acomp-criterion-field"><label>Critério de conclusão</label><textarea class="acomp-criterio-conclusao" rows="2" placeholder="Ex.: Todas as peças alinhadas por tamanho e sem cabides vazios.">${escapeHTML(dados.criterioConclusao||'')}</textarea></div>
+      <div class="field acomp-checklist-field"><div class="acomp-checklist-head"><label>Checklist da execução</label><button class="acomp-checklist-add" type="button" onclick="adicionarItemChecklistAcompanhamento(this)">＋ Adicionar etapa</button></div><div class="acomp-checklist-editor"></div></div>
+    </div></details>
     <button class="acomp-remove-task" type="button" title="Remover esta tarefa" aria-label="Remover esta tarefa" onclick="removerTarefaAcompanhamento(this)">Remover tarefa</button>`;
   editor.appendChild(linha);
+  (Array.isArray(dados.assessoresAdicionais)?dados.assessoresAdicionais:[]).forEach(a=>adicionarAssessorAdicionalAcompanhamento(linha.querySelector('.acomp-add-assessor'),a));
+  (Array.isArray(dados.checklist)?dados.checklist:[]).forEach(i=>adicionarItemChecklistAcompanhamento(linha,i));
+  atualizarEstadoReferenciaAcompanhamento(linha);
   linha.querySelector('.acomp-prioridade').value=dados.prioridade||'MÉDIA';
-  linha.querySelector('.acomp-status').value=dados.status||'PENDENTE';
   atualizarFamiliaLinhaAcomp(linha,dados.familia||'',dados.subfamilia||'');
   renumerarTarefasAcompanhamento();
   linha.querySelector('.acomp-descricao')?.focus();
@@ -15696,8 +16089,15 @@ function coletarTarefasAcompanhamento(){
     subfamilia: normalizarTextoAcomp(linha.querySelector('.acomp-subfamilia')?.value),
     prazo: normalizarTextoAcomp(linha.querySelector('.acomp-prazo')?.value),
     observacao: normalizarTextoAcomp(linha.querySelector('.acomp-observacao')?.value),
+    exigirFotoConclusao: !!linha.querySelector('.acomp-foto-obrigatoria')?.checked,
+    assessoresAdicionais: coletarAssessoresAdicionaisLinhaAcompanhamento(linha),
     prioridade: normalizarTextoAcomp(linha.querySelector('.acomp-prioridade')?.value) || 'MÉDIA',
-    status: normalizarTextoAcomp(linha.querySelector('.acomp-status')?.value) || 'PENDENTE'
+    status: String(linha.dataset.statusOriginal||'PENDENTE').toUpperCase(),
+    tempoEstimadoMin: Math.max(0,Number(linha.querySelector('.acomp-tempo-estimado')?.value||0)||0),
+    criterioConclusao: normalizarTextoAcomp(linha.querySelector('.acomp-criterio-conclusao')?.value),
+    checklist: coletarChecklistLinhaAcompanhamento(linha),
+    exigirAprovacaoLider: !!linha.querySelector('.acomp-exigir-aprovacao')?.checked,
+    referenciaArquivo: linha._referenciaArquivo&&linha._referenciaArquivo.dataUrl?cloneJSONSeguro(linha._referenciaArquivo,linha._referenciaArquivo):null
   })).filter(t=>t.descricao);
 }
 function adicionarHistoricoTarefa(t, evento, detalhes=''){
@@ -15712,36 +16112,63 @@ function salvarDiario(e){
   e.preventDefault();
   const funcionario=normalizarTextoAcomp(document.getElementById('diarioResp')?.value);
   const departamento=normalizarTextoAcomp(document.getElementById('diarioDepartamento')?.value);
-  const tarefas=coletarTarefasAcompanhamento();
+  const tarefasPrincipais=coletarTarefasAcompanhamento();
   if(!funcionario){ alert('Selecione o assessor / funcionário.'); return; }
   if(!departamento){ alert('Selecione o departamento.'); return; }
-  if(!tarefas.length){ alert('Adicione pelo menos uma tarefa ao acompanhamento.'); return; }
+  if(!tarefasPrincipais.length){ alert('Adicione pelo menos uma tarefa ao acompanhamento.'); return; }
   const id=document.getElementById('diarioId').value || uid('dia');
   const existente=db.diario.find(d=>d.id===id);
   const anteriores=Array.isArray(existente?.tarefas)?existente.tarefas:[];
-  tarefas.forEach(t=>{
-    const anterior=anteriores.find(x=>x.id===t.id);
+  const anterioresPrincipais=anteriores.filter(x=>!x?.assessorAdicional);
+  const funcionarioPrincipal=(db?.funcionarios||[]).find(f=>normalizarTextoAcomp(f.nome)===funcionario)||{};
+  tarefasPrincipais.forEach(t=>{
+    const anterior=anterioresPrincipais.find(x=>x.id===t.id);
     t.responsavel=anterior?.responsavel||funcionario;
+    t.responsavelId=String(funcionarioPrincipal.id||anterior?.responsavelId||'');
+    t.responsavelOperador=normalizarOperador(funcionarioPrincipal.operador||anterior?.responsavelOperador||'');
+    t.responsavelMatricula=String(funcionarioPrincipal.matricula||anterior?.responsavelMatricula||'');
     t.historico=Array.isArray(anterior?.historico)?anterior.historico:[];
+    t.criadoPor=anterior?.criadoPor||usuarioAtual?.nome||'Sistema';
+    t.criadoPorOperador=anterior?.criadoPorOperador||normalizarOperador(usuarioAtual?.operador);
+    if(anterior?.reagendamento && typeof anterior.reagendamento==='object') t.reagendamento=cloneJSONSeguro(anterior.reagendamento,anterior.reagendamento);
+    t.checklist=mesclarChecklistExecucaoAcompanhamento(t.checklist,anterior?.checklist);
+    if(anterior?.validacaoConclusao && typeof anterior.validacaoConclusao==='object') t.validacaoConclusao=cloneJSONSeguro(anterior.validacaoConclusao,anterior.validacaoConclusao);
+    ['concluidaEmISO','concluidaPor','observacaoConclusao'].forEach(k=>{if(anterior?.[k])t[k]=anterior[k]});
+    if(anterior?.fotoConclusaoDataUrl){
+      t.fotoConclusaoDataUrl=anterior.fotoConclusaoDataUrl;t.fotoConclusaoNome=anterior.fotoConclusaoNome||'';t.fotoConclusaoEmISO=anterior.fotoConclusaoEmISO||'';t.fotoConclusaoPor=anterior.fotoConclusaoPor||anterior.concluidaPor||'';
+    }
     if(anterior){
-      if(anterior.status!==t.status) adicionarHistoricoTarefa(t,'STATUS ALTERADO',`${anterior.status||'PENDENTE'} → ${t.status}`);
       if(anterior.observacao!==t.observacao && t.observacao) adicionarHistoricoTarefa(t,'OBSERVAÇÃO',t.observacao);
       if(!t.historico.length) garantirHistoricoTarefa(t,'MIGRADA','Histórico preservado.');
-    }else{
-      garantirHistoricoTarefa(t,'CRIADA',`Tarefa designada para ${t.responsavel}.`);
-    }
-    if(t.status==='CONCLUÍDA' && anterior?.status!=='CONCLUÍDA'){
-      t.concluidaEmISO=new Date().toISOString(); t.concluidaPor=usuarioAtual?.nome||t.responsavel;
-      adicionarHistoricoTarefa(t,'CONCLUÍDA',`Concluída por ${t.concluidaPor}.`);
-    }
-    if(t.status!=='CONCLUÍDA'){ delete t.concluidaEmISO; delete t.concluidaPor; }
+    }else garantirHistoricoTarefa(t,'CRIADA',`Tarefa designada para ${t.responsavel}.`);
+  });
+  const tarefasExpandidas=[];
+  tarefasPrincipais.forEach(t=>{
+    tarefasExpandidas.push(t);
+    (Array.isArray(t.assessoresAdicionais)?t.assessoresAdicionais:[]).forEach(a=>{
+      const anteriorExtra=anteriores.find(x=>x?.assessorAdicional && String(x.tarefaMatrizId||'')===String(t.id) && (normalizarOperador(x.responsavelOperador)===normalizarOperador(a.operador) || normalizarTextoAcomp(x.responsavel)===normalizarTextoAcomp(a.nome)));
+      const extra={
+        id:anteriorExtra?.id||uid('atfextra'),tarefaMatrizId:t.id,assessorAdicional:true,
+        descricao:t.descricao,familia:t.familia,subfamilia:t.subfamilia,prazo:t.prazo,observacao:t.observacao,prioridade:t.prioridade,
+        tempoEstimadoMin:Number(t.tempoEstimadoMin||0)||0,criterioConclusao:t.criterioConclusao||'',exigirAprovacaoLider:!!t.exigirAprovacaoLider,
+        referenciaArquivo:t.referenciaArquivo&&t.referenciaArquivo.dataUrl?cloneJSONSeguro(t.referenciaArquivo,t.referenciaArquivo):null,
+        checklist:mesclarChecklistExecucaoAcompanhamento(t.checklist,anteriorExtra?.checklist),
+        exigirFotoConclusao:!!a.exigirFotoConclusao,responsavel:a.nome,responsavelId:String(a.id||''),responsavelOperador:normalizarOperador(a.operador),responsavelMatricula:String(a.matricula||''),
+        status:String(anteriorExtra?.status||'PENDENTE').toUpperCase(),historico:Array.isArray(anteriorExtra?.historico)?anteriorExtra.historico:[],
+        criadoPor:anteriorExtra?.criadoPor||t.criadoPor,criadoPorOperador:anteriorExtra?.criadoPorOperador||t.criadoPorOperador
+      };
+      if(anteriorExtra?.reagendamento && typeof anteriorExtra.reagendamento==='object') extra.reagendamento=cloneJSONSeguro(anteriorExtra.reagendamento,anteriorExtra.reagendamento);
+      if(anteriorExtra?.validacaoConclusao && typeof anteriorExtra.validacaoConclusao==='object') extra.validacaoConclusao=cloneJSONSeguro(anteriorExtra.validacaoConclusao,anteriorExtra.validacaoConclusao);
+      ['fotoConclusaoDataUrl','fotoConclusaoNome','fotoConclusaoEmISO','fotoConclusaoPor','concluidaEmISO','concluidaPor','observacaoConclusao'].forEach(k=>{if(anteriorExtra?.[k])extra[k]=anteriorExtra[k]});
+      if(!extra.historico.length) garantirHistoricoTarefa(extra,'CRIADA',`Tarefa compartilhada com assessor adicional ${a.nome}.`);
+      tarefasExpandidas.push(extra);
+    });
   });
   const item={
-    id,versaoAcompanhamento:3,criadoEm:existente?.criadoEm||agoraBR(),
-    dataISO:document.getElementById('diarioData').value||hojeISO(),
-    responsavel:funcionario,departamento,tarefas,
-    obs:normalizarTextoAcomp(document.getElementById('diarioObs')?.value),
-    atualizadoPor:usuarioAtual.nome,atualizadoEm:agoraBR(),
+    id,versaoAcompanhamento:6,criadoEm:existente?.criadoEm||agoraBR(),
+    criadoPor:existente?.criadoPor||usuarioAtual?.nome||'Sistema',criadoPorOperador:existente?.criadoPorOperador||normalizarOperador(usuarioAtual?.operador),
+    dataISO:document.getElementById('diarioData').value||hojeISO(),responsavel:funcionario,departamento,tarefas:tarefasExpandidas,
+    obs:normalizarTextoAcomp(document.getElementById('diarioObs')?.value),atualizadoPor:usuarioAtual.nome,atualizadoEm:agoraBR(),
     historicoResponsavel:Array.isArray(existente?.historicoResponsavel)?existente.historicoResponsavel:[]
   };
   if(!existente) item.historicoResponsavel.push({em:agoraBR(),por:usuarioAtual?.nome||'Sistema',de:'',para:funcionario});
@@ -15749,7 +16176,6 @@ function salvarDiario(e){
   if(existente) Object.assign(existente,item); else db.diario.unshift(item);
   saveDB(); fecharFormularioAcompanhamento(true); renderAll();
 }
-
 function editarDiario(id){
   const d=db.diario.find(x=>x.id===id); if(!d) return;
   showPage('acompanhamento');
@@ -15768,7 +16194,8 @@ function editarDiario(id){
   document.getElementById('diarioObs').value=d.obs||'';
   const editor=document.getElementById('acompTarefasEditor');
   editor.innerHTML='';
-  const tarefas=Array.isArray(d.tarefas)&&d.tarefas.length ? d.tarefas : [{
+  const tarefasPrincipais=(Array.isArray(d.tarefas)?d.tarefas:[]).filter(t=>!t?.assessorAdicional);
+  const tarefas=tarefasPrincipais.length ? tarefasPrincipais : [{
     descricao:d.resumo||'Registro anterior', familia:'', subfamilia:'', prazo:'', prioridade:'MÉDIA', status:'PENDENTE'
   }];
   tarefas.forEach(t=>adicionarTarefaAcompanhamento(t));
@@ -15798,15 +16225,9 @@ function limparFormDiario(){
   }
 }
 function alterarStatusTarefaAcompanhamento(registroId,tarefaId,status){
-  const d=db.diario.find(x=>x.id===registroId); if(!d||!Array.isArray(d.tarefas)) return;
-  const t=d.tarefas.find(x=>x.id===tarefaId); if(!t) return;
-  const anterior=t.status||'PENDENTE'; if(anterior===status) return;
-  t.status=status;
-  if(status==='CONCLUÍDA'){ t.concluidaEmISO=new Date().toISOString(); t.concluidaPor=usuarioAtual?.nome||t.responsavel||d.responsavel||'Sistema'; }
-  else { delete t.concluidaEmISO; delete t.concluidaPor; }
-  adicionarHistoricoTarefa(t,'STATUS ALTERADO',`${anterior} → ${status}`);
-  d.atualizadoPor=usuarioAtual?.nome||d.atualizadoPor; d.atualizadoEm=agoraBR();
-  saveDB(); renderDiario(); renderRelatorio();
+  // V51.52: o status do Acompanhamento do Dia é controlado exclusivamente pelo Sistema Operacional.
+  // Mantida apenas por compatibilidade com chamadas antigas; não altera dados no Gerencial.
+  alert('O status desta tarefa é atualizado pelas ações do assessor no Sistema Operacional.');
 }
 function reatribuirTarefaAcompanhamento(registroId,tarefaId){
   const d=db.diario.find(x=>x.id===registroId); if(!d) return;
@@ -15840,6 +16261,19 @@ function verHistoricoTarefaAcompanhamento(registroId,tarefaId){
   alert(`HISTÓRICO DA TAREFA\n\n${hist.length?hist.map(h=>`${h.em||'-'} • ${h.por||'-'}\n${h.evento||'EVENTO'}${h.detalhes?` — ${h.detalhes}`:''}`).join('\n\n'):'Nenhum histórico registrado.'}`);
 }
 
+function abrirFotoConclusaoAcompanhamento(registroId,tarefaId){
+  const d=(db.diario||[]).find(x=>String(x.id)===String(registroId));
+  const t=d?.tarefas?.find(x=>String(x.id)===String(tarefaId));
+  if(!t?.fotoConclusaoDataUrl){ alert('Esta tarefa não possui evidência fotográfica.'); return; }
+  const w=window.open('','_blank','noopener,noreferrer');
+  if(!w){ alert('O navegador bloqueou a abertura da foto. Permita pop-ups para visualizar.'); return; }
+  const titulo=escapeHTML(t.descricao||'Evidência da conclusão');
+  const quando=escapeHTML(t.fotoConclusaoEmISO?new Date(t.fotoConclusaoEmISO).toLocaleString('pt-BR'):(t.concluidaEmISO?new Date(t.concluidaEmISO).toLocaleString('pt-BR'):'-'));
+  const por=escapeHTML(t.concluidaPor||t.responsavel||d?.responsavel||'-');
+  w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${titulo}</title><style>body{margin:0;background:#111;color:#fff;font-family:Arial,sans-serif}.wrap{max-width:1100px;margin:auto;padding:22px}.meta{margin-bottom:14px}.meta h1{font-size:20px;margin:0 0 6px}.meta p{margin:0;color:#bbb}.foto{display:block;max-width:100%;max-height:82vh;margin:auto;border-radius:14px;background:#222}</style></head><body><div class="wrap"><div class="meta"><h1>${titulo}</h1><p>Concluída por ${por} • ${quando}</p></div><img class="foto" src="${t.fotoConclusaoDataUrl}" alt="Evidência da conclusão"></div></body></html>`);
+  w.document.close();
+}
+
 function prazoAcompanhamentoTexto(valor){
   if(!valor) return 'Sem prazo definido';
   const d=new Date(valor);
@@ -15847,7 +16281,7 @@ function prazoAcompanhamentoTexto(valor){
   return d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
 }
 function tarefaAcompanhamentoAtrasada(t){
-  if(!t?.prazo || ['CONCLUÍDA','CANCELADA'].includes(String(t.status||'').toUpperCase())) return false;
+  if(!t?.prazo || ['CONCLUÍDA','CANCELADA','AGUARDANDO VALIDAÇÃO'].includes(String(t.status||'').toUpperCase())) return false;
   const d=new Date(t.prazo); return !isNaN(d.getTime()) && d.getTime()<Date.now();
 }
 function classePrioridadeAcomp(p){
@@ -16767,6 +17201,37 @@ function renderSetores(){
     </div>`;
 }
 
+async function atualizarAcompanhamentoDia(botao){
+  const btn=botao || document.getElementById('acompRefreshBtn');
+  const textoOriginal=btn?.innerHTML || '↻ Atualizar';
+  if(btn){ btn.disabled=true; btn.innerHTML='↻ Atualizando...'; }
+  try{
+    if(!navigator.onLine){
+      prepararDBCarregado();
+      preencherFiltrosAcompanhamento(Array.isArray(db?.diario)?db.diario:[]);
+      renderDiario();
+      setSyncStatus('OFFLINE • dados disponíveis no aparelho','offline');
+      return false;
+    }
+    setSyncStatus('ATUALIZANDO ACOMPANHAMENTO...','syncing');
+    const ok=await carregarDadosCompartilhadosOnline();
+    prepararDBCarregado();
+    popularSelects();
+    renderDiario();
+    if(ok){
+      marcarSincronizacaoConfirmada('ONLINE • Acompanhamento atualizado agora');
+    }
+    return !!ok;
+  }catch(err){
+    console.error('Falha ao atualizar Acompanhamento do Dia:',err);
+    setSyncStatus('FALHA AO ATUALIZAR • dados atuais preservados','offline');
+    alert('Não foi possível atualizar o Acompanhamento do Dia agora. Os dados atuais foram preservados.');
+    return false;
+  }finally{
+    if(btn){ btn.disabled=false; btn.innerHTML=textoOriginal; }
+  }
+}
+
 let acompVisaoAtual='FUNCIONARIO';
 function preencherFiltrosAcompanhamento(registros){
   const f=document.getElementById('acompFiltroFuncionario'), d=document.getElementById('acompFiltroDepartamento');
@@ -16787,14 +17252,123 @@ function tarefaAcompPassaFiltros(d,t){
   if(data==='PROXIMAS'){if(!t.prazo||['CONCLUÍDA','CANCELADA'].includes(String(t.status||'').toUpperCase()))return false;const dt=new Date(t.prazo),ag=Date.now(),lim=ag+48*60*60*1000;if(isNaN(dt.getTime())||dt.getTime()<ag||dt.getTime()>lim)return false;}
   return true;
 }
+function dataReagendamentoAcompTexto(iso){const p=String(iso||'').slice(0,10).split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:(iso||'-');}
+function liderPodeDecidirReagendamento(d,t){const atual=normalizarOperador(usuarioAtual?.operador),criador=normalizarOperador(t?.criadoPorOperador||d?.criadoPorOperador);return !!atual&&!!criador&&atual===criador;}
+function prazoComNovaDataAcompanhamento(prazoAtual,novaData){const data=String(novaData||'').slice(0,10);if(!data)return String(prazoAtual||'');const atual=String(prazoAtual||''),hora=atual.includes('T')?atual.slice(10):'';return data+hora;}
+function decidirReagendamentoAcompanhamento(registroId,tarefaId,aprovar){const d=db.diario.find(x=>x.id===registroId);if(!d)return;const t=d.tarefas?.find(x=>x.id===tarefaId);if(!t)return;const r=t.reagendamento;if(!r||r.status!=='PENDENTE')return;if(!liderPodeDecidirReagendamento(d,t)){alert('Somente o líder responsável pela criação desta tarefa pode decidir este reagendamento.');return;}const antes=t.prazo||r.prazoOriginal||'';if(aprovar){const depois=prazoComNovaDataAcompanhamento(antes,r.dataSolicitada);t.prazo=depois;r.status='APROVADO';r.prazoAprovado=depois;r.decididoEmISO=new Date().toISOString();r.decididoEm=agoraBR();r.decididoPor=usuarioAtual?.nome||'Líder';r.decididoPorOperador=normalizarOperador(usuarioAtual?.operador);adicionarHistoricoTarefa(t,'REAGENDAMENTO APROVADO',`${dataReagendamentoAcompTexto(String(antes).slice(0,10))} → ${dataReagendamentoAcompTexto(r.dataSolicitada)} • aprovado por ${r.decididoPor}.`);}else{r.status='RECUSADO';r.decididoEmISO=new Date().toISOString();r.decididoEm=agoraBR();r.decididoPor=usuarioAtual?.nome||'Líder';r.decididoPorOperador=normalizarOperador(usuarioAtual?.operador);adicionarHistoricoTarefa(t,'REAGENDAMENTO RECUSADO',`Solicitação para ${dataReagendamentoAcompTexto(r.dataSolicitada)} recusada por ${r.decididoPor}. Prazo original mantido.`);}d.atualizadoPor=usuarioAtual?.nome||d.atualizadoPor;d.atualizadoEm=agoraBR();saveDB();renderDiario();renderRelatorio();}
+const SISTEMA_OPERACIONAL_ARQUIVO_WHATSAPP='SISTEMA_OPERACIONAL_V1_3_1_ICONES_100_VETORIAIS.html';
+const SISTEMA_OPERACIONAL_LINK_KEY='sistemaOperacionalLinkPublicoV1';
+function normalizarTelefoneWhatsApp(valor){
+  let digitos=String(valor||'').replace(/\D/g,'');
+  if(!digitos) return '';
+  if(digitos.startsWith('00')) digitos=digitos.slice(2);
+  if((digitos.length===10||digitos.length===11)&&!digitos.startsWith('55')) digitos='55'+digitos;
+  return digitos;
+}
+function funcionarioResponsavelAcompanhamento(d,t){
+  const lista=Array.isArray(db?.funcionarios)?db.funcionarios:[];
+  const operador=normalizarOperador(t?.responsavelOperador||t?.operador||'');
+  const matricula=String(t?.responsavelMatricula||'').trim();
+  const nome=String(t?.responsavel||d?.responsavel||'').trim();
+  return (operador?lista.find(f=>normalizarOperador(f.operador)===operador):null)
+    ||(matricula?lista.find(f=>String(f.matricula||'').trim()===matricula):null)
+    ||lista.find(f=>norm(f.nome)===norm(nome))||null;
+}
+function obterLinkSistemaOperacionalWhatsApp(){
+  try{
+    if(/^https?:$/i.test(location.protocol)) return new URL(SISTEMA_OPERACIONAL_ARQUIVO_WHATSAPP,location.href).href;
+  }catch(_){ }
+  let salvo='';
+  try{salvo=String(localStorage.getItem(SISTEMA_OPERACIONAL_LINK_KEY)||'').trim();}catch(_){ }
+  if(salvo) return salvo;
+  const informado=prompt('Informe o link público do SISTEMA OPERACIONAL para enviar pelo WhatsApp.\n\nExemplo: https://suaempresa.com/sistema-operacional');
+  if(!informado) return '';
+  const link=String(informado).trim();
+  if(!/^https?:\/\//i.test(link)){
+    alert('Informe um link iniciado por http:// ou https://.');
+    return '';
+  }
+  try{localStorage.setItem(SISTEMA_OPERACIONAL_LINK_KEY,link);}catch(_){ }
+  return link;
+}
+function enviarTarefaAcompanhamentoWhatsApp(diarioId,tarefaId){
+  const d=(db.diario||[]).find(x=>String(x.id)===String(diarioId));
+  const t=d?.tarefas?.find(x=>String(x.id)===String(tarefaId));
+  if(!d||!t){alert('Tarefa não encontrada.');return;}
+  const funcionario=funcionarioResponsavelAcompanhamento(d,t);
+  const telefone=normalizarTelefoneWhatsApp(funcionario?.telefone||'');
+  if(!telefone){
+    alert(`O funcionário ${t.responsavel||d.responsavel||'responsável'} não possui telefone cadastrado no Quadro de Funcionários.\n\nCadastre o telefone antes de enviar a tarefa por WhatsApp.`);
+    return;
+  }
+  const link=obterLinkSistemaOperacionalWhatsApp();
+  if(!link) return;
+  const nome=String(funcionario?.nome||t.responsavel||d.responsavel||'').trim();
+  const primeiroNome=(nome.split(/\s+/)[0]||nome||'Olá');
+  const prazo=prazoAcompanhamentoTexto(t.prazo);
+  const rota=[d.departamento,t.familia,t.subfamilia].filter(Boolean).join(' › ');
+  const linhas=[
+    `Olá, ${primeiroNome}!`,
+    '',
+    'Você recebeu uma nova tarefa no Sistema Operacional:',
+    '',
+    `📋 *Tarefa:* ${t.descricao||'-'}`,
+    rota?`🏬 *Área:* ${rota}`:'',
+    `⚡ *Prioridade:* ${t.prioridade||'MÉDIA'}`,
+    `📅 *Prazo:* ${prazo}`,
+    t.exigirFotoConclusao?'📷 *Conclusão:* foto obrigatória':'',
+    t.tempoEstimadoMin?`⏱ *Tempo estimado:* ${t.tempoEstimadoMin} min`:'',
+    t.criterioConclusao?`✅ *Critério de conclusão:* ${t.criterioConclusao}`:'',
+    Array.isArray(t.checklist)&&t.checklist.length?`☑ *Checklist:* ${t.checklist.map(i=>i.texto).filter(Boolean).join(' | ')}`:'',
+    t.exigirAprovacaoLider?'👤 *Validação:* conclusão sujeita à aprovação do líder':'',
+    t.observacao?`📝 *Orientação:* ${t.observacao}`:'',
+    '',
+    'Acesse o Sistema Operacional para acompanhar e executar a tarefa:',
+    link
+  ].filter(Boolean);
+  const url=`https://wa.me/${telefone}?text=${encodeURIComponent(linhas.join('\n'))}`;
+  window.open(url,'_blank','noopener,noreferrer');
+}
+function redefinirLinkSistemaOperacionalWhatsApp(){
+  const atual=(()=>{try{return localStorage.getItem(SISTEMA_OPERACIONAL_LINK_KEY)||''}catch(_){return ''}})();
+  const informado=prompt('Link público do SISTEMA OPERACIONAL:',atual);
+  if(informado===null) return;
+  const link=String(informado).trim();
+  if(link&&!/^https?:\/\//i.test(link)){alert('Informe um link iniciado por http:// ou https://.');return;}
+  try{if(link)localStorage.setItem(SISTEMA_OPERACIONAL_LINK_KEY,link);else localStorage.removeItem(SISTEMA_OPERACIONAL_LINK_KEY);}catch(_){ }
+  alert(link?'Link do Sistema Operacional atualizado.':'Link salvo removido.');
+}
+
+function liderPodeDecidirValidacaoConclusao(d,t){const atual=normalizarOperador(usuarioAtual?.operador),criador=normalizarOperador(t?.criadoPorOperador||d?.criadoPorOperador);return !!atual&&!!criador&&atual===criador;}
+function decidirValidacaoConclusaoAcompanhamento(registroId,tarefaId,aprovar){
+  const d=(db.diario||[]).find(x=>String(x.id)===String(registroId)),t=d?.tarefas?.find(x=>String(x.id)===String(tarefaId));if(!d||!t)return;
+  const v=t.validacaoConclusao;if(!v||v.status!=='PENDENTE'){alert('Esta conclusão não está aguardando validação.');return;}
+  if(!liderPodeDecidirValidacaoConclusao(d,t)){alert('Somente o líder responsável pela criação desta tarefa pode validar a conclusão.');return;}
+  const lider=usuarioAtual?.nome||'Líder',op=normalizarOperador(usuarioAtual?.operador),agoraISO=new Date().toISOString();
+  if(aprovar){
+    v.status='APROVADA';v.decididoEmISO=agoraISO;v.decididoEm=agoraBR();v.decididoPor=lider;v.decididoPorOperador=op;
+    t.status='CONCLUÍDA';t.concluidaEmISO=v.solicitadoEmISO||agoraISO;t.concluidaPor=v.solicitadoPor||t.responsavel||'';
+    adicionarHistoricoTarefa(t,'CONCLUSÃO APROVADA',`Conclusão validada por ${lider}.`);adicionarHistoricoTarefa(t,'STATUS ALTERADO','AGUARDANDO VALIDAÇÃO → CONCLUÍDA • aprovação do líder');
+  }else{
+    const motivo=prompt('Motivo da devolução para ajuste (opcional):','');if(motivo===null)return;
+    v.status='RECUSADA';v.decididoEmISO=agoraISO;v.decididoEm=agoraBR();v.decididoPor=lider;v.decididoPorOperador=op;v.motivoRecusa=normalizarTextoAcomp(motivo);
+    t.status='EM ANDAMENTO';adicionarHistoricoTarefa(t,'CONCLUSÃO DEVOLVIDA',`${v.motivoRecusa||'Sem observação adicional.'} • por ${lider}`);adicionarHistoricoTarefa(t,'STATUS ALTERADO','AGUARDANDO VALIDAÇÃO → EM ANDAMENTO • devolvida pelo líder');
+  }
+  d.atualizadoPor=lider;d.atualizadoEm=agoraBR();saveDB();renderDiario();renderRelatorio();
+}
+function abrirReferenciaTarefaAcompanhamento(registroId,tarefaId){
+  const d=(db.diario||[]).find(x=>String(x.id)===String(registroId)),t=d?.tarefas?.find(x=>String(x.id)===String(tarefaId)),r=t?.referenciaArquivo;if(!r?.dataUrl)return alert('Esta tarefa não possui arquivo de referência.');
+  const w=window.open('','_blank');if(!w){alert('O navegador bloqueou a abertura do arquivo.');return;}if(String(r.tipo||'').startsWith('image/')){w.document.write(`<title>${escapeHTML(r.nome||'Referência')}</title><body style="margin:0;background:#111;display:grid;place-items:center;min-height:100vh"><img src="${r.dataUrl}" style="max-width:100%;max-height:100vh;object-fit:contain"></body>`);w.document.close();}else{w.location.href=r.dataUrl;}
+}
+
 function tarefaAcompCardHTML(d,t){
   const atrasada=tarefaAcompanhamentoAtrasada(t), status=normalizarStatusAcompVisual(t), rota=[d.departamento,t.familia,t.subfamilia].filter(Boolean).join(' › '), hist=Array.isArray(t.historico)?t.historico.length:0;
-  const opts=['PENDENTE','EM ANDAMENTO','BLOQUEADA','CONCLUÍDA','CANCELADA'];
-  return `<div class="acomp-task-card ${status==='CONCLUÍDA'?'concluida':''} ${status==='BLOQUEADA'?'bloqueada':''} ${status==='CANCELADA'?'cancelada':''}">
-    <div class="acomp-task-main"><div class="acomp-task-name">${escapeHTML(t.descricao||'-')}</div><div class="acomp-task-route">${escapeHTML(rota||d.departamento||'-')}</div><div class="acomp-task-meta"><span class="acomp-chip ${classePrioridadeAcomp(t.prioridade)}">${escapeHTML(t.prioridade||'MÉDIA')}</span><span class="acomp-chip acomp-status-chip">${escapeHTML(status)}</span>${atrasada?'<span class="acomp-chip acomp-prio-critica">ATRASADA</span>':''}</div>${t.observacao?`<div class="acomp-task-observation"><b>Observação:</b> ${escapeHTML(t.observacao)}</div>`:''}</div>
-    <div class="acomp-deadline ${atrasada?'atrasada':''}"><b>Prazo</b><br>${escapeHTML(prazoAcompanhamentoTexto(t.prazo))}</div>
-    <div class="no-print acomp-task-actions"><select class="acomp-status-select" onchange="alterarStatusTarefaAcompanhamento('${d.id}','${t.id}',this.value)">${opts.map(x=>`<option ${status===x?'selected':''}>${x}</option>`).join('')}</select><button class="btn small secondary" type="button" onclick="adicionarObservacaoTarefaAcompanhamento('${d.id}','${t.id}')" title="Observação">📝</button><button class="btn small secondary" type="button" onclick="reatribuirTarefaAcompanhamento('${d.id}','${t.id}')" title="Reatribuir">↪</button><button class="btn small secondary" type="button" onclick="verHistoricoTarefaAcompanhamento('${d.id}','${t.id}')" title="Histórico">🕘 ${hist}</button></div>
-  </div>`;
+  const reag=t.reagendamento&&typeof t.reagendamento==='object'?t.reagendamento:null,reagPendente=reag?.status==='PENDENTE',podeDecidir=reagPendente&&liderPodeDecidirReagendamento(d,t),criador=t.criadoPor||d.criadoPor||'Líder não identificado';
+  const painelReag=reagPendente?`<div class="acomp-reschedule-request"><div><b>📅 Reagendamento solicitado</b><span>Nova data proposta: <strong>${escapeHTML(dataReagendamentoAcompTexto(reag.dataSolicitada))}</strong></span>${reag.motivo?`<span>Motivo: ${escapeHTML(reag.motivo)}</span>`:''}<small>Solicitado por ${escapeHTML(reag.solicitadoPor||t.responsavel||d.responsavel||'-')} • aprovação: ${escapeHTML(criador)}</small></div>${podeDecidir?`<div class="acomp-reschedule-actions no-print"><button class="btn small" type="button" onclick="decidirReagendamentoAcompanhamento('${d.id}','${t.id}',true)">✓ Aprovar</button><button class="btn small danger" type="button" onclick="decidirReagendamentoAcompanhamento('${d.id}','${t.id}',false)">✕ Recusar</button></div>`:`<span class="acomp-chip acomp-status-chip">AGUARDANDO LÍDER</span>`}</div>`:'';
+  const valid=t.validacaoConclusao&&typeof t.validacaoConclusao==='object'?t.validacaoConclusao:null,validPendente=valid?.status==='PENDENTE'&&String(t.status||'').toUpperCase()==='AGUARDANDO VALIDAÇÃO',podeValidar=validPendente&&liderPodeDecidirValidacaoConclusao(d,t);
+  const painelValidacao=validPendente?`<div class="acomp-validation-request"><div><b>✓ Conclusão aguardando validação</b><span>Enviada por <strong>${escapeHTML(valid.solicitadoPor||t.responsavel||'-')}</strong>${valid.solicitadoEm?` • ${escapeHTML(valid.solicitadoEm)}`:''}</span>${t.observacaoConclusao?`<small>${escapeHTML(t.observacaoConclusao)}</small>`:''}</div>${podeValidar?`<div class="acomp-validation-actions no-print"><button class="btn small" type="button" onclick="decidirValidacaoConclusaoAcompanhamento('${d.id}','${t.id}',true)">✓ Aprovar conclusão</button><button class="btn small danger" type="button" onclick="decidirValidacaoConclusaoAcompanhamento('${d.id}','${t.id}',false)">↩ Devolver</button></div>`:`<span class="acomp-chip acomp-status-chip">AGUARDANDO LÍDER</span>`}</div>`:'';
+  const checklist=Array.isArray(t.checklist)?t.checklist.filter(i=>i?.texto):[],checkDone=checklist.filter(i=>i.concluido).length;
+  return `<div class="acomp-task-card ${status==='CONCLUÍDA'?'concluida':''} ${status==='BLOQUEADA'?'bloqueada':''} ${status==='CANCELADA'?'cancelada':''}"><div class="acomp-task-main"><div class="acomp-task-name">${escapeHTML(t.descricao||'-')}</div><div class="acomp-task-route">${escapeHTML(rota||d.departamento||'-')}</div><div class="acomp-task-meta"><span class="acomp-chip ${classePrioridadeAcomp(t.prioridade)}">${escapeHTML(t.prioridade||'MÉDIA')}</span><span class="acomp-chip acomp-status-chip">${escapeHTML(status)}</span>${atrasada?'<span class="acomp-chip acomp-prio-critica">ATRASADA</span>':''}${reagPendente?'<span class="acomp-chip acomp-prio-alta">📅 REAGENDAMENTO PENDENTE</span>':''}${t.assessorAdicional?'<span class="acomp-chip">👥 ASSESSOR ADICIONAL</span>':''}${t.exigirFotoConclusao?`<span class="acomp-photo-chip ${t.fotoConclusaoDataUrl?'done':''}">${t.fotoConclusaoDataUrl?'📷 Foto recebida':'📷 Foto obrigatória'}</span>`:(t.fotoConclusaoDataUrl?'<span class="acomp-photo-chip done">📷 Foto recebida</span>':'')}${t.tempoEstimadoMin?`<span class="acomp-chip acomp-advanced-chip">⏱ ${escapeHTML(String(t.tempoEstimadoMin))} min</span>`:''}${checklist.length?`<span class="acomp-chip acomp-advanced-chip">☑ ${checkDone}/${checklist.length}</span>`:''}${t.exigirAprovacaoLider?'<span class="acomp-chip acomp-advanced-chip">✓ Validação do líder</span>':''}${t.referenciaArquivo?.dataUrl?'<span class="acomp-chip acomp-advanced-chip">📎 Referência</span>':''}</div>${t.observacao?`<div class="acomp-task-observation"><b>Observação:</b> ${escapeHTML(t.observacao)}</div>`:''}${t.criterioConclusao?`<div class="acomp-task-observation"><b>Critério:</b> ${escapeHTML(t.criterioConclusao)}</div>`:''}</div><div class="acomp-deadline ${atrasada?'atrasada':''}"><b>Prazo</b><br>${escapeHTML(prazoAcompanhamentoTexto(t.prazo))}</div>${painelReag}${painelValidacao}${t.fotoConclusaoDataUrl?`<div class="acomp-photo-proof"><img class="acomp-photo-thumb" src="${escapeHTML(t.fotoConclusaoDataUrl)}" alt="Evidência da conclusão"><button class="btn small secondary no-print" type="button" onclick="abrirFotoConclusaoAcompanhamento('${d.id}','${t.id}')">📷 Ver evidência</button></div>`:''}<div class="no-print acomp-task-actions"><span class="acomp-status-readonly acomp-status-readonly-card" title="Status atualizado pelo assessor no Sistema Operacional">${escapeHTML(status)}</span><button class="btn small acomp-whatsapp-btn" type="button" onclick="enviarTarefaAcompanhamentoWhatsApp('${d.id}','${t.id}')" title="Enviar esta tarefa ao funcionário por WhatsApp">WhatsApp</button>${t.referenciaArquivo?.dataUrl?`<button class="btn small secondary" type="button" onclick="abrirReferenciaTarefaAcompanhamento('${d.id}','${t.id}')" title="Abrir referência">📎 Referência</button>`:''}<button class="btn small secondary" type="button" onclick="adicionarObservacaoTarefaAcompanhamento('${d.id}','${t.id}')" title="Observação">📝</button><button class="btn small secondary" type="button" onclick="reatribuirTarefaAcompanhamento('${d.id}','${t.id}')" title="Reatribuir">↪</button><button class="btn small secondary" type="button" onclick="verHistoricoTarefaAcompanhamento('${d.id}','${t.id}')" title="Histórico">🕘 ${hist}</button></div></div>`;
 }
 function renderDiario(){
   const lista=document.getElementById('acompanhamentoLista'), resumo=document.getElementById('acompResumoDia'); if(!lista)return;
@@ -17331,7 +17905,165 @@ function abrirPermissoesSelecionadas(){
   editarPermissoesUsuario(op);
 }
 
-function printActivePage(){ showAppLoader('Preparando impressão', 'Organizando a página para impressão em A4...'); setTimeout(() => { window.print(); hideAppLoader(); }, 320); }
+
+function abrirOpcoesImpressaoAcompanhamento(){
+  const modal=document.getElementById('modalImpressaoAcompanhamento');
+  const data=document.getElementById('acompPrintData');
+  const dep=document.getElementById('acompPrintDepartamento');
+  if(!modal||!data||!dep)return;
+
+  data.value=document.getElementById('acompFiltroData')?.value && /^\d{4}-\d{2}-\d{2}$/.test(document.getElementById('acompFiltroData').value)
+    ? document.getElementById('acompFiltroData').value : hojeISO();
+
+  const deps=typeof departamentosAcompanhamento==='function'
+    ? departamentosAcompanhamento() : ['MASCULINO','FEMININO','INFANTIL','CALÇADO','LAR','UNI-FILA','ESTOQUE','CAIXA','LIMPEZA','LOJA TODA'];
+
+  dep.innerHTML='<option value="TODOS">TODOS OS DEPARTAMENTOS</option>'+deps.map(x=>`<option value="${escapeHTML(x)}">${escapeHTML(x)}</option>`).join('');
+  const filtroDep=document.getElementById('acompFiltroDepartamento')?.value||'TODOS';
+  dep.value=deps.includes(filtroDep)?filtroDep:'TODOS';
+
+  modal.style.display='flex';
+}
+function fecharOpcoesImpressaoAcompanhamento(){
+  const modal=document.getElementById('modalImpressaoAcompanhamento');
+  if(modal)modal.style.display='none';
+}
+function textoDataImpressaoAcompanhamento(iso){
+  if(!iso)return '-';
+  const p=String(iso).split('-');
+  return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:iso;
+}
+function agEstilosDocumentoImpressao(orientation='portrait'){
+  return `
+    @page { size: A4 ${orientation}; margin: 14mm; }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:#fff;color:#111;font-family:Inter,"Segoe UI",Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{padding:0}
+    .ag-print-page{width:100%}
+    .ag-doc{width:100%;margin:0 auto}
+    .ag-doc-header{padding:6px 0 14px;border-bottom:2px solid #141414;text-align:center}
+    .ag-doc-kicker{font-size:11pt;font-weight:800;color:#333;letter-spacing:.01em}
+    .ag-doc-title{margin:10px 0 8px;font-size:26pt;line-height:1.1;font-family:Georgia,"Times New Roman",serif;font-weight:700;color:#111}
+    .ag-doc-rule{width:180px;height:3px;background:#c89a2b;margin:0 auto 12px;border-radius:999px}
+    .ag-doc-meta{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px;font-size:9pt;color:#222}
+    .ag-doc-meta span{display:inline-flex;align-items:center;gap:6px}
+    .ag-doc-meta b{font-weight:800}
+    .ag-doc-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}
+    .ag-doc-card{border:1px solid #cfc8ba;border-radius:12px;padding:12px 14px;min-height:78px;background:#fff}
+    .ag-doc-card small{display:block;font-size:8.2pt;text-transform:uppercase;letter-spacing:.08em;color:#6b5d44;font-weight:800;margin-bottom:6px}
+    .ag-doc-card b{display:block;font-size:20pt;line-height:1.1;color:#111}
+    .ag-doc-section{margin-top:16px}
+    .ag-doc-note{padding:12px 13px;border:1px solid #dfdfdf;border-radius:10px;background:#fff;white-space:pre-wrap;font-size:10pt;line-height:1.45}
+    table.ag-doc-table{width:100%;border-collapse:collapse;margin-top:4px;font-size:9pt}
+    .ag-doc-table th,.ag-doc-table td{border:1px solid #cfcfcf;padding:8px 9px;text-align:left;vertical-align:top}
+    .ag-doc-table th{background:#1b1f23;color:#fff;font-weight:800}
+    .ag-doc-table tr{break-inside:avoid}
+    .ag-doc-table thead{display:table-header-group}
+    .ag-doc-table tbody tr:nth-child(even){background:#fafafa}
+    .ag-doc-footer{margin-top:18px;padding-top:10px;border-top:2px solid #c89a2b;display:flex;justify-content:space-between;gap:12px;font-size:9pt;color:#222}
+    .ag-generic-content{display:grid;gap:12px}
+    .ag-print-html table{width:100%;border-collapse:collapse;font-size:9pt}
+    .ag-print-html th,.ag-print-html td{border:1px solid #d4d4d4;padding:7px 8px;vertical-align:top;text-align:left}
+    .ag-print-html th{background:#1b1f23;color:#fff;font-weight:800}
+    .ag-print-html .section-card,.ag-print-html .table-wrap,.ag-print-html .table-container{border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#fff;margin:0 0 10px}
+    .ag-print-html .metric,.ag-print-html .acomp-summary-card{border:1px solid #dadada;border-radius:12px;padding:12px}
+    .ag-print-html .grid,.ag-print-html .grid-2,.ag-print-html .grid-3,.ag-print-html .grid-4,.ag-print-html .acomp-summary-grid{display:grid;gap:10px}
+    .ag-print-html .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .ag-print-html .grid-3,.ag-print-html .acomp-summary-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .ag-print-html .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .ag-print-html img{max-width:100%;height:auto}
+    .ag-print-html .hidden{display:none !important}
+    .ag-print-html .print-field-value{display:block;padding:6px 8px;border:1px dashed #d1d5db;border-radius:8px;background:#fafafa;white-space:pre-wrap;min-height:34px}
+    @media print {.ag-doc-card,.ag-print-html .section-card{break-inside:avoid}}
+  `;
+}
+function agAbrirDocumentoImpressao(titulo,conteudoHTML,orientation='portrait',meta=[]){
+  const win=window.open('','_blank','noopener,noreferrer,width=1280,height=900');
+  if(!win){ alert('Não foi possível abrir a janela de impressão. Verifique o bloqueador de pop-ups.'); return; }
+  const metaHtml=(Array.isArray(meta)?meta:[]).filter(Boolean).map(item=>`<span><b>${escapeHTML(item.label||'')}</b> ${escapeHTML(item.value||'')}</span>`).join('');
+  win.document.open();
+  win.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${escapeHTML(titulo)}</title><style>${agEstilosDocumentoImpressao(orientation)}</style></head><body><div class="ag-print-page"><div class="ag-doc"><header class="ag-doc-header"><div class="ag-doc-kicker">Assistência Gerencial de Loja — Avenida</div><h1 class="ag-doc-title">${escapeHTML(titulo)}</h1><div class="ag-doc-rule"></div><div class="ag-doc-meta">${metaHtml}</div></header><main>${conteudoHTML}</main><footer class="ag-doc-footer"><span>Relatório gerado pelo sistema</span><span>${escapeHTML(agoraBR())}</span></footer></div></div><script>window.onload=function(){setTimeout(function(){window.focus();window.print();},180)};<\/script></body></html>`);
+  win.document.close();
+}
+function agNormalizarTextoImpressao(valor){
+  return String(valor==null?'':valor).replace(/\s+/g,' ').trim();
+}
+function agPrepararCloneParaImpressao(node){
+  const clone=node.cloneNode(true);
+  clone.querySelectorAll('.no-print,button,.btn,.actions,.modal-backdrop,.icon-btn,.tabs,.task-view-switch,.acomp-control-bar,.acomp-page-actions,.ag-header-actions,.filter-row,.acomp-operacional-bridge-actions,.bottom-nav,.logout-fixed,.sidebar,.topbar,.app-loader,.toast').forEach(el=>el.remove());
+  clone.querySelectorAll('.hidden,[hidden]').forEach(el=>el.remove());
+  clone.querySelectorAll('th.no-print,td.no-print').forEach(el=>el.remove());
+  clone.querySelectorAll('input,select,textarea').forEach(el=>{
+    const wrap=document.createElement(el.tagName==='TEXTAREA'?'div':'span');
+    wrap.className='print-field-value';
+    let value='';
+    if(el.tagName==='SELECT'){
+      const idx=el.selectedIndex;
+      value=(idx>=0 && el.options[idx])?el.options[idx].textContent:'';
+    }else if((el.type||'').toLowerCase()==='checkbox'){
+      value=el.checked?'Sim':'Não';
+    }else if((el.type||'').toLowerCase()==='radio'){
+      value=el.checked?(el.value||'Marcado'):'Não';
+    }else{
+      value=el.value||el.getAttribute('value')||'';
+    }
+    wrap.textContent=agNormalizarTextoImpressao(value)||'—';
+    el.replaceWith(wrap);
+  });
+  clone.querySelectorAll('*').forEach(el=>{
+    el.removeAttribute('onclick');el.removeAttribute('onchange');el.removeAttribute('oninput');el.removeAttribute('onblur');el.removeAttribute('onfocus');
+    const cls=(el.className&&typeof el.className==='string')?el.className:'';
+    if(cls.includes('page')) el.classList.remove('page','active');
+  });
+  return clone;
+}
+function agMontarDocumentoPaginaAtiva(active){
+  const titulo=agNormalizarTextoImpressao(active.querySelector('.section-title h1, h1')?.textContent||'Documento para impressão');
+  const subtitulo=agNormalizarTextoImpressao(active.querySelector('.section-title p, h1 + p, h2 + p')?.textContent||'');
+  const clone=agPrepararCloneParaImpressao(active);
+  const html=`<section class="ag-doc-section"><div class="ag-generic-content"><div class="ag-print-html">${clone.innerHTML}</div></div></section>`;
+  agAbrirDocumentoImpressao(titulo, html, 'portrait', [
+    {label:'Documento:', value:titulo},
+    {label:'Gerado em:', value:agoraBR()},
+    {label:'Usuário:', value:(usuarioAtual&&usuarioAtual.nome)||'Sistema'},
+    {label:'Resumo:', value:subtitulo||'Documento interno'}
+  ]);
+}
+function gerarImpressaoAcompanhamento(){
+  const data=document.getElementById('acompPrintData')?.value||hojeISO();
+  const dep=document.getElementById('acompPrintDepartamento')?.value||'TODOS';
+  const tipo=document.getElementById('acompPrintTipo')?.value||'DEMANDAS';
+  const registros=Array.isArray(db.diario)?db.diario:[];
+  let itens=[];
+  registros.filter(d=>d.dataISO===data && (dep==='TODOS'||d.departamento===dep)).forEach(d=>{
+    (Array.isArray(d.tarefas)?d.tarefas:[]).forEach(t=>itens.push({d,t,responsavel:t.responsavel||d.responsavel||'-'}));
+  });
+  if(tipo==='POR_FUNCIONARIO') itens.sort((a,b)=>a.responsavel.localeCompare(b.responsavel,'pt-BR') || String(a.t.descricao||'').localeCompare(String(b.t.descricao||''),'pt-BR'));
+  else if(tipo==='POR_DEPARTAMENTO') itens.sort((a,b)=>(a.d.departamento||'').localeCompare(b.d.departamento||'','pt-BR') || a.responsavel.localeCompare(b.responsavel,'pt-BR'));
+  else itens.sort((a,b)=>String(a.t.prazo||'9999').localeCompare(String(b.t.prazo||'9999')));
+  const total=itens.length;
+  const concl=itens.filter(x=>String(x.t.status||'').toUpperCase()==='CONCLUÍDA').length;
+  const atras=itens.filter(x=>typeof tarefaAcompanhamentoAtrasada==='function'&&tarefaAcompanhamentoAtrasada(x.t)).length;
+  const crit=itens.filter(x=>String(x.t.prioridade||'').toUpperCase()==='CRÍTICA').length;
+  const grupoLabel=tipo==='POR_FUNCIONARIO'?'FUNCIONÁRIO':tipo==='POR_DEPARTAMENTO'?'DEPARTAMENTO':'DEMANDAS';
+  const titulo=tipo==='POR_FUNCIONARIO'?'ACOMPANHAMENTO DO DIA — POR FUNCIONÁRIO':tipo==='POR_DEPARTAMENTO'?'ACOMPANHAMENTO DO DIA — POR DEPARTAMENTO':'ACOMPANHAMENTO DO DIA — DEMANDAS';
+  const rows=itens.map(x=>{ const t=x.t,d=x.d; return `<tr><td>${escapeHTML(x.responsavel)}</td><td>${escapeHTML(d.departamento||'-')}</td><td><b>${escapeHTML(t.descricao||'-')}</b></td><td>${escapeHTML([t.familia,t.subfamilia].filter(Boolean).join(' / ')||'-')}</td><td>${escapeHTML(t.prioridade||'MÉDIA')}</td><td>${escapeHTML(t.status||'PENDENTE')}</td><td>${escapeHTML(prazoAcompanhamentoTexto(t.prazo))}</td><td>${escapeHTML(t.observacao||'-')}</td></tr>`; }).join('');
+  const summary=`<section class="ag-doc-summary"><div class="ag-doc-card"><small>Total de demandas</small><b>${total}</b></div><div class="ag-doc-card"><small>Concluídas</small><b>${concl}</b></div><div class="ag-doc-card"><small>Críticas</small><b>${crit}</b></div><div class="ag-doc-card"><small>Atrasadas</small><b>${atras}</b></div></section>`;
+  const tabela=total?`<section class="ag-doc-section"><table class="ag-doc-table"><thead><tr><th style="width:16%">Funcionário</th><th style="width:12%">Departamento</th><th style="width:19%">Demanda</th><th style="width:16%">Família / Subfamília</th><th style="width:10%">Prioridade</th><th style="width:10%">Status</th><th style="width:11%">Prazo</th><th style="width:16%">Observação</th></tr></thead><tbody>${rows}</tbody></table></section>`:`<section class="ag-doc-section"><div class="ag-doc-note">Nenhuma demanda encontrada para os filtros selecionados.</div></section>`;
+  fecharOpcoesImpressaoAcompanhamento();
+  agAbrirDocumentoImpressao(titulo, `${summary}${tabela}`, 'landscape', [
+    {label:'Data:', value:textoDataImpressaoAcompanhamento(data)},
+    {label:'Departamento:', value:dep==='TODOS'?'TODOS OS DEPARTAMENTOS':dep},
+    {label:'Tipo:', value:grupoLabel},
+    {label:'Impresso em:', value:agoraBR()}
+  ]);
+}
+function printActivePage(){
+  const active=document.querySelector('.page.active');
+  if(!active){ window.print(); return; }
+  showAppLoader('Preparando impressão','Criando documento otimizado para A4...');
+  try{ agMontarDocumentoPaginaAtiva(active); } finally { setTimeout(()=>hideAppLoader(),200); }
+}
 function configGlobalSeguroParaBackup(config){
   const copia=cloneJSONSeguro(config||{},{});
   if(Array.isArray(copia.usuarios)) copia.usuarios=copia.usuarios.map(u=>{ const limpo={...u}; delete limpo.senha; return limpo; });
@@ -19300,7 +20032,22 @@ window.addEventListener('load', async () => {
     const acc=acesso || ((typeof globalConfig!=='undefined' ? globalConfig?.usuarios : [])||[]).find(u=>String(u.operador||'').replace(/\D/g,'')===op);
     return String(reg?.nome||acc?.nome||'').trim();
   };
-  g.nomeCompletoUsuarioPorOperadorAsync=async(operador,acesso=null)=>g.nomeCompletoUsuarioPorOperadorLocal(operador,null,acesso);
+  g.nomeCompletoUsuarioPorOperadorAsync=async(operador,acesso=null)=>{
+    const op=typeof normalizarOperador==='function'?normalizarOperador(operador):String(operador||'').replace(/\D/g,'');
+    if(!op)return '';
+    try{
+      if(typeof supabaseclient!=='undefined'&&supabaseclient&&typeof ONLINE_TABLE!=='undefined'&&typeof SHARED_ROW_ID!=='undefined'){
+        const {data,error}=await supabaseclient.from(ONLINE_TABLE).select('dados').eq('id',SHARED_ROW_ID).maybeSingle();
+        if(!error){
+          const f=(data?.dados?.funcionarios||[]).find(x=>(typeof normalizarOperador==='function'?normalizarOperador(x?.operador):String(x?.operador||'').replace(/\D/g,''))===op);
+          if(f?.nome)return String(f.nome).trim();
+        }
+      }
+      const local=(typeof db!=='undefined'&&Array.isArray(db?.funcionarios))?db.funcionarios.find(f=>(typeof normalizarOperador==='function'?normalizarOperador(f?.operador):String(f?.operador||'').replace(/\D/g,''))===op):null;
+      if(local?.nome)return String(local.nome).trim();
+    }catch(e){console.warn('Não foi possível consultar o nome completo no login:',e)}
+    return g.nomeCompletoUsuarioPorOperadorLocal(operador,null,acesso);
+  };
   g.bindLoginPreviewTabFullName=()=>{
     const user=$('loginUser'),pass=$('loginPass');
     if(!user||user.dataset.fullNameBound==='1')return;
@@ -27583,5 +28330,186 @@ window.addEventListener('load', async () => {
     else iniciarOperacoesDocumentos();
   })();
   </script>
+\n<script id="acesso-operacional-v51-54-js">
+(function(){
+  function mapaAcessos(){
+    if(!globalConfig || typeof globalConfig!=='object') return {};
+    const atual=globalConfig.operacionalAcessos;
+    return atual && typeof atual==='object' && !Array.isArray(atual) ? atual : {};
+  }
+  function funcionariosConfiguraveis(){
+    return (Array.isArray(db?.funcionarios)?db.funcionarios:[])
+      .filter(f=>normalizarOperador(f?.operador) && !['DESLIGADO','INATIVO'].includes(String(f?.status||'ATIVO').toUpperCase()))
+      .slice().sort((a,b)=>String(a?.nome||'').localeCompare(String(b?.nome||''),'pt-BR'));
+  }
+  window.abrirConfiguracaoAcessoOperacional=function(){
+    if(typeof temPermissao==='function' && !temPermissao('acompanhamento')){alert('Você não possui permissão para configurar o Sistema Operacional.');return;}
+    const modal=document.getElementById('modalAcessoOperacional'); if(!modal)return;
+    const busca=document.getElementById('buscaAcessoOperacional'); if(busca)busca.value='';
+    renderConfiguracaoAcessoOperacional(); modal.classList.add('active');
+    setTimeout(()=>busca?.focus(),80);
+  };
+  window.fecharConfiguracaoAcessoOperacional=function(){document.getElementById('modalAcessoOperacional')?.classList.remove('active');};
+  window.renderConfiguracaoAcessoOperacional=function(){
+    const alvo=document.getElementById('listaAcessoOperacional'); if(!alvo)return;
+    const busca=typeof norm==='function'?norm(document.getElementById('buscaAcessoOperacional')?.value||''):String(document.getElementById('buscaAcessoOperacional')?.value||'').toUpperCase();
+    const acessos=mapaAcessos();
+    const todos=funcionariosConfiguraveis();
+    const filtrados=todos.filter(f=>{
+      const texto=`${f?.nome||''} ${f?.operador||''} ${f?.matricula||''} ${f?.cargo||''} ${f?.setor||f?.departamento||''}`;
+      return !busca || (typeof norm==='function'?norm(texto):texto.toUpperCase()).includes(busca);
+    });
+    const liberados=todos.filter(f=>acessos[normalizarOperador(f.operador)]===true).length;
+    const resumo=document.getElementById('resumoAcessoOperacional'); if(resumo)resumo.textContent=`${liberados} liberado${liberados===1?'':'s'} • ${todos.length} funcionário${todos.length===1?'':'s'}`;
+    if(!filtrados.length){alvo.innerHTML='<div class="operacional-access-empty">Nenhum funcionário encontrado.</div>';return;}
+    alvo.innerHTML=filtrados.map(f=>{
+      const op=normalizarOperador(f.operador),liberado=acessos[op]===true;
+      return `<div class="operacional-access-row" data-op-access-row="${escapeHTML(op)}">
+        <div class="operacional-access-person"><b>${escapeHTML(f.nome||'Sem nome')}</b><small>${escapeHTML(f.setor||f.departamento||'Equipe')}</small></div>
+        <div class="operacional-access-cell">OP. ${escapeHTML(op)}</div>
+        <div class="operacional-access-cell op-access-matricula">${escapeHTML(f.matricula||'-')}</div>
+        <div class="operacional-access-cell op-access-cargo">${escapeHTML(f.cargo||'-')}</div>
+        <label class="operacional-access-toggle"><input type="checkbox" data-operacional-acesso="${escapeHTML(op)}" ${liberado?'checked':''} onchange="this.nextElementSibling.textContent=this.checked?'LIBERADO':'BLOQUEADO'"><span>${liberado?'LIBERADO':'BLOQUEADO'}</span></label>
+      </div>`;
+    }).join('');
+  };
+  window.salvarConfiguracaoAcessoOperacional=async function(botao){
+    if(!globalConfig || typeof globalConfig!=='object'){alert('Configuração global ainda não foi carregada.');return;}
+    const mapa={...mapaAcessos()};
+    funcionariosConfiguraveis().forEach(f=>{const op=normalizarOperador(f.operador); mapa[op]=false;});
+    document.querySelectorAll('#listaAcessoOperacional [data-operacional-acesso]').forEach(el=>{mapa[normalizarOperador(el.dataset.operacionalAcesso)]=!!el.checked;});
+    globalConfig.operacionalAcessos=mapa;
+    globalConfig.operacionalAcessosAtualizadoPor=usuarioAtual?.nome||'';
+    globalConfig.operacionalAcessosAtualizadoEm=typeof agoraBR==='function'?agoraBR():new Date().toLocaleString('pt-BR');
+    const original=botao?.innerHTML; if(botao){botao.disabled=true;botao.textContent='Salvando...';}
+    try{
+      await salvarConfigGlobalOnline();
+      renderConfiguracaoAcessoOperacional();
+      if(typeof marcarSincronizacaoConfirmada==='function')marcarSincronizacaoConfirmada('ONLINE • acessos do Operacional atualizados');
+      fecharConfiguracaoAcessoOperacional();
+      alert('Acessos do Sistema Operacional atualizados com sucesso.');
+    }catch(err){console.error('Falha ao salvar acessos do Operacional:',err);alert('Não foi possível salvar os acessos do Sistema Operacional. Verifique a conexão e tente novamente.');}
+    finally{if(botao){botao.disabled=false;botao.innerHTML=original||'💾 Salvar acessos';}}
+  };
+})();
+</script>\n\n<div id="modalAcessoOperacional" class="operacional-access-modal no-print" role="dialog" aria-modal="true" aria-labelledby="tituloAcessoOperacional" onclick="if(event.target===this)fecharConfiguracaoAcessoOperacional()">
+  <div class="operacional-access-dialog">
+    <div class="operacional-access-head">
+      <div><h2 id="tituloAcessoOperacional">⚙ Acesso ao Sistema Operacional</h2><p>Defina quais funcionários da loja estão autorizados a fazer login no Sistema Operacional.</p></div>
+      <button class="operacional-access-close" type="button" onclick="fecharConfiguracaoAcessoOperacional()" aria-label="Fechar">✕</button>
+    </div>
+    <div class="operacional-access-toolbar">
+      <input id="buscaAcessoOperacional" type="search" placeholder="Buscar funcionário, operador, matrícula ou cargo..." oninput="renderConfiguracaoAcessoOperacional()">
+      <span id="resumoAcessoOperacional" class="operacional-access-count">0 liberados</span>
+    </div>
+    <div id="listaAcessoOperacional" class="operacional-access-list"></div>
+    <div class="operacional-access-foot">
+      <div class="operacional-access-note">Funcionário cadastrado não significa acesso liberado. O Operacional consulta esta autorização no momento do login. Alterações só entram em vigor após salvar.</div>
+      <div class="operacional-access-actions"><button class="btn secondary" type="button" onclick="fecharConfiguracaoAcessoOperacional()">Cancelar</button><button id="salvarAcessoOperacionalBtn" class="btn" type="button" onclick="salvarConfiguracaoAcessoOperacional(this)">💾 Salvar acessos</button></div>
+    </div>
+  </div>
+</div>\n
+
+<style id="ui-vector-icons-v2-style">
+.ui-svg-icon{width:1.05em;height:1.05em;display:inline-block;vertical-align:-.16em;flex:0 0 auto;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+button>.ui-svg-icon,.btn>.ui-svg-icon{margin-right:.18em}.ico>.ui-svg-icon,.bottom-nav span>.ui-svg-icon{width:1.14em;height:1.14em;margin:0}
+.header-logout .ui-svg-icon,.icon-btn .ui-svg-icon,.modal-close .ui-svg-icon,.completion-back .ui-svg-icon,.theme-btn .ui-svg-icon{margin:0;width:1.12em;height:1.12em}
+h1>.ui-svg-icon,h2>.ui-svg-icon,h3>.ui-svg-icon{margin-right:.3em;vertical-align:-.12em}
+.metric-svg-deco{position:absolute;right:18px;top:50%;transform:translateY(-50%);width:44px;height:44px;opacity:.20;pointer-events:none}.metric-svg-deco .ui-svg-icon{width:100%;height:100%;margin:0}
+.user-box::before{content:""!important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFCD09' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21a8 8 0 0 0-16 0'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:center!important;background-size:44px!important}
+</style>
+<script id="ui-vector-icons-v2-js">
+(function(){
+  const paths={
+    print:'<path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
+    settings:'<path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.1A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.1A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.1A1.7 1.7 0 0 0 15.4 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.13.36.34.69.6 1 .3.28.68.42 1.1.4h.1v4h-.1a1.7 1.7 0 0 0-1.7.6Z"/>',
+    users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    user:'<path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/>',
+    checkSquare:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="m8 12 3 3 5-6"/>',
+    check:'<path d="m5 12 4 4L19 6"/>', plus:'<path d="M12 5v14M5 12h14"/>', x:'<path d="M18 6 6 18M6 6l12 12"/>',
+    camera:'<path d="M14.5 4 16 7h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h3l1.5-3h5Z"/><circle cx="12" cy="13" r="3"/>',
+    message:'<path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z"/>',
+    link:'<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+    refresh:'<path d="M20 6v6h-6"/><path d="M4 18v-6h6"/><path d="M18.5 9a7 7 0 0 0-11.9-2.6L4 9"/><path d="M5.5 15a7 7 0 0 0 11.9 2.6L20 15"/>',
+    play:'<path d="m8 5 11 7-11 7V5Z"/>', calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
+    clipboard:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M9 9h6M9 13h6M9 17h4"/>',
+    home:'<path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/>',
+    paperclip:'<path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>',
+    note:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h6"/>',
+    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', undo:'<path d="M9 7 4 12l5 5"/><path d="M4 12h9a7 7 0 0 1 7 7"/>',
+    moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/>', sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',
+    chart:'<path d="M4 19V9M10 19V5M16 19v-7M22 19V3"/>', door:'<path d="M10 17l5-5-5-5M15 12H3"/><path d="M15 3h5a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-5"/>',
+    arrowLeft:'<path d="m15 18-6-6 6-6"/>', search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
+    save:'<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/>',
+    file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/>',
+    folder:'<path d="M3 6h6l2 2h10v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6Z"/>',
+    lock:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>', key:'<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M18 5l2 2M15 8l2 2"/>',
+    shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/>',
+    alert:'<path d="M10.3 2.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 2.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/>',
+    mic:'<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/>',
+    edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/>',
+    upload:'<path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 20h14"/>', download:'<path d="M12 4v12M7 11l5 5 5-5"/><path d="M5 20h14"/>',
+    trash:'<path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15M10 11v6M14 11v6"/>',
+    package:'<path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 7 9 5 9-5M3 7v10l9 5 9-5V7M12 12v10"/>',
+    truck:'<path d="M3 6h11v10H3Z"/><path d="M14 10h4l3 3v3h-7Z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/>',
+    store:'<path d="M3 10h18M5 10v10h14V10M4 3h16l2 7H2l2-7ZM9 20v-6h6v6"/>',
+    card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',
+    palette:'<circle cx="12" cy="12" r="9"/><circle cx="8" cy="9" r="1"/><circle cx="12" cy="7" r="1"/><circle cx="16" cy="9" r="1"/><path d="M17 15c0 2-2 3-4 2"/>',
+    target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+    tool:'<path d="M14.7 6.3a4 4 0 0 0-5 5L3 18l3 3 6.7-6.7a4 4 0 0 0 5-5l-2.4 2.4-3-3 2.4-2.4Z"/>',
+    broom:'<path d="m15 4 5 5M13 6l5 5M4 20c4-1 7-4 9-8l-3-3c-4 2-7 5-8 9l2 2Z"/>',
+    tag:'<path d="M20 13 11 22l-9-9V4h9l9 9Z"/><circle cx="7" cy="9" r="1"/>',
+    book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13Z"/><path d="M4 19.5V6.5"/>',
+    briefcase:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V4h8v3M3 12h18"/>',
+    handshake:'<path d="m8 12 2 2c1 1 2 1 3 0l3-3"/><path d="M2 11l5-5 4 2 2-2 5 5M4 17l3 3 3-3M20 17l-3 3-2-2"/>',
+    spark:'<path d="m12 2 1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5L12 2Z"/>',
+    arrowRight:'<path d="m9 18 6-6-6-6"/>',
+    circle:'<circle cx="12" cy="12" r="8"/>', blocked:'<circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/>'
+  };
+  const tokenMap=new Map([
+    ['🖨️','print'],['🖨','print'],['⚙️','settings'],['⚙','settings'],['👥','users'],['👤','user'],['✅','checkSquare'],['☑','checkSquare'],['☐','checkSquare'],['✓','check'],['➕','plus'],['✕','x'],['📷','camera'],['📲','message'],['💬','message'],['🔗','link'],['↻','refresh'],['🔄','refresh'],['🔁','refresh'],['▶','play'],['📅','calendar'],['🗓️','calendar'],['📋','clipboard'],['⌂','home'],['📎','paperclip'],['📝','note'],['📄','file'],['📁','folder'],['⏱','clock'],['🕑','clock'],['🕗','clock'],['🕘','clock'],['⌛','clock'],['↩','undo'],['←','arrowLeft'],['➤','arrowRight'],
+    ['🌙','moon'],['☀️','sun'],['☀','sun'],['🌞','sun'],['📊','chart'],['📈','chart'],['🚪','door'],['🔎','search'],['💾','save'],['🔒','lock'],['🔐','lock'],['🔑','key'],['🛡️','shield'],['⚠️','alert'],['⚡','alert'],['🎙️','mic'],['✍️','edit'],['✏️','edit'],['📤','upload'],['📥','download'],['🗑️','trash'],['📦','package'],['🚚','truck'],['🏬','store'],['🏢','store'],['💳','card'],['🎨','palette'],['🎯','target'],['🔧','tool'],['🛠️','tool'],['🧰','tool'],['🧹','broom'],['🧾','tag'],['📚','book'],['📕','book'],['📗','book'],['📘','book'],['📙','book'],['🎓','book'],['🤝','handshake'],['🧩','settings'],['👋','user'],['✦','spark'],['🎉','spark'],['🌐','link'],['🖼️','camera'],['🗄️','folder'],['🗜️','package'],['👕','store'],['🛒','store'],['🏖️','calendar'],['🎲','circle'],['🔴','circle'],['🟢','circle'],['◇','target'],['◆','target'],['◷','clock'],['▤','clipboard'],['▦','calendar'],['⊘','blocked']
+  ]);
+  const sortedTokens=[...tokenMap.keys()].sort((a,b)=>b.length-a.length);
+  function svg(name){return `<svg class="ui-svg-icon" aria-hidden="true" viewBox="0 0 24 24">${paths[name]||paths.circle}</svg>`}
+  function replaceTextNode(n){
+    if(!n||!n.nodeValue||!n.parentNode)return;
+    const parent=n.parentElement;if(!parent||/^(SCRIPT|STYLE|TEXTAREA|OPTION)$/.test(parent.tagName))return;
+    let text=n.nodeValue, found=false;
+    for(const tok of sortedTokens){if(text.includes(tok)){found=true;break}}
+    if(!found)return;
+    const frag=document.createDocumentFragment();let rest=text;
+    while(rest){
+      let best=-1,bTok=null;
+      for(const tok of sortedTokens){const i=rest.indexOf(tok);if(i>=0&&(best<0||i<best)){best=i;bTok=tok;if(i===0)break}}
+      if(best<0){frag.appendChild(document.createTextNode(rest));break}
+      if(best>0)frag.appendChild(document.createTextNode(rest.slice(0,best)));
+      const box=document.createElement('span');box.innerHTML=svg(tokenMap.get(bTok));frag.appendChild(box.firstElementChild);
+      rest=rest.slice(best+bTok.length);
+    }
+    parent.replaceChild(frag,n);
+  }
+  function processDataIcon(el){
+    if(!el||!el.hasAttribute?.('data-icon'))return;
+    const tok=el.getAttribute('data-icon')||'', name=tokenMap.get(tok);
+    if(!name)return;
+    el.setAttribute('data-icon','');
+    let deco=el.querySelector(':scope > .metric-svg-deco');
+    if(!deco){deco=document.createElement('span');deco.className='metric-svg-deco';deco.innerHTML=svg(name);el.appendChild(deco)}
+  }
+  function polish(root=document){
+    if(root.nodeType===3){replaceTextNode(root);return}
+    root.querySelectorAll?.('[data-icon]').forEach(processDataIcon);
+    if(root.matches?.('[data-icon]'))processDataIcon(root);
+    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const nodes=[];let n;while((n=walker.nextNode()))nodes.push(n);nodes.forEach(replaceTextNode);
+    root.querySelectorAll?.('[onclick*="logout()"],.header-logout').forEach(el=>{el.innerHTML=svg('door');el.setAttribute('aria-label',el.getAttribute('aria-label')||'Sair');el.title=el.title||'Sair'});
+  }
+  window.polishVectorIcons=polish;
+  const run=()=>polish(document.body||document);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();
+  const obs=new MutationObserver(ms=>{for(const m of ms){m.addedNodes.forEach(n=>{if(n.nodeType===1||n.nodeType===3)polish(n)})}});
+  if(document.documentElement)obs.observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
 </body>
 </html>
