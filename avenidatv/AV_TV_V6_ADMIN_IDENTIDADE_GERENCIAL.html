@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AV TV — Painel de Transmissão</title>
+<title>AV TV V6.1 — Painel de Transmissão</title>
 <meta name="theme-color" content="#291A1E">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -353,7 +353,14 @@ dialog::backdrop{background:rgba(15,23,42,.62)}
           <input id="sbKey" placeholder="eyJ...">
         </div>
         <div class="actions">
-          <button class="btn" id="saveConfig">SALVAR CONFIGURAÇÃO</button>
+          <button class="btn" id="saveConfig">SALVAR E TESTAR CONEXÃO</button>
+          <button class="btn secondary" id="testConnectionBtn">TESTAR AGORA</button>
+        </div>
+
+        <div class="status-list" style="margin-top:18px">
+          <div class="status-item"><div><small>SUPABASE</small><br><b id="diagDb">Não testado</b></div><span>☁️</span></div>
+          <div class="status-item"><div><small>SALA</small><br><b id="diagRoom">Não testada</b></div><span>📡</span></div>
+          <div class="status-item"><div><small>REALTIME</small><br><b id="diagRealtime">Não testado</b></div><span>⚡</span></div>
         </div>
       </div>
     </section>
@@ -364,7 +371,7 @@ dialog::backdrop{background:rgba(15,23,42,.62)}
 
 <script>
 const URL_KEY='avenida_tv_url', KEY_KEY='avenida_tv_key', ROOM_KEY='avenida_tv_room', THEME_KEY='avenida_tv_dark';
-let sb=null,currentVideo=null,lastState=null,loopEnabled=false;
+let sb=null,currentVideo=null,lastState=null,loopEnabled=false,channel=null;
 const $=s=>document.querySelector(s),video=$('#adminVideo');
 
 function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),2200)}
@@ -378,10 +385,11 @@ function updateRoomLabels(){
   $('#topRoom').textContent='Sala: '+r;
   $('#statusRoom').textContent=r;
 }
-function setConnected(ok){
+function setConnected(ok,label){
   const s=$('#syncStatus');
   s.classList.toggle('online',ok);s.classList.toggle('offline',!ok);
-  s.textContent=ok?'Sincronização online':'Não conectado';
+  const txt=label || (ok?'Sincronização online':'Não conectado');
+  s.textContent=txt;
   $('#metricConnection').textContent=ok?'Online':'Offline';
   $('#syncBadge').textContent=ok?'SINCRONIZADO':'OFFLINE';
 }
@@ -411,31 +419,132 @@ document.querySelectorAll('.nav-btn').forEach(b=>b.onclick=()=>showPage(b.datase
 
 async function connect(){
   const u=localStorage.getItem(URL_KEY),k=localStorage.getItem(KEY_KEY);
-  $('#sbUrl').value=u||'';$('#sbKey').value=k||'';
+  $('#sbUrl').value=u||'';
+  $('#sbKey').value=k||'';
   $('#roomInput').value=localStorage.getItem(ROOM_KEY)||'avenida-principal';
   updateRoomLabels();
-  if(!u||!k)return setConnected(false);
+
+  if(!u||!k){
+    setConnected(false,'Configuração pendente');
+    return false;
+  }
+
   try{
+    setConnected(false,'Conectando...');
     sb=window.supabase.createClient(u,k);
+
     const {error}=await sb.from('videos').select('id').limit(1);
-    if(error)throw error;
-    setConnected(true);
-    await ensureRoom();await loadVideos();await fetchState();
-  }catch(e){setConnected(false);toast('Erro ao conectar: '+e.message)}
+    if(error) throw new Error('Banco inacessível: '+error.message);
+    if($('#diagDb')) $('#diagDb').textContent='Conectado';
+
+    await ensureRoom();
+    if($('#diagRoom')) $('#diagRoom').textContent='Sala OK: '+room();
+    await fetchState();
+
+    try{
+      await subscribeRealtime();
+      setConnected(true,'Online • Realtime ativo');
+      if($('#diagRealtime')) $('#diagRealtime').textContent='Ativo';
+    }catch(rtErr){
+      // Banco funciona mesmo se o canal Realtime falhar; mostramos o estado real.
+      setConnected(true,'Online • Realtime indisponível');
+      if($('#diagRealtime')) $('#diagRealtime').textContent='Indisponível';
+      toast(rtErr.message);
+    }
+
+    await loadVideos();
+    return true;
+  }catch(e){
+    setConnected(false,'Falha de conexão');
+    console.error('[AV TV] conexão:',e);
+    toast(e.message);
+    return false;
+  }
 }
 async function ensureRoom(){
-  localStorage.setItem(ROOM_KEY,room()); updateRoomLabels();
-  const {data}=await sb.from('playback_state').select('*').eq('room',room()).maybeSingle();
-  if(!data)await sb.from('playback_state').insert({room:room(),is_playing:false,position_seconds:0,loop_enabled:false});
+  if(!sb) throw new Error('Cliente Supabase não inicializado.');
+  localStorage.setItem(ROOM_KEY,room());
+  updateRoomLabels();
+
+  const {data,error}=await sb.from('playback_state')
+    .select('*')
+    .eq('room',room())
+    .maybeSingle();
+
+  if(error) throw new Error('Falha ao consultar a sala: '+error.message);
+
+  if(!data){
+    const {error:insertError}=await sb.from('playback_state').insert({
+      room:room(),
+      is_playing:false,
+      position_seconds:0,
+      loop_enabled:false,
+      updated_at:new Date().toISOString()
+    });
+    if(insertError) throw new Error('Falha ao criar a sala: '+insertError.message);
+  }
+  return true;
 }
+
 async function fetchState(){
-  if(!sb)return;
-  const {data}=await sb.from('playback_state').select('*').eq('room',room()).maybeSingle();
+  if(!sb) throw new Error('Cliente Supabase não inicializado.');
+  const {data,error}=await sb.from('playback_state')
+    .select('*')
+    .eq('room',room())
+    .maybeSingle();
+
+  if(error) throw new Error('Falha ao ler estado da sala: '+error.message);
+
   if(data){
-    lastState=data;loopEnabled=!!data.loop_enabled;
+    lastState=data;
+    loopEnabled=!!data.loop_enabled;
     if(data.video_title) $('#statusVideo').textContent=data.video_title;
     updateStateUI();
   }
+  return data;
+}
+
+async function subscribeRealtime(){
+  if(!sb) throw new Error('Cliente Supabase não inicializado.');
+  if(channel){
+    try{ await sb.removeChannel(channel); }catch(_){}
+    channel=null;
+  }
+
+  return await new Promise((resolve,reject)=>{
+    let settled=false;
+    channel=sb.channel('av-tv-admin:'+room())
+      .on('postgres_changes',{
+        event:'*',
+        schema:'public',
+        table:'playback_state',
+        filter:`room=eq.${room()}`
+      },payload=>{
+        if(payload.new){
+          lastState=payload.new;
+          loopEnabled=!!payload.new.loop_enabled;
+          if(payload.new.video_title) $('#statusVideo').textContent=payload.new.video_title;
+          updateStateUI();
+        }
+      })
+      .subscribe(status=>{
+        if(status==='SUBSCRIBED' && !settled){
+          settled=true;
+          resolve(true);
+        }
+        if((status==='CHANNEL_ERROR' || status==='TIMED_OUT') && !settled){
+          settled=true;
+          reject(new Error('Realtime não conectou: '+status));
+        }
+      });
+
+    setTimeout(()=>{
+      if(!settled){
+        settled=true;
+        reject(new Error('Tempo esgotado ao conectar o Realtime.'));
+      }
+    },8000);
+  });
 }
 async function publish(patch={}){
   if(!sb)return toast('Configure o Supabase.');
@@ -521,14 +630,66 @@ video.onended=async()=>{if(loopEnabled){video.currentTime=0;await video.play().c
 
 $('#uploadBtn').onclick=upload;
 $('#refreshBtn').onclick=loadVideos;
-$('#connectRoomBtn').onclick=async()=>{if(!sb)return toast('Configure o Supabase.');await ensureRoom();await fetchState();toast('Sala conectada.')};
+$('#connectRoomBtn').onclick=async()=>{
+  if(!sb){
+    const ok=await connect();
+    if(!ok) return;
+  }
+  try{
+    setConnected(false,'Conectando à sala...');
+    await ensureRoom();
+    await fetchState();
+    try{
+      await subscribeRealtime();
+      setConnected(true,'Online • Realtime ativo');
+    }catch(rtErr){
+      setConnected(true,'Online • Realtime indisponível');
+      toast(rtErr.message);
+    }
+    toast('Sala conectada e validada.');
+  }catch(e){
+    setConnected(false,'Falha na sala');
+    console.error('[AV TV] sala:',e);
+    toast(e.message);
+  }
+};
 $('#saveConfig').onclick=async()=>{
-  localStorage.setItem(URL_KEY,$('#sbUrl').value.trim());
-  localStorage.setItem(KEY_KEY,$('#sbKey').value.trim());
+  const url=$('#sbUrl').value.trim();
+  const key=$('#sbKey').value.trim();
+  if(!url || !key) return toast('Preencha a URL e a Anon Key.');
+
+  localStorage.setItem(URL_KEY,url);
+  localStorage.setItem(KEY_KEY,key);
   localStorage.setItem(ROOM_KEY,room());
-  await connect();toast('Configuração salva.');
+
+  const ok=await connect();
+  if(ok) toast('Configuração salva e conexão validada.');
 };
 $('#fileInput').onchange=()=>{const f=$('#fileInput').files[0];if(f&&!$('#titleInput').value.trim())$('#titleInput').value=f.name.replace(/\.[^.]+$/,'')};
+
+$('#testConnectionBtn').onclick=async()=>{
+  $('#diagDb').textContent='Testando...';
+  $('#diagRoom').textContent='Testando...';
+  $('#diagRealtime').textContent='Testando...';
+
+  const url=$('#sbUrl').value.trim();
+  const key=$('#sbKey').value.trim();
+  if(!url || !key){
+    $('#diagDb').textContent='Dados ausentes';
+    return toast('Preencha URL e Anon Key.');
+  }
+
+  localStorage.setItem(URL_KEY,url);
+  localStorage.setItem(KEY_KEY,key);
+  localStorage.setItem(ROOM_KEY,room());
+
+  const ok=await connect();
+  if(!ok){
+    $('#diagDb').textContent='Falha';
+    if($('#diagRoom').textContent==='Testando...') $('#diagRoom').textContent='Não testada';
+    if($('#diagRealtime').textContent==='Testando...') $('#diagRealtime').textContent='Não testado';
+  }
+};
 
 const dark=localStorage.getItem(THEME_KEY)==='1';document.body.classList.toggle('dark-mode',dark);
 $('#themeBtn').onclick=()=>{document.body.classList.toggle('dark-mode');localStorage.setItem(THEME_KEY,document.body.classList.contains('dark-mode')?'1':'0')};
