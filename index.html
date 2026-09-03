@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="referrer" content="no-referrer" />
-  <title>Assistência Gerencial de Loja - Avenida V51.32 • Sincronização Gerencial Isolada</title>
+  <title>Gerencial de Loja • Avenida AV • v51.63 </title>
   <!-- PWA / Ícones do Sistema Gerencial Avenida -->
   <meta name="theme-color" content="#291A1E">
   <meta name="application-name" content="Gerencial Avenida">
@@ -64,7 +64,7 @@
       // V51.24 — conexão reforçada sem alterar a lógica funcional dos módulos.
       // Web Worker mantém os heartbeats mais confiáveis quando a aba fica em segundo plano.
       // heartbeatCallback detecta quedas silenciosas e aciona a reconexão controlada abaixo.
-      const supabaseclient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      const supabaseclient = window.supabase?.createClient ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
           auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
           realtime: {
               worker: true,
@@ -77,7 +77,11 @@
                   eventsPerSecond: 10
               }
           }
-      });
+      }) : null;
+
+      if(!supabaseclient){
+          console.error('O módulo de sincronização não foi carregado pelos provedores CDN. O login online ficará indisponível até a conexão ser restabelecida.');
+      }
 
       // A sincronização online por usuário é inicializada após o login.
 
@@ -87,7 +91,7 @@
       const SOPHIA_SESSION_KEY = 'sophiaSessaoSeguraV1';
       const SOPHIA_HISTORY_KEY = 'sophiaHistoricoSessaoV1';
       const SOPHIA_BUILD = 'V39.1-SEMPREFLIGHT';
-      const GERENCIAL_BUILD = 'V51.54-CONFIG-ACESSO-OPERACIONAL';
+      const GERENCIAL_BUILD = 'V51.63-IDENTIFICACAO-LATERAL-RESPONSIVA';
   </script>
   <style>
     :root {
@@ -209,6 +213,7 @@
       margin-bottom: 2px;
     }
     .login-user-preview b { font-size: .98rem; }
+    #loginUserFullName { display:block;max-width:100%;white-space:normal;overflow:visible;text-overflow:clip;word-break:normal; }
     .login-user-preview .preview-operator {
       background: var(--preto-logo);
       color: var(--amarelo);
@@ -338,8 +343,9 @@
     .permission-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:12px; }
     .permission-item { display:flex; align-items:center; gap:10px; padding:11px 12px; border:1px solid var(--border); border-radius:14px; background:var(--page-2); font-weight:850; }
     .permission-item input { width:18px; height:18px; accent-color:var(--amarelo-escuro); }
-    .sync-pill { display:inline-flex; align-items:center; gap:6px; width:max-content; font-size:.72rem; font-weight:900; margin-top:7px; padding:5px 9px; border-radius:999px; border:1px solid var(--border); background:var(--soft); color:var(--muted); }
-    .sync-pill::before { content:''; width:8px; height:8px; border-radius:50%; background:currentColor; }
+    .sync-pill { display:inline-flex; align-items:center; gap:6px; width:max-content; max-width:100%; min-width:0; box-sizing:border-box; font-size:.72rem; font-weight:900; margin-top:7px; padding:5px 9px; border-radius:999px; border:1px solid var(--border); background:var(--soft); color:var(--muted); }
+    .sync-pill::before { content:''; flex:0 0 8px; width:8px; height:8px; border-radius:50%; background:currentColor; }
+    .sync-pill-text { display:block; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .sync-pill.online { color:#15803D; background:#DCFCE7; border-color:#86EFAC; }
     .sync-pill.offline { color:#B91C1C; background:#FEE2E2; border-color:#FCA5A5; }
     .sync-pill.syncing { color:#B45309; background:#FEF3C7; border-color:#FCD34D; }
@@ -10781,7 +10787,7 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
 
 .acomp-reschedule-request{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px solid #f59e0b;border-radius:14px;background:#fffbeb;color:#92400e}.acomp-reschedule-request>div:first-child{display:flex;flex-direction:column;gap:3px}.acomp-reschedule-request b{font-size:.84rem}.acomp-reschedule-request span,.acomp-reschedule-request small{font-size:.74rem}.acomp-reschedule-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}@media(max-width:820px){.acomp-reschedule-request{align-items:flex-start;flex-direction:column}.acomp-reschedule-actions{width:100%}.acomp-reschedule-actions .btn{flex:1}}
 </style>
-\n<style id="acesso-operacional-v51-54">
+<style id="acesso-operacional-v51-54">
 .operacional-access-modal{position:fixed;inset:0;z-index:12000;background:rgba(15,23,42,.58);display:none;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(4px)}
 .operacional-access-modal.active{display:flex}
 .operacional-access-dialog{width:min(980px,100%);max-height:min(88vh,900px);display:flex;flex-direction:column;background:var(--page);border:1px solid var(--border);border-radius:24px;box-shadow:0 30px 90px rgba(15,23,42,.28);overflow:hidden}
@@ -10800,7 +10806,7 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
 .operacional-access-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px;border-top:1px solid var(--border);background:var(--page-2)}
 .operacional-access-note{font-size:.72rem;color:var(--muted);font-weight:750;max-width:620px;line-height:1.45}.operacional-access-actions{display:flex;gap:9px}
 @media(max-width:760px){.operacional-access-row{grid-template-columns:1fr 90px}.operacional-access-row .op-access-matricula,.operacional-access-row .op-access-cargo{display:none}.operacional-access-toggle{grid-column:2;grid-row:1/3}.operacional-access-toolbar{align-items:stretch;flex-direction:column}.operacional-access-count{align-self:flex-start}.operacional-access-foot{align-items:stretch;flex-direction:column}.operacional-access-actions .btn{flex:1}.operacional-access-actions{display:flex}}
-</style>\n
+</style>
 <style id="acompanhamento-tarefas-avancadas-v51-58">
 #acompanhamento .acomp-advanced{grid-column:1/-1;border:1px solid var(--border);border-radius:15px;background:color-mix(in srgb,var(--page) 96%,var(--amarelo) 4%);overflow:hidden}
 #acompanhamento .acomp-advanced>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 13px;cursor:pointer;font-size:.72rem;font-weight:1000;color:var(--text);user-select:none}
@@ -10867,17 +10873,17 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
         <div id="loginUserPreview" class="login-user-preview empty">
           <div>
             <small>Usuário identificado</small>
-            <b>Digite seu operador</b>
+            <b id="loginUserFullName">Digite seu operador</b>
           </div>
           <span class="preview-operator">--</span>
         </div>
       </div>
       <div class="login-body">
         <label for="loginUser">Usuário / Nº de Operador</label>
-        <input id="loginUser" type="text" inputmode="numeric" placeholder="Digite seu número de operador" autocomplete="username" oninput="atualizarIdentificacaoLogin(false)" onblur="atualizarIdentificacaoLogin(true)" />
+        <input id="loginUser" type="text" inputmode="numeric" placeholder="Digite seu número de operador" autocomplete="username" oninput="atualizarIdentificacaoLogin(false)" onkeydown="if(event.key==='Tab') atualizarIdentificacaoLogin(true)" disabled />
         <label for="loginPass">Senha</label>
-        <input id="loginPass" type="password" placeholder="Digite sua senha" autocomplete="current-password" onfocus="atualizarIdentificacaoLogin(true)" />
-        <button class="login-btn" onclick="login()">Entrar no sistema</button>
+        <input id="loginPass" type="password" placeholder="Digite sua senha" autocomplete="current-password" disabled />
+        <button class="login-btn" onclick="login()" disabled>Entrar no sistema</button>
         <div id="loginError" class="login-error"></div>
         <div class="login-hint">Acesso restrito por número de operador. A senha inicial segue o padrão operador + 24, mas poderá ser alterada quando houver permissão.</div>
       </div>
@@ -10973,7 +10979,7 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
       <div class="user-name" id="userNameBox">Usuário</div>
       <div class="user-role" id="userRoleBox">Cargo</div>
       <div id="developerBadge" class="developer-badge" style="display:none;"><span>&lt;/&gt;</span> DESENVOLVEDOR</div>
-      <div id="syncStatus" class="sync-pill">Aguardando login</div>
+      <div id="syncStatus" class="sync-pill" title="Aguardando login" aria-label="Status da sincronização: Aguardando login"><span class="sync-pill-text">Aguardando login</span></div>
     </div>
     <nav class="nav" id="navMenu">
       <button class="nav-btn active" onclick="showPage('painel', this)"><span class="ico">📊</span>Painel Geral</button>
@@ -12701,6 +12707,17 @@ let realtimeStatus = 'CLOSED';
 let realtimeReconnectTimer = null;
 let realtimeReconnectAttempts = 0;
 let realtimeReconnectReason = '';
+let loginEmAndamento = false;
+let logoutEmAndamento = false;
+let reconciliacaoRealtimeEmAndamento = false;
+let revisaoDB = 0;
+let globalConfigBase = null;
+let sessionExpiryTimer = null;
+const realtimeRequestSeq = { individual:0, compartilhado:0, config:0 };
+const nomeCompletoLoginCache = new Map();
+const consultaNomeCompletoLoginEmAndamento = new Map();
+const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
+const SUPABASE_OPERATION_TIMEOUT_MS = 15000;
 
 const BACKUP_MAX_BYTES = 15 * 1024 * 1024;
 const BACKUP_MAX_ITEMS_POR_LISTA = 20000;
@@ -13144,7 +13161,10 @@ async function verificarDadosSincronizados(){
     );
     if(error) throw error;
 
-    await salvarDadosUsuarioOnline(true);
+    const salvo=await salvarDadosUsuarioOnline(true);
+    if(!salvo || haPendenciasSincronizacao(op)){
+      throw new Error('A gravação de confirmação não foi concluída.');
+    }
 
     return {
       ok:true,
@@ -13453,23 +13473,24 @@ function configGlobalPadrao(){
   const usuarios = usuariosOficiais.map(u => ({
     nome:u.nome, operador:normalizarOperador(u.operadorPadrao), cargo:u.cargo,
     matricula:`AV24-${String(Number(u.operadorPadrao)).padStart(4,'0')}`,
-    senha:senhaPorOperador(u.operadorPadrao)
+    senha:senhaPorOperador(u.operadorPadrao),
+    credencialVersao:1
   }));
   return { versao:1, usuarios, permissoes:Object.fromEntries(usuarios.map(u => [u.operador,permissoesPadrao(u.operador)])), atualizadoEm:agoraBR() };
 }
 function normalizarConfigGlobal(raw){
   const base=configGlobalPadrao();
-  const cfg=raw && typeof raw==='object' ? raw : {};
+  const cfg=raw && typeof raw==='object' ? cloneJSONSeguro(raw,{}) : {};
   cfg.usuarios=Array.isArray(cfg.usuarios)?cfg.usuarios:base.usuarios;
   usuariosOficiais.forEach(of=>{
     const op=normalizarOperador(of.operadorPadrao);
     let u=cfg.usuarios.find(x=>normalizarOperador(x.operador)===op);
     if(!u){ cfg.usuarios.push(base.usuarios.find(x=>x.operador===op)); }
-    else { u.nome=u.nome||of.nome; u.cargo=u.cargo||of.cargo; u.operador=op; u.senha=String(u.senha||senhaPorOperador(op)); u.matricula=u.matricula||`AV24-${String(Number(op)).padStart(4,'0')}`; }
+    else { u.nome=u.nome||of.nome; u.cargo=u.cargo||of.cargo; u.operador=op; u.senha=String(u.senha||senhaPorOperador(op)); u.matricula=u.matricula||`AV24-${String(Number(op)).padStart(4,'0')}`; u.credencialVersao=Math.max(1,Number(u.credencialVersao)||1); }
   });
   cfg.permissoes=cfg.permissoes||{};
   cfg.usuarios.forEach(u=>{
-    const op=normalizarOperador(u.operador); u.operador=op; u.senha=String(u.senha||senhaPorOperador(op));
+    const op=normalizarOperador(u.operador); u.operador=op; u.senha=String(u.senha||senhaPorOperador(op)); u.credencialVersao=Math.max(1,Number(u.credencialVersao)||1);
     const permissoesSalvas={...(cfg.permissoes[op]||{})};
     if(typeof permissoesSalvas.operacoes!=='boolean' && typeof permissoesSalvas.setores==='boolean'){
       permissoesSalvas.operacoes=permissoesSalvas.setores;
@@ -13491,7 +13512,20 @@ function setSyncStatus(texto, estado){
   const el=document.getElementById('syncStatus'); if(!el) return;
   const t=String(texto||'');
   const classe=estado || (/offline|pendente|sem internet/i.test(t)?'offline':(/sincron|salvando|conectando/i.test(t)?'syncing':'online'));
-  el.textContent=t;
+  const rotulosCompactos={
+    'ONLINE • banco e tempo real atualizados':'ONLINE • dados atualizados',
+    'ONLINE • banco e tempo real conectados':'ONLINE • dados conectados'
+  };
+  const rotulo=rotulosCompactos[t]||t;
+  let textoEl=el.querySelector('.sync-pill-text');
+  if(!textoEl){
+    textoEl=document.createElement('span');
+    textoEl.className='sync-pill-text';
+    el.replaceChildren(textoEl);
+  }
+  textoEl.textContent=rotulo;
+  el.title=t;
+  el.setAttribute('aria-label',`Status da sincronização: ${t}`);
   el.classList.remove('online','offline','syncing');
   el.classList.add(classe);
 }
@@ -13515,14 +13549,18 @@ function atualizarStatusConexao(){
 }
 async function carregarConfigGlobalOnline(){
   try{
-    const {data,error}=await supabaseclient.from(ONLINE_TABLE).select('dados').eq('id',GLOBAL_ROW_ID).maybeSingle();
+    const {data,error}=await comTimeout(
+      supabaseclient.from(ONLINE_TABLE).select('dados,updated_at').eq('id',GLOBAL_ROW_ID).maybeSingle(),
+      SUPABASE_OPERATION_TIMEOUT_MS
+    );
     if(error) throw error;
     globalConfig=normalizarConfigGlobal(data?.dados);
+    globalConfigBase=cloneJSONSeguro(globalConfig,{});
     if(!data) await salvarConfigGlobalOnline();
     return true;
   }catch(err){
     console.error('Falha ao carregar configuração global:',err);
-    globalConfig=normalizarConfigGlobal(null);
+    if(!globalConfig) globalConfig=normalizarConfigGlobal(null);
     return false;
   }
 }
@@ -13531,9 +13569,15 @@ async function salvarConfigGlobalOnline(){
   globalConfig.atualizadoEm=agoraBR();
   // Credenciais legadas não são mais persistidas em localStorage.
   localStorage.removeItem(`${STORAGE_KEY}_config_global`);
-  const {error}=await supabaseclient.from(ONLINE_TABLE).upsert({id:GLOBAL_ROW_ID,dados:globalConfig,updated_at:new Date().toISOString()},{onConflict:'id'});
-  if(error) throw error;
+  const salvo=await salvarLinhaComConcorrencia(
+    GLOBAL_ROW_ID,
+    globalConfig,
+    globalConfigBase || {}
+  );
+  globalConfig=normalizarConfigGlobal(salvo);
+  globalConfigBase=cloneJSONSeguro(globalConfig,{});
   marcarSincronizacaoConfirmada('ONLINE • configurações salvas');
+  return true;
 }
 function usuarioGlobalPorOperador(op){
   const operador=normalizarOperador(op);
@@ -13557,11 +13601,32 @@ function atualizarIdentidadeUsuarioAtual(){
     delete usuarioAtual.senha;
   }
 }
+function abreviarNomeCabecalho(nomeCompleto){
+  const partes=String(nomeCompleto||'').trim().split(/\s+/).filter(Boolean);
+  if(partes.length<=2) return partes.join(' ');
+  const conectivos=new Set(['DE','DA','DO','DAS','DOS','E']);
+  const inicio=partes.slice(0,2);
+  const iniciais=partes.slice(2)
+    .filter(parte=>!conectivos.has(norm(parte)))
+    .map(parte=>Array.from(parte)[0]?.toLocaleUpperCase('pt-BR')||'')
+    .filter(Boolean);
+  return [...inicio,...iniciais].join(' ');
+}
 function atualizarIdentidadeNaTela(){
   if(!usuarioAtual) return;
-  const nome=document.getElementById('userNameBox'); if(nome) nome.textContent=usuarioAtual.nome;
+  const nome=document.getElementById('userNameBox');
+  if(nome){
+    nome.textContent=abreviarNomeCabecalho(usuarioAtual.nome);
+    nome.title=usuarioAtual.nome;
+    nome.setAttribute('aria-label',`Usuário: ${usuarioAtual.nome}`);
+  }
   const cargo=document.getElementById('userRoleBox'); if(cargo) cargo.textContent=usuarioAtual.cargo;
-  const cab=document.getElementById('headerUserName'); if(cab) cab.textContent=usuarioAtual.nome;
+  const cab=document.getElementById('headerUserName');
+  if(cab){
+    cab.textContent=abreviarNomeCabecalho(usuarioAtual.nome);
+    cab.title=usuarioAtual.nome;
+    cab.setAttribute('aria-label',`Usuário: ${usuarioAtual.nome}`);
+  }
   const op=document.getElementById('headerUserOperator'); if(op) op.textContent=usuarioAtual.operador||'-';
 }
 function permissoesUsuario(op){
@@ -13625,6 +13690,12 @@ function jsonIgual(a,b){
 function chaveBaseUsuario(op){
   return `${chaveLocalUsuario(op)}_base_sync`;
 }
+function chaveUsuarioPendente(op){
+  return `${chaveLocalUsuario(op)}_sync_pendente`;
+}
+function marcarUsuarioPendente(op){ try{ localStorage.setItem(chaveUsuarioPendente(op),'1'); }catch(_){ } }
+function limparUsuarioPendente(op){ try{ localStorage.removeItem(chaveUsuarioPendente(op)); }catch(_){ } }
+function usuarioPendente(op){ try{ return localStorage.getItem(chaveUsuarioPendente(op))==='1'; }catch(_){ return false; } }
 const GERENCIAL_SHARED_KEYS = Object.freeze([
   'meta','usuariosPermitidos','usuarios','funcionarios','escalas','escalasLimpeza',
   'escalasProvador','diario','observacoesFuncionarios','gerencial','_sync'
@@ -13636,6 +13707,15 @@ function chaveMigracaoCompartilhadoV5132(){ return `${STORAGE_KEY}_${SHARED_CACH
 function marcarCompartilhadoPendente(){ try{ localStorage.setItem(chaveCompartilhadoPendente(),'1'); }catch(_){ } }
 function limparCompartilhadoPendente(){ try{ localStorage.removeItem(chaveCompartilhadoPendente()); }catch(_){ } }
 function compartilhadoPendente(){ try{ return localStorage.getItem(chaveCompartilhadoPendente())==='1'; }catch(_){ return false; } }
+function haPendenciasSincronizacao(op=usuarioAtual?.operador){
+  const operador=normalizarOperador(op);
+  return !!(
+    salvamentoEmAndamento ||
+    salvamentoPendente ||
+    (operador && usuarioPendente(operador)) ||
+    compartilhadoPendente()
+  );
+}
 function extrairDadosGerenciaisCompartilhados(base){
   const origem = base && typeof base==='object' && !Array.isArray(base) ? base : {};
   const saida = {};
@@ -13697,7 +13777,7 @@ function valorBaseSync(chave, fallback={}){
 }
 function chaveItemMerge(item){
   if(!item || typeof item !== 'object' || Array.isArray(item)) return null;
-  for(const campo of ['id','uuid','protocolo']){
+  for(const campo of ['id','uuid','protocolo','operador','matricula','funcionarioId','data']){
     const valor = String(item[campo] ?? '').trim();
     if(valor) return `${campo}:${valor}`;
   }
@@ -13818,20 +13898,26 @@ async function salvarLinhaComConcorrencia(rowId, dadosLocais, dadosBase, tentati
   let base=cloneJSONSeguro(dadosBase,{});
 
   for(let tentativa=1; tentativa<=tentativas; tentativa++){
-    const {data:atual,error:erroLeitura}=await supabaseclient
-      .from(ONLINE_TABLE)
-      .select('dados,updated_at')
-      .eq('id',rowId)
-      .maybeSingle();
+    const {data:atual,error:erroLeitura}=await comTimeout(
+      supabaseclient
+        .from(ONLINE_TABLE)
+        .select('dados,updated_at')
+        .eq('id',rowId)
+        .maybeSingle(),
+      SUPABASE_OPERATION_TIMEOUT_MS
+    );
     if(erroLeitura) throw erroLeitura;
 
     if(!atual){
       const agora=new Date().toISOString();
-      const {data:criado,error:erroCriar}=await supabaseclient
-        .from(ONLINE_TABLE)
-        .upsert({id:rowId,dados:local,updated_at:agora},{onConflict:'id'})
-        .select('dados,updated_at')
-        .maybeSingle();
+      const {data:criado,error:erroCriar}=await comTimeout(
+        supabaseclient
+          .from(ONLINE_TABLE)
+          .upsert({id:rowId,dados:local,updated_at:agora},{onConflict:'id'})
+          .select('dados,updated_at')
+          .maybeSingle(),
+        SUPABASE_OPERATION_TIMEOUT_MS
+      );
       if(erroCriar) throw erroCriar;
       return cloneJSONSeguro(criado?.dados ?? local, local);
     }
@@ -13847,9 +13933,10 @@ async function salvarLinhaComConcorrencia(rowId, dadosLocais, dadosBase, tentati
       .eq('id',rowId);
     query = atual.updated_at ? query.eq('updated_at',atual.updated_at) : query.is('updated_at',null);
 
-    const {data:salvo,error:erroSalvar}=await query
-      .select('dados,updated_at')
-      .maybeSingle();
+    const {data:salvo,error:erroSalvar}=await comTimeout(
+      query.select('dados,updated_at').maybeSingle(),
+      SUPABASE_OPERATION_TIMEOUT_MS
+    );
     if(erroSalvar) throw erroSalvar;
     if(salvo) return cloneJSONSeguro(salvo.dados ?? combinado, combinado);
 
@@ -13924,15 +14011,24 @@ function aplicarDadosCompartilhados(compartilhados){
 async function carregarDadosCompartilhadosOnline(){
   migrarCacheCompartilhadoV5132();
   try{
-    let {data,error}=await supabaseclient.from(ONLINE_TABLE).select('dados').eq('id',SHARED_ROW_ID).maybeSingle();
+    let {data,error}=await comTimeout(
+      supabaseclient.from(ONLINE_TABLE).select('dados,updated_at').eq('id',SHARED_ROW_ID).maybeSingle(),
+      SUPABASE_OPERATION_TIMEOUT_MS
+    );
     if(error) throw error;
     if(!data?.dados){
-      const {data:fonte133,error:erro133}=await supabaseclient.from(ONLINE_TABLE).select('dados').eq('id','usuario_133').maybeSingle();
+      const {data:fonte133,error:erro133}=await comTimeout(
+        supabaseclient.from(ONLINE_TABLE).select('dados').eq('id','usuario_133').maybeSingle(),
+        SUPABASE_OPERATION_TIMEOUT_MS
+      );
       if(erro133) throw erro133;
       const fonte = fonte133?.dados || db || defaultDB();
       // O whitelist de dadosCompartilhadosDoDB impede qualquer campo de chat nessa criação.
       const compartilhados = dadosCompartilhadosDoDB(fonte);
-      const {error:erroCriar}=await supabaseclient.from(ONLINE_TABLE).upsert({id:SHARED_ROW_ID,dados:compartilhados,updated_at:new Date().toISOString()},{onConflict:'id'});
+      const {error:erroCriar}=await comTimeout(
+        supabaseclient.from(ONLINE_TABLE).upsert({id:SHARED_ROW_ID,dados:compartilhados,updated_at:new Date().toISOString()},{onConflict:'id'}),
+        SUPABASE_OPERATION_TIMEOUT_MS
+      );
       if(erroCriar) throw erroCriar;
       data={dados:compartilhados};
     }
@@ -13940,7 +14036,12 @@ async function carregarDadosCompartilhadosOnline(){
     const remoto = data.dados && typeof data.dados==='object' ? data.dados : {};
     const cacheLocal = storageGetJSONSeguro(chaveCacheCompartilhado(), null);
     const baseAnterior = valorBaseSync(chaveBaseCompartilhado(),{});
-    const resolvidoBruto = compartilhadoPendente() && cacheLocal && typeof cacheLocal==='object'
+    const haviaAlteracaoLocal=!!(
+      cacheLocal &&
+      typeof cacheLocal==='object' &&
+      (compartilhadoPendente() || !jsonIgual(cacheLocal,baseAnterior))
+    );
+    const resolvidoBruto = haviaAlteracaoLocal
       ? mesclarTresVias(baseAnterior,cacheLocal,remoto)
       : remoto;
     const resolvido = aplicarExclusoesPersistentesCompartilhadas(resolvidoBruto);
@@ -13949,7 +14050,10 @@ async function carregarDadosCompartilhadosOnline(){
     storageSetSeguro(chaveCacheCompartilhado(),resolvido,{serializar:true,silencioso:true});
     // A base permanece como o snapshot do servidor para que alterações pendentes sejam reenviadas.
     storageSetSeguro(chaveBaseCompartilhado(),remoto,{serializar:true,silencioso:true});
-    marcarSincronizacaoConfirmada(compartilhadoPendente()?'ONLINE • reconciliando alterações locais':'ONLINE • dados da loja carregados');
+    if(jsonIgual(resolvido,remoto)) limparCompartilhadoPendente();
+    else marcarCompartilhadoPendente();
+    if(compartilhadoPendente()) setSyncStatus('ONLINE • alterações da loja aguardando envio','syncing');
+    else marcarSincronizacaoConfirmada('ONLINE • dados da loja carregados');
     return true;
   }catch(err){
     console.error('Falha ao carregar dados compartilhados:',err);
@@ -13964,24 +14068,47 @@ async function carregarDadosUsuarioOnline(op){
   const operador=normalizarOperador(op); const rowId=`usuario_${operador}`;
   setSyncStatus('SINCRONIZANDO...','syncing');
   try{
-    const {data,error}=await supabaseclient.from(ONLINE_TABLE).select('dados').eq('id',rowId).maybeSingle();
+    const {data,error}=await comTimeout(
+      supabaseclient.from(ONLINE_TABLE).select('dados,updated_at').eq('id',rowId).maybeSingle(),
+      SUPABASE_OPERATION_TIMEOUT_MS
+    );
     if(error) throw error;
-    if(data?.dados){
-      // Compatível com versões anteriores, mas preserva somente anotações e tarefas como individuais.
-      db={...defaultDB(),...dadosIndividuaisDoDB(data.dados)};
-    } else {
+    const remoto=data?.dados ? dadosIndividuaisDoDB(data.dados) : dadosIndividuaisDoDB(defaultDB());
+    let cacheLocal=storageGetJSONSeguro(chaveLocalUsuario(operador),null);
+    if(!cacheLocal && !data?.dados){
       const legado=localStorage.getItem(STORAGE_KEY);
       const fonte=(operador==='133'&&legado)?{...defaultDB(),...JSON.parse(legado)}:defaultDB();
-      db={...defaultDB(),...dadosIndividuaisDoDB(fonte)};
+      cacheLocal=dadosIndividuaisDoDB(fonte);
     }
-    await carregarDadosCompartilhadosOnline();
+    const baseAnterior=valorBaseSync(chaveBaseUsuario(operador),{});
+    const haviaAlteracaoLocal=!!(
+      cacheLocal &&
+      typeof cacheLocal==='object' &&
+      (usuarioPendente(operador) || !jsonIgual(cacheLocal,baseAnterior))
+    );
+    const resolvido=haviaAlteracaoLocal
+      ? dadosIndividuaisDoDB(mesclarTresVias(baseAnterior,cacheLocal,remoto))
+      : remoto;
+
+    db={...defaultDB(),...resolvido};
+    const compartilhadosOk=await carregarDadosCompartilhadosOnline();
     prepararDBCarregado();
-    storageSetSeguro(chaveLocalUsuario(operador),dadosIndividuaisDoDB(db),{serializar:true,silencioso:true});
-    storageSetSeguro(chaveBaseUsuario(operador),dadosIndividuaisDoDB(db),{serializar:true,silencioso:true});
-    marcarSincronizacaoConfirmada('ONLINE • dados sincronizados');
-    // Garante a migração do registro individual antigo para o formato enxuto.
-    await salvarDadosUsuarioOnline(true);
-    return true;
+    const individuaisPreparados=dadosIndividuaisDoDB(db);
+    storageSetSeguro(chaveLocalUsuario(operador),individuaisPreparados,{serializar:true,silencioso:true});
+    storageSetSeguro(chaveBaseUsuario(operador),remoto,{serializar:true,silencioso:true});
+    if(jsonIgual(individuaisPreparados,remoto)) limparUsuarioPendente(operador);
+    else marcarUsuarioPendente(operador);
+
+    let envioOk=true;
+    if(usuarioPendente(operador) || compartilhadoPendente()){
+      envioOk=await salvarDadosUsuarioOnline(true);
+    }
+    if(compartilhadosOk && envioOk && !haPendenciasSincronizacao(operador)){
+      marcarSincronizacaoConfirmada('ONLINE • dados sincronizados');
+    }else{
+      setSyncStatus('ATENÇÃO • há alterações aguardando sincronização','syncing');
+    }
+    return !!(compartilhadosOk && envioOk);
   }catch(err){
     console.error('Falha ao carregar dados:',err);
     try{
@@ -14017,7 +14144,11 @@ function prepararDBCarregado(){
   garantirCamposFuncionarios(); sincronizarUsuariosLogin();
 }
 async function salvarDadosUsuarioOnline(silencioso=false){
-  if(!usuarioAtual || aplicandoRemoto) return false;
+  if(!usuarioAtual) return false;
+  if(aplicandoRemoto){
+    salvamentoPendente = true;
+    return false;
+  }
   if(salvamentoEmAndamento){
     salvamentoPendente = true;
     return false;
@@ -14025,45 +14156,77 @@ async function salvarDadosUsuarioOnline(silencioso=false){
 
   salvamentoEmAndamento = true;
   const op = normalizarOperador(usuarioAtual.operador);
+  const revisaoInicio = revisaoDB;
   const individuaisLocais = dadosIndividuaisDoDB(db);
   const compartilhadosLocais = dadosCompartilhadosDoDB(db);
+  const baseIndividual=valorBaseSync(chaveBaseUsuario(op),{});
+  const baseCompartilhado=valorBaseSync(chaveBaseCompartilhado(),{});
+  const salvarIndividual=usuarioPendente(op) || !jsonIgual(individuaisLocais,baseIndividual);
+  const salvarCompartilhado=compartilhadoPendente() || !jsonIgual(compartilhadosLocais,baseCompartilhado);
+
   storageSetSeguro(chaveLocalUsuario(op),individuaisLocais,{serializar:true,silencioso});
   storageSetSeguro(chaveCacheCompartilhado(),compartilhadosLocais,{serializar:true,silencioso});
+  if(salvarIndividual) marcarUsuarioPendente(op);
+  if(salvarCompartilhado) marcarCompartilhadoPendente();
 
   try{
     if(!navigator.onLine) throw new Error('Sem conexão com a internet.');
+    if(!salvarIndividual && !salvarCompartilhado){
+      marcarSincronizacaoConfirmada('ONLINE • nenhuma alteração pendente');
+      return true;
+    }
     if(!silencioso) setSyncStatus('SALVANDO ONLINE...','syncing');
-
-    const baseIndividual=valorBaseSync(chaveBaseUsuario(op),{});
-    const baseCompartilhado=valorBaseSync(chaveBaseCompartilhado(),{});
 
     // Cada linha é salva com trava otimista. Se outro PC salvou no intervalo,
     // a função relê, mescla e tenta novamente sem sobrescrever silenciosamente.
-    const individuaisSalvos=await salvarLinhaComConcorrencia(`usuario_${op}`,individuaisLocais,baseIndividual);
-    const compartilhadosSalvos=await salvarLinhaComConcorrencia(SHARED_ROW_ID,compartilhadosLocais,baseCompartilhado);
+    const individuaisSalvos=salvarIndividual
+      ? await salvarLinhaComConcorrencia(`usuario_${op}`,individuaisLocais,baseIndividual)
+      : cloneJSONSeguro(individuaisLocais,{});
+    const compartilhadosSalvos=salvarCompartilhado
+      ? await salvarLinhaComConcorrencia(SHARED_ROW_ID,compartilhadosLocais,baseCompartilhado)
+      : cloneJSONSeguro(compartilhadosLocais,{});
 
-    // Atualiza a memória local com qualquer mudança remota que entrou durante o merge.
-    db={...defaultDB(),...compartilhadosSalvos,...dadosIndividuaisDoDB(individuaisSalvos)};
+    // Se a tela mudou enquanto a rede salvava, mescla o retorno com a revisão atual
+    // e mantém a nova alteração marcada para uma segunda gravação.
+    const houveMudancaDuranteSalvamento = revisaoDB !== revisaoInicio;
+    const individuaisFinais = houveMudancaDuranteSalvamento
+      ? mesclarTresVias(individuaisLocais,dadosIndividuaisDoDB(db),individuaisSalvos)
+      : individuaisSalvos;
+    const compartilhadosFinais = houveMudancaDuranteSalvamento
+      ? mesclarTresVias(compartilhadosLocais,dadosCompartilhadosDoDB(db),compartilhadosSalvos)
+      : compartilhadosSalvos;
+
+    db={...defaultDB(),...compartilhadosFinais,...dadosIndividuaisDoDB(individuaisFinais)};
     prepararDBCarregado();
 
-    storageSetSeguro(chaveLocalUsuario(op),dadosIndividuaisDoDB(db),{serializar:true,silencioso:true});
-    storageSetSeguro(chaveBaseUsuario(op),dadosIndividuaisDoDB(db),{serializar:true,silencioso:true});
-    storageSetSeguro(chaveCacheCompartilhado(),dadosCompartilhadosDoDB(db),{serializar:true,silencioso:true});
-    storageSetSeguro(chaveBaseCompartilhado(),dadosCompartilhadosDoDB(db),{serializar:true,silencioso:true});
-    limparCompartilhadoPendente();
+    const individualAtual=dadosIndividuaisDoDB(db);
+    const compartilhadoAtual=dadosCompartilhadosDoDB(db);
+    storageSetSeguro(chaveLocalUsuario(op),individualAtual,{serializar:true,silencioso:true});
+    storageSetSeguro(chaveBaseUsuario(op),individuaisSalvos,{serializar:true,silencioso:true});
+    storageSetSeguro(chaveCacheCompartilhado(),compartilhadoAtual,{serializar:true,silencioso:true});
+    storageSetSeguro(chaveBaseCompartilhado(),compartilhadosSalvos,{serializar:true,silencioso:true});
 
-    marcarSincronizacaoConfirmada('ONLINE • salvo agora');
-    return true;
+    if(jsonIgual(individualAtual,individuaisSalvos)) limparUsuarioPendente(op);
+    else marcarUsuarioPendente(op);
+    if(jsonIgual(compartilhadoAtual,compartilhadosSalvos)) limparCompartilhadoPendente();
+    else marcarCompartilhadoPendente();
+
+    const concluido=!usuarioPendente(op) && !compartilhadoPendente();
+    if(concluido) marcarSincronizacaoConfirmada('ONLINE • salvo agora');
+    else setSyncStatus('ONLINE • salvando alterações mais recentes','syncing');
+    return concluido;
   }catch(err){
     console.error('Falha ao salvar online:', err);
+    if(salvarIndividual) marcarUsuarioPendente(op);
+    if(salvarCompartilhado) marcarCompartilhadoPendente();
     setSyncStatus(navigator.onLine ? 'SEM SINCRONIZAÇÃO • salvo no aparelho' : 'OFFLINE • salvo no aparelho','offline');
     if(!silencioso) alert('Não foi possível salvar online agora. Os dados ficaram no cache deste aparelho.\n\nDetalhe: '+err.message);
     return false;
   }finally{
     salvamentoEmAndamento = false;
-    if(salvamentoPendente){
+    if(navigator.onLine && salvamentoPendente){
       salvamentoPendente = false;
-      setTimeout(() => salvarDadosUsuarioOnline(true), 120);
+      setTimeout(() => salvarDadosUsuarioOnline(true), 500);
     }
   }
 }
@@ -14078,7 +14241,7 @@ function cancelarReconexaoRealtime(){
   }
 }
 function agendarReconexaoRealtime(motivo='desconectado', imediata=false){
-  if(!navigator.onLine || !usuarioAtual) return;
+  if(!navigator.onLine || !usuarioAtual || !supabaseclient) return;
   if(realtimeReconnectTimer) return;
 
   realtimeReconnectReason = String(motivo || 'desconectado');
@@ -14099,9 +14262,44 @@ window.addEventListener('ag:supabase-heartbeat-disconnected', () => {
   agendarReconexaoRealtime('heartbeat', true);
 });
 
+async function reconciliarRealtimeAposConexao(canal,operador){
+  if(reconciliacaoRealtimeEmAndamento || !navigator.onLine || !usuarioAtual) return false;
+  reconciliacaoRealtimeEmAndamento=true;
+  setSyncStatus('ONLINE • conferindo alterações perdidas','syncing');
+  try{
+    const configOk=await carregarConfigGlobalOnline();
+    if(realtimeChannel!==canal || normalizarOperador(usuarioAtual?.operador)!==operador) return false;
+    if(!configOk || !validarSessaoAtualContraConfig()){
+      await encerrarSessaoRevogada('Sua sessão perdeu a validade ou o acesso foi alterado. Entre novamente.');
+      return false;
+    }
+    const dadosOk=await carregarDadosUsuarioOnline(operador);
+    if(realtimeChannel!==canal || normalizarOperador(usuarioAtual?.operador)!==operador) return false;
+    if(!dadosOk) throw new Error('Não foi possível reconciliar todos os dados.');
+    atualizarIdentidadeUsuarioAtual();
+    atualizarIdentidadeNaTela();
+    aplicarPermissoes();
+    popularSelects();
+    renderAll();
+    marcarSincronizacaoConfirmada('ONLINE • banco e tempo real atualizados');
+    return true;
+  }catch(err){
+    console.error('Falha na reconciliação após reconectar:',err);
+    setSyncStatus('ATENÇÃO • reconectado, aguardando atualização completa','syncing');
+    return false;
+  }finally{
+    reconciliacaoRealtimeEmAndamento=false;
+  }
+}
+
 function ativarRealtimeUsuario(){
   cancelarReconexaoRealtime();
   const op=normalizarOperador(usuarioAtual?.operador); if(!op)return;
+  if(!supabaseclient){
+    realtimeStatus='CLOSED';
+    setSyncStatus('ATENÇÃO • módulo online indisponível; dados no aparelho','offline');
+    return;
+  }
 
   // Torna qualquer callback do canal anterior obsoleto antes de removê-lo.
   const canalAnterior = realtimeChannel;
@@ -14112,7 +14310,20 @@ function ativarRealtimeUsuario(){
 
   const canalAtual=supabaseclient.channel(`assistencia_${op}_${Date.now()}`)
    .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.usuario_${op}`},async()=>{
-      const {data,error}=await supabaseclient.from(ONLINE_TABLE).select('dados').eq('id',`usuario_${op}`).maybeSingle();
+      const sequencia=++realtimeRequestSeq.individual;
+      let resposta;
+      try{
+        resposta=await comTimeout(
+          supabaseclient.from(ONLINE_TABLE).select('dados,updated_at').eq('id',`usuario_${op}`).maybeSingle(),
+          SUPABASE_OPERATION_TIMEOUT_MS
+        );
+      }catch(error){
+        console.error('Falha ao receber atualização individual:',error);
+        agendarReconexaoRealtime('leitura-individual');
+        return;
+      }
+      if(sequencia!==realtimeRequestSeq.individual || realtimeChannel!==canalAtual) return;
+      const {data,error}=resposta;
       if(error){console.error('Falha ao receber atualização individual:',error);return;}
       if(data?.dados){
         let persistir=false; aplicandoRemoto=true;
@@ -14121,15 +14332,32 @@ function ativarRealtimeUsuario(){
           const mesclado=mesclarTresVias(base,local,remoto); persistir=!jsonIgual(mesclado,remoto);
           const compartilhados=dadosCompartilhadosDoDB(db); db={...defaultDB(),...compartilhados,...dadosIndividuaisDoDB(mesclado)};
           prepararDBCarregado();
+          revisaoDB++;
           storageSetSeguro(chaveLocalUsuario(op),dadosIndividuaisDoDB(db),{serializar:true,silencioso:true});
           storageSetSeguro(chaveBaseUsuario(op),remoto,{serializar:true,silencioso:true});
-          renderAll(); marcarSincronizacaoConfirmada('ONLINE • tarefas e anotações atualizadas');
+          if(persistir) marcarUsuarioPendente(op); else limparUsuarioPendente(op);
+          renderAll();
+          if(persistir) setSyncStatus('ONLINE • mesclando alterações individuais','syncing');
+          else marcarSincronizacaoConfirmada('ONLINE • tarefas e anotações atualizadas');
         }finally{aplicandoRemoto=false;}
         if(persistir)setTimeout(()=>salvarDadosUsuarioOnline(true),180);
       }
    })
    .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${SHARED_ROW_ID}`},async()=>{
-      const {data,error}=await supabaseclient.from(ONLINE_TABLE).select('dados').eq('id',SHARED_ROW_ID).maybeSingle();
+      const sequencia=++realtimeRequestSeq.compartilhado;
+      let resposta;
+      try{
+        resposta=await comTimeout(
+          supabaseclient.from(ONLINE_TABLE).select('dados,updated_at').eq('id',SHARED_ROW_ID).maybeSingle(),
+          SUPABASE_OPERATION_TIMEOUT_MS
+        );
+      }catch(error){
+        console.error('Falha ao receber atualização compartilhada:',error);
+        agendarReconexaoRealtime('leitura-compartilhada');
+        return;
+      }
+      if(sequencia!==realtimeRequestSeq.compartilhado || realtimeChannel!==canalAtual) return;
+      const {data,error}=resposta;
       if(error){console.error('Falha ao receber atualização compartilhada:',error);return;}
       if(data?.dados){
         let persistir=false; aplicandoRemoto=true;
@@ -14138,16 +14366,26 @@ function ativarRealtimeUsuario(){
           const mesclado=aplicarExclusoesPersistentesCompartilhadas(mesclarTresVias(base,local,remoto));
           persistir=!jsonIgual(mesclado,remoto);
           aplicarDadosCompartilhados(mesclado); prepararDBCarregado();
+          revisaoDB++;
           storageSetSeguro(chaveCacheCompartilhado(),dadosCompartilhadosDoDB(db),{serializar:true,silencioso:true});
           storageSetSeguro(chaveBaseCompartilhado(),remoto,{serializar:true,silencioso:true});
+          if(persistir) marcarCompartilhadoPendente(); else limparCompartilhadoPendente();
           atualizarIdentidadeUsuarioAtual(); atualizarIdentidadeNaTela(); popularSelects(); renderAll();
-          marcarSincronizacaoConfirmada('ONLINE • dados da loja atualizados');
+          if(persistir) setSyncStatus('ONLINE • mesclando alterações da loja','syncing');
+          else marcarSincronizacaoConfirmada('ONLINE • dados da loja atualizados');
         }finally{aplicandoRemoto=false;}
         if(persistir)setTimeout(()=>salvarDadosUsuarioOnline(true),180);
       }
    })
    .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${GLOBAL_ROW_ID}`},async()=>{
-      await carregarConfigGlobalOnline(); atualizarIdentidadeUsuarioAtual(); atualizarIdentidadeNaTela(); aplicarPermissoes(); renderAll();
+      const sequencia=++realtimeRequestSeq.config;
+      const ok=await carregarConfigGlobalOnline();
+      if(sequencia!==realtimeRequestSeq.config || realtimeChannel!==canalAtual) return;
+      if(!ok || !validarSessaoAtualContraConfig()){
+        await encerrarSessaoRevogada('Seu acesso ou sua senha foram alterados. Entre novamente.');
+        return;
+      }
+      atualizarIdentidadeUsuarioAtual(); atualizarIdentidadeNaTela(); aplicarPermissoes(); renderAll();
    })
    .subscribe(status=>{
       // Ignora CLOSED/ERROR emitidos por um canal antigo que já foi substituído.
@@ -14157,7 +14395,8 @@ function ativarRealtimeUsuario(){
         realtimeReconnectAttempts = 0;
         realtimeReconnectReason = '';
         cancelarReconexaoRealtime();
-        marcarSincronizacaoConfirmada('ONLINE • tempo real conectado');
+        setSyncStatus('ONLINE • tempo real conectado, atualizando dados','syncing');
+        setTimeout(()=>reconciliarRealtimeAposConexao(canalAtual,op),100);
       }else if(['CHANNEL_ERROR','TIMED_OUT','CLOSED'].includes(status)){
         setSyncStatus(navigator.onLine?'ONLINE • reconectando tempo real':'OFFLINE • dados no aparelho', navigator.onLine?'syncing':'offline');
         agendarReconexaoRealtime(status);
@@ -14224,32 +14463,91 @@ function saveDB(){
   // V51.32: o cache do usuário guarda somente notas/tarefas individuais.
   // Os dados compartilhados ficam em cache separado e isolado do Comunicação AV.
   const conteudoLocal = op ? dadosIndividuaisDoDB(db) : sanitizarDBGerencial(db);
+  const anteriorLocal=storageGetJSONSeguro(chave,null);
   const salvoLocal = storageSetSeguro(chave,conteudoLocal,{serializar:true});
+  revisaoDB++;
   if(op){
     const compartilhados=dadosCompartilhadosDoDB(db);
-    storageSetSeguro(chaveCacheCompartilhado(),compartilhados,{serializar:true,silencioso:true});
-    marcarCompartilhadoPendente();
-    agendarSalvamentoOnline();
+    const compartilhadosAnteriores=storageGetJSONSeguro(chaveCacheCompartilhado(),null);
+    const salvoCompartilhado=storageSetSeguro(chaveCacheCompartilhado(),compartilhados,{serializar:true});
+    const mudouIndividual=!anteriorLocal || !jsonIgual(anteriorLocal,conteudoLocal);
+    const mudouCompartilhado=!compartilhadosAnteriores || !jsonIgual(compartilhadosAnteriores,compartilhados);
+    if(mudouIndividual || !salvoLocal) marcarUsuarioPendente(op);
+    if(mudouCompartilhado || !salvoCompartilhado) marcarCompartilhadoPendente();
+    if(mudouIndividual || mudouCompartilhado || !salvoLocal || !salvoCompartilhado) agendarSalvamentoOnline();
   }
   return salvoLocal;
 }
 
+function criarRegistroSessao(user){
+  const agora=Date.now();
+  const operador=normalizarOperador(user?.operador);
+  return {
+    nome:String(user?.nome||'').trim(),
+    operador,
+    cargo:String(user?.cargo||'').trim(),
+    matricula:String(user?.matricula||'').trim(),
+    loginEm:new Date(agora).toISOString(),
+    expiraEm:agora+SESSION_TTL_MS,
+    credencialVersao:Math.max(1,Number(user?.credencialVersao)||1),
+    permissoes:cloneJSONSeguro(globalConfig?.permissoes?.[operador]||permissoesPadrao(operador),{})
+  };
+}
+function lerSessaoLocal(){
+  try{
+    const sessao=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');
+    return sessao && typeof sessao==='object' ? sessao : null;
+  }catch(_){ return null; }
+}
+function limparSessaoLocal(){
+  if(sessionExpiryTimer){ clearTimeout(sessionExpiryTimer); sessionExpiryTimer=null; }
+  sessionStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(SOPHIA_SESSION_KEY);
+  sessionStorage.removeItem(SOPHIA_HISTORY_KEY);
+  localStorage.removeItem(SESSION_KEY);
+}
+function validarSessaoAtualContraConfig(){
+  const sessao=lerSessaoLocal();
+  const operador=normalizarOperador(sessao?.operador);
+  if(!operador || !Number.isFinite(Number(sessao?.expiraEm)) || Date.now()>=Number(sessao.expiraEm)) return false;
+  const user=usuarioGlobalPorOperador(operador);
+  if(!user) return false;
+  return Math.max(1,Number(sessao.credencialVersao)||1)===Math.max(1,Number(user.credencialVersao)||1);
+}
+function agendarExpiracaoSessao(){
+  if(sessionExpiryTimer) clearTimeout(sessionExpiryTimer);
+  const sessao=lerSessaoLocal();
+  const restante=Number(sessao?.expiraEm)-Date.now();
+  if(!Number.isFinite(restante) || restante<=0){
+    setTimeout(()=>encerrarSessaoRevogada('Sua sessão expirou. Entre novamente.'),0);
+    return;
+  }
+  sessionExpiryTimer=setTimeout(
+    ()=>encerrarSessaoRevogada('Sua sessão expirou. Entre novamente.'),
+    Math.min(restante,2147483647)
+  );
+}
+async function encerrarSessaoRevogada(motivo='Sua sessão não é mais válida. Entre novamente.'){
+  if(logoutEmAndamento) return;
+  await logout({forcado:true,motivo});
+}
+
 async function login(){
+  if(loginEmAndamento) return;
   bindLoginPreviewTabFullName();
-  atualizarIdentificacaoLogin(true);
   const operadorInput=normalizarOperador(document.getElementById('loginUser').value);
   const pass=document.getElementById('loginPass').value.trim();
   const err=document.getElementById('loginError');
   if(!operadorInput){err.textContent='Informe o número de operador.';return;}
   if(!pass){err.textContent='Informe a senha.';return;}
   if(!navigator.onLine){err.textContent='O login seguro exige conexão com a internet.';return;}
+  if(!supabaseclient){err.textContent='O módulo de sincronização não carregou. Verifique a conexão e atualize a página.';return;}
+  loginEmAndamento=true;
+  const botaoLogin=document.querySelector('.login-btn');
+  if(botaoLogin) botaoLogin.disabled=true;
   err.textContent='';
   showAppLoader('Entrando no sistema','Validando o acesso no servidor e carregando os dados da loja...');
   try{
-    const configOk=await carregarConfigGlobalOnline();
-    if(!configOk){err.textContent='Não foi possível carregar a configuração segura de acesso. Verifique a conexão e tente novamente.';return;}
-    const user=usuarioGlobalPorOperador(operadorInput);
-    if(!user){err.textContent='Operador não autorizado para acessar o sistema.';return;}
     // Validação real no servidor pela Edge Function; não confia na comparação local.
     const autenticado=await criarSessaoSophia(operadorInput,pass);
     if(!autenticado){
@@ -14257,17 +14555,37 @@ async function login(){
       err.textContent=/\[401\]|\[403\]|senha|credencial/i.test(detalhe)?'Operador ou senha inválidos.':'Não foi possível validar o acesso no servidor. Tente novamente com conexão estável.';
       return;
     }
+    const configOk=await carregarConfigGlobalOnline();
+    if(!configOk){
+      sessionStorage.removeItem(SOPHIA_SESSION_KEY);
+      err.textContent='A senha foi validada, mas não foi possível carregar as permissões. Verifique a conexão e tente novamente.';
+      return;
+    }
+    const user=usuarioGlobalPorOperador(operadorInput);
+    if(!user){
+      sessionStorage.removeItem(SOPHIA_SESSION_KEY);
+      err.textContent='Operador não autorizado para acessar o sistema.';
+      return;
+    }
     usuarioAtual={...user}; delete usuarioAtual.senha;
-    sessionStorage.setItem(SESSION_KEY,JSON.stringify({nome:user.nome,operador:user.operador,loginEm:agoraBR()}));
-    await carregarDadosUsuarioOnline(operadorInput);
+    sessionStorage.setItem(SESSION_KEY,JSON.stringify(criarRegistroSessao(user)));
+    agendarExpiracaoSessao();
+    const dadosOk=await carregarDadosUsuarioOnline(operadorInput);
+    if(!dadosOk) setSyncStatus('ATENÇÃO • acesso liberado; sincronização será repetida','syncing');
     atualizarIdentidadeUsuarioAtual();
     await executarVerificacoesPosLogin();
     initApp(); ativarRealtimeUsuario(); atualizarStatusConexao();
     document.getElementById('loginPass').value='';
   }catch(e){
     console.error('Erro ao entrar no sistema:',e);
+    limparSessaoLocal();
+    usuarioAtual=null;
     err.textContent='Não foi possível concluir a entrada. Atualize a página e tente novamente.';
-  }finally{ hideAppLoader(); }
+  }finally{
+    loginEmAndamento=false;
+    if(botaoLogin) botaoLogin.disabled=false;
+    hideAppLoader();
+  }
 }
 
 function ocultarIdentificacaoLogin(){
@@ -14276,14 +14594,52 @@ function ocultarIdentificacaoLogin(){
   const operador = normalizarOperador(document.getElementById('loginUser')?.value || '');
   preview.className = 'login-user-preview empty';
   preview.innerHTML = operador
-    ? `<div><small>Identificação</small><b>Continue para a senha</b><small>O nome aparecerá ao entrar no campo de senha</small></div><span class="preview-operator">OP. ${escapeHTML(operador)}</span>`
-    : `<div><small>Identificação</small><b>Digite seu operador</b><small>Depois vá para a senha</small></div><span class="preview-operator">--</span>`;
+    ? `<div><small>Identificação</small><b id="loginUserFullName">Pressione TAB para identificar</b><small>O nome completo aparecerá neste quadro</small></div><span class="preview-operator">OP. ${escapeHTML(operador)}</span>`
+    : `<div><small>Identificação</small><b id="loginUserFullName">Digite seu operador</b><small>Depois pressione TAB</small></div><span class="preview-operator">--</span>`;
+}
+
+function usuarioAutorizadoNaTelaLogin(operador){
+  return usuarioGlobalPorOperador(operador) ||
+    (db?.usuarios || []).find(usuario=>normalizarOperador(usuario.operador)===operador) ||
+    null;
+}
+function nomeLoginTemSobrenome(nome){
+  return String(nome||'').trim().split(/\s+/).filter(Boolean).length>=3;
+}
+async function obterNomeCompletoTelaLogin(operador,autorizado){
+  const op=normalizarOperador(operador);
+  if(!op) return '';
+  const cache=nomeCompletoLoginCache.get(op);
+  if(cache) return cache;
+  if(consultaNomeCompletoLoginEmAndamento.has(op)) return consultaNomeCompletoLoginEmAndamento.get(op);
+  const consulta=Promise.resolve(nomeCompletoUsuarioPorOperadorAsync(op,autorizado))
+    .then(nome=>{
+      const resultado=String(nome||'').trim();
+      // Só consolida no cache quando há sobrenomes. Um valor abreviado nunca
+      // bloqueia uma consulta posterior ao cadastro completo.
+      if(nomeLoginTemSobrenome(resultado)) nomeCompletoLoginCache.set(op,resultado);
+      return resultado;
+    })
+    .catch(err=>{
+      console.warn('Não foi possível preparar o nome completo para o login:',err);
+      return '';
+    })
+    .finally(()=>consultaNomeCompletoLoginEmAndamento.delete(op));
+  consultaNomeCompletoLoginEmAndamento.set(op,consulta);
+  return consulta;
 }
 
 async function atualizarIdentificacaoLogin(mostrar = false){
   const preview = document.getElementById('loginUserPreview');
   if(!preview) return;
-  if(!mostrar) { ocultarIdentificacaoLogin(); return; }
+  if(!mostrar) {
+    ocultarIdentificacaoLogin();
+    const opDigitado=normalizarOperador(document.getElementById('loginUser')?.value||'');
+    const acessoLocal=opDigitado ? usuarioAutorizadoNaTelaLogin(opDigitado) : null;
+    // Pré-carrega silenciosamente durante a digitação, sem revelar o usuário.
+    if(acessoLocal) obterNomeCompletoTelaLogin(opDigitado,acessoLocal);
+    return;
+  }
 
   const operador = normalizarOperador(
     document.getElementById('loginUser')?.value || ''
@@ -14291,7 +14647,7 @@ async function atualizarIdentificacaoLogin(mostrar = false){
 
   if(!operador){
     preview.className = 'login-user-preview empty';
-    preview.innerHTML = `<div><small>Identificação</small><b>Digite seu operador</b><small>Depois vá para a senha</small></div><span class="preview-operator">--</span>`;
+    preview.innerHTML = `<div><small>Identificação</small><b id="loginUserFullName">Digite seu operador</b><small>Depois pressione TAB</small></div><span class="preview-operator">--</span>`;
     return;
   }
 
@@ -14300,21 +14656,28 @@ async function atualizarIdentificacaoLogin(mostrar = false){
    * somente usuários com autorização de acesso podem ter nome e cargo exibidos.
    * Funcionários cadastrados sem login não são identificados nesta tela.
    */
-  const autorizado =
-    usuarioGlobalPorOperador(operador) ||
-    (db.usuarios || []).find(
-      usuario => normalizarOperador(usuario.operador) === operador
-    );
+  const autorizado=usuarioAutorizadoNaTelaLogin(operador);
 
   if(autorizado){
-    const nome = await nomeCompletoUsuarioPorOperadorAsync(operador, autorizado) || autorizado.nome || 'Usuário autorizado';
     const cargo = autorizado.cargo || '';
-
-    preview.className = 'login-user-preview';
+    preview.className = 'login-user-preview empty';
     preview.innerHTML = `
       <div>
+        <small>Identificação</small>
+        <b id="loginUserFullName">Identificando usuário...</b>
+        <small>Consultando o nome completo</small>
+      </div>
+      <span class="preview-operator">OP. ${escapeHTML(operador)}</span>
+    `;
+    const nomeLocal=nomeCompletoUsuarioPorOperadorLocal(operador,null,autorizado)||autorizado.nome||'Usuário autorizado';
+    const nomeAtualizado=await obterNomeCompletoTelaLogin(operador,autorizado)||nomeLocal;
+    const operadorAindaDigitado=normalizarOperador(document.getElementById('loginUser')?.value||'');
+    if(operadorAindaDigitado!==operador) return;
+    preview.className='login-user-preview';
+    preview.innerHTML=`
+      <div>
         <small>Identificação confirmada</small>
-        <b>${escapeHTML(nome)}</b>
+        <b id="loginUserFullName">${escapeHTML(nomeAtualizado)}</b>
         <small>${escapeHTML(cargo)}</small>
       </div>
       <span class="preview-operator">OP. ${escapeHTML(operador)}</span>
@@ -14330,7 +14693,7 @@ async function atualizarIdentificacaoLogin(mostrar = false){
   preview.innerHTML = `
     <div>
       <small>Identificação</small>
-      <b>Acesso não autorizado</b>
+      <b id="loginUserFullName">Acesso não autorizado</b>
       <small>Este operador não possui acesso ao sistema</small>
     </div>
     <span class="preview-operator">OP. ${escapeHTML(operador)}</span>
@@ -14358,7 +14721,7 @@ async function trySession(){
   try{
     const sessao=JSON.parse(raw);
     const operador=normalizarOperador(sessao?.operador);
-    if(!operador) throw new Error('Sessão local inválida.');
+    if(!operador || !Number.isFinite(Number(sessao?.expiraEm)) || Date.now()>=Number(sessao.expiraEm)) throw new Error('Sessão local inválida ou expirada.');
 
     // Primeiro recupera o que estava salvo neste aparelho, inclusive exclusões pendentes.
     const cacheUsuario=storageGetJSONSeguro(chaveLocalUsuario(operador),null);
@@ -14372,22 +14735,42 @@ async function trySession(){
       prepararDBCarregado();
     }
 
-    const user=usuarioGlobalPorOperador(operador);
+    let user=null;
+    const onlineCompleto=!!(navigator.onLine && supabaseclient);
+    if(onlineCompleto){
+      const configOk=await carregarConfigGlobalOnline();
+      if(!configOk) throw new Error('Não foi possível validar a sessão no servidor.');
+      if(!validarSessaoAtualContraConfig()) throw new Error('Sessão revogada ou credencial alterada.');
+      user=usuarioGlobalPorOperador(operador);
+    }else{
+      user={
+        nome:String(sessao.nome||`OPERADOR ${operador}`),
+        operador,
+        cargo:String(sessao.cargo||'USUÁRIO'),
+        matricula:String(sessao.matricula||''),
+        credencialVersao:Math.max(1,Number(sessao.credencialVersao)||1)
+      };
+      globalConfig=normalizarConfigGlobal({
+        usuarios:[user],
+        permissoes:{[operador]:cloneJSONSeguro(sessao.permissoes||permissoesPadrao(operador),{})}
+      });
+    }
     if(!user) throw new Error('Operador não autorizado.');
     usuarioAtual={...user};
     delete usuarioAtual.senha;
 
-    if(navigator.onLine){
-      await carregarDadosUsuarioOnline(operador);
+    if(onlineCompleto){
+      const dadosOk=await carregarDadosUsuarioOnline(operador);
+      if(!dadosOk) setSyncStatus('ATENÇÃO • sessão restaurada; sincronização pendente','syncing');
     }else{
-      setSyncStatus('OFFLINE • sessão restaurada pelo cache','offline');
+      setSyncStatus(navigator.onLine?'ATENÇÃO • módulo online indisponível; sessão em cache':'OFFLINE • sessão restaurada pelo cache','offline');
     }
+    agendarExpiracaoSessao();
     atualizarIdentidadeUsuarioAtual();
     return true;
   }catch(err){
     console.error('Falha ao restaurar sessão:',err);
-    sessionStorage.removeItem(SESSION_KEY);
-    sessionStorage.removeItem(SOPHIA_SESSION_KEY);
+    limparSessaoLocal();
     usuarioAtual=null;
     return false;
   }finally{
@@ -14425,7 +14808,20 @@ function interfaceGerencialEmAcaoCritica(){
   const formFocado=document.activeElement&&['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName);
   return modalAberto||formFocado;
 }
-function executarAutoAtualizacaoGerencial(){
+async function garantirSalvamentoAntesDeSair(){
+  if(!usuarioAtual || !haPendenciasSincronizacao()) return true;
+  if(!navigator.onLine) return false;
+  clearTimeout(salvamentoTimer);
+  const limite=Date.now()+12000;
+  while(salvamentoEmAndamento && Date.now()<limite) await esperar(120);
+  if(haPendenciasSincronizacao()){
+    try{ await comTimeout(salvarDadosUsuarioOnline(true),SUPABASE_OPERATION_TIMEOUT_MS+3000); }
+    catch(err){ console.error('Falha ao concluir o salvamento antes de sair:',err); }
+  }
+  while(salvamentoEmAndamento && Date.now()<limite) await esperar(120);
+  return !haPendenciasSincronizacao();
+}
+async function executarAutoAtualizacaoGerencial(){
   if(!usuarioAtual)return;
   if(interfaceGerencialEmAcaoCritica()){
     autoRefreshTimerGerencial=setTimeout(executarAutoAtualizacaoGerencial,15000);
@@ -14433,22 +14829,63 @@ function executarAutoAtualizacaoGerencial(){
   }
   salvarEstadoAntesAtualizacaoGerencial();
   showAppLoader('Atualizando sistema','Salvando sua posição e carregando os dados mais recentes...');
-  setTimeout(()=>location.reload(),180);
+  const salvo=await garantirSalvamentoAntesDeSair();
+  if(!salvo && navigator.onLine){
+    hideAppLoader();
+    setSyncStatus('ATENÇÃO • atualização adiada; salvamento pendente','syncing');
+    autoRefreshTimerGerencial=setTimeout(executarAutoAtualizacaoGerencial,60000);
+    return;
+  }
+  location.reload();
 }
 function iniciarAutoAtualizacaoGerencial(){
   if(autoRefreshTimerGerencial)clearTimeout(autoRefreshTimerGerencial);
   autoRefreshTimerGerencial=setTimeout(executarAutoAtualizacaoGerencial,AUTO_REFRESH_TEST_MS);
 }
-function logout(){ sessionStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(SOPHIA_SESSION_KEY); sessionStorage.removeItem(SOPHIA_HISTORY_KEY); localStorage.removeItem(SESSION_KEY); location.reload(); }
+async function logout(opcoes={}){
+  if(logoutEmAndamento) return false;
+  logoutEmAndamento=true;
+  const forcado=!!opcoes?.forcado;
+  const motivo=String(opcoes?.motivo||'').trim();
+  try{
+    if(!forcado && usuarioAtual){
+      showAppLoader('Saindo com segurança','Conferindo se todas as alterações foram sincronizadas...');
+      const salvo=await garantirSalvamentoAntesDeSair();
+      if(!salvo){
+        const continuar=confirm('Ainda existem alterações salvas somente neste aparelho. Deseja sair mesmo assim? Elas serão reenviadas quando este operador entrar novamente neste aparelho.');
+        if(!continuar){ hideAppLoader(); return false; }
+      }
+    }
+    cancelarReconexaoRealtime();
+    if(realtimeChannel){
+      const canal=realtimeChannel;
+      realtimeChannel=null;
+      try{ await supabaseclient.removeChannel(canal); }catch(err){ console.warn('Não foi possível encerrar o canal Realtime:',err); }
+    }
+    limparSessaoLocal();
+    usuarioAtual=null;
+    if(motivo) alert(motivo);
+    location.reload();
+    return true;
+  }finally{
+    logoutEmAndamento=false;
+  }
+}
 
 function initApp(){
   if(!usuarioAtual) return;
   atualizarIdentidadeUsuarioAtual();
   document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('userNameBox').textContent = usuarioAtual.nome;
+  const nomeLateral=document.getElementById('userNameBox');
+  nomeLateral.textContent = abreviarNomeCabecalho(usuarioAtual.nome);
+  nomeLateral.title = usuarioAtual.nome;
+  nomeLateral.setAttribute('aria-label',`Usuário: ${usuarioAtual.nome}`);
   document.getElementById('userRoleBox').textContent = usuarioAtual.cargo;
   document.getElementById('mesAtual').textContent = mesAnoBR();
-  document.getElementById('headerUserName').textContent = usuarioAtual.nome;
+  const headerNome=document.getElementById('headerUserName');
+  headerNome.textContent = abreviarNomeCabecalho(usuarioAtual.nome);
+  headerNome.title = usuarioAtual.nome;
+  headerNome.setAttribute('aria-label',`Usuário: ${usuarioAtual.nome}`);
   document.getElementById('headerUserOperator').textContent = usuarioAtual.operador || '-';
   const dev=normalizarOperador(usuarioAtual.operador)==='133';
   document.getElementById('developerBadge').style.display=dev?'inline-flex':'none';
@@ -17832,16 +18269,30 @@ async function adicionarUsuarioLogin(){
   if(!op){alert('Selecione um funcionário com número de operador.');return;}
   const f=(db.funcionarios||[]).find(x=>normalizarOperador(x.operador)===op); if(!f)return;
   const senhaTemporaria=gerarSenhaTemporariaSegura();
+  const configAnterior=cloneJSONSeguro(globalConfig,{});
   globalConfig=normalizarConfigGlobal(globalConfig);
-  globalConfig.usuarios.push({nome:f.nome,operador:op,matricula:f.matricula||matriculaPorOperador(op),cargo:f.cargo,senha:senhaTemporaria});
+  globalConfig.usuarios.push({nome:f.nome,operador:op,matricula:f.matricula||matriculaPorOperador(op),cargo:f.cargo,senha:senhaTemporaria,credencialVersao:1});
   globalConfig.permissoes[op]=permissoesPadrao(op);
-  await salvarConfigGlobalOnline(); renderAll();
-  alert(`Login liberado para ${f.nome}.\n\nSenha temporária: ${senhaTemporaria}\n\nEntregue esta senha somente ao usuário e peça que ele a altere no primeiro acesso.`);
+  try{
+    await salvarConfigGlobalOnline(); renderAll();
+    alert(`Login liberado para ${f.nome}.\n\nSenha temporária: ${senhaTemporaria}\n\nEntregue esta senha somente ao usuário e peça que ele a altere no primeiro acesso.`);
+  }catch(err){
+    globalConfig=configAnterior;
+    console.error('Falha ao liberar login:',err);
+    alert('Não foi possível liberar o login no servidor. Tente novamente.');
+  }
 }
 async function removerUsuarioLogin(op){
   if(normalizarOperador(usuarioAtual?.operador)!=='133')return; const operador=normalizarOperador(op);
   if(operadoresOficiaisLogin().includes(operador)){alert('Usuário padrão não pode ser removido.');return;}
-  const u=usuarioGlobalPorOperador(operador); if(u&&confirm('Remover o acesso de '+u.nome+'?')){ globalConfig.usuarios=globalConfig.usuarios.filter(x=>normalizarOperador(x.operador)!==operador); delete globalConfig.permissoes[operador]; await salvarConfigGlobalOnline(); renderAll(); }
+  const u=usuarioGlobalPorOperador(operador);
+  if(u&&confirm('Remover o acesso de '+u.nome+'?')){
+    const configAnterior=cloneJSONSeguro(globalConfig,{});
+    globalConfig.usuarios=globalConfig.usuarios.filter(x=>normalizarOperador(x.operador)!==operador);
+    delete globalConfig.permissoes[operador];
+    try{ await salvarConfigGlobalOnline(); renderAll(); }
+    catch(err){ globalConfig=configAnterior; console.error('Falha ao remover login:',err); alert('Não foi possível remover o acesso no servidor. Tente novamente.'); }
+  }
 }
 function renderUsuariosLoginRows(){
   return (globalConfig?.usuarios || []).map(usuario => {
@@ -17883,12 +18334,19 @@ async function salvarPermissoesUsuario(op){
   perms.sistemaAvLinks=sistemaAvLinks;
   perms.painel=true;
   if(perms.alterarSenha || perms.backupDados) perms.config=true;
+  const configAnterior=cloneJSONSeguro(globalConfig,{});
   globalConfig.permissoes[operador]=perms;
-  await salvarConfigGlobalOnline();
-  fecharModalPermissoes();
-  renderAll();
-  aplicarPermissoes();
-  alert('Permissões atualizadas.');
+  try{
+    await salvarConfigGlobalOnline();
+    fecharModalPermissoes();
+    renderAll();
+    aplicarPermissoes();
+    alert('Permissões atualizadas.');
+  }catch(err){
+    globalConfig=configAnterior;
+    console.error('Falha ao salvar permissões:',err);
+    alert('Não foi possível salvar as permissões no servidor. Tente novamente.');
+  }
 }
 function abrirAlteracaoSenha(op){
   const operador=normalizarOperador(op);
@@ -17908,18 +18366,52 @@ async function salvarNovaSenha(op){
   if(!/[A-Za-z]/.test(nova)||!/\d/.test(nova)){alert('Use uma senha com pelo menos uma letra e um número.');return;}
   if(nova!==confirma){alert('As senhas informadas não são iguais.');return;}
   const u=(globalConfig?.usuarios||[]).find(x=>normalizarOperador(x.operador)===operador); if(!u)return;
-  u.senha=nova; await salvarConfigGlobalOnline();
-  if(normalizarOperador(usuarioAtual?.operador)===operador){sessionStorage.removeItem(SOPHIA_SESSION_KEY);await criarSessaoSophia(operador,nova);}
-  fecharModalPermissoes(); renderAll(); alert('Senha alterada com sucesso.');
+  const anterior={senha:u.senha,credencialVersao:u.credencialVersao};
+  u.senha=nova;
+  u.credencialVersao=Math.max(1,Number(u.credencialVersao)||1)+1;
+  try{
+    await salvarConfigGlobalOnline();
+    if(normalizarOperador(usuarioAtual?.operador)===operador){
+      sessionStorage.removeItem(SOPHIA_SESSION_KEY);
+      const autenticado=await criarSessaoSophia(operador,nova);
+      if(!autenticado){
+        await logout({forcado:true,motivo:'A senha foi alterada. Entre novamente usando a nova senha.'});
+        return;
+      }
+      const atualizado=usuarioGlobalPorOperador(operador)||u;
+      usuarioAtual={...atualizado}; delete usuarioAtual.senha;
+      sessionStorage.setItem(SESSION_KEY,JSON.stringify(criarRegistroSessao(atualizado)));
+      agendarExpiracaoSessao();
+    }
+    fecharModalPermissoes(); renderAll(); alert('Senha alterada com sucesso.');
+  }catch(err){
+    u.senha=anterior.senha; u.credencialVersao=anterior.credencialVersao;
+    console.error('Falha ao alterar senha:',err);
+    alert('Não foi possível alterar a senha no servidor. Tente novamente.');
+  }
 }
 async function redefinirSenhaPadrao(op){
   const operador=normalizarOperador(op);
   if(normalizarOperador(usuarioAtual?.operador)!=='133')return;
   if(!confirm('Gerar uma nova senha temporária para este operador?'))return;
   const u=(globalConfig?.usuarios||[]).find(x=>normalizarOperador(x.operador)===operador); if(!u)return;
-  const temporaria=gerarSenhaTemporariaSegura(); u.senha=temporaria; await salvarConfigGlobalOnline();
-  if(normalizarOperador(usuarioAtual?.operador)===operador) sessionStorage.removeItem(SOPHIA_SESSION_KEY);
-  fecharModalPermissoes(); renderAll(); alert(`Nova senha temporária: ${temporaria}\n\nEntregue-a somente ao usuário. Ela não voltará a ser exibida.`);
+  const temporaria=gerarSenhaTemporariaSegura();
+  const anterior={senha:u.senha,credencialVersao:u.credencialVersao};
+  u.senha=temporaria;
+  u.credencialVersao=Math.max(1,Number(u.credencialVersao)||1)+1;
+  try{
+    await salvarConfigGlobalOnline();
+    if(normalizarOperador(usuarioAtual?.operador)===operador){
+      sessionStorage.removeItem(SOPHIA_SESSION_KEY);
+      await logout({forcado:true,motivo:`Sua senha foi redefinida. Entre novamente com a senha temporária: ${temporaria}`});
+      return;
+    }
+    fecharModalPermissoes(); renderAll(); alert(`Nova senha temporária: ${temporaria}\n\nEntregue-a somente ao usuário. Ela não voltará a ser exibida.`);
+  }catch(err){
+    u.senha=anterior.senha; u.credencialVersao=anterior.credencialVersao;
+    console.error('Falha ao redefinir senha:',err);
+    alert('Não foi possível redefinir a senha no servidor. Tente novamente.');
+  }
 }
 function fecharModalPermissoes(){document.getElementById('modalPermissoes')?.classList.remove('active');}
 
@@ -19254,7 +19746,7 @@ window.addEventListener('load', async () => {
   ['adminGerencialSessaoV1','adminGerencialSessaoV2','adminGerencialSessaoV3','adminGerencialSessaoV4','adminGerencialSessaoV5','adminGerencialSessaoV6','adminGerencialSessaoV7','adminGerencialSessaoV12Operador','adminGerencialSessaoV13Operador','adminGerencialSessaoV14Operador','adminGerencialSessaoV15Operador','adminGerencialSessaoV16Operador','adminGerencialSessaoV17Operador','adminGerencialSessaoV18Operador','adminGerencialSessaoV19Operador','adminGerencialSessaoV20Operador'].forEach(k=>localStorage.removeItem(k));
   const possuiSessao=!!sessionStorage.getItem(SESSION_KEY);
   if(possuiSessao) showAppLoader('Atualizando sistema','Restaurando sua sessão e verificando a sincronização...');
-  loadDB(); await carregarConfigGlobalOnline();
+  loadDB();
   if(localStorage.getItem('adminGerencialDark')==='1'){
     document.body.classList.add('dark-mode');
     document.documentElement.dataset.theme='dark';
@@ -19280,6 +19772,27 @@ window.addEventListener('load', async () => {
     hideAppLoader();
     document.documentElement.classList.remove('session-restoring');
     const login=document.getElementById('loginScreen'); if(login) login.style.display='grid';
+    const loginUser=document.getElementById('loginUser');
+    const loginPass=document.getElementById('loginPass');
+    const loginBtn=document.querySelector('.login-btn');
+    const preview=document.getElementById('loginUserPreview');
+    if(preview){
+      preview.className='login-user-preview empty';
+      preview.innerHTML='<div><small>Identificação</small><b id="loginUserFullName">Carregando usuários...</b><small>Preparando os nomes completos</small></div><span class="preview-operator">--</span>';
+    }
+    try{
+      if(navigator.onLine && supabaseclient && typeof window.carregarDiretorioNomesLogin==='function'){
+        await window.carregarDiretorioNomesLogin();
+      }
+    }catch(err){
+      console.warn('O diretório completo de nomes não pôde ser preparado na abertura:',err);
+    }finally{
+      if(loginUser) loginUser.disabled=false;
+      if(loginPass) loginPass.disabled=false;
+      if(loginBtn) loginBtn.disabled=false;
+      ocultarIdentificacaoLogin();
+      loginUser?.focus();
+    }
   }
   document.getElementById('loginUser').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('loginPass').focus();}});
   document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
@@ -19299,7 +19812,12 @@ window.addEventListener('load', async () => {
   document.addEventListener('visibilitychange', () => {
     if(!document.hidden && navigator.onLine && usuarioAtual && realtimeStatus !== 'SUBSCRIBED'){
       agendarReconexaoRealtime('aba-reativada', true);
+    }else if(document.hidden && navigator.onLine && usuarioAtual && haPendenciasSincronizacao()){
+      salvarDadosUsuarioOnline(true);
     }
+  });
+  window.addEventListener('pagehide',()=>{
+    if(navigator.onLine && usuarioAtual && haPendenciasSincronizacao()) salvarDadosUsuarioOnline(true);
   });
   atualizarStatusConexao();
 });
@@ -20163,35 +20681,90 @@ window.addEventListener('load', async () => {
 
 
   /* Compatibilidade: rotinas de identidade/cabeçalho perdidas no trecho truncado. */
+  const nomeLoginMaisCompleto=(...valores)=>{
+    const candidatos=[...new Set(valores.map(v=>String(v||'').trim()).filter(v=>v && !/^OPERADOR\s+\d+$/i.test(v)))];
+    candidatos.sort((a,b)=>{
+      const palavrasA=a.split(/\s+/).filter(Boolean).length;
+      const palavrasB=b.split(/\s+/).filter(Boolean).length;
+      return (palavrasB-palavrasA) || (b.length-a.length);
+    });
+    return candidatos[0]||'';
+  };
   g.nomeCompletoUsuarioPorOperadorLocal=(operador,registro=null,acesso=null)=>{
     const op=String(operador||'').replace(/\D/g,'');
     const d=currentDB();
     const reg=registro || (d?.funcionarios||[]).find(f=>String(f.operador||'').replace(/\D/g,'')===op);
     const acc=acesso || ((typeof globalConfig!=='undefined' ? globalConfig?.usuarios : [])||[]).find(u=>String(u.operador||'').replace(/\D/g,'')===op);
-    return String(reg?.nome||acc?.nome||'').trim();
+    const usuarioLocal=(d?.usuarios||[]).find(u=>String(u.operador||'').replace(/\D/g,'')===op);
+    const oficial=(typeof usuariosOficiais!=='undefined' ? usuariosOficiais : []).find(u=>String(u.operadorPadrao||'').replace(/\D/g,'')===op);
+    return nomeLoginMaisCompleto(
+      reg?.nomeCompleto,reg?.nome_completo,reg?.fullName,[reg?.nome,reg?.sobrenome].filter(Boolean).join(' '),reg?.nome,
+      acc?.nomeCompleto,acc?.nome_completo,acc?.fullName,[acc?.nome,acc?.sobrenome].filter(Boolean).join(' '),acc?.nome,
+      usuarioLocal?.nomeCompleto,usuarioLocal?.nome_completo,usuarioLocal?.fullName,[usuarioLocal?.nome,usuarioLocal?.sobrenome].filter(Boolean).join(' '),usuarioLocal?.nome,
+      oficial?.nomeCompleto,oficial?.nome
+    );
+  };
+  g.carregarDiretorioNomesLogin=async(forcar=false)=>{
+    if(g.__diretorioNomesLoginCarregado && !forcar) return true;
+    if(g.__diretorioNomesLoginPromise && !forcar) return g.__diretorioNomesLoginPromise;
+    const tarefa=(async()=>{
+      if(typeof supabaseclient==='undefined'||!supabaseclient||typeof ONLINE_TABLE==='undefined'||typeof SHARED_ROW_ID==='undefined') return false;
+      const idsFonte=[
+        SHARED_ROW_ID,
+        typeof LEGACY_SHARED_ROW_ID!=='undefined' ? LEGACY_SHARED_ROW_ID : '',
+        'usuario_133',
+        typeof GLOBAL_ROW_ID!=='undefined' ? GLOBAL_ROW_ID : ''
+      ].filter((id,indice,lista)=>id && lista.indexOf(id)===indice);
+      const consulta=supabaseclient.from(ONLINE_TABLE).select('id,dados').in('id',idsFonte);
+      const resposta=typeof comTimeout==='function' ? await comTimeout(consulta,10000) : await consulta;
+      if(resposta?.error) throw resposta.error;
+      const candidatosPorOperador=new Map();
+      (resposta?.data||[]).forEach(linha=>{
+        const dados=linha?.dados||{};
+        const pessoas=[...(dados.funcionarios||[]),...(dados.usuarios||[])];
+        pessoas.forEach(pessoa=>{
+          const op=typeof normalizarOperador==='function'?normalizarOperador(pessoa?.operador):String(pessoa?.operador||'').replace(/\D/g,'');
+          if(!op)return;
+          const candidatos=candidatosPorOperador.get(op)||[];
+          candidatos.push(
+            pessoa?.nomeCompleto,
+            pessoa?.nome_completo,
+            pessoa?.fullName,
+            [pessoa?.nome,pessoa?.sobrenome].filter(Boolean).join(' '),
+            pessoa?.nome
+          );
+          candidatosPorOperador.set(op,candidatos);
+        });
+      });
+      candidatosPorOperador.forEach((candidatos,op)=>{
+        const nome=nomeLoginMaisCompleto(...candidatos);
+        if(nome) nomeCompletoLoginCache.set(op,nome);
+      });
+      g.__diretorioNomesLoginCarregado=true;
+      return true;
+    })();
+    g.__diretorioNomesLoginPromise=tarefa;
+    try{return await tarefa;}
+    finally{g.__diretorioNomesLoginPromise=null;}
   };
   g.nomeCompletoUsuarioPorOperadorAsync=async(operador,acesso=null)=>{
     const op=typeof normalizarOperador==='function'?normalizarOperador(operador):String(operador||'').replace(/\D/g,'');
     if(!op)return '';
-    try{
-      if(typeof supabaseclient!=='undefined'&&supabaseclient&&typeof ONLINE_TABLE!=='undefined'&&typeof SHARED_ROW_ID!=='undefined'){
-        const {data,error}=await supabaseclient.from(ONLINE_TABLE).select('dados').eq('id',SHARED_ROW_ID).maybeSingle();
-        if(!error){
-          const f=(data?.dados?.funcionarios||[]).find(x=>(typeof normalizarOperador==='function'?normalizarOperador(x?.operador):String(x?.operador||'').replace(/\D/g,''))===op);
-          if(f?.nome)return String(f.nome).trim();
-        }
-      }
-      const local=(typeof db!=='undefined'&&Array.isArray(db?.funcionarios))?db.funcionarios.find(f=>(typeof normalizarOperador==='function'?normalizarOperador(f?.operador):String(f?.operador||'').replace(/\D/g,''))===op):null;
-      if(local?.nome)return String(local.nome).trim();
-    }catch(e){console.warn('Não foi possível consultar o nome completo no login:',e)}
-    return g.nomeCompletoUsuarioPorOperadorLocal(operador,null,acesso);
+    const nomeLocalCompleto=g.nomeCompletoUsuarioPorOperadorLocal(operador,null,acesso);
+    try{await g.carregarDiretorioNomesLogin();}
+    catch(e){console.warn('Não foi possível consultar o diretório completo no login:',e)}
+    return nomeLoginMaisCompleto(nomeCompletoLoginCache.get(op),acesso?.nomeCompleto,acesso?.nome,nomeLocalCompleto);
   };
   g.bindLoginPreviewTabFullName=()=>{
-    const user=$('loginUser'),pass=$('loginPass');
+    const user=$('loginUser');
     if(!user||user.dataset.fullNameBound==='1')return;
     user.dataset.fullNameBound='1';
-    user.addEventListener('blur',()=>{ if(typeof g.atualizarIdentificacaoLogin==='function') g.atualizarIdentificacaoLogin(false); });
-    pass?.addEventListener('focus',()=>{ if(typeof g.atualizarIdentificacaoLogin==='function') g.atualizarIdentificacaoLogin(true); });
+    // O nome só é revelado ao avançar com TAB; clique, foco ou blur não identificam.
+    if(!String(user.getAttribute('onkeydown')||'').includes("event.key==='Tab'")){
+      user.addEventListener('keydown',event=>{
+        if(event.key==='Tab' && typeof g.atualizarIdentificacaoLogin==='function') g.atualizarIdentificacaoLogin(true);
+      });
+    }
   };
   let notificationTimer=null;
   g.iniciarCentralNotificacoes=()=>{
@@ -28513,6 +29086,7 @@ window.addEventListener('load', async () => {
   };
   window.salvarConfiguracaoAcessoOperacional=async function(botao){
     if(!globalConfig || typeof globalConfig!=='object'){alert('Configuração global ainda não foi carregada.');return;}
+    const configAnterior=cloneJSONSeguro(globalConfig,{});
     const mapa={...mapaAcessos()};
     funcionariosConfiguraveis().forEach(f=>{const op=normalizarOperador(f.operador); mapa[op]=false;});
     document.querySelectorAll('#listaAcessoOperacional [data-operacional-acesso]').forEach(el=>{mapa[normalizarOperador(el.dataset.operacionalAcesso)]=!!el.checked;});
@@ -28526,7 +29100,7 @@ window.addEventListener('load', async () => {
       if(typeof marcarSincronizacaoConfirmada==='function')marcarSincronizacaoConfirmada('ONLINE • acessos do Operacional atualizados');
       fecharConfiguracaoAcessoOperacional();
       alert('Acessos do Sistema Operacional atualizados com sucesso.');
-    }catch(err){console.error('Falha ao salvar acessos do Operacional:',err);alert('Não foi possível salvar os acessos do Sistema Operacional. Verifique a conexão e tente novamente.');}
+    }catch(err){globalConfig=configAnterior;console.error('Falha ao salvar acessos do Operacional:',err);alert('Não foi possível salvar os acessos do Sistema Operacional. Verifique a conexão e tente novamente.');}
     finally{if(botao){botao.disabled=false;botao.innerHTML=original||'💾 Salvar acessos';}}
   };
 })();
@@ -28653,3 +29227,5 @@ h1>.ui-svg-icon,h2>.ui-svg-icon,h3>.ui-svg-icon{margin-right:.3em;vertical-align
 </script>
 </body>
 </html>
+
+  
