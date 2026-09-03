@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="referrer" content="no-referrer" />
-  <title>Gerencial de Loja • Avenida AV • v51.63 </title>
+  <title>Gerencial de Loja • AV • V51.64</title>
   <!-- PWA / Ícones do Sistema Gerencial Avenida -->
   <meta name="theme-color" content="#291A1E">
   <meta name="application-name" content="Gerencial Avenida">
@@ -91,7 +91,7 @@
       const SOPHIA_SESSION_KEY = 'sophiaSessaoSeguraV1';
       const SOPHIA_HISTORY_KEY = 'sophiaHistoricoSessaoV1';
       const SOPHIA_BUILD = 'V39.1-SEMPREFLIGHT';
-      const GERENCIAL_BUILD = 'V51.63-IDENTIFICACAO-LATERAL-RESPONSIVA';
+      const GERENCIAL_BUILD = 'V51.64-SINCRONIZACAO-CORRIGIDA';
   </script>
   <style>
     :root {
@@ -12611,6 +12611,7 @@ const GLOBAL_ROW_ID = 'config_global_v1';
 const SHARED_ROW_ID = 'gerencial_compartilhados_v1';
 const LEGACY_SHARED_ROW_ID = 'dados_compartilhados_v1';
 const SHARED_CACHE_NAMESPACE = 'gerencial_compartilhados_v1';
+// V51.64: corrige comparação JSONB, migração da linha legada e validação real do conteúdo sincronizado.
 const MODULOS = [
   ['painel','Painel Geral'],['anotacoes','Central de Anotações'],['tarefas','Quadro de Tarefas'],
   ['operacoes','Operações'],['funcionarios','Quadro de Funcionários'],['operadores','Operadores'],
@@ -13150,34 +13151,73 @@ async function verificarDadosSincronizados(){
       detalhe:'Sem internet: dados carregados do cache deste aparelho.'
     };
   }
+  if(!supabaseclient){
+    return {
+      ok:false,
+      detalhe:'O módulo do Supabase não foi carregado no navegador.'
+    };
+  }
+
   try{
     const op = normalizarOperador(usuarioAtual.operador);
-    const { error } = await comTimeout(
+
+    // Se existe qualquer alteração local pendente, ela precisa ser gravada antes da
+    // conferência. Quando não há pendência, não fazemos uma escrita artificial no login.
+    if(haPendenciasSincronizacao(op)){
+      const salvo=await salvarDadosUsuarioOnline(true);
+      if(!salvo || haPendenciasSincronizacao(op)){
+        throw new Error('Existem alterações locais que o Supabase ainda não confirmou.');
+      }
+    }
+
+    // Confirma o conteúdo, e não apenas se o SELECT respondeu. Isso elimina falso positivo
+    // de "sincronizado" quando a leitura funciona mas o servidor ficou com outra versão.
+    const {data,error}=await comTimeout(
       supabaseclient
         .from(ONLINE_TABLE)
-        .select('id')
+        .select('id,dados,updated_at')
         .in('id', [`usuario_${op}`, SHARED_ROW_ID]),
-      4500
+      7000
     );
     if(error) throw error;
 
-    const salvo=await salvarDadosUsuarioOnline(true);
-    if(!salvo || haPendenciasSincronizacao(op)){
-      throw new Error('A gravação de confirmação não foi concluída.');
+    const linhas=Array.isArray(data)?data:[];
+    const individualServidor=linhas.find(l=>String(l.id)===`usuario_${op}`);
+    const compartilhadoServidor=linhas.find(l=>String(l.id)===SHARED_ROW_ID);
+
+    if(!compartilhadoServidor?.dados){
+      throw new Error(`O registro ${SHARED_ROW_ID} não foi encontrado no banco.`);
     }
 
+    const individualRemoto=dadosIndividuaisDoDB(individualServidor?.dados||{});
+    const compartilhadoRemoto=extrairDadosGerenciaisCompartilhados(compartilhadoServidor.dados||{});
+    const individualLocal=dadosIndividuaisDoDB(db);
+    const compartilhadoLocal=dadosCompartilhadosDoDB(db);
+
+    if(!jsonIgual(individualLocal,individualRemoto)){
+      throw new Error('As tarefas/anotações deste aparelho ainda divergem do banco online.');
+    }
+    if(!jsonIgual(compartilhadoLocal,compartilhadoRemoto)){
+      throw new Error('Os dados compartilhados da loja ainda divergem do banco online.');
+    }
+
+    limparUsuarioPendente(op);
+    limparCompartilhadoPendente();
+    marcarSincronizacaoConfirmada('ONLINE • conteúdo confirmado no Supabase');
     return {
       ok:true,
-      detalhe:'Leitura e gravação confirmadas no banco de dados online.'
+      detalhe:'Conteúdo local e banco online conferidos e sincronizados.'
     };
   }catch(err){
     console.error('Falha ao verificar sincronização:', err);
+    const detalheErro=String(err?.message||err||'Erro desconhecido').replace(/\s+/g,' ').trim();
     return {
       ok:false,
-      detalhe:'Não foi possível confirmar a sincronização com o Supabase.'
+      detalhe:`Falha de sincronização: ${detalheErro}`
     };
   }
 }
+
 function montarUrlVerificacao(url){
   const alvo = new URL(url, location.href);
   alvo.searchParams.set('verificacao_av', String(Date.now()));
@@ -13682,9 +13722,25 @@ function cloneJSONSeguro(valor, fallback=null){
   try{ return JSON.parse(JSON.stringify(valor)); }
   catch(_){ return fallback; }
 }
+// V51.64 — comparação semântica de JSON.
+// O PostgreSQL/Supabase pode devolver objetos JSONB com as mesmas chaves em outra ordem.
+// JSON.stringify direto gerava falsos conflitos, mantinha pendências ativas e fazia o loader
+// acusar falha mesmo quando o conteúdo salvo era equivalente ao conteúdo local.
+function jsonCanonicoSync(valor){
+  if(Array.isArray(valor)) return valor.map(item=>jsonCanonicoSync(item));
+  if(valor && typeof valor==='object'){
+    const saida={};
+    Object.keys(valor).sort().forEach(chave=>{
+      const v=valor[chave];
+      if(typeof v!=='undefined') saida[chave]=jsonCanonicoSync(v);
+    });
+    return saida;
+  }
+  return valor;
+}
 function jsonIgual(a,b){
   if(a === b) return true;
-  try{ return JSON.stringify(a) === JSON.stringify(b); }
+  try{ return JSON.stringify(jsonCanonicoSync(a)) === JSON.stringify(jsonCanonicoSync(b)); }
   catch(_){ return false; }
 }
 function chaveBaseUsuario(op){
@@ -14008,6 +14064,36 @@ function aplicarDadosCompartilhados(compartilhados){
   const limpos=aplicarExclusoesPersistentesCompartilhadas(apenasGerencial);
   db = {...defaultDB(), ...limpos, ...individuais};
 }
+// V51.64 — migração controlada da antiga linha compartilhada.
+// A marca fica no próprio payload novo, portanto a linha legada é usada somente durante
+// a migração. Isso evita que um snapshot antigo seja reimportado em todo login.
+function migracaoLegacyCompartilhadoConcluida(dados){
+  return !!(dados?._sync?.legacySharedMigration?.concluida);
+}
+function marcarMigracaoLegacyCompartilhado(dados,origem='desconhecida'){
+  const saida=extrairDadosGerenciaisCompartilhados(cloneJSONSeguro(dados||{},{}));
+  saida._sync = (saida._sync && typeof saida._sync==='object' && !Array.isArray(saida._sync)) ? saida._sync : {};
+  saida._sync.legacySharedMigration={
+    concluida:true,
+    versao:'V51.64',
+    origem:String(origem||'desconhecida'),
+    em:new Date().toISOString()
+  };
+  return aplicarExclusoesPersistentesCompartilhadas(saida);
+}
+function mesclarMigracaoLegacyCompartilhado(novo,legado,novoUpdatedAt='',legadoUpdatedAt=''){
+  const a=extrairDadosGerenciaisCompartilhados(novo||{});
+  const b=extrairDadosGerenciaisCompartilhados(legado||{});
+  if(!Object.keys(a).length) return cloneJSONSeguro(b,{});
+  if(!Object.keys(b).length) return cloneJSONSeguro(a,{});
+
+  // Na primeira migração não existe uma base comum confiável. A linha mais recente recebe
+  // preferência apenas nos campos realmente conflitantes; listas com IDs são mescladas.
+  const legadoMaisNovo=String(legadoUpdatedAt||'').localeCompare(String(novoUpdatedAt||''))>0;
+  const preferido=legadoMaisNovo?b:a;
+  const secundario=legadoMaisNovo?a:b;
+  return aplicarExclusoesPersistentesCompartilhadas(mesclarTresVias({},preferido,secundario));
+}
 async function carregarDadosCompartilhadosOnline(){
   migrarCacheCompartilhadoV5132();
   try{
@@ -14016,24 +14102,58 @@ async function carregarDadosCompartilhadosOnline(){
       SUPABASE_OPERATION_TIMEOUT_MS
     );
     if(error) throw error;
-    if(!data?.dados){
-      const {data:fonte133,error:erro133}=await comTimeout(
-        supabaseclient.from(ONLINE_TABLE).select('dados').eq('id','usuario_133').maybeSingle(),
+
+    let remotoNovo=data?.dados && typeof data.dados==='object'
+      ? extrairDadosGerenciaisCompartilhados(data.dados)
+      : null;
+    let remotoAtualizadoEm=data?.updated_at||'';
+
+    // A V51.63 passou a usar gerencial_compartilhados_v1, mas não migrava de fato
+    // dados_compartilhados_v1. A V51.64 consulta a linha antiga SOMENTE se a nova ainda
+    // não possui a marca de migração concluída.
+    if(!remotoNovo || !migracaoLegacyCompartilhadoConcluida(remotoNovo)){
+      const {data:legado,error:erroLegado}=await comTimeout(
+        supabaseclient.from(ONLINE_TABLE).select('dados,updated_at').eq('id',LEGACY_SHARED_ROW_ID).maybeSingle(),
         SUPABASE_OPERATION_TIMEOUT_MS
       );
-      if(erro133) throw erro133;
-      const fonte = fonte133?.dados || db || defaultDB();
-      // O whitelist de dadosCompartilhadosDoDB impede qualquer campo de chat nessa criação.
-      const compartilhados = dadosCompartilhadosDoDB(fonte);
-      const {error:erroCriar}=await comTimeout(
-        supabaseclient.from(ONLINE_TABLE).upsert({id:SHARED_ROW_ID,dados:compartilhados,updated_at:new Date().toISOString()},{onConflict:'id'}),
-        SUPABASE_OPERATION_TIMEOUT_MS
-      );
-      if(erroCriar) throw erroCriar;
-      data={dados:compartilhados};
+      if(erroLegado) throw erroLegado;
+
+      let fonteMigracao=null;
+      let origemMigracao='';
+
+      if(remotoNovo && legado?.dados){
+        fonteMigracao=mesclarMigracaoLegacyCompartilhado(
+          remotoNovo,
+          legado.dados,
+          remotoAtualizadoEm,
+          legado.updated_at||''
+        );
+        origemMigracao='nova+legada';
+      }else if(remotoNovo){
+        fonteMigracao=remotoNovo;
+        origemMigracao='nova';
+      }else if(legado?.dados){
+        fonteMigracao=extrairDadosGerenciaisCompartilhados(legado.dados);
+        origemMigracao='legada';
+      }else{
+        const {data:fonte133,error:erro133}=await comTimeout(
+          supabaseclient.from(ONLINE_TABLE).select('dados').eq('id','usuario_133').maybeSingle(),
+          SUPABASE_OPERATION_TIMEOUT_MS
+        );
+        if(erro133) throw erro133;
+        fonteMigracao=dadosCompartilhadosDoDB(fonte133?.dados || db || defaultDB());
+        origemMigracao='usuario_133';
+      }
+
+      const migrado=marcarMigracaoLegacyCompartilhado(fonteMigracao,origemMigracao);
+      const baseParaSalvar=remotoNovo||{};
+      remotoNovo=await salvarLinhaComConcorrencia(SHARED_ROW_ID,migrado,baseParaSalvar);
+      remotoNovo=extrairDadosGerenciaisCompartilhados(remotoNovo||migrado);
+      remotoAtualizadoEm=new Date().toISOString();
+      data={dados:remotoNovo,updated_at:remotoAtualizadoEm};
     }
 
-    const remoto = data.dados && typeof data.dados==='object' ? data.dados : {};
+    const remoto = remotoNovo && typeof remotoNovo==='object' ? remotoNovo : {};
     const cacheLocal = storageGetJSONSeguro(chaveCacheCompartilhado(), null);
     const baseAnterior = valorBaseSync(chaveBaseCompartilhado(),{});
     const haviaAlteracaoLocal=!!(
@@ -14048,7 +14168,7 @@ async function carregarDadosCompartilhadosOnline(){
 
     aplicarDadosCompartilhados(resolvido);
     storageSetSeguro(chaveCacheCompartilhado(),resolvido,{serializar:true,silencioso:true});
-    // A base permanece como o snapshot do servidor para que alterações pendentes sejam reenviadas.
+    // A base permanece como o snapshot efetivamente confirmado pelo servidor.
     storageSetSeguro(chaveBaseCompartilhado(),remoto,{serializar:true,silencioso:true});
     if(jsonIgual(resolvido,remoto)) limparCompartilhadoPendente();
     else marcarCompartilhadoPendente();
@@ -14061,9 +14181,11 @@ async function carregarDadosCompartilhadosOnline(){
       const cache=storageGetJSONSeguro(chaveCacheCompartilhado(),null);
       if(cache) aplicarDadosCompartilhados(cache);
     }catch(_){ }
+    setSyncStatus(navigator.onLine ? `SEM SINCRONIZAÇÃO • ${String(err?.message||'falha no banco')}` : 'OFFLINE • cache deste aparelho','offline');
     return false;
   }
 }
+
 async function carregarDadosUsuarioOnline(op){
   const operador=normalizarOperador(op); const rowId=`usuario_${operador}`;
   setSyncStatus('SINCRONIZANDO...','syncing');
@@ -29227,5 +29349,3 @@ h1>.ui-svg-icon,h2>.ui-svg-icon,h3>.ui-svg-icon{margin-right:.3em;vertical-align
 </script>
 </body>
 </html>
-
-  
