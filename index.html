@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="referrer" content="no-referrer" />
-  <title>Assistência Gerencial de Loja - Avenida V51.70 • Fundo superior descendo atrás das abas</title>
+  <title>Assistência Gerencial de Loja - Avenida V51.72 • Modo Seguro Pré-Sincronização V2</title>
   <!-- PWA / Ícones do Sistema Gerencial Avenida -->
   <meta name="theme-color" content="#291A1E">
   <meta name="application-name" content="Gerencial Avenida">
@@ -91,7 +91,7 @@
       const SOPHIA_SESSION_KEY = 'sophiaSessaoSeguraV1';
       const SOPHIA_HISTORY_KEY = 'sophiaHistoricoSessaoV1';
       const SOPHIA_BUILD = 'V39.1-SEMPREFLIGHT';
-      const GERENCIAL_BUILD = 'V51.70-MOBILE-FUNDO-SUPERIOR-DESCENDO-ATRAS-DAS-ABAS';
+      const GERENCIAL_BUILD = 'V51.72-MODO-SEGURO-NUVEM-SOMENTE-LEITURA';
   </script>
   <style>
     :root {
@@ -12715,6 +12715,9 @@ let loginEmAndamento = false;
 let logoutEmAndamento = false;
 let reconciliacaoRealtimeEmAndamento = false;
 let revisaoDB = 0;
+// V51.72 — proteção da sincronização monolítica antiga.
+let syncSessaoInicializada = false;
+let ultimaInteracaoUsuarioEm = 0;
 let globalConfigBase = null;
 let sessionExpiryTimer = null;
 const realtimeRequestSeq = { individual:0, compartilhado:0, config:0 };
@@ -12722,6 +12725,14 @@ const nomeCompletoLoginCache = new Map();
 const consultaNomeCompletoLoginEmAndamento = new Map();
 const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
 const SUPABASE_OPERATION_TIMEOUT_MS = 15000;
+// V51.72 — proteção absoluta da base antiga durante a migração V2.
+// O sistema pode LER a tabela monolítica, mas nenhuma rotina deste HTML pode gravá-la.
+const PRE_V2_CLOUD_READ_ONLY = true;
+
+// Apenas uma ação humana desta sessão pode autorizar uma nova gravação online.
+['pointerdown','keydown','input','change'].forEach(tipo=>{
+  document.addEventListener(tipo,()=>{ ultimaInteracaoUsuarioEm=Date.now(); },{capture:true,passive:true});
+});
 
 const BACKUP_MAX_BYTES = 15 * 1024 * 1024;
 const BACKUP_MAX_ITEMS_POR_LISTA = 20000;
@@ -13142,82 +13153,27 @@ async function verificarIAFuncionando(){
   }
 }
 async function verificarDadosSincronizados(){
-  if(!usuarioAtual){
-    return {
-      ok:false,
-      detalhe:'Nenhum usuário autenticado para validar a sincronização.'
-    };
-  }
-  if(!navigator.onLine){
-    return {
-      ok:false,
-      detalhe:'Sem internet: dados carregados do cache deste aparelho.'
-    };
-  }
-  if(!supabaseclient){
-    return {
-      ok:false,
-      detalhe:'O módulo do Supabase não foi carregado no navegador.'
-    };
-  }
-
+  if(!usuarioAtual) return {ok:false,detalhe:'Nenhum usuário autenticado para validar a sincronização.'};
+  if(!navigator.onLine) return {ok:false,detalhe:'Sem internet: sistema usando somente o cache deste aparelho.'};
+  if(!supabaseclient) return {ok:false,detalhe:'O módulo do Supabase não foi carregado no navegador.'};
   try{
-    const op = normalizarOperador(usuarioAtual.operador);
-
-    // Se existe qualquer alteração local pendente, ela precisa ser gravada antes da
-    // conferência. Quando não há pendência, não fazemos uma escrita artificial no login.
-    if(haPendenciasSincronizacao(op)){
-      const salvo=await salvarDadosUsuarioOnline(true);
-      if(!salvo || haPendenciasSincronizacao(op)){
-        throw new Error('Existem alterações locais que o Supabase ainda não confirmou.');
-      }
-    }
-
-    // Confirma o conteúdo, e não apenas se o SELECT respondeu. Isso elimina falso positivo
-    // de "sincronizado" quando a leitura funciona mas o servidor ficou com outra versão.
+    const op=normalizarOperador(usuarioAtual.operador);
     const {data,error}=await comTimeout(
-      supabaseclient
-        .from(ONLINE_TABLE)
-        .select('id,dados,updated_at')
-        .in('id', [`usuario_${op}`, SHARED_ROW_ID]),
+      supabaseclient.from(ONLINE_TABLE).select('id,updated_at').in('id',[`usuario_${op}`,SHARED_ROW_ID]),
       7000
     );
     if(error) throw error;
-
-    const linhas=Array.isArray(data)?data:[];
-    const individualServidor=linhas.find(l=>String(l.id)===`usuario_${op}`);
-    const compartilhadoServidor=linhas.find(l=>String(l.id)===SHARED_ROW_ID);
-
-    if(!compartilhadoServidor?.dados){
-      throw new Error(`O registro ${SHARED_ROW_ID} não foi encontrado no banco.`);
+    const ids=new Set((data||[]).map(x=>String(x.id)));
+    if(!ids.has(SHARED_ROW_ID)) throw new Error(`O registro ${SHARED_ROW_ID} não foi encontrado no banco.`);
+    if(haPendenciasSincronizacao(op)){
+      return {ok:false,detalhe:'Há uma alteração feita nesta sessão aguardando confirmação no servidor.'};
     }
-
-    const individualRemoto=dadosIndividuaisDoDB(individualServidor?.dados||{});
-    const compartilhadoRemoto=extrairDadosGerenciaisCompartilhados(compartilhadoServidor.dados||{});
-    const individualLocal=dadosIndividuaisDoDB(db);
-    const compartilhadoLocal=dadosCompartilhadosDoDB(db);
-
-    if(!jsonIgual(individualLocal,individualRemoto)){
-      throw new Error('As tarefas/anotações deste aparelho ainda divergem do banco online.');
-    }
-    if(!jsonIgual(compartilhadoLocal,compartilhadoRemoto)){
-      throw new Error('Os dados compartilhados da loja ainda divergem do banco online.');
-    }
-
-    limparUsuarioPendente(op);
-    limparCompartilhadoPendente();
-    marcarSincronizacaoConfirmada('ONLINE • conteúdo confirmado no Supabase');
-    return {
-      ok:true,
-      detalhe:'Conteúdo local e banco online conferidos e sincronizados.'
-    };
+    if(!syncSessaoInicializada) throw new Error('A sessão ainda não confirmou o snapshot do servidor.');
+    marcarSincronizacaoConfirmada('ONLINE • servidor carregado em modo somente leitura');
+    return {ok:true,detalhe:'Servidor carregado como fonte principal. A base antiga está protegida contra qualquer gravação desta versão.'};
   }catch(err){
-    console.error('Falha ao verificar sincronização:', err);
-    const detalheErro=String(err?.message||err||'Erro desconhecido').replace(/\s+/g,' ').trim();
-    return {
-      ok:false,
-      detalhe:`Falha de sincronização: ${detalheErro}`
-    };
+    console.error('Falha ao verificar sincronização:',err);
+    return {ok:false,detalhe:`Falha de sincronização: ${String(err?.message||err||'erro desconhecido').replace(/\s+/g,' ').trim()}`};
   }
 }
 
@@ -13370,7 +13326,7 @@ async function executarVerificacoesPosLogin(){
   const ia = await verificarIAFuncionando();
   setAppLoaderCheck('ia', ia.ok ? 'success' : 'error', ia.detalhe);
 
-  setAppLoaderCheck('sync','checking','Conferindo leitura e gravação dos dados online...');
+  setAppLoaderCheck('sync','checking','Conferindo leitura segura dos dados online...');
   await esperar(180);
   const sync = await verificarDadosSincronizados();
   setAppLoaderCheck('sync', sync.ok ? 'success' : 'error', sync.detalhe);
@@ -13608,6 +13564,10 @@ async function carregarConfigGlobalOnline(){
   }
 }
 async function salvarConfigGlobalOnline(){
+  if(PRE_V2_CLOUD_READ_ONLY){
+    setSyncStatus('MODO SEGURO • configurações da nuvem protegidas até concluir V2','syncing');
+    return false;
+  }
   globalConfig=normalizarConfigGlobal(globalConfig);
   globalConfig.atualizadoEm=agoraBR();
   // Credenciais legadas não são mais persistidas em localStorage.
@@ -14100,90 +14060,44 @@ function mesclarMigracaoLegacyCompartilhado(novo,legado,novoUpdatedAt='',legadoU
 async function carregarDadosCompartilhadosOnline(){
   migrarCacheCompartilhadoV5132();
   try{
-    let {data,error}=await comTimeout(
+    const {data,error}=await comTimeout(
       supabaseclient.from(ONLINE_TABLE).select('dados,updated_at').eq('id',SHARED_ROW_ID).maybeSingle(),
       SUPABASE_OPERATION_TIMEOUT_MS
     );
     if(error) throw error;
 
-    let remotoNovo=data?.dados && typeof data.dados==='object'
+    let remoto=data?.dados && typeof data.dados==='object'
       ? extrairDadosGerenciaisCompartilhados(data.dados)
       : null;
-    let remotoAtualizadoEm=data?.updated_at||'';
 
-    // A V51.63 passou a usar gerencial_compartilhados_v1, mas não migrava de fato
-    // dados_compartilhados_v1. A V51.64 consulta a linha antiga SOMENTE se a nova ainda
-    // não possui a marca de migração concluída.
-    if(!remotoNovo || !migracaoLegacyCompartilhadoConcluida(remotoNovo)){
+    // V51.72: no login o SERVIDOR é a fonte prioritária. Se a linha nova estiver ausente,
+    // usa a linha legada apenas para leitura; NUNCA faz migração/gravação automática no login.
+    if(!remoto){
       const {data:legado,error:erroLegado}=await comTimeout(
-        supabaseclient.from(ONLINE_TABLE).select('dados,updated_at').eq('id',LEGACY_SHARED_ROW_ID).maybeSingle(),
+        supabaseclient.from(ONLINE_TABLE).select('dados').eq('id',LEGACY_SHARED_ROW_ID).maybeSingle(),
         SUPABASE_OPERATION_TIMEOUT_MS
       );
       if(erroLegado) throw erroLegado;
-
-      let fonteMigracao=null;
-      let origemMigracao='';
-
-      if(remotoNovo && legado?.dados){
-        fonteMigracao=mesclarMigracaoLegacyCompartilhado(
-          remotoNovo,
-          legado.dados,
-          remotoAtualizadoEm,
-          legado.updated_at||''
-        );
-        origemMigracao='nova+legada';
-      }else if(remotoNovo){
-        fonteMigracao=remotoNovo;
-        origemMigracao='nova';
-      }else if(legado?.dados){
-        fonteMigracao=extrairDadosGerenciaisCompartilhados(legado.dados);
-        origemMigracao='legada';
-      }else{
-        const {data:fonte133,error:erro133}=await comTimeout(
-          supabaseclient.from(ONLINE_TABLE).select('dados').eq('id','usuario_133').maybeSingle(),
-          SUPABASE_OPERATION_TIMEOUT_MS
-        );
-        if(erro133) throw erro133;
-        fonteMigracao=dadosCompartilhadosDoDB(fonte133?.dados || db || defaultDB());
-        origemMigracao='usuario_133';
-      }
-
-      const migrado=marcarMigracaoLegacyCompartilhado(fonteMigracao,origemMigracao);
-      const baseParaSalvar=remotoNovo||{};
-      remotoNovo=await salvarLinhaComConcorrencia(SHARED_ROW_ID,migrado,baseParaSalvar);
-      remotoNovo=extrairDadosGerenciaisCompartilhados(remotoNovo||migrado);
-      remotoAtualizadoEm=new Date().toISOString();
-      data={dados:remotoNovo,updated_at:remotoAtualizadoEm};
+      remoto=legado?.dados ? extrairDadosGerenciaisCompartilhados(legado.dados) : dadosCompartilhadosDoDB(defaultDB());
     }
 
-    const remoto = remotoNovo && typeof remotoNovo==='object' ? remotoNovo : {};
-    const cacheLocal = storageGetJSONSeguro(chaveCacheCompartilhado(), null);
-    const baseAnterior = valorBaseSync(chaveBaseCompartilhado(),{});
-    const haviaAlteracaoLocal=!!(
-      cacheLocal &&
-      typeof cacheLocal==='object' &&
-      (compartilhadoPendente() || !jsonIgual(cacheLocal,baseAnterior))
-    );
-    const resolvidoBruto = haviaAlteracaoLocal
-      ? mesclarTresVias(baseAnterior,cacheLocal,remoto)
-      : remoto;
-    const resolvido = aplicarExclusoesPersistentesCompartilhadas(resolvidoBruto);
+    aplicarDadosCompartilhados(remoto||{});
+    prepararDBCarregado();
+    const snapshot=dadosCompartilhadosDoDB(db);
 
-    aplicarDadosCompartilhados(resolvido);
-    storageSetSeguro(chaveCacheCompartilhado(),resolvido,{serializar:true,silencioso:true});
-    // A base permanece como o snapshot efetivamente confirmado pelo servidor.
-    storageSetSeguro(chaveBaseCompartilhado(),remoto,{serializar:true,silencioso:true});
-    if(jsonIgual(resolvido,remoto)) limparCompartilhadoPendente();
-    else marcarCompartilhadoPendente();
-    if(compartilhadoPendente()) setSyncStatus('ONLINE • alterações da loja aguardando envio','syncing');
-    else marcarSincronizacaoConfirmada('ONLINE • dados da loja carregados');
+    // Cache e base recebem o MESMO snapshot proveniente do servidor.
+    // Isso elimina pendências antigas e impede cache velho de ser reenviado ao entrar.
+    storageSetSeguro(chaveCacheCompartilhado(),snapshot,{serializar:true,silencioso:true});
+    storageSetSeguro(chaveBaseCompartilhado(),snapshot,{serializar:true,silencioso:true});
+    limparCompartilhadoPendente();
+    marcarSincronizacaoConfirmada('ONLINE • dados da loja carregados do servidor');
     return true;
   }catch(err){
     console.error('Falha ao carregar dados compartilhados:',err);
-    try{
-      const cache=storageGetJSONSeguro(chaveCacheCompartilhado(),null);
-      if(cache) aplicarDadosCompartilhados(cache);
-    }catch(_){ }
+    // Só cai para cache quando o servidor realmente está indisponível; esse cache não ganha
+    // permissão automática para subir depois.
+    const cache=storageGetJSONSeguro(chaveCacheCompartilhado(),null);
+    if(cache) aplicarDadosCompartilhados(cache);
     setSyncStatus(navigator.onLine ? `SEM SINCRONIZAÇÃO • ${String(err?.message||'falha no banco')}` : 'OFFLINE • cache deste aparelho','offline');
     return false;
   }
@@ -14191,58 +14105,48 @@ async function carregarDadosCompartilhadosOnline(){
 
 async function carregarDadosUsuarioOnline(op){
   const operador=normalizarOperador(op); const rowId=`usuario_${operador}`;
-  setSyncStatus('SINCRONIZANDO...','syncing');
+  setSyncStatus('SINCRONIZANDO • servidor prioritário','syncing');
+  syncSessaoInicializada=false;
   try{
     const {data,error}=await comTimeout(
       supabaseclient.from(ONLINE_TABLE).select('dados,updated_at').eq('id',rowId).maybeSingle(),
       SUPABASE_OPERATION_TIMEOUT_MS
     );
     if(error) throw error;
-    const remoto=data?.dados ? dadosIndividuaisDoDB(data.dados) : dadosIndividuaisDoDB(defaultDB());
-    let cacheLocal=storageGetJSONSeguro(chaveLocalUsuario(operador),null);
-    if(!cacheLocal && !data?.dados){
-      const legado=localStorage.getItem(STORAGE_KEY);
-      const fonte=(operador==='133'&&legado)?{...defaultDB(),...JSON.parse(legado)}:defaultDB();
-      cacheLocal=dadosIndividuaisDoDB(fonte);
-    }
-    const baseAnterior=valorBaseSync(chaveBaseUsuario(operador),{});
-    const haviaAlteracaoLocal=!!(
-      cacheLocal &&
-      typeof cacheLocal==='object' &&
-      (usuarioPendente(operador) || !jsonIgual(cacheLocal,baseAnterior))
-    );
-    const resolvido=haviaAlteracaoLocal
-      ? dadosIndividuaisDoDB(mesclarTresVias(baseAnterior,cacheLocal,remoto))
-      : remoto;
 
-    db={...defaultDB(),...resolvido};
+    // V51.72: não mescla cache antigo durante o login. O que está confirmado no Supabase vence.
+    const remoto=data?.dados ? dadosIndividuaisDoDB(data.dados) : dadosIndividuaisDoDB(defaultDB());
+    db={...defaultDB(),...remoto};
+
     const compartilhadosOk=await carregarDadosCompartilhadosOnline();
     prepararDBCarregado();
-    const individuaisPreparados=dadosIndividuaisDoDB(db);
-    storageSetSeguro(chaveLocalUsuario(operador),individuaisPreparados,{serializar:true,silencioso:true});
-    storageSetSeguro(chaveBaseUsuario(operador),remoto,{serializar:true,silencioso:true});
-    if(jsonIgual(individuaisPreparados,remoto)) limparUsuarioPendente(operador);
-    else marcarUsuarioPendente(operador);
 
-    let envioOk=true;
-    if(usuarioPendente(operador) || compartilhadoPendente()){
-      envioOk=await salvarDadosUsuarioOnline(true);
-    }
-    if(compartilhadosOk && envioOk && !haPendenciasSincronizacao(operador)){
-      marcarSincronizacaoConfirmada('ONLINE • dados sincronizados');
-    }else{
-      setSyncStatus('ATENÇÃO • há alterações aguardando sincronização','syncing');
-    }
-    return !!(compartilhadosOk && envioOk);
+    const individualSnapshot=dadosIndividuaisDoDB(db);
+    const compartilhadoSnapshot=dadosCompartilhadosDoDB(db);
+
+    storageSetSeguro(chaveLocalUsuario(operador),individualSnapshot,{serializar:true,silencioso:true});
+    storageSetSeguro(chaveBaseUsuario(operador),individualSnapshot,{serializar:true,silencioso:true});
+    storageSetSeguro(chaveCacheCompartilhado(),compartilhadoSnapshot,{serializar:true,silencioso:true});
+    storageSetSeguro(chaveBaseCompartilhado(),compartilhadoSnapshot,{serializar:true,silencioso:true});
+    limparUsuarioPendente(operador);
+    limparCompartilhadoPendente();
+
+    syncSessaoInicializada=!!compartilhadosOk;
+    if(syncSessaoInicializada) marcarSincronizacaoConfirmada('ONLINE • servidor confirmado como fonte principal');
+    else setSyncStatus('ATENÇÃO • dados individuais carregados; loja pendente','syncing');
+    return syncSessaoInicializada;
   }catch(err){
     console.error('Falha ao carregar dados:',err);
     try{
-      const cacheIndividual=JSON.parse(localStorage.getItem(chaveLocalUsuario(operador))||'null')||{};
+      const cacheIndividual=storageGetJSONSeguro(chaveLocalUsuario(operador),{})||{};
       db={...defaultDB(),...dadosIndividuaisDoDB(cacheIndividual)};
       const cacheCompartilhado=storageGetJSONSeguro(chaveCacheCompartilhado(),null);
       if(cacheCompartilhado) aplicarDadosCompartilhados(cacheCompartilhado);
-    }catch(e){ db=defaultDB(); }
-    prepararDBCarregado(); setSyncStatus('OFFLINE • cache deste aparelho','offline'); return false;
+    }catch(_){ db=defaultDB(); }
+    prepararDBCarregado();
+    syncSessaoInicializada=false;
+    setSyncStatus('OFFLINE • somente leitura/cache até reconectar','offline');
+    return false;
   }
 }
 function prepararDBCarregado(){
@@ -14269,57 +14173,52 @@ function prepararDBCarregado(){
   garantirCamposFuncionarios(); sincronizarUsuariosLogin();
 }
 async function salvarDadosUsuarioOnline(silencioso=false){
-  if(!usuarioAtual) return false;
-  if(aplicandoRemoto){
-    salvamentoPendente = true;
-    return false;
+  if(PRE_V2_CLOUD_READ_ONLY){
+    const opSeguro=normalizarOperador(usuarioAtual?.operador);
+    if(opSeguro) limparUsuarioPendente(opSeguro);
+    limparCompartilhadoPendente();
+    salvamentoPendente=false;
+    setSyncStatus('ONLINE • nuvem protegida em modo somente leitura até concluir V2','online');
+    return true;
   }
-  if(salvamentoEmAndamento){
-    salvamentoPendente = true;
-    return false;
-  }
+  if(!usuarioAtual || !syncSessaoInicializada) return false;
+  if(aplicandoRemoto){ salvamentoPendente=true; return false; }
+  if(salvamentoEmAndamento){ salvamentoPendente=true; return false; }
 
-  salvamentoEmAndamento = true;
-  const op = normalizarOperador(usuarioAtual.operador);
-  const revisaoInicio = revisaoDB;
-  const individuaisLocais = dadosIndividuaisDoDB(db);
-  const compartilhadosLocais = dadosCompartilhadosDoDB(db);
+  salvamentoEmAndamento=true;
+  const op=normalizarOperador(usuarioAtual.operador);
+  const revisaoInicio=revisaoDB;
+  const salvarIndividual=usuarioPendente(op);
+  const salvarCompartilhado=compartilhadoPendente();
+  const individuaisLocais=dadosIndividuaisDoDB(db);
+  const compartilhadosLocais=dadosCompartilhadosDoDB(db);
   const baseIndividual=valorBaseSync(chaveBaseUsuario(op),{});
   const baseCompartilhado=valorBaseSync(chaveBaseCompartilhado(),{});
-  const salvarIndividual=usuarioPendente(op) || !jsonIgual(individuaisLocais,baseIndividual);
-  const salvarCompartilhado=compartilhadoPendente() || !jsonIgual(compartilhadosLocais,baseCompartilhado);
-
-  storageSetSeguro(chaveLocalUsuario(op),individuaisLocais,{serializar:true,silencioso});
-  storageSetSeguro(chaveCacheCompartilhado(),compartilhadosLocais,{serializar:true,silencioso});
-  if(salvarIndividual) marcarUsuarioPendente(op);
-  if(salvarCompartilhado) marcarCompartilhadoPendente();
 
   try{
     if(!navigator.onLine) throw new Error('Sem conexão com a internet.');
+    // Diferença de JSON sozinha NÃO autoriza escrita. Só uma alteração local marcada
+    // nesta sessão pode subir para o banco.
     if(!salvarIndividual && !salvarCompartilhado){
-      marcarSincronizacaoConfirmada('ONLINE • nenhuma alteração pendente');
+      marcarSincronizacaoConfirmada('ONLINE • nenhuma alteração desta sessão pendente');
       return true;
     }
-    if(!silencioso) setSyncStatus('SALVANDO ONLINE...','syncing');
+    if(!silencioso) setSyncStatus('SALVANDO ONLINE • alteração desta sessão','syncing');
 
-    // Cada linha é salva com trava otimista. Se outro PC salvou no intervalo,
-    // a função relê, mescla e tenta novamente sem sobrescrever silenciosamente.
     const individuaisSalvos=salvarIndividual
       ? await salvarLinhaComConcorrencia(`usuario_${op}`,individuaisLocais,baseIndividual)
-      : cloneJSONSeguro(individuaisLocais,{});
+      : cloneJSONSeguro(baseIndividual,{});
     const compartilhadosSalvos=salvarCompartilhado
       ? await salvarLinhaComConcorrencia(SHARED_ROW_ID,compartilhadosLocais,baseCompartilhado)
-      : cloneJSONSeguro(compartilhadosLocais,{});
+      : cloneJSONSeguro(baseCompartilhado,{});
 
-    // Se a tela mudou enquanto a rede salvava, mescla o retorno com a revisão atual
-    // e mantém a nova alteração marcada para uma segunda gravação.
-    const houveMudancaDuranteSalvamento = revisaoDB !== revisaoInicio;
-    const individuaisFinais = houveMudancaDuranteSalvamento
+    const houveMudancaDuranteSalvamento=revisaoDB!==revisaoInicio;
+    const individuaisFinais=houveMudancaDuranteSalvamento && salvarIndividual
       ? mesclarTresVias(individuaisLocais,dadosIndividuaisDoDB(db),individuaisSalvos)
-      : individuaisSalvos;
-    const compartilhadosFinais = houveMudancaDuranteSalvamento
+      : (salvarIndividual?individuaisSalvos:dadosIndividuaisDoDB(db));
+    const compartilhadosFinais=houveMudancaDuranteSalvamento && salvarCompartilhado
       ? mesclarTresVias(compartilhadosLocais,dadosCompartilhadosDoDB(db),compartilhadosSalvos)
-      : compartilhadosSalvos;
+      : (salvarCompartilhado?compartilhadosSalvos:dadosCompartilhadosDoDB(db));
 
     db={...defaultDB(),...compartilhadosFinais,...dadosIndividuaisDoDB(individuaisFinais)};
     prepararDBCarregado();
@@ -14327,31 +14226,35 @@ async function salvarDadosUsuarioOnline(silencioso=false){
     const individualAtual=dadosIndividuaisDoDB(db);
     const compartilhadoAtual=dadosCompartilhadosDoDB(db);
     storageSetSeguro(chaveLocalUsuario(op),individualAtual,{serializar:true,silencioso:true});
-    storageSetSeguro(chaveBaseUsuario(op),individuaisSalvos,{serializar:true,silencioso:true});
     storageSetSeguro(chaveCacheCompartilhado(),compartilhadoAtual,{serializar:true,silencioso:true});
-    storageSetSeguro(chaveBaseCompartilhado(),compartilhadosSalvos,{serializar:true,silencioso:true});
 
-    if(jsonIgual(individualAtual,individuaisSalvos)) limparUsuarioPendente(op);
-    else marcarUsuarioPendente(op);
-    if(jsonIgual(compartilhadoAtual,compartilhadosSalvos)) limparCompartilhadoPendente();
-    else marcarCompartilhadoPendente();
+    if(salvarIndividual){
+      storageSetSeguro(chaveBaseUsuario(op),individuaisSalvos,{serializar:true,silencioso:true});
+      if(jsonIgual(individualAtual,individuaisSalvos)) limparUsuarioPendente(op); else marcarUsuarioPendente(op);
+    }
+    if(salvarCompartilhado){
+      storageSetSeguro(chaveBaseCompartilhado(),compartilhadosSalvos,{serializar:true,silencioso:true});
+      if(jsonIgual(compartilhadoAtual,compartilhadosSalvos)) limparCompartilhadoPendente(); else marcarCompartilhadoPendente();
+    }
 
     const concluido=!usuarioPendente(op) && !compartilhadoPendente();
-    if(concluido) marcarSincronizacaoConfirmada('ONLINE • salvo agora');
-    else setSyncStatus('ONLINE • salvando alterações mais recentes','syncing');
+    if(concluido) marcarSincronizacaoConfirmada('ONLINE • alteração confirmada no servidor');
+    else setSyncStatus('ONLINE • há alteração desta sessão aguardando confirmação','syncing');
     return concluido;
   }catch(err){
-    console.error('Falha ao salvar online:', err);
+    console.error('Falha ao salvar online:',err);
     if(salvarIndividual) marcarUsuarioPendente(op);
     if(salvarCompartilhado) marcarCompartilhadoPendente();
-    setSyncStatus(navigator.onLine ? 'SEM SINCRONIZAÇÃO • salvo no aparelho' : 'OFFLINE • salvo no aparelho','offline');
-    if(!silencioso) alert('Não foi possível salvar online agora. Os dados ficaram no cache deste aparelho.\n\nDetalhe: '+err.message);
+    setSyncStatus(navigator.onLine?'SEM SINCRONIZAÇÃO • alteração preservada no aparelho':'OFFLINE • alteração preservada no aparelho','offline');
+    if(!silencioso) alert('Não foi possível confirmar a alteração no servidor agora. Ela foi preservada neste aparelho.\n\nDetalhe: '+err.message);
     return false;
   }finally{
-    salvamentoEmAndamento = false;
-    if(navigator.onLine && salvamentoPendente){
-      salvamentoPendente = false;
-      setTimeout(() => salvarDadosUsuarioOnline(true), 500);
+    salvamentoEmAndamento=false;
+    if(navigator.onLine && salvamentoPendente && (usuarioPendente(op)||compartilhadoPendente())){
+      salvamentoPendente=false;
+      setTimeout(()=>salvarDadosUsuarioOnline(true),700);
+    }else{
+      salvamentoPendente=false;
     }
   }
 }
@@ -14418,117 +14321,19 @@ async function reconciliarRealtimeAposConexao(canal,operador){
 }
 
 function ativarRealtimeUsuario(){
+  // V51.72 — MODO SEGURO PRÉ-V2.
+  // A tabela monolítica antiga não deve mais operar por Realtime: um snapshot incompleto
+  // poderia ser propagado para todos os dispositivos. O Realtime será reativado somente
+  // nas tabelas V2 separadas por módulo/registro.
   cancelarReconexaoRealtime();
-  const op=normalizarOperador(usuarioAtual?.operador); if(!op)return;
-  if(!supabaseclient){
-    realtimeStatus='CLOSED';
-    setSyncStatus('ATENÇÃO • módulo online indisponível; dados no aparelho','offline');
-    return;
+  if(realtimeChannel && supabaseclient){
+    try{ supabaseclient.removeChannel(realtimeChannel); }catch(_){ }
   }
-
-  // Torna qualquer callback do canal anterior obsoleto antes de removê-lo.
-  const canalAnterior = realtimeChannel;
-  realtimeChannel = null;
-  if(canalAnterior){
-    try{ supabaseclient.removeChannel(canalAnterior); }catch(err){ console.warn('Falha ao remover canal Realtime anterior:',err); }
+  realtimeChannel=null;
+  realtimeStatus='SAFE_MODE';
+  if(usuarioAtual && navigator.onLine){
+    setSyncStatus('ONLINE • modo seguro até concluir Sincronização V2','online');
   }
-
-  const canalAtual=supabaseclient.channel(`assistencia_${op}_${Date.now()}`)
-   .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.usuario_${op}`},async()=>{
-      const sequencia=++realtimeRequestSeq.individual;
-      let resposta;
-      try{
-        resposta=await comTimeout(
-          supabaseclient.from(ONLINE_TABLE).select('dados,updated_at').eq('id',`usuario_${op}`).maybeSingle(),
-          SUPABASE_OPERATION_TIMEOUT_MS
-        );
-      }catch(error){
-        console.error('Falha ao receber atualização individual:',error);
-        agendarReconexaoRealtime('leitura-individual');
-        return;
-      }
-      if(sequencia!==realtimeRequestSeq.individual || realtimeChannel!==canalAtual) return;
-      const {data,error}=resposta;
-      if(error){console.error('Falha ao receber atualização individual:',error);return;}
-      if(data?.dados){
-        let persistir=false; aplicandoRemoto=true;
-        try{
-          const local=dadosIndividuaisDoDB(db),base=valorBaseSync(chaveBaseUsuario(op),{}),remoto=dadosIndividuaisDoDB(data.dados);
-          const mesclado=mesclarTresVias(base,local,remoto); persistir=!jsonIgual(mesclado,remoto);
-          const compartilhados=dadosCompartilhadosDoDB(db); db={...defaultDB(),...compartilhados,...dadosIndividuaisDoDB(mesclado)};
-          prepararDBCarregado();
-          revisaoDB++;
-          storageSetSeguro(chaveLocalUsuario(op),dadosIndividuaisDoDB(db),{serializar:true,silencioso:true});
-          storageSetSeguro(chaveBaseUsuario(op),remoto,{serializar:true,silencioso:true});
-          if(persistir) marcarUsuarioPendente(op); else limparUsuarioPendente(op);
-          renderAll();
-          if(persistir) setSyncStatus('ONLINE • mesclando alterações individuais','syncing');
-          else marcarSincronizacaoConfirmada('ONLINE • tarefas e anotações atualizadas');
-        }finally{aplicandoRemoto=false;}
-        if(persistir)setTimeout(()=>salvarDadosUsuarioOnline(true),180);
-      }
-   })
-   .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${SHARED_ROW_ID}`},async()=>{
-      const sequencia=++realtimeRequestSeq.compartilhado;
-      let resposta;
-      try{
-        resposta=await comTimeout(
-          supabaseclient.from(ONLINE_TABLE).select('dados,updated_at').eq('id',SHARED_ROW_ID).maybeSingle(),
-          SUPABASE_OPERATION_TIMEOUT_MS
-        );
-      }catch(error){
-        console.error('Falha ao receber atualização compartilhada:',error);
-        agendarReconexaoRealtime('leitura-compartilhada');
-        return;
-      }
-      if(sequencia!==realtimeRequestSeq.compartilhado || realtimeChannel!==canalAtual) return;
-      const {data,error}=resposta;
-      if(error){console.error('Falha ao receber atualização compartilhada:',error);return;}
-      if(data?.dados){
-        let persistir=false; aplicandoRemoto=true;
-        try{
-          const local=dadosCompartilhadosDoDB(db),base=valorBaseSync(chaveBaseCompartilhado(),{}),remoto=data.dados;
-          const mesclado=aplicarExclusoesPersistentesCompartilhadas(mesclarTresVias(base,local,remoto));
-          persistir=!jsonIgual(mesclado,remoto);
-          aplicarDadosCompartilhados(mesclado); prepararDBCarregado();
-          revisaoDB++;
-          storageSetSeguro(chaveCacheCompartilhado(),dadosCompartilhadosDoDB(db),{serializar:true,silencioso:true});
-          storageSetSeguro(chaveBaseCompartilhado(),remoto,{serializar:true,silencioso:true});
-          if(persistir) marcarCompartilhadoPendente(); else limparCompartilhadoPendente();
-          atualizarIdentidadeUsuarioAtual(); atualizarIdentidadeNaTela(); popularSelects(); renderAll();
-          if(persistir) setSyncStatus('ONLINE • mesclando alterações da loja','syncing');
-          else marcarSincronizacaoConfirmada('ONLINE • dados da loja atualizados');
-        }finally{aplicandoRemoto=false;}
-        if(persistir)setTimeout(()=>salvarDadosUsuarioOnline(true),180);
-      }
-   })
-   .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${GLOBAL_ROW_ID}`},async()=>{
-      const sequencia=++realtimeRequestSeq.config;
-      const ok=await carregarConfigGlobalOnline();
-      if(sequencia!==realtimeRequestSeq.config || realtimeChannel!==canalAtual) return;
-      if(!ok || !validarSessaoAtualContraConfig()){
-        await encerrarSessaoRevogada('Seu acesso ou sua senha foram alterados. Entre novamente.');
-        return;
-      }
-      atualizarIdentidadeUsuarioAtual(); atualizarIdentidadeNaTela(); aplicarPermissoes(); renderAll();
-   })
-   .subscribe(status=>{
-      // Ignora CLOSED/ERROR emitidos por um canal antigo que já foi substituído.
-      if(realtimeChannel !== canalAtual) return;
-      realtimeStatus=status;
-      if(status==='SUBSCRIBED'){
-        realtimeReconnectAttempts = 0;
-        realtimeReconnectReason = '';
-        cancelarReconexaoRealtime();
-        setSyncStatus('ONLINE • tempo real conectado, atualizando dados','syncing');
-        setTimeout(()=>reconciliarRealtimeAposConexao(canalAtual,op),100);
-      }else if(['CHANNEL_ERROR','TIMED_OUT','CLOSED'].includes(status)){
-        setSyncStatus(navigator.onLine?'ONLINE • reconectando tempo real':'OFFLINE • dados no aparelho', navigator.onLine?'syncing':'offline');
-        agendarReconexaoRealtime(status);
-      }
-   });
-
-  realtimeChannel = canalAtual;
 }
 
 
@@ -14582,24 +14387,42 @@ function loadDB(){
   prepararDBCarregado();
 }
 function saveDB(){
-  if(!db || typeof db !== 'object') return false;
-  const op = normalizarOperador(usuarioAtual?.operador);
-  const chave = op ? chaveLocalUsuario(op) : chaveLocalUsuario('bootstrap');
-  // V51.32: o cache do usuário guarda somente notas/tarefas individuais.
-  // Os dados compartilhados ficam em cache separado e isolado do Comunicação AV.
-  const conteudoLocal = op ? dadosIndividuaisDoDB(db) : sanitizarDBGerencial(db);
+  if(!db || typeof db!=='object') return false;
+  const op=normalizarOperador(usuarioAtual?.operador);
+  const chave=op?chaveLocalUsuario(op):chaveLocalUsuario('bootstrap');
+  const conteudoLocal=op?dadosIndividuaisDoDB(db):sanitizarDBGerencial(db);
   const anteriorLocal=storageGetJSONSeguro(chave,null);
-  const salvoLocal = storageSetSeguro(chave,conteudoLocal,{serializar:true});
+  const salvoLocal=storageSetSeguro(chave,conteudoLocal,{serializar:true});
   revisaoDB++;
+
+  // V51.72: alterações locais podem ser usadas/testadas, porém não recebem permissão
+  // para escrever na base monolítica antiga. Isso elimina qualquer sobrescrita no login
+  // ou por rotinas internas enquanto a Sincronização V2 é construída.
+  if(PRE_V2_CLOUD_READ_ONLY){
+    if(op){
+      const compartilhados=dadosCompartilhadosDoDB(db);
+      storageSetSeguro(chaveCacheCompartilhado(),compartilhados,{serializar:true,silencioso:true});
+      limparUsuarioPendente(op);
+      limparCompartilhadoPendente();
+    }
+    return salvoLocal;
+  }
+
   if(op){
     const compartilhados=dadosCompartilhadosDoDB(db);
     const compartilhadosAnteriores=storageGetJSONSeguro(chaveCacheCompartilhado(),null);
     const salvoCompartilhado=storageSetSeguro(chaveCacheCompartilhado(),compartilhados,{serializar:true});
-    const mudouIndividual=!anteriorLocal || !jsonIgual(anteriorLocal,conteudoLocal);
-    const mudouCompartilhado=!compartilhadosAnteriores || !jsonIgual(compartilhadosAnteriores,compartilhados);
-    if(mudouIndividual || !salvoLocal) marcarUsuarioPendente(op);
-    if(mudouCompartilhado || !salvoCompartilhado) marcarCompartilhadoPendente();
-    if(mudouIndividual || mudouCompartilhado || !salvoLocal || !salvoCompartilhado) agendarSalvamentoOnline();
+    const mudouIndividual=!!anteriorLocal && !jsonIgual(anteriorLocal,conteudoLocal);
+    const mudouCompartilhado=!!compartilhadosAnteriores && !jsonIgual(compartilhadosAnteriores,compartilhados);
+
+    // Só uma alteração feita por interação real do usuário, DEPOIS que o snapshot do
+    // servidor foi carregado nesta sessão, ganha permissão para sincronizar.
+    const gestoRecente=(Date.now()-ultimaInteracaoUsuarioEm)<=120000;
+    if(syncSessaoInicializada && gestoRecente && !aplicandoRemoto){
+      if(mudouIndividual) marcarUsuarioPendente(op);
+      if(mudouCompartilhado) marcarCompartilhadoPendente();
+      if(mudouIndividual || mudouCompartilhado) agendarSalvamentoOnline();
+    }
   }
   return salvoLocal;
 }
@@ -29957,5 +29780,9 @@ h1>.ui-svg-icon,h2>.ui-svg-icon,h3>.ui-svg-icon{margin-right:.3em;vertical-align
   }
 }
 </style>
+
+<script id="v5172-safe-readonly-marker">
+console.info('[V51.72] Base assistencia_gerencial em modo somente leitura durante migração Sync V2.');
+</script>
 </body>
 </html>
