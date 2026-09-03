@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="referrer" content="no-referrer" />
-  <title>Gerencial de Loja • AV • V51.64</title>
+  <title>Assistência Gerencial de Loja - Avenida V51.65 • Mobile responsivo corrigido</title>
   <!-- PWA / Ícones do Sistema Gerencial Avenida -->
   <meta name="theme-color" content="#291A1E">
   <meta name="application-name" content="Gerencial Avenida">
@@ -91,7 +91,7 @@
       const SOPHIA_SESSION_KEY = 'sophiaSessaoSeguraV1';
       const SOPHIA_HISTORY_KEY = 'sophiaHistoricoSessaoV1';
       const SOPHIA_BUILD = 'V39.1-SEMPREFLIGHT';
-      const GERENCIAL_BUILD = 'V51.64-SINCRONIZACAO-CORRIGIDA';
+      const GERENCIAL_BUILD = 'V51.65-MOBILE-RESPONSIVO-CORRIGIDO';
   </script>
   <style>
     :root {
@@ -29347,5 +29347,173 @@ h1>.ui-svg-icon,h2>.ui-svg-icon,h3>.ui-svg-icon{margin-right:.3em;vertical-align
   if(document.documentElement)obs.observe(document.documentElement,{childList:true,subtree:true});
 })();
 </script>
+
+<style id="mobile-overflow-fix-v5165">
+/* ============================================================
+   V51.65 — CORREÇÃO DE RESPONSIVIDADE MOBILE
+   - impede overflow na identificação do usuário
+   - libera largura total para Desenvolvedor e status Online
+   - reorganiza cabeçalho do Painel Geral para não comprimir o texto
+   ============================================================ */
+@media (max-width:760px){
+  html,body{max-width:100%;overflow-x:hidden!important;}
+  .sidebar,.main,.content,.topbar,.user-box{min-width:0!important;max-width:100%!important;box-sizing:border-box!important;}
+
+  /* Identificação: avatar fica no topo; badges usam toda a largura do card. */
+  .user-box{
+    --av-profile-shift:100px;
+    margin:12px 14px 14px!important;
+    padding:20px 18px 18px 118px!important;
+    min-height:0!important;
+    overflow:hidden!important;
+  }
+  .user-box::before{
+    left:16px!important;
+    top:20px!important;
+    transform:none!important;
+    width:84px!important;
+    height:84px!important;
+  }
+  .user-box::after{
+    right:18px!important;
+    top:58px!important;
+    transform:translateY(-50%)!important;
+  }
+  .user-name,.user-role{
+    min-width:0!important;
+    max-width:100%!important;
+    padding-right:26px!important;
+    overflow-wrap:anywhere!important;
+  }
+  .user-name{
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+  .user-role{
+    min-height:38px!important;
+    line-height:1.08!important;
+  }
+  .user-box .developer-badge,
+  .user-box .sync-pill{
+    display:flex!important;
+    align-items:center!important;
+    width:calc(100% + var(--av-profile-shift))!important;
+    max-width:calc(100% + var(--av-profile-shift))!important;
+    min-width:0!important;
+    margin-left:calc(var(--av-profile-shift) * -1)!important;
+    box-sizing:border-box!important;
+    overflow:hidden!important;
+  }
+  .user-box .developer-badge{
+    margin-top:18px!important;
+    padding:9px 12px!important;
+    gap:8px!important;
+    font-size:clamp(.78rem,3.6vw,.92rem)!important;
+    line-height:1.15!important;
+    white-space:nowrap!important;
+  }
+  .user-box .developer-badge span{flex:0 0 auto!important;}
+  .user-box .sync-pill{
+    margin-top:10px!important;
+    padding:9px 12px!important;
+    flex-wrap:nowrap!important;
+    font-size:clamp(.76rem,3.45vw,.90rem)!important;
+    line-height:1.15!important;
+  }
+  .user-box .sync-pill::before{flex:0 0 8px!important;}
+  .user-box .sync-pill-text{
+    flex:1 1 auto!important;
+    min-width:0!important;
+    max-width:100%!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  /* Cabeçalho do módulo: texto em largura total e controles em linha própria. */
+  .topbar{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    justify-content:flex-start!important;
+    gap:14px!important;
+    padding:18px!important;
+    overflow:hidden!important;
+  }
+  .top-left{
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    overflow:visible!important;
+  }
+  .top-left h2,#pageTitle{
+    max-width:100%!important;
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    overflow-wrap:anywhere!important;
+  }
+  .top-left p,#pageSubtitle{
+    max-width:100%!important;
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    overflow-wrap:break-word!important;
+    line-height:1.35!important;
+  }
+  .store-meta{
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    gap:10px!important;
+    overflow:visible!important;
+  }
+  .store-meta .header-notification,
+  .store-meta .header-theme,
+  .store-meta .header-logout{
+    flex:0 0 54px!important;
+  }
+
+  /* Segurança geral contra componentes que tentem crescer além do card. */
+  .section-card,.mobile-dashboard-shell,.nav{max-width:100%!important;box-sizing:border-box!important;}
+}
+
+@media (max-width:420px){
+  .user-box{
+    --av-profile-shift:88px;
+    margin-left:12px!important;
+    margin-right:12px!important;
+    padding:18px 14px 16px 102px!important;
+  }
+  .user-box::before{
+    left:14px!important;
+    top:18px!important;
+    width:72px!important;
+    height:72px!important;
+    font-size:2rem!important;
+  }
+  .user-box::after{right:14px!important;top:52px!important;}
+  .user-role{min-height:34px!important;}
+  .user-box .developer-badge{margin-top:15px!important;padding:8px 10px!important;font-size:.78rem!important;}
+  .user-box .sync-pill{padding:8px 10px!important;font-size:.76rem!important;}
+  .topbar{margin-left:12px!important;margin-right:12px!important;padding:16px!important;}
+  .store-meta{gap:8px!important;}
+  .store-meta .header-notification,
+  .store-meta .header-theme,
+  .store-meta .header-logout,
+  .header-notification,.header-theme,.header-logout.logout-fixed{
+    width:50px!important;
+    min-width:50px!important;
+    height:50px!important;
+    min-height:50px!important;
+    flex-basis:50px!important;
+  }
+}
+</style>
+
 </body>
 </html>
