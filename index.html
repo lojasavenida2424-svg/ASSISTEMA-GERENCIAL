@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="referrer" content="no-referrer" />
-  <title>Assistência Gerencial de Loja - Avenida V51.72 • Modo Seguro Pré-Sincronização V2</title>
+  <title>Gerencial de Loja • AV • V51.73</title>
   <!-- PWA / Ícones do Sistema Gerencial Avenida -->
   <meta name="theme-color" content="#291A1E">
   <meta name="application-name" content="Gerencial Avenida">
@@ -91,7 +91,7 @@
       const SOPHIA_SESSION_KEY = 'sophiaSessaoSeguraV1';
       const SOPHIA_HISTORY_KEY = 'sophiaHistoricoSessaoV1';
       const SOPHIA_BUILD = 'V39.1-SEMPREFLIGHT';
-      const GERENCIAL_BUILD = 'V51.72-MODO-SEGURO-NUVEM-SOMENTE-LEITURA';
+      const GERENCIAL_BUILD = 'V51.73-SALVAMENTO-SEGURO-REATIVADO';
   </script>
   <style>
     :root {
@@ -12718,6 +12718,9 @@ let revisaoDB = 0;
 // V51.72 — proteção da sincronização monolítica antiga.
 let syncSessaoInicializada = false;
 let ultimaInteracaoUsuarioEm = 0;
+/* V51.73 — escrita na nuvem só é liberada DEPOIS que login + carregamento + initApp terminam. */
+let syncEscritaHabilitada = false;
+let syncEscritaHabilitadaEm = 0;
 let globalConfigBase = null;
 let sessionExpiryTimer = null;
 const realtimeRequestSeq = { individual:0, compartilhado:0, config:0 };
@@ -12727,12 +12730,53 @@ const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
 const SUPABASE_OPERATION_TIMEOUT_MS = 15000;
 // V51.72 — proteção absoluta da base antiga durante a migração V2.
 // O sistema pode LER a tabela monolítica, mas nenhuma rotina deste HTML pode gravá-la.
-const PRE_V2_CLOUD_READ_ONLY = true;
+const PRE_V2_CLOUD_READ_ONLY = false;
 
-// Apenas uma ação humana desta sessão pode autorizar uma nova gravação online.
-['pointerdown','keydown','input','change'].forEach(tipo=>{
-  document.addEventListener(tipo,()=>{ ultimaInteracaoUsuarioEm=Date.now(); },{capture:true,passive:true});
+// V51.73 — o login não pode autorizar escrita.
+function registrarInteracaoAplicacao(evento){
+  if(!syncEscritaHabilitada || !usuarioAtual) return;
+  const alvo=evento?.target;
+  const login=document.getElementById('loginScreen');
+  if(login && alvo && login.contains(alvo)) return;
+
+  // Só interações dentro da aplicação contam.
+  const dentroApp=!!(
+    alvo?.closest?.('.main') ||
+    alvo?.closest?.('.modal-backdrop') ||
+    alvo?.closest?.('.sidebar')
+  );
+  if(!dentroApp) return;
+
+  // INPUT/CHANGE representam edição real. POINTERDOWN cobre salvar/excluir/adicionar.
+  if(evento.type==='input' || evento.type==='change'){
+    ultimaInteracaoUsuarioEm=Date.now();
+    return;
+  }
+  if(evento.type==='pointerdown'){
+    const acionavel=alvo?.closest?.('button,[role="button"],a');
+    if(acionavel) ultimaInteracaoUsuarioEm=Date.now();
+  }
+}
+['pointerdown','input','change'].forEach(tipo=>{
+  document.addEventListener(tipo,registrarInteracaoAplicacao,{capture:true,passive:true});
 });
+
+function habilitarEscritaSeguraDaSessao(){
+  if(!usuarioAtual || !syncSessaoInicializada) return false;
+  const op=normalizarOperador(usuarioAtual.operador);
+  if(!op) return false;
+
+  // O snapshot/base já foi capturado após prepararDBCarregado().
+  // Qualquer rotina executada antes deste ponto não pode gerar escrita online.
+  limparUsuarioPendente(op);
+  limparCompartilhadoPendente();
+  salvamentoPendente=false;
+  ultimaInteracaoUsuarioEm=0;
+  syncEscritaHabilitadaEm=Date.now();
+  syncEscritaHabilitada=true;
+  setSyncStatus('ONLINE • salvamento seguro habilitado','online');
+  return true;
+}
 
 const BACKUP_MAX_BYTES = 15 * 1024 * 1024;
 const BACKUP_MAX_ITEMS_POR_LISTA = 20000;
@@ -13169,8 +13213,8 @@ async function verificarDadosSincronizados(){
       return {ok:false,detalhe:'Há uma alteração feita nesta sessão aguardando confirmação no servidor.'};
     }
     if(!syncSessaoInicializada) throw new Error('A sessão ainda não confirmou o snapshot do servidor.');
-    marcarSincronizacaoConfirmada('ONLINE • servidor carregado em modo somente leitura');
-    return {ok:true,detalhe:'Servidor carregado como fonte principal. A base antiga está protegida contra qualquer gravação desta versão.'};
+    marcarSincronizacaoConfirmada('ONLINE • servidor carregado com proteção de escrita');
+    return {ok:true,detalhe:'Servidor carregado como fonte principal. Gravações só são aceitas após a inicialização e por alteração feita nesta sessão.'};
   }catch(err){
     console.error('Falha ao verificar sincronização:',err);
     return {ok:false,detalhe:`Falha de sincronização: ${String(err?.message||err||'erro desconhecido').replace(/\s+/g,' ').trim()}`};
@@ -14106,6 +14150,9 @@ async function carregarDadosCompartilhadosOnline(){
 async function carregarDadosUsuarioOnline(op){
   const operador=normalizarOperador(op); const rowId=`usuario_${operador}`;
   setSyncStatus('SINCRONIZANDO • servidor prioritário','syncing');
+  syncEscritaHabilitada=false;
+  syncEscritaHabilitadaEm=0;
+  ultimaInteracaoUsuarioEm=0;
   syncSessaoInicializada=false;
   try{
     const {data,error}=await comTimeout(
@@ -14417,7 +14464,11 @@ function saveDB(){
 
     // Só uma alteração feita por interação real do usuário, DEPOIS que o snapshot do
     // servidor foi carregado nesta sessão, ganha permissão para sincronizar.
-    const gestoRecente=(Date.now()-ultimaInteracaoUsuarioEm)<=120000;
+    const gestoRecente=
+      syncEscritaHabilitada &&
+      ultimaInteracaoUsuarioEm>=syncEscritaHabilitadaEm &&
+      (Date.now()-ultimaInteracaoUsuarioEm)<=120000;
+
     if(syncSessaoInicializada && gestoRecente && !aplicandoRemoto){
       if(mudouIndividual) marcarUsuarioPendente(op);
       if(mudouCompartilhado) marcarCompartilhadoPendente();
@@ -14522,7 +14573,10 @@ async function login(){
     if(!dadosOk) setSyncStatus('ATENÇÃO • acesso liberado; sincronização será repetida','syncing');
     atualizarIdentidadeUsuarioAtual();
     await executarVerificacoesPosLogin();
-    initApp(); ativarRealtimeUsuario(); atualizarStatusConexao();
+    initApp();
+    habilitarEscritaSeguraDaSessao();
+    ativarRealtimeUsuario();
+    atualizarStatusConexao();
     document.getElementById('loginPass').value='';
   }catch(e){
     console.error('Erro ao entrar no sistema:',e);
@@ -19723,6 +19777,7 @@ window.addEventListener('load', async () => {
       // Sessão já autenticada: recarregamento automático não repete o checklist de login.
       initApp();
       restaurarEstadoAposAtualizacaoGerencial();
+      habilitarEscritaSeguraDaSessao();
       ativarRealtimeUsuario();
       atualizarStatusConexao();
     } finally {
@@ -29782,7 +29837,7 @@ h1>.ui-svg-icon,h2>.ui-svg-icon,h3>.ui-svg-icon{margin-right:.3em;vertical-align
 </style>
 
 <script id="v5172-safe-readonly-marker">
-console.info('[V51.72] Base assistencia_gerencial em modo somente leitura durante migração Sync V2.');
+console.info('[V51.73] Salvamento seguro ativo; Realtime monolítico permanece desativado durante migração Sync V2.');
 </script>
 </body>
 </html>
