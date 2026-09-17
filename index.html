@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="referrer" content="no-referrer" />
-  <title>Gerencial de Loja • AV • V51.74</title>
+  <title>Gerencial de Loja • AV • V51.81</title>
   <!-- PWA / Ícones do Sistema Gerencial Avenida -->
   <meta name="theme-color" content="#291A1E">
   <meta name="application-name" content="Gerencial Avenida">
@@ -91,7 +91,7 @@
       const SOPHIA_SESSION_KEY = 'sophiaSessaoSeguraV1';
       const SOPHIA_HISTORY_KEY = 'sophiaHistoricoSessaoV1';
       const SOPHIA_BUILD = 'V39.1-SEMPREFLIGHT';
-      const GERENCIAL_BUILD = 'V51.74-FOLHA-ASSINATURA-ESCALA';
+      const GERENCIAL_BUILD = 'V51.81-AUTOPREENCHIMENTO-UNIFORMES';
   </script>
   <style>
     :root {
@@ -11128,6 +11128,132 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
   }
 </style>
 
+
+
+  <style id="uniforme-itens-dinamicos-v51-78">
+    /* V51.78 — a tabela nasce vazia e cresce somente conforme peças são adicionadas. */
+    .corporate-repeater-empty {
+      padding:18px;
+      border:1px dashed var(--border);
+      border-radius:15px;
+      background:var(--page-2);
+      color:var(--muted);
+      text-align:center;
+      font-size:.82rem;
+      font-weight:800;
+      line-height:1.45;
+    }
+    .uniform-empty-items {
+      padding:10px 12px;
+      border:1px dashed #bdb7b8;
+      background:#fafafa;
+      color:#666;
+      text-align:center;
+      font-size:7px;
+      font-weight:700;
+    }
+  </style>
+
+  <style id="uniforme-document-print-signature-v51-80">
+    /* V51.80 — assinatura manuscrita: área livre, linha e identificação abaixo. */
+    .uniform-signatures{align-items:end!important;padding-top:1.5%!important;}
+    .uniform-signature{min-height:7.7cqw!important;display:flex!important;flex-direction:column!important;justify-content:flex-end!important;text-align:center!important;}
+    .uniform-signature .uniform-sign-space{display:block;flex:1 1 auto;min-height:3.15cqw;}
+    .uniform-signature .uniform-sign-line{display:block;width:100%;border-top:1px solid #2d2829;margin:0 0 .48cqw;}
+    .uniform-signature strong{display:block!important;min-height:1.05cqw!important;margin:0 0 .22cqw!important;font-size:.69cqw!important;line-height:1.15!important;font-weight:900!important;text-transform:uppercase!important;overflow-wrap:anywhere;}
+    .uniform-signature small{display:block;font-size:.61cqw;line-height:1.1;font-weight:850;text-transform:uppercase;color:#4f494b;}
+
+    /* O status é um dado de workflow e não integra o documento. */
+    .uniform-doc .uniform-doc-status{display:none!important;}
+
+    @media print{
+      .operation-page[data-operation-template="entrega_uniforme"],
+      .operation-page[data-operation-template="devolucao_uniforme"]{container-type:inline-size!important;}
+      .uniform-doc{overflow:hidden!important;}
+    }
+  </style>
+
+  <style id="uniforme-document-lifecycle-v51-76">
+    /* V51.76 — ciclo dos termos de uniforme: preenchimento > assinatura > concluído */
+    .uniform-lifecycle {
+      margin: 0 0 14px;
+      padding: 15px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: linear-gradient(135deg, color-mix(in srgb,var(--amarelo) 9%,var(--page)), var(--page));
+      box-shadow: 0 8px 22px rgba(15,23,42,.06);
+    }
+    .uniform-lifecycle-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+    .uniform-lifecycle-head h3 { margin:0; font-size:.98rem; }
+    .uniform-lifecycle-head p { margin:4px 0 0; color:var(--muted); font-size:.78rem; font-weight:750; line-height:1.4; }
+    .uniform-status-chip { display:inline-flex; align-items:center; gap:7px; min-height:30px; padding:7px 10px; border-radius:999px; border:1px solid var(--border); background:var(--soft); font-size:.72rem; font-weight:1000; white-space:nowrap; }
+    .uniform-status-chip::before { content:""; width:9px; height:9px; border-radius:50%; background:#F59E0B; }
+    .uniform-status-chip.waiting::before { background:#2563EB; }
+    .uniform-status-chip.done::before { background:#16A34A; }
+    .uniform-status-chip.cancelled::before { background:#DC2626; }
+    .uniform-lifecycle-steps { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-bottom:12px; }
+    .uniform-lifecycle-step { position:relative; min-height:72px; padding:11px 11px 10px 38px; border:1px solid var(--border); border-radius:14px; background:var(--page-2); color:var(--muted); }
+    .uniform-lifecycle-step .n { position:absolute; left:11px; top:11px; width:20px; height:20px; border-radius:50%; display:grid; place-items:center; border:1px solid var(--border); background:var(--page); font-size:.68rem; font-weight:1000; }
+    .uniform-lifecycle-step strong { display:block; color:var(--text); font-size:.78rem; margin-bottom:3px; }
+    .uniform-lifecycle-step small { display:block; font-size:.68rem; line-height:1.35; font-weight:700; }
+    .uniform-lifecycle-step.current { border-color:color-mix(in srgb,var(--amarelo) 70%,var(--border)); box-shadow:0 0 0 3px color-mix(in srgb,var(--amarelo) 16%,transparent); }
+    .uniform-lifecycle-step.current .n { background:var(--amarelo); color:var(--preto-logo); border-color:var(--amarelo-escuro); }
+    .uniform-lifecycle-step.complete .n { background:var(--green-bg); color:var(--green); border-color:color-mix(in srgb,var(--green) 28%,var(--border)); }
+    .uniform-lifecycle-file { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding-top:12px; border-top:1px solid var(--border); }
+    .uniform-lifecycle-file-info { min-width:0; flex:1 1 260px; }
+    .uniform-lifecycle-file-info strong { display:block; font-size:.8rem; color:var(--text); overflow-wrap:anywhere; }
+    .uniform-lifecycle-file-info small { display:block; margin-top:4px; color:var(--muted); font-weight:750; font-size:.7rem; }
+    .uniform-lifecycle-actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .uniform-lifecycle-upload { position:relative; overflow:hidden; }
+    .uniform-lifecycle-upload input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+    .uniform-lifecycle-note { margin-top:10px; padding:9px 11px; border-radius:12px; background:var(--soft); color:var(--muted); font-size:.72rem; font-weight:750; line-height:1.4; }
+    .uniform-lifecycle-note strong { color:var(--text); }
+    .uniform-doc-status { display:inline-flex !important; align-items:center; justify-content:center; margin-left:auto; padding:.32cqw .62cqw; border-radius:999px; background:#FFF3C4; color:#765600 !important; border:1px solid #E6C24D; font-size:.66cqw !important; font-weight:1000 !important; line-height:1.15; }
+    .uniform-doc-status.waiting { background:#E8F0FF; color:#174EA6 !important; border-color:#9EBBEE; }
+    .uniform-doc-status.done { background:#E2F7E8; color:#176534 !important; border-color:#91D2A3; }
+    body.dark-mode .uniform-lifecycle { background:linear-gradient(135deg,rgba(255,205,9,.06),rgba(31,33,38,.82)); }
+    @media(max-width:720px){ .uniform-lifecycle-steps{grid-template-columns:1fr;} .uniform-lifecycle-actions{width:100%;} .uniform-lifecycle-actions .btn,.uniform-lifecycle-upload{flex:1 1 auto;text-align:center;} }
+
+    /* V51.77 — arquivo permanente dos termos de uniforme */
+    .uniform-main-tabs { margin-bottom:16px !important; }
+    .uniform-archive-shell { display:grid; gap:14px; }
+    .uniform-archive-toolbar { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; padding:15px; border:1px solid var(--border); border-radius:18px; background:var(--page-2); }
+    .uniform-archive-toolbar h3 { margin:0; font-size:1rem; }
+    .uniform-archive-toolbar p { margin:4px 0 0; color:var(--muted); font-size:.78rem; font-weight:750; line-height:1.45; }
+    .uniform-archive-summary { display:grid; grid-template-columns:repeat(3,minmax(120px,1fr)); gap:9px; }
+    .uniform-archive-stat { min-width:0; padding:11px 12px; border:1px solid var(--border); border-radius:14px; background:var(--page); }
+    .uniform-archive-stat small { display:block; color:var(--muted); font-size:.64rem; font-weight:950; text-transform:uppercase; }
+    .uniform-archive-stat b { display:block; margin-top:4px; font-size:1.3rem; }
+    .uniform-archive-list { display:grid; gap:11px; }
+    .uniform-archive-card { display:grid; grid-template-columns:minmax(220px,1.4fr) minmax(180px,.9fr) auto; gap:14px; align-items:center; padding:14px 15px; border:1px solid var(--border); border-radius:18px; background:var(--page); box-shadow:0 8px 20px rgba(15,23,42,.055); }
+    .uniform-archive-person strong { display:block; color:var(--text); font-size:.94rem; overflow-wrap:anywhere; }
+    .uniform-archive-person small,.uniform-archive-meta small { display:block; margin-top:4px; color:var(--muted); font-size:.7rem; font-weight:760; line-height:1.4; }
+    .uniform-archive-meta { display:grid; gap:5px; }
+    .uniform-file-pills { display:flex; flex-wrap:wrap; gap:6px; margin-top:7px; }
+    .uniform-file-pill { display:inline-flex; align-items:center; gap:5px; padding:5px 8px; border-radius:999px; border:1px solid var(--border); background:var(--soft); color:var(--muted); font-size:.64rem; font-weight:950; }
+    .uniform-file-pill.digital { background:var(--blue-bg); color:var(--blue); }
+    .uniform-file-pill.scanned { background:var(--green-bg); color:var(--green); }
+    .uniform-file-pill.pending { background:var(--orange-bg); color:var(--orange); }
+    .uniform-archive-actions { display:flex; justify-content:flex-end; align-items:center; gap:7px; flex-wrap:wrap; }
+    .uniform-archive-actions .btn { padding:8px 10px; font-size:.72rem; }
+    .uniform-archive-empty { padding:34px 18px; border:1px dashed var(--border); border-radius:18px; background:var(--soft); color:var(--muted); text-align:center; font-weight:800; line-height:1.55; }
+    .uniform-archive-detail { display:grid; gap:13px; }
+    .uniform-archive-detail-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:15px; border:1px solid var(--border); border-radius:18px; background:var(--page-2); }
+    .uniform-archive-detail-head h3 { margin:0; font-size:1rem; }
+    .uniform-archive-detail-head p { margin:4px 0 0; color:var(--muted); font-weight:750; font-size:.76rem; }
+    .uniform-archive-detail-actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .uniform-archive-detail-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; }
+    .uniform-archive-detail-box { min-width:0; padding:11px 12px; border:1px solid var(--border); border-radius:14px; background:var(--page); }
+    .uniform-archive-detail-box small { display:block; color:var(--muted); font-size:.62rem; font-weight:950; text-transform:uppercase; }
+    .uniform-archive-detail-box b { display:block; margin-top:5px; color:var(--text); font-size:.78rem; overflow-wrap:anywhere; }
+    .uniform-digital-note { padding:11px 12px; border-radius:14px; border:1px solid var(--border); background:var(--soft); color:var(--muted); font-size:.74rem; font-weight:750; line-height:1.45; }
+    .uniform-digital-note strong { color:var(--text); }
+    body.dark-mode .uniform-archive-card, body.dark-mode .uniform-archive-detail-box { background:rgba(31,33,38,.86); }
+    @media(max-width:900px){ .uniform-archive-card{grid-template-columns:1fr;} .uniform-archive-actions{justify-content:flex-start;} .uniform-archive-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
+    @media(max-width:620px){ .uniform-archive-summary,.uniform-archive-detail-grid{grid-template-columns:1fr;} .uniform-archive-actions .btn,.uniform-archive-actions .uniform-lifecycle-upload,.uniform-archive-detail-actions .btn,.uniform-archive-detail-actions .uniform-lifecycle-upload{flex:1 1 100%; text-align:center;} }
+    @media print { .uniform-lifecycle,.uniform-main-tabs,.uniform-archive-shell { display:none !important; } }
+  </style>
+
 </head>
 <body>
 <div id="impressaoAcompanhamentoRelatorio" aria-hidden="true"></div>
@@ -21502,6 +21628,148 @@ window.addEventListener('load', async () => {
       mudanca_departamento: {"id":"mudanca_departamento","nome":"Mudança de Departamento","subtitulo":"Formalização de movimentação interna de colaborador","editable":true,"categoria":"recursos_humanos","kind":"corporate_form","printOrientation":"portrait","documentPrefix":"MD","protocolPrefix":"RH","employeeGroups":{"colaborador":{"selectId":"colaboradorId","nameId":"colaboradorNome","cargoId":"colaboradorCargo","matriculaId":"colaboradorMatricula","departmentId":"departamentoAtual","operatorId":"colaboradorOperador","admissionId":"dataAdmissao"},"responsavelAtual":{"selectId":"responsavelAtualId","nameId":"responsavelAtualNome","cargoId":"responsavelAtualCargo","matriculaId":"responsavelAtualMatricula"},"responsavelDestino":{"selectId":"responsavelDestinoId","nameId":"responsavelDestinoNome","cargoId":"responsavelDestinoCargo","matriculaId":"responsavelDestinoMatricula"},"gerenciaRH":{"selectId":"gerenciaRHId","nameId":"gerenciaRHNome","cargoId":"gerenciaRHCargo","matriculaId":"gerenciaRHMatricula"}},"defaults":{"tipoGestaoDepartamento":"MUDAR","documentoAba":"MOVIMENTACAO","numeroDocumento":"","protocoloDocumento":"","dataEmissao":"","dataVigencia":"","statusDocumento":"EM PREENCHIMENTO","empresaDocumento":"LOJAS AVENIDA S/A","unidadeDocumento":"LOJA 24","colaboradorId":"","colaboradorNome":"","colaboradorMatricula":"","colaboradorOperador":"","colaboradorCargo":"","unidadeColaborador":"LOJA 24","dataAdmissao":"","departamentoAtual":"","novoDepartamento":"","tipoMudanca":"PERMANENTE","periodoInicio":"","periodoFim":"","responsavelAtualId":"","responsavelAtualNome":"","responsavelAtualCargo":"","responsavelAtualMatricula":"","responsavelDestinoId":"","responsavelDestinoNome":"","responsavelDestinoCargo":"","responsavelDestinoMatricula":"","motivoMudanca":"","alteracaoCargo":"NÃO","novoCargo":"","alteracaoSalarial":"NÃO","alteracaoHorario":"NÃO","novoHorario":"","treinamentoIntegracao":"NÃO NECESSÁRIO","termoCiencia":"Declaro estar ciente da movimentação de departamento descrita neste documento, incluindo a data de vigência, as condições informadas e as orientações recebidas. A alteração somente terá validade após as aprovações internas aplicáveis.","gerenciaRHId":"","gerenciaRHNome":"","gerenciaRHCargo":"","gerenciaRHMatricula":"","assinaturaColaborador":"","assinaturaResponsavel":"","assinaturaGerenciaRH":""},"sections":[{"id":"cabecalho","title":"1. Identificação do documento","fields":[{"id":"numeroDocumento","label":"Número do documento","type":"text","readonly":true},{"id":"dataEmissao","label":"Data de emissão","type":"date"},{"id":"dataVigencia","label":"Data de vigência","type":"date","required":true},{"id":"statusDocumento","label":"Status","type":"select","options":["EM PREENCHIMENTO","AGUARDANDO CIÊNCIA","CONCLUÍDO","CANCELADO"]},{"id":"empresaDocumento","label":"Empresa","type":"text","readonly":true,"wide":true},{"id":"unidadeDocumento","label":"Unidade / loja","type":"text","wide":true}]},{"id":"colaborador","title":"2. Identificação do colaborador","fields":[{"id":"colaboradorId","label":"Selecionar colaborador","type":"employee","group":"colaborador","print":false,"wide":true},{"id":"colaboradorNome","label":"Colaborador","type":"text","readonly":true,"wide":true},{"id":"colaboradorMatricula","label":"Matrícula","type":"text","readonly":true},{"id":"colaboradorOperador","label":"Operador","type":"text","readonly":true},{"id":"colaboradorCargo","label":"Cargo / função","type":"text","readonly":true,"wide":true},{"id":"unidadeColaborador","label":"Unidade / loja","type":"text"},{"id":"dataAdmissao","label":"Data de admissão","type":"date"}]},{"id":"movimentacao","title":"3. Movimentação de departamento","fields":[{"id":"departamentoAtual","label":"Departamento atual","type":"text","readonly":true,"wide":true},{"id":"novoDepartamento","label":"Novo departamento","type":"select","options":["","MASCULINO","FEMININO","INFANTIL","CALÇADO","LAR","UNI-FILA","ESTOQUE","CAIXA","LIMPEZA","LOJA TODA","OUTRO"],"required":true,"wide":true},{"id":"tipoMudanca","label":"Tipo de mudança","type":"select","options":["PERMANENTE","TEMPORÁRIA"]},{"id":"periodoInicio","label":"Período temporário — início","type":"date"},{"id":"periodoFim","label":"Período temporário — fim","type":"date"},{"id":"responsavelAtualId","label":"Selecionar responsável atual","type":"employee","group":"responsavelAtual","print":false,"wide":true},{"id":"responsavelAtualNome","label":"Responsável atual","type":"text","readonly":true,"wide":true},{"id":"responsavelAtualCargo","label":"Cargo do responsável atual","type":"text","readonly":true,"print":false},{"id":"responsavelAtualMatricula","label":"Matrícula do responsável atual","type":"text","readonly":true,"print":false},{"id":"responsavelDestinoId","label":"Selecionar responsável do destino","type":"employee","group":"responsavelDestino","print":false,"wide":true},{"id":"responsavelDestinoNome","label":"Responsável do destino","type":"text","readonly":true,"wide":true},{"id":"responsavelDestinoCargo","label":"Cargo do responsável do destino","type":"text","readonly":true,"print":false},{"id":"responsavelDestinoMatricula","label":"Matrícula do responsável do destino","type":"text","readonly":true,"print":false}]},{"id":"justificativa","title":"4. Motivo e justificativa da mudança","fields":[{"id":"motivoMudanca","label":"Motivo / justificativa","type":"textarea","rows":5,"full":true,"required":true}]},{"id":"condicoes","title":"5. Condições da movimentação","fields":[{"id":"alteracaoCargo","label":"Alteração de cargo","type":"select","options":["NÃO","SIM"]},{"id":"novoCargo","label":"Novo cargo (se aplicável)","type":"text"},{"id":"alteracaoSalarial","label":"Alteração salarial","type":"select","options":["NÃO","SIM"]},{"id":"alteracaoHorario","label":"Alteração de horário","type":"select","options":["NÃO","SIM"]},{"id":"novoHorario","label":"Novo horário (se aplicável)","type":"text"},{"id":"treinamentoIntegracao","label":"Treinamento / integração","type":"select","options":["NÃO NECESSÁRIO","NECESSÁRIO"]}]},{"id":"ciencia","title":"6. Ciência e aprovação","fields":[{"id":"termoCiencia","label":"Termo de ciência","type":"textarea","rows":4,"full":true},{"id":"gerenciaRHId","label":"Selecionar Gerência / RH","type":"employee","group":"gerenciaRH","print":false,"wide":true},{"id":"gerenciaRHNome","label":"Gerência / RH","type":"text","readonly":true,"wide":true},{"id":"gerenciaRHCargo","label":"Cargo Gerência / RH","type":"text","readonly":true,"print":false},{"id":"gerenciaRHMatricula","label":"Matrícula Gerência / RH","type":"text","readonly":true,"print":false},{"id":"assinaturaColaborador","label":"Colaborador","type":"signature"},{"id":"assinaturaResponsavel","label":"Responsável / liderança","type":"signature"},{"id":"assinaturaGerenciaRH","label":"Gerência / RH","type":"signature"}],"text":"A movimentação somente deve ser considerada válida após as aprovações internas aplicáveis."}],"repeaters":[],"formPages":[{"key":"MOVIMENTACAO","label":"Mudança de departamento","icon":"🔄","sections":["cabecalho","colaborador","movimentacao","justificativa","condicoes","ciencia"],"repeaters":[]}]} ,
       vale_quebra_caixa: {"id":"vale_quebra_caixa","nome":"Vale Quebra de Caixa","subtitulo":"Vale interno em formato corporativo para registro de quebra de caixa","editable":true,"categoria":"recursos_humanos","kind":"corporate_form","printOrientation":"portrait","documentPrefix":"VQC","protocolPrefix":"RH","employeeGroups":{"colaborador":{"selectId":"colaboradorId","nameId":"colaboradorNome","cargoId":"colaboradorCargo","matriculaId":"colaboradorMatricula","operatorId":"colaboradorOperador"},"responsavel":{"selectId":"responsavelId","nameId":"responsavelNome","cargoId":"responsavelCargo","matriculaId":"responsavelMatricula"}},"defaults":{"documentoAba":"VALE","numeroDocumento":"","protocoloDocumento":"","dataEmissao":"","statusDocumento":"EM PREENCHIMENTO","empresaDocumento":"LOJAS AVENIDA S/A","unidadeDocumento":"LOJA 24","quantidadeVias":"2","vqcAba":"VALE","valesIndividuais":[],"formulariosOcorrencia":[],"colaboradorId":"","colaboradorNome":"","colaboradorMatricula":"","colaboradorCargo":"","colaboradorDepartamento":"","colaboradorOperador":"","tipoMovimentacao":"CONCESSÃO","dataInicio":"","competencia":"","valorVale":"","valorPorExtenso":"","motivo":"QUEBRA DE CAIXA – FUNDO DE TROCO.","observacoes":"","responsavelId":"","responsavelNome":"","responsavelCargo":"","responsavelMatricula":"","termoCiencia":"Declaro estar ciente do registro referente ao Vale Quebra de Caixa descrito neste documento, incluindo a data de vigência, o valor informado e as condições aplicáveis ao exercício das atividades de caixa.","assinaturaColaborador":"","assinaturaResponsavel":""},"sections":[{"id":"cabecalho","title":"1. Identificação do documento","fields":[{"id":"numeroDocumento","label":"Número do vale","type":"text","readonly":true},{"id":"dataEmissao","label":"Data de emissão","type":"date"},{"id":"statusDocumento","label":"Situação","type":"select","options":["EM PREENCHIMENTO","AGUARDANDO CIÊNCIA","CONCLUÍDO","CANCELADO"]},{"id":"quantidadeVias","label":"Quantidade de cheques para impressão","type":"select","options":["1","2","3","4"],"help":"Cada cheque possui dados próprios. A impressão organiza automaticamente 2 cheques por folha A4."},{"id":"empresaDocumento","label":"Empresa","type":"text","readonly":true,"wide":true},{"id":"unidadeDocumento","label":"Unidade / loja","type":"text","wide":true}]},{"id":"colaborador","title":"2. Colaborador / operador de caixa","fields":[{"id":"colaboradorId","label":"Selecionar colaborador","type":"employee","group":"colaborador","print":false,"wide":true},{"id":"colaboradorNome","label":"Favorecido / colaborador","type":"text","readonly":true,"wide":true},{"id":"colaboradorMatricula","label":"Matrícula / registro","type":"text","readonly":true},{"id":"colaboradorOperador","label":"Nº do operador","type":"text","readonly":true},{"id":"colaboradorCargo","label":"Cargo / função","type":"text","readonly":true}]},{"id":"vale","title":"3. Dados do vale","fields":[{"id":"tipoMovimentacao","label":"Tipo de movimentação","type":"select","options":["CONCESSÃO","ALTERAÇÃO DE VALOR","SUSPENSÃO / CANCELAMENTO"]},{"id":"competencia","label":"Competência / referência","type":"text","placeholder":"Ex.: 09/2026"},{"id":"valorVale","label":"Valor do vale","type":"text","placeholder":"Ex.: R$ 150,00"},{"id":"valorPorExtenso","label":"Valor por extenso","type":"text","placeholder":"Ex.: cento e cinquenta reais","wide":true},{"id":"motivo","label":"Referente a","type":"textarea","rows":3,"full":true},{"id":"observacoes","label":"Observações complementares","type":"textarea","rows":3,"full":true}]},{"id":"responsavel","title":"4. Responsável pela liberação","fields":[{"id":"responsavelId","label":"Selecionar responsável","type":"employee","group":"responsavel","print":false,"wide":true},{"id":"responsavelNome","label":"Nome","type":"text","readonly":true,"wide":true},{"id":"responsavelCargo","label":"Cargo / função","type":"text","readonly":true},{"id":"responsavelMatricula","label":"Matrícula","type":"text","readonly":true}]},{"id":"ciencia","title":"5. Ciência e assinaturas","fields":[{"id":"termoCiencia","label":"Termo de ciência","type":"textarea","rows":4,"full":true},{"id":"assinaturaColaborador","label":"Colaborador","type":"signature"},{"id":"assinaturaResponsavel","label":"Responsável / liderança","type":"signature"}],"text":"O documento registra a movimentação do vale e a ciência das partes envolvidas."}],"repeaters":[],"formPages":[{"key":"VALE","label":"Vale quebra de caixa","icon":"💵","sections":["cabecalho","colaborador","vale","responsavel","ciencia"],"repeaters":[]}]} ,
       ata_reuniao: {"id":"ata_reuniao","nome":"Ata de Reunião","subtitulo":"Registro formal de participantes, pautas, discussões, decisões e responsáveis","editable":true,"categoria":"administrativo_compras","kind":"corporate_form","printOrientation":"portrait","documentPrefix":"ATA","protocolPrefix":"REU","employeeGroups":{"coordenador":{"selectId":"coordenadorId","nameId":"coordenadorNome","cargoId":"coordenadorCargo","matriculaId":"coordenadorMatricula"},"secretario":{"selectId":"secretarioId","nameId":"secretarioNome","cargoId":"secretarioCargo","matriculaId":"secretarioMatricula"}},"defaults":{"documentoAba":"ABERTURA","numeroDocumento":"","protocoloDocumento":"","dataEmissao":"","statusDocumento":"EM PREENCHIMENTO","empresaDocumento":"LOJAS AVENIDA S/A","unidadeDocumento":"LOJA 24","tituloReuniao":"","tipoReuniao":"REUNIÃO DE EQUIPE","dataReuniao":"","horaInicio":"","horaFim":"","localReuniao":"","modalidadeReuniao":"PRESENCIAL","convocacaoReuniao":"PROGRAMADA","objetivoGeral":"","contextoReuniao":"","coordenadorId":"","coordenadorNome":"","coordenadorCargo":"","coordenadorMatricula":"","secretarioId":"","secretarioNome":"","secretarioCargo":"","secretarioMatricula":"","decisoesConsolidadas":"","pendenciasGerais":"","dataProximaReuniao":"","horaProximaReuniao":"","localProximaReuniao":"","observacoesEncerramento":"","assinaturaCoordenador":"","assinaturaSecretario":"","participantesReuniao":[{"nome":"","vinculo":"COLABORADOR DA LOJA","cargoSetor":"","empresaUnidade":"LOJA 24","presenca":"PRESENTE","assinatura":""}],"pautasReuniao":[{"ordem":"1","assunto":"","apresentador":"","objetivo":"","tempoPrevisto":""}],"registrosReuniao":[{"pautaReferencia":"1","assunto":"","pontosDiscutidos":"","decisoes":"","pendencias":""}],"acoesReuniao":[{"acao":"","responsavel":"","prazo":"","prioridade":"NORMAL","status":"PENDENTE","acompanhamento":""}]},"sections":[{"id":"identificacao","title":"1. Identificação e abertura","fields":[{"id":"numeroDocumento","label":"Número da ata","type":"text","readonly":true},{"id":"protocoloDocumento","label":"Protocolo","type":"text","readonly":true},{"id":"dataEmissao","label":"Data de emissão","type":"date"},{"id":"statusDocumento","label":"Situação da ata","type":"select","options":["EM PREENCHIMENTO","AGUARDANDO VALIDAÇÃO","VALIDADA","CONCLUÍDA","CANCELADA"]},{"id":"empresaDocumento","label":"Empresa","type":"text","readonly":true,"wide":true},{"id":"unidadeDocumento","label":"Unidade / loja","type":"text","wide":true},{"id":"tituloReuniao","label":"Título da reunião","type":"text","wide":true},{"id":"tipoReuniao","label":"Tipo de reunião","type":"select","options":["REUNIÃO DE EQUIPE","ALINHAMENTO GERENCIAL","REUNIÃO DE RESULTADOS","ORIENTAÇÃO OPERACIONAL","COMITÊ DE EVENTO","REUNIÃO COM PARCEIRO","OUTRO"]},{"id":"dataReuniao","label":"Data da reunião","type":"date"},{"id":"horaInicio","label":"Horário de início","type":"time"},{"id":"horaFim","label":"Horário de término","type":"time"},{"id":"localReuniao","label":"Local da reunião","type":"text","wide":true},{"id":"modalidadeReuniao","label":"Modalidade","type":"select","options":["PRESENCIAL","ONLINE","HÍBRIDA"]},{"id":"convocacaoReuniao","label":"Forma de convocação","type":"select","options":["PROGRAMADA","EXTRAORDINÁRIA","EMERGENCIAL"]},{"id":"objetivoGeral","label":"Objetivo geral da reunião","type":"textarea","rows":4,"full":true},{"id":"contextoReuniao","label":"Contexto ou motivo da convocação","type":"textarea","rows":4,"full":true}],"description":"Informações essenciais apresentadas de forma compacta no início da ata."},{"id":"conducao","title":"2. Coordenação e elaboração da ata","fields":[{"id":"coordenadorId","label":"Selecionar quem coordenou a reunião","type":"employee","group":"coordenador","print":false,"wide":true},{"id":"coordenadorNome","label":"Nome","type":"text","readonly":true},{"id":"coordenadorCargo","label":"Cargo / função","type":"text","readonly":true},{"id":"coordenadorMatricula","label":"Matrícula","type":"text","readonly":true},{"id":"secretarioId","label":"Selecionar quem registrou a ata","type":"employee","group":"secretario","print":false,"wide":true},{"id":"secretarioNome","label":"Nome","type":"text","readonly":true},{"id":"secretarioCargo","label":"Cargo / função","type":"text","readonly":true},{"id":"secretarioMatricula","label":"Matrícula","type":"text","readonly":true}],"description":"Os dois responsáveis internos ficam identificados separadamente."},{"id":"encerramento","title":"5. Consolidação e encerramento","fields":[{"id":"decisoesConsolidadas","label":"Decisões consolidadas da reunião","type":"textarea","rows":6,"full":true},{"id":"pendenciasGerais","label":"Pendências gerais que permaneceram em aberto","type":"textarea","rows":5,"full":true},{"id":"dataProximaReuniao","label":"Data da próxima reunião","type":"date"},{"id":"horaProximaReuniao","label":"Horário da próxima reunião","type":"time"},{"id":"localProximaReuniao","label":"Local / formato da próxima reunião","type":"text","wide":true},{"id":"observacoesEncerramento","label":"Observações de encerramento","type":"textarea","rows":5,"full":true}],"description":"Resumo final do que foi decidido e do que ainda precisa ser acompanhado."},{"id":"assinaturas","title":"6. Validação da ata","fields":[{"id":"assinaturaCoordenador","label":"Coordenador da reunião","type":"signature"},{"id":"assinaturaSecretario","label":"Responsável pelo registro da ata","type":"signature"}],"text":"As assinaturas validam o conteúdo registrado. A lista de participantes possui campo próprio de assinatura ou ciência."}],"repeaters":[{"id":"participantesReuniao","title":"Participantes da reunião","columns":[{"id":"nome","label":"Nome completo","type":"text","wide":true},{"id":"vinculo","label":"Vínculo","type":"select","options":["COLABORADOR DA LOJA","LIDERANÇA / GESTÃO","EMPRESA PARCEIRA","PRESTADOR DE SERVIÇO","CONVIDADO EXTERNO"]},{"id":"cargoSetor","label":"Cargo / setor","type":"text"},{"id":"empresaUnidade","label":"Empresa / unidade","type":"text"},{"id":"presenca","label":"Participação","type":"select","options":["PRESENTE","ONLINE","AUSENTE JUSTIFICADO","AUSENTE"]},{"id":"assinatura","label":"Assinatura / ciência","type":"text","wide":true}],"minRows":1,"maxRows":30,"description":"Cada participante deve ocupar um registro próprio."},{"id":"pautasReuniao","title":"Pautas e assuntos programados","columns":[{"id":"ordem","label":"Ordem","type":"number"},{"id":"assunto","label":"Assunto / pauta","type":"text","wide":true},{"id":"apresentador","label":"Responsável pela apresentação","type":"text"},{"id":"objetivo","label":"Objetivo ou resultado esperado","type":"textarea","rows":3,"full":true},{"id":"tempoPrevisto","label":"Tempo previsto","type":"text"}],"minRows":1,"maxRows":20,"description":"Cada assunto da reunião deve ser cadastrado separadamente."},{"id":"registrosReuniao","title":"Registro individual das pautas","columns":[{"id":"pautaReferencia","label":"Nº da pauta","type":"text"},{"id":"assunto","label":"Assunto tratado","type":"text","wide":true},{"id":"pontosDiscutidos","label":"Principais pontos discutidos","type":"textarea","rows":5,"full":true},{"id":"decisoes","label":"Decisões e conclusões","type":"textarea","rows":4,"full":true},{"id":"pendencias","label":"Pendências ou questões em aberto","type":"textarea","rows":4,"full":true}],"minRows":1,"maxRows":20,"description":"Não reúna todos os assuntos em um único campo. Registre cada pauta em seu próprio bloco."},{"id":"acoesReuniao","title":"Plano de ação e acompanhamento","columns":[{"id":"acao","label":"Ação definida","type":"text","wide":true},{"id":"responsavel","label":"Responsável","type":"text"},{"id":"prazo","label":"Prazo","type":"date"},{"id":"prioridade","label":"Prioridade","type":"select","options":["BAIXA","NORMAL","ALTA","URGENTE"]},{"id":"status","label":"Status","type":"select","options":["PENDENTE","EM ANDAMENTO","CONCLUÍDA","CANCELADA"]},{"id":"acompanhamento","label":"Forma de acompanhamento","type":"textarea","rows":3,"full":true}],"minRows":1,"maxRows":20,"description":"Transforme as decisões em tarefas objetivas, com responsáveis e prazos."}],"formPages":[{"key":"ABERTURA","label":"Abertura e participantes","icon":"👥","sections":["identificacao","conducao"],"repeaters":["participantesReuniao"]},{"key":"PAUTAS","label":"Pautas e assuntos","icon":"📌","sections":[],"repeaters":["pautasReuniao"]},{"key":"REGISTRO","label":"Discussões e decisões","icon":"📝","sections":[],"repeaters":["registrosReuniao"]},{"key":"ACOES","label":"Ações e encerramento","icon":"✅","sections":["encerramento","assinaturas"],"repeaters":["acoesReuniao"]}]},
+      entrega_uniforme: {
+        id:'entrega_uniforme',
+        nome:'Termo de Entrega de Uniforme',
+        subtitulo:'Entrega de uniforme corporativo ao colaborador com termo de responsabilidade',
+        editable:true,
+        categoria:'recursos_humanos',
+        kind:'corporate_form',
+        printOrientation:'portrait',
+        documentPrefix:'TEU',
+        protocolPrefix:'RH',
+        employeeGroups:{
+          colaborador:{selectId:'colaboradorId',nameId:'colaboradorNome',cargoId:'colaboradorCargo',matriculaId:'colaboradorMatricula',departmentId:'colaboradorSetor',cpfId:'colaboradorCPF',admissionId:'dataAdmissao'},
+          entregador:{selectId:'entregadorId',nameId:'entregadorNome',cargoId:'entregadorCargo',matriculaId:'entregadorMatricula'},
+          gestor:{selectId:'gestorId',nameId:'gestorNome',cargoId:'gestorCargo',matriculaId:'gestorMatricula'}
+        },
+        defaults:{
+          documentoAba:'UNIFORME',numeroDocumento:'',protocoloDocumento:'',dataEmissao:'',statusDocumento:'EM PREENCHIMENTO',impressoEm:'',digitalizadoNome:'',digitalizadoTipo:'',digitalizadoTamanho:'',digitalizadoEm:'',empresaDocumento:'LOJAS AVENIDA S/A',unidadeDocumento:'LOJA 24',
+          colaboradorId:'',colaboradorNome:'',colaboradorCPF:'',colaboradorMatricula:'',colaboradorCargo:'',colaboradorSetor:'',dataAdmissao:'',
+          dataEntrega:'',motivoEntrega:'',observacoes:'',
+          entregadorId:'',entregadorNome:'',entregadorCargo:'',entregadorMatricula:'',
+          gestorId:'',gestorNome:'',gestorCargo:'',gestorMatricula:'',
+          termoResponsabilidade:'Declaro que recebi da LOJAS AVENIDA S/A as peças de uniforme relacionadas neste documento, nas quantidades, tamanhos e condições registradas. Comprometo-me a utilizar o uniforme exclusivamente no exercício das minhas atividades profissionais, mantendo-o em condições adequadas de higiene, conservação e apresentação, não o cedendo a terceiros. Comprometo-me ainda a comunicar à liderança qualquer perda, dano, desgaste que impeça o uso ou necessidade de substituição, bem como a devolver as peças que estiverem sob minha responsabilidade quando houver troca, solicitação da empresa ou encerramento do vínculo.',
+          assinaturaColaborador:'',assinaturaEntregador:'',assinaturaGestor:'',dataAssinatura:'',
+          uniformesEntregues:[]
+        },
+        sections:[
+          {id:'documento',title:'1. Identificação do documento',fields:[
+            {id:'numeroDocumento',label:'Número do termo',type:'text',readonly:true},
+            {id:'dataEmissao',label:'Data de emissão',type:'date'},
+            {id:'statusDocumento',label:'Situação',type:'text',readonly:true,help:'Atualizada automaticamente: preenchimento → impressão → arquivo assinado digitalizado.'},
+            {id:'unidadeDocumento',label:'Unidade / loja',type:'text'}
+          ]},
+          {id:'colaborador',title:'2. Dados do colaborador',fields:[
+            {id:'colaboradorId',label:'Colaborador',type:'employee',group:'colaborador',print:false,wide:true,help:'Selecione no Quadro de Funcionários. Nome, matrícula, cargo, setor, CPF e admissão serão aproveitados automaticamente.'},
+            {id:'colaboradorNome',label:'Nome completo',type:'text',readonly:true,wide:true},
+            {id:'colaboradorCPF',label:'CPF',type:'text',placeholder:'000.000.000-00',help:'Preenchido automaticamente pelo Quadro de Funcionários quando houver CPF cadastrado. Pode ser corrigido neste documento.'},
+            {id:'colaboradorMatricula',label:'Matrícula / operador',type:'text',readonly:true},
+            {id:'colaboradorCargo',label:'Cargo / função',type:'text',readonly:true},
+            {id:'colaboradorSetor',label:'Setor / departamento',type:'text',readonly:true},
+            {id:'dataAdmissao',label:'Data de admissão',type:'date',help:'Preenchida automaticamente pela Data de entrada na loja do cadastro do colaborador. Pode ser ajustada neste documento.'}
+          ]},
+          {id:'entrega',title:'3. Dados da entrega',fields:[
+            {id:'dataEntrega',label:'Data da entrega',type:'date'},
+            {id:'motivoEntrega',label:'Motivo da entrega',type:'textarea',rows:2,full:true,required:true,placeholder:'Escreva o motivo desta entrega de uniforme'},
+            {id:'entregadorId',label:'Responsável pela entrega',type:'employee',group:'entregador',print:false,wide:true,help:'Selecione no Quadro de Funcionários; o nome e os dados funcionais são vinculados automaticamente.'},
+            {id:'entregadorNome',label:'Responsável pela entrega',type:'text',readonly:true},
+            {id:'entregadorCargo',label:'Cargo / função',type:'text',readonly:true},
+            {id:'gestorId',label:'Gestor / líder',type:'employee',group:'gestor',print:false,wide:true,help:'Selecione no Quadro de Funcionários; não é necessário digitar o nome novamente.'},
+            {id:'gestorNome',label:'Gestor / líder',type:'text',readonly:true},
+            {id:'observacoes',label:'Observações',type:'textarea',rows:3,full:true}
+          ]},
+          {id:'responsabilidade',title:'5. Termo de responsabilidade e assinaturas',text:'Os nomes do Colaborador, Responsável pela Entrega e Gestor / Líder são vinculados automaticamente às pessoas selecionadas anteriormente. Não é necessário digitá-los novamente.',fields:[
+            {id:'termoResponsabilidade',label:'Termo de responsabilidade pelo uniforme',type:'textarea',rows:8,full:true},
+            {id:'dataAssinatura',label:'Data da assinatura',type:'date'}
+          ]}
+        ],
+        repeaters:[
+          {id:'uniformesEntregues',title:'4. Uniformes entregues',description:'Adicione uma linha para cada peça física entregue. Ex.: 2 camisetas = 2 linhas.',columns:[
+            {id:'item',label:'Peça / item',type:'text'},
+            {id:'descricao',label:'Descrição / modelo',type:'text',wide:true},
+            {id:'tamanho',label:'Tamanho',type:'text'},
+            {id:'estado',label:'Estado na entrega',type:'select',default:'NOVO',options:['NOVO','BOM','USADO EM BOM ESTADO','COM RESSALVA']},
+            {id:'assinaturaRecebimento',label:'Rubrica / ciência',type:'text',wide:true}
+          ],minRows:0,maxRows:30}
+        ],
+        formPages:[{key:'UNIFORME',label:'Entrega de uniforme',icon:'👕',sections:['documento','colaborador','entrega','responsabilidade'],repeaters:['uniformesEntregues']}]
+      },
+      devolucao_uniforme: {
+        id:'devolucao_uniforme',
+        nome:'Termo de Devolução de Uniforme',
+        subtitulo:'Devolução e conferência de uniforme corporativo do colaborador',
+        editable:true,
+        categoria:'recursos_humanos',
+        kind:'corporate_form',
+        printOrientation:'portrait',
+        documentPrefix:'TDU',
+        protocolPrefix:'RH',
+        employeeGroups:{
+          colaborador:{selectId:'colaboradorId',nameId:'colaboradorNome',cargoId:'colaboradorCargo',matriculaId:'colaboradorMatricula',departmentId:'colaboradorSetor',cpfId:'colaboradorCPF'},
+          conferente:{selectId:'conferenteId',nameId:'conferenteNome',cargoId:'conferenteCargo',matriculaId:'conferenteMatricula'},
+          gestor:{selectId:'gestorId',nameId:'gestorNome',cargoId:'gestorCargo',matriculaId:'gestorMatricula'}
+        },
+        defaults:{
+          documentoAba:'UNIFORME',numeroDocumento:'',protocoloDocumento:'',dataEmissao:'',statusDocumento:'EM PREENCHIMENTO',impressoEm:'',digitalizadoNome:'',digitalizadoTipo:'',digitalizadoTamanho:'',digitalizadoEm:'',empresaDocumento:'LOJAS AVENIDA S/A',unidadeDocumento:'LOJA 24',
+          colaboradorId:'',colaboradorNome:'',colaboradorCPF:'',colaboradorMatricula:'',colaboradorCargo:'',colaboradorSetor:'',dataDesligamentoOuSolicitacao:'',
+          dataDevolucao:'',motivoDevolucao:'DESLIGAMENTO',observacoes:'',
+          conferenteId:'',conferenteNome:'',conferenteCargo:'',conferenteMatricula:'',
+          gestorId:'',gestorNome:'',gestorCargo:'',gestorMatricula:'',
+          itensCompletos:'SIM',haAvarias:'NÃO',necessitaReposicao:'NÃO',pendenciasEncontradas:'NÃO',detalhamentoPendencias:'',
+          termoCiencia:'Declaro que entreguei à LOJAS AVENIDA S/A as peças de uniforme relacionadas neste documento. A empresa, por meio do responsável identificado, realizou a conferência da quantidade e do estado aparente das peças no momento do recebimento. Eventuais faltas, danos, avarias ou pendências devem permanecer registrados neste termo para análise e tratamento interno conforme os procedimentos aplicáveis.',
+          assinaturaColaborador:'',assinaturaConferente:'',assinaturaGestor:'',dataAssinatura:'',
+          uniformesDevolvidos:[]
+        },
+        sections:[
+          {id:'documento',title:'1. Identificação do documento',fields:[
+            {id:'numeroDocumento',label:'Número do termo',type:'text',readonly:true},
+            {id:'dataEmissao',label:'Data de emissão',type:'date'},
+            {id:'statusDocumento',label:'Situação',type:'text',readonly:true,help:'Atualizada automaticamente: preenchimento → impressão → arquivo assinado digitalizado.'},
+            {id:'unidadeDocumento',label:'Unidade / loja',type:'text'}
+          ]},
+          {id:'colaborador',title:'2. Dados do colaborador',fields:[
+            {id:'colaboradorId',label:'Selecionar colaborador',type:'employee',group:'colaborador',print:false,wide:true},
+            {id:'colaboradorNome',label:'Nome completo',type:'text',readonly:true,wide:true},
+            {id:'colaboradorCPF',label:'CPF',type:'text',placeholder:'000.000.000-00',help:'Preenchido automaticamente pelo Quadro de Funcionários quando houver CPF cadastrado. Pode ser corrigido neste documento.'},
+            {id:'colaboradorMatricula',label:'Matrícula / operador',type:'text',readonly:true},
+            {id:'colaboradorCargo',label:'Cargo / função',type:'text',readonly:true},
+            {id:'colaboradorSetor',label:'Setor / departamento',type:'text',readonly:true},
+            {id:'dataDesligamentoOuSolicitacao',label:'Data de desligamento ou solicitação',type:'date'}
+          ]},
+          {id:'devolucao',title:'3. Dados da devolução',fields:[
+            {id:'dataDevolucao',label:'Data da devolução',type:'date'},
+            {id:'motivoDevolucao',label:'Motivo da devolução',type:'select',options:['DESLIGAMENTO','TROCA DE TAMANHO','SUBSTITUIÇÃO POR DESGASTE','SOLICITAÇÃO DA EMPRESA','OUTRO']},
+            {id:'conferenteId',label:'Selecionar responsável pelo recebimento',type:'employee',group:'conferente',print:false,wide:true},
+            {id:'conferenteNome',label:'Responsável pelo recebimento',type:'text',readonly:true},
+            {id:'conferenteCargo',label:'Cargo / função',type:'text',readonly:true},
+            {id:'gestorId',label:'Selecionar gestor / líder',type:'employee',group:'gestor',print:false,wide:true},
+            {id:'gestorNome',label:'Gestor / líder',type:'text',readonly:true},
+            {id:'observacoes',label:'Observações',type:'textarea',rows:3,full:true}
+          ]},
+          {id:'conferencia',title:'5. Conferência da devolução',fields:[
+            {id:'itensCompletos',label:'Quantidade devolvida confere?',type:'select',options:['SIM','NÃO']},
+            {id:'haAvarias',label:'Há peças com avaria / dano?',type:'select',options:['SIM','NÃO']},
+            {id:'necessitaReposicao',label:'Necessita reposição?',type:'select',options:['SIM','NÃO']},
+            {id:'pendenciasEncontradas',label:'Há item não devolvido / pendência?',type:'select',options:['SIM','NÃO']},
+            {id:'detalhamentoPendencias',label:'Detalhamento de avarias, faltas, desgaste ou pendências',type:'textarea',rows:5,full:true}
+          ]},
+          {id:'ciencia',title:'6. Termo de ciência e assinaturas',text:'Os nomes do Colaborador, Responsável pelo Recebimento e Gestor / Líder são vinculados automaticamente às pessoas selecionadas anteriormente. Não é necessário digitá-los novamente.',fields:[
+            {id:'termoCiencia',label:'Termo de ciência da devolução',type:'textarea',rows:7,full:true},
+            {id:'dataAssinatura',label:'Data da assinatura',type:'date'}
+          ]}
+        ],
+        repeaters:[
+          {id:'uniformesDevolvidos',title:'4. Uniformes devolvidos',description:'Adicione uma linha para cada peça física devolvida. Ex.: 2 camisetas = 2 linhas.',columns:[
+            {id:'item',label:'Peça / item',type:'text'},
+            {id:'descricao',label:'Descrição / modelo',type:'text',wide:true},
+            {id:'tamanho',label:'Tamanho',type:'text'},
+            {id:'estadoDevolucao',label:'Estado na devolução',type:'select',default:'BOM',options:['NOVO','BOM','DESGASTE NATURAL','AVARIADO','INUTILIZÁVEL']},
+            {id:'conferencia',label:'Conferência',type:'select',default:'OK',options:['OK','DIVERGÊNCIA','PENDENTE']}
+          ],minRows:0,maxRows:30}
+        ],
+        formPages:[{key:'UNIFORME',label:'Devolução de uniforme',icon:'↩️',sections:['documento','colaborador','devolucao','conferencia','ciencia'],repeaters:['uniformesDevolvidos']}]
+      },
       controle_treinamentos: {"id":"controle_treinamentos","nome":"Controle de Treinamentos","subtitulo":"Planejamento, presença e avaliação de capacitações","editable":true,"categoria":"recursos_humanos","kind":"corporate_form","printOrientation":"portrait","documentPrefix":"CTR","protocolPrefix":"TRE","employeeGroups":{"responsavel":{"selectId":"responsavelId","nameId":"responsavelNome","cargoId":"responsavelCargo","matriculaId":"responsavelMatricula"},"instrutorInterno":{"selectId":"instrutorInternoId","nameId":"instrutorInternoNome","cargoId":"instrutorInternoCargo","matriculaId":"instrutorInternoMatricula"}},"defaults":{"documentoAba":"TREINAMENTO","numeroDocumento":"","protocoloDocumento":"","dataEmissao":"","statusDocumento":"EM PREENCHIMENTO","empresaDocumento":"LOJAS AVENIDA S/A","unidadeDocumento":"LOJA 24","tituloTreinamento":"","categoriaTreinamento":"OPERAÇÃO DE LOJA","modalidade":"PRESENCIAL","dataTreinamento":"","horaInicio":"","horaFim":"","cargaHoraria":"","localTreinamento":"","responsavelId":"","responsavelNome":"","responsavelCargo":"","responsavelMatricula":"","instrutorInternoId":"","instrutorInternoNome":"","instrutorInternoCargo":"","instrutorInternoMatricula":"","instrutorExterno":"","empresaInstrutor":"","objetivo":"","conteudoProgramatico":"","materiaisUtilizados":"","criterioAvaliacao":"","resultadoGeral":"","necessitaReciclagem":"NÃO","dataReciclagem":"","observacoes":"","assinaturaResponsavel":"","assinaturaInstrutor":"","participantesTreinamento":[{"nome":"","matricula":"","cargo":"","presenca":"PRESENTE","nota":"","resultado":"PENDENTE","assinatura":""}]},"sections":[{"id":"cabecalho","title":"1. Identificação do treinamento","fields":[{"id":"numeroDocumento","label":"Número do documento","type":"text","readonly":true},{"id":"protocoloDocumento","label":"Protocolo","type":"text","readonly":true},{"id":"dataEmissao","label":"Data de emissão","type":"date"},{"id":"statusDocumento","label":"Situação","type":"select","options":["EM PREENCHIMENTO","AGUARDANDO APROVAÇÃO","APROVADO","CONCLUÍDO","CANCELADO"]},{"id":"empresaDocumento","label":"Empresa","type":"text","readonly":true,"wide":true},{"id":"unidadeDocumento","label":"Unidade / loja","type":"text","wide":true},{"id":"tituloTreinamento","label":"Título do treinamento","type":"text","wide":true},{"id":"categoriaTreinamento","label":"Categoria","type":"select","options":["INTEGRAÇÃO","OPERAÇÃO DE LOJA","ATENDIMENTO","CAIXA","SEGURANÇA","LGPD","VISUAL MERCHANDISING","PRODUTOS FINANCEIROS","OUTRO"]},{"id":"modalidade","label":"Modalidade","type":"select","options":["PRESENCIAL","ONLINE AO VIVO","EAD","PRÁTICO"]},{"id":"dataTreinamento","label":"Data","type":"date"},{"id":"horaInicio","label":"Início","type":"time"},{"id":"horaFim","label":"Término","type":"time"},{"id":"cargaHoraria","label":"Carga horária","type":"text"},{"id":"localTreinamento","label":"Local / plataforma","type":"text","wide":true}]},{"id":"responsaveis","title":"2. Responsáveis","fields":[{"id":"responsavelId","label":"Selecionar responsável interno pelo controle","type":"employee","group":"responsavel","print":false,"wide":true},{"id":"responsavelNome","label":"Nome","type":"text","readonly":true},{"id":"responsavelCargo","label":"Cargo / função","type":"text","readonly":true},{"id":"responsavelMatricula","label":"Matrícula","type":"text","readonly":true},{"id":"instrutorInternoId","label":"Selecionar instrutor interno, quando aplicável","type":"employee","group":"instrutorInterno","print":false,"wide":true},{"id":"instrutorInternoNome","label":"Nome","type":"text","readonly":true},{"id":"instrutorInternoCargo","label":"Cargo / função","type":"text","readonly":true},{"id":"instrutorInternoMatricula","label":"Matrícula","type":"text","readonly":true},{"id":"instrutorExterno","label":"Instrutor externo","type":"text","wide":true},{"id":"empresaInstrutor","label":"Empresa do instrutor","type":"text","wide":true}]},{"id":"programa","title":"3. Programa","fields":[{"id":"objetivo","label":"Objetivo do treinamento","type":"textarea","rows":5,"full":true},{"id":"conteudoProgramatico","label":"Conteúdo programático","type":"textarea","rows":8,"full":true},{"id":"materiaisUtilizados","label":"Materiais utilizados","type":"textarea","rows":4,"full":true},{"id":"criterioAvaliacao","label":"Critério de avaliação / aprovação","type":"textarea","rows":4,"full":true}]},{"id":"avaliacao","title":"4. Avaliação e acompanhamento","fields":[{"id":"resultadoGeral","label":"Resultado geral","type":"textarea","rows":5,"full":true},{"id":"necessitaReciclagem","label":"Necessita reciclagem?","type":"select","options":["NÃO","SIM","A DEFINIR"]},{"id":"dataReciclagem","label":"Data prevista da reciclagem","type":"date"},{"id":"observacoes","label":"Observações","type":"textarea","rows":5,"full":true}]},{"id":"assinaturas","title":"5. Assinaturas","fields":[{"id":"assinaturaResponsavel","label":"Responsável interno","type":"signature"},{"id":"assinaturaInstrutor","label":"Instrutor","type":"signature"}]}],"repeaters":[{"id":"participantesTreinamento","title":"Participantes e presença","columns":[{"id":"nome","label":"Nome do participante","type":"text","wide":true},{"id":"matricula","label":"Matrícula","type":"text"},{"id":"cargo","label":"Cargo","type":"text"},{"id":"presenca","label":"Presença","type":"select","options":["PRESENTE","AUSENTE","PARCIAL","JUSTIFICADO"]},{"id":"nota","label":"Nota / conceito","type":"text"},{"id":"resultado","label":"Resultado","type":"select","options":["PENDENTE","APROVADO","REPROVADO","RECICLAGEM"]},{"id":"assinatura","label":"Assinatura / ciência","type":"text","wide":true}],"minRows":1,"maxRows":25}],"formPages":[{"key":"TREINAMENTO","label":"Treinamento","icon":"🎓","sections":["cabecalho","responsaveis"],"repeaters":[]},{"key":"CONTEUDO","label":"Conteúdo","icon":"📚","sections":["programa"],"repeaters":[]},{"key":"PARTICIPANTES","label":"Participantes e avaliação","icon":"✅","sections":["avaliacao","assinaturas"],"repeaters":["participantesTreinamento"]}]},
       registro_feedback: {"id":"registro_feedback","nome":"Registro de Feedback","subtitulo":"Desenvolvimento, orientação e acompanhamento de colaboradores","editable":true,"categoria":"recursos_humanos","kind":"corporate_form","printOrientation":"portrait","documentPrefix":"RFB","protocolPrefix":"FBK","employeeGroups":{"colaborador":{"selectId":"colaboradorId","nameId":"colaboradorNome","cargoId":"colaboradorCargo","matriculaId":"colaboradorMatricula"},"lider":{"selectId":"liderId","nameId":"liderNome","cargoId":"liderCargo","matriculaId":"liderMatricula"}},"defaults":{"documentoAba":"FEEDBACK","numeroDocumento":"","protocoloDocumento":"","dataEmissao":"","statusDocumento":"EM PREENCHIMENTO","empresaDocumento":"LOJAS AVENIDA S/A","unidadeDocumento":"LOJA 24","colaboradorId":"","colaboradorNome":"","colaboradorCargo":"","colaboradorMatricula":"","liderId":"","liderNome":"","liderCargo":"","liderMatricula":"","dataFeedback":"","tipoFeedback":"ACOMPANHAMENTO","periodoAvaliado":"","localFeedback":"","contexto":"","pontosPositivos":"","pontosDesenvolvimento":"","exemplosObservados":"","manifestacaoColaborador":"","compromissosColaborador":"","apoioLideranca":"","dataAcompanhamento":"","resultadoEsperado":"","observacoes":"","assinaturaColaborador":"","assinaturaLider":"","acoesFeedback":[{"acao":"","responsavel":"","prazo":"","indicador":"","status":"PENDENTE","observacao":""}]},"sections":[{"id":"cabecalho","title":"1. Identificação do feedback","fields":[{"id":"numeroDocumento","label":"Número do documento","type":"text","readonly":true},{"id":"protocoloDocumento","label":"Protocolo","type":"text","readonly":true},{"id":"dataEmissao","label":"Data de emissão","type":"date"},{"id":"statusDocumento","label":"Situação","type":"select","options":["EM PREENCHIMENTO","AGUARDANDO APROVAÇÃO","APROVADO","CONCLUÍDO","CANCELADO"]},{"id":"empresaDocumento","label":"Empresa","type":"text","readonly":true,"wide":true},{"id":"unidadeDocumento","label":"Unidade / loja","type":"text","wide":true}]},{"id":"envolvidos","title":"2. Colaborador e liderança","fields":[{"id":"colaboradorId","label":"Selecionar colaborador","type":"employee","group":"colaborador","print":false,"wide":true},{"id":"colaboradorNome","label":"Nome","type":"text","readonly":true},{"id":"colaboradorCargo","label":"Cargo / função","type":"text","readonly":true},{"id":"colaboradorMatricula","label":"Matrícula","type":"text","readonly":true},{"id":"liderId","label":"Selecionar liderança responsável","type":"employee","group":"lider","print":false,"wide":true},{"id":"liderNome","label":"Nome","type":"text","readonly":true},{"id":"liderCargo","label":"Cargo / função","type":"text","readonly":true},{"id":"liderMatricula","label":"Matrícula","type":"text","readonly":true},{"id":"dataFeedback","label":"Data do feedback","type":"date"},{"id":"tipoFeedback","label":"Tipo","type":"select","options":["ACOMPANHAMENTO","RECONHECIMENTO","DESENVOLVIMENTO","DESEMPENHO","ORIENTAÇÃO","RETORNO DE EXPERIÊNCIA"]},{"id":"periodoAvaliado","label":"Período avaliado","type":"text","wide":true},{"id":"localFeedback","label":"Local / formato","type":"text","wide":true}]},{"id":"conteudo","title":"3. Conteúdo do feedback","fields":[{"id":"contexto","label":"Contexto e objetivo da conversa","type":"textarea","rows":5,"full":true},{"id":"pontosPositivos","label":"Pontos positivos e reconhecimentos","type":"textarea","rows":6,"full":true},{"id":"pontosDesenvolvimento","label":"Pontos de desenvolvimento","type":"textarea","rows":6,"full":true},{"id":"exemplosObservados","label":"Exemplos e fatos observados","type":"textarea","rows":5,"full":true}]},{"id":"manifestacao","title":"4. Manifestação e acompanhamento","fields":[{"id":"manifestacaoColaborador","label":"Manifestação do colaborador","type":"textarea","rows":6,"full":true},{"id":"compromissosColaborador","label":"Compromissos assumidos pelo colaborador","type":"textarea","rows":5,"full":true},{"id":"apoioLideranca","label":"Apoio e recursos da liderança","type":"textarea","rows":5,"full":true},{"id":"dataAcompanhamento","label":"Data de acompanhamento","type":"date"},{"id":"resultadoEsperado","label":"Resultado esperado","type":"text","wide":true},{"id":"observacoes","label":"Observações finais","type":"textarea","rows":4,"full":true}]},{"id":"assinaturas","title":"5. Ciência","fields":[{"id":"assinaturaColaborador","label":"Colaborador","type":"signature"},{"id":"assinaturaLider","label":"Liderança responsável","type":"signature"}],"text":"O registro tem finalidade de acompanhamento e desenvolvimento, preservando o caráter respeitoso e profissional da conversa."}],"repeaters":[{"id":"acoesFeedback","title":"Plano de desenvolvimento","columns":[{"id":"acao","label":"Ação de desenvolvimento","type":"text","wide":true},{"id":"responsavel","label":"Responsável","type":"text"},{"id":"prazo","label":"Prazo","type":"date"},{"id":"indicador","label":"Indicador / evidência","type":"text","wide":true},{"id":"status","label":"Status","type":"select","options":["PENDENTE","EM ANDAMENTO","CONCLUÍDA","REPROGRAMADA"]},{"id":"observacao","label":"Observação","type":"text","wide":true}],"minRows":1,"maxRows":12}],"formPages":[{"key":"FEEDBACK","label":"Feedback","icon":"💬","sections":["cabecalho","envolvidos","conteudo"],"repeaters":[]},{"key":"PLANO","label":"Plano e acompanhamento","icon":"📈","sections":["manifestacao","assinaturas"],"repeaters":["acoesFeedback"]}]},
       ipc: {
@@ -21624,6 +21892,10 @@ window.addEventListener('load', async () => {
     let operacaoModeloAtual = 'orcamento_loja24';
     let operacaoPaginaAtual = 0;
     let operacaoRascunhos = {};
+    const OPERATION_UNIFORM_HISTORY_KEY = 'av24HistoricoTermosUniformeV1';
+    let operacaoHistoricoUniformes = [];
+    let operacaoUniformeModo = 'novo';
+    let operacaoUniformeArquivoSelecionadoId = '';
     let operacaoHistoricoOrcamentos = [];
     let operacaoHistoricoConsultaId = '';
     let operacaoHistoricoJanela = null;
@@ -21727,6 +21999,18 @@ window.addEventListener('load', async () => {
           : [];
       }catch(_){
         operacaoHistoricoMudancasDepartamento=[];
+      }
+
+      try{
+        const salvoUniformes=JSON.parse(
+          localStorage.getItem(OPERATION_UNIFORM_HISTORY_KEY)||'[]'
+        );
+        operacaoHistoricoUniformes=Array.isArray(salvoUniformes)
+          ? salvoUniformes.filter(item=>item&&item.id&&item.dados&&['entrega_uniforme','devolucao_uniforme'].includes(item.tipoDocumento||item.dados?.tipoDocumento||''))
+              .map(item=>{const tipo=item.tipoDocumento||item.dados?.tipoDocumento;return {...item,tipoDocumento:tipo,dados:opNormalizarDadosUniformeUnitarios(tipo,item.dados)};})
+          : [];
+      }catch(_){
+        operacaoHistoricoUniformes=[];
       }
 
       // Migra o antigo único "preenchimento salvo" para a nova lista de arquivos.
@@ -23336,11 +23620,36 @@ window.addEventListener('load', async () => {
         if(!Array.isArray(dados[repetidor.id])){
           dados[repetidor.id]=[];
         }
-        while(dados[repetidor.id].length<(repetidor.minRows||1)){
+        const minimo=repetidor.minRows===undefined?1:Math.max(0,Number(repetidor.minRows)||0);
+        while(dados[repetidor.id].length<minimo){
           dados[repetidor.id].push(opLinhaPadraoDocumento(repetidor));
         }
       });
       return dados;
+    }
+
+    /* V51.78 — cada peça de uniforme corresponde a uma linha. Migra registros antigos que usavam quantidade. */
+    function opNormalizarItensUniformeUnitarios(tplId,linhas){
+      if(!['entrega_uniforme','devolucao_uniforme'].includes(String(tplId||''))) return Array.isArray(linhas)?linhas:[];
+      const lista=Array.isArray(linhas)?linhas:[];
+      const resultado=[];
+      lista.forEach(item=>{
+        const linha=item&&typeof item==='object'?{...item}:{};
+        const temConteudo=!![
+          linha.item,linha.descricao,linha.tamanho
+        ].some(v=>String(v||'').trim());
+        if(!temConteudo) return;
+        const bruto=parseInt(String(linha.quantidade||'1').replace(/\D/g,''),10);
+        const qtd=Math.max(1,Math.min(Number.isFinite(bruto)?bruto:1,50));
+        delete linha.quantidade;
+        for(let i=0;i<qtd;i++) resultado.push({...linha});
+      });
+      return resultado;
+    }
+    function opNormalizarDadosUniformeUnitarios(tplId,dados){
+      if(!dados||!['entrega_uniforme','devolucao_uniforme'].includes(String(tplId||''))) return dados;
+      const chave=tplId==='entrega_uniforme'?'uniformesEntregues':'uniformesDevolvidos';
+      return {...dados,[chave]:opNormalizarItensUniformeUnitarios(tplId,dados[chave])};
     }
 
     function opInicializarDocumentosCorporativos(){
@@ -23366,6 +23675,9 @@ window.addEventListener('load', async () => {
           operacaoRascunhos[tpl.id]=opMigrarAdvertenciaDisciplinar(
             operacaoRascunhos[tpl.id]
           );
+        }
+        if(['entrega_uniforme','devolucao_uniforme'].includes(tpl.id)){
+          operacaoRascunhos[tpl.id]=opNormalizarDadosUniformeUnitarios(tpl.id,operacaoRascunhos[tpl.id]);
         }
       });
     }
@@ -23460,8 +23772,30 @@ window.addEventListener('load', async () => {
       if(config.operatorId){
         valores[config.operatorId]=normalizarOperador(funcionario?.operador)||'';
       }
+      /* V51.81 — CPF do termo vem do cadastro do Quadro de Funcionários, mas permanece editável no documento. */
+      if(config.cpfId){
+        const tipoDocumento=String(funcionario?.documentoTipo||'').trim().toUpperCase();
+        const documentoBruto=String(
+          funcionario?.cpf||
+          funcionario?.CPF||
+          funcionario?.documentoNumero||
+          ''
+        ).trim();
+        const digitos=documentoBruto.replace(/\D/g,'');
+        let cpf='';
+        if(funcionario?.cpf||funcionario?.CPF){
+          cpf=documentoBruto;
+        }else if(tipoDocumento.includes('CPF')){
+          cpf=digitos.length>=11?digitos.slice(0,11):documentoBruto;
+        }else if(digitos.length===11){
+          cpf=digitos;
+        }
+        if(cpf && typeof opMascaraCPF==='function') cpf=opMascaraCPF(cpf);
+        valores[config.cpfId]=cpf;
+      }
       if(config.admissionId){
         const bruto=String(
+          funcionario?.entrada||
           funcionario?.dataAdmissao||
           funcionario?.data_admissao||
           funcionario?.admissao||
@@ -23601,6 +23935,11 @@ window.addEventListener('load', async () => {
 
     function opRenderRepetidorDocumento(tpl,repetidor,dados){
       const linhas=Array.isArray(dados?.[repetidor.id])?dados[repetidor.id]:[];
+      const ehUniforme=opEhTermoUniforme(tpl?.id);
+      const rotuloAdicionar=ehUniforme?'+ Adicionar peça':'+ Adicionar';
+      const vazio=ehUniforme
+        ? `<div class="corporate-repeater-empty">Nenhuma peça adicionada. Clique em <b>Adicionar peça</b>. Cada peça física corresponde a uma linha.</div>`
+        : '';
       return `<section class="corporate-repeater" data-corp-repeater="${opEscape(repetidor.id)}">
         <div class="corporate-repeater-head">
           <div>
@@ -23608,13 +23947,13 @@ window.addEventListener('load', async () => {
             ${repetidor.description?`<small>${opEscape(repetidor.description)}</small>`:''}
           </div>
           <button class="btn secondary" type="button"
-                  onclick="opAdicionarLinhaDocumentoCorporativo('${opEscape(repetidor.id)}')">+ Adicionar</button>
+                  onclick="opAdicionarLinhaDocumentoCorporativo('${opEscape(repetidor.id)}')">${rotuloAdicionar}</button>
         </div>
         <div class="corporate-repeater-list">
-          ${linhas.map((linha,index)=>`
+          ${linhas.length?linhas.map((linha,index)=>`
             <div class="corporate-repeater-row" data-corp-repeater-row>
               <div class="corporate-repeater-number">
-                <span>ITEM ${index+1}</span>
+                <span>${ehUniforme?'PEÇA':'ITEM'} ${index+1}</span>
                 <button class="corporate-repeater-remove" type="button"
                         onclick="opRemoverLinhaDocumentoCorporativo('${opEscape(repetidor.id)}',${index})"
                         title="Remover item">×</button>
@@ -23623,7 +23962,7 @@ window.addEventListener('load', async () => {
                 opCampoLinhaRepetidorHTML(coluna,linha?.[coluna.id])
               ).join('')}
             </div>
-          `).join('')}
+          `).join(''):vazio}
         </div>
       </section>`;
     }
@@ -23779,10 +24118,11 @@ window.addEventListener('load', async () => {
 
       return `<div class="corporate-form">
         <input id="op_documentoAba" type="hidden" value="${opEscape(pagina.key)}">
+        ${opEhTermoUniforme(tpl?.id)?opFluxoTermoUniformeHTML(tpl,dados):''}
         ${secoes}
         ${repetidores}
         <div class="operations-form-note">
-          Documento operacional interno. Utilize “Salvar documento” para manter o preenchimento neste navegador e “Imprimir documento” para gerar as páginas A4.
+          ${opEhTermoUniforme(tpl?.id)?'O status é automático: EM PREENCHIMENTO → AGUARDANDO ASSINATURA ao imprimir → CONCLUÍDO ao anexar o termo assinado digitalizado.':'Documento operacional interno. Utilize “Salvar documento” para manter o preenchimento neste navegador e “Imprimir documento” para gerar as páginas A4.'}
         </div>
       </div>`;
     }
@@ -23847,8 +24187,9 @@ window.addEventListener('load', async () => {
       if(!repetidor) return;
       const dados=lerFormularioDocumentoCorporativo(tpl);
       const linhas=Array.isArray(dados[repetidorId])?dados[repetidorId]:[];
-      if(linhas.length<=Number(repetidor.minRows||1)){
-        alert('O documento precisa manter pelo menos um registro nesta tabela.');
+      const minimo=repetidor.minRows===undefined?1:Math.max(0,Number(repetidor.minRows)||0);
+      if(linhas.length<=minimo){
+        if(minimo>0) alert('O documento precisa manter pelo menos um registro nesta tabela.');
         return;
       }
       linhas.splice(Number(index),1);
@@ -24206,34 +24547,35 @@ window.addEventListener('load', async () => {
       return `<div class="uniform-field ${classe}"><b>${opEscape(label)}</b>${opBr(t||'Não informado')}</div>`;
     }
     function opUniHeader(titulo,codigo,dados){
+      /* V51.80 — situação documental pertence ao sistema e nunca ao termo impresso/digital. */
       return `<div class="uniform-head">
         <div class="uniform-brand"><div class="uniform-logo">AV</div><div class="uniform-brand-copy"><h1>LOJAS AVENIDA S/A</h1><p>LOJA 24 • CONTROLE INTERNO DE UNIFORMES</p></div></div>
         <div class="uniform-meta"><strong>${opEscape(dados.numeroDocumento||codigo||'—')}</strong><span>Emissão: ${opEscape(opFormatoData(dados.dataEmissao))}</span><small>Página 1 de 1</small></div>
       </div><div class="uniform-yellow-rule"></div><h2 class="uniform-title">${opEscape(titulo)}</h2>`;
     }
     function opUniAss(label,nome=''){
-      return `<div class="uniform-signature"><strong>${opEscape(String(nome||''))}</strong><div class="line">${opEscape(label)}</div></div>`;
+      /* V51.80 — área superior permanece totalmente livre para a assinatura manuscrita. */
+      const valor=String(nome||'').trim();
+      return `<div class="uniform-signature"><div class="uniform-sign-space" aria-hidden="true"></div><div class="uniform-sign-line"></div><strong>${opEscape(valor||' ')}</strong><small>${opEscape(label)}</small></div>`;
     }
     function opUniTableEntrega(itens){
       const linhas=Array.isArray(itens)?itens:[];
-      const vazias=Math.max(0,6-linhas.length);
-      const all=[...linhas,...Array.from({length:vazias},()=>({}))].slice(0,6);
-      return `<div class="uniform-table-wrap"><table class="uniform-table"><thead><tr><th style="width:5%">#</th><th style="width:14%">Item</th><th style="width:28%">Descrição</th><th style="width:10%">Tamanho</th><th style="width:10%">Quantidade</th><th style="width:11%">Estado</th><th style="width:22%">Assinatura de recebimento</th></tr></thead><tbody>${all.map((i,n)=>`<tr><td>${n+1}</td><td>${opBr(String(i.item||''))}</td><td>${opBr(String(i.descricao||''))}</td><td>${opBr(String(i.tamanho||''))}</td><td>${opBr(String(i.quantidade||''))}</td><td>${opBr(String(i.estado||''))}</td><td>${opBr(String(i.assinaturaRecebimento||''))}</td></tr>`).join('')}</tbody></table></div>`;
+      if(!linhas.length) return `<div class="uniform-empty-items">Nenhuma peça adicionada ao termo.</div>`;
+      return `<div class="uniform-table-wrap"><table class="uniform-table"><thead><tr><th style="width:6%">#</th><th style="width:17%">Peça / item</th><th style="width:31%">Descrição / modelo</th><th style="width:11%">Tamanho</th><th style="width:13%">Estado</th><th style="width:22%">Assinatura de recebimento</th></tr></thead><tbody>${linhas.map((i,n)=>`<tr><td>${n+1}</td><td>${opBr(String(i.item||''))}</td><td>${opBr(String(i.descricao||''))}</td><td>${opBr(String(i.tamanho||''))}</td><td>${opBr(String(i.estado||''))}</td><td>${opBr(String(i.assinaturaRecebimento||''))}</td></tr>`).join('')}</tbody></table></div>`;
     }
     function opUniTableDevolucao(itens){
       const linhas=Array.isArray(itens)?itens:[];
-      const vazias=Math.max(0,6-linhas.length);
-      const all=[...linhas,...Array.from({length:vazias},()=>({}))].slice(0,6);
-      return `<div class="uniform-table-wrap"><table class="uniform-table"><thead><tr><th style="width:5%">#</th><th style="width:14%">Item</th><th style="width:29%">Descrição</th><th style="width:10%">Tamanho</th><th style="width:10%">Quantidade</th><th style="width:18%">Estado na devolução</th><th style="width:14%">Conferência</th></tr></thead><tbody>${all.map((i,n)=>`<tr><td>${n+1}</td><td>${opBr(String(i.item||''))}</td><td>${opBr(String(i.descricao||''))}</td><td>${opBr(String(i.tamanho||''))}</td><td>${opBr(String(i.quantidade||''))}</td><td>${opBr(String(i.estadoDevolucao||''))}</td><td>${opBr(String(i.conferencia||''))}</td></tr>`).join('')}</tbody></table></div>`;
+      if(!linhas.length) return `<div class="uniform-empty-items">Nenhuma peça adicionada ao termo.</div>`;
+      return `<div class="uniform-table-wrap"><table class="uniform-table"><thead><tr><th style="width:6%">#</th><th style="width:17%">Peça / item</th><th style="width:31%">Descrição / modelo</th><th style="width:11%">Tamanho</th><th style="width:21%">Estado na devolução</th><th style="width:14%">Conferência</th></tr></thead><tbody>${linhas.map((i,n)=>`<tr><td>${n+1}</td><td>${opBr(String(i.item||''))}</td><td>${opBr(String(i.descricao||''))}</td><td>${opBr(String(i.tamanho||''))}</td><td>${opBr(String(i.estadoDevolucao||''))}</td><td>${opBr(String(i.conferencia||''))}</td></tr>`).join('')}</tbody></table></div>`;
     }
     function paginaTermoEntregaUniformeAprovado(tpl,dados){
       return `<div class="operation-page corporate-page active" data-operation-template="entrega_uniforme" data-operation-page="1"><div class="uniform-doc">
         ${opUniHeader('TERMO DE ENTREGA DE UNIFORME','TEU-24',dados)}
         <section class="uniform-section"><div class="uniform-section-title">1. Dados do colaborador</div><div class="uniform-grid">${opUniField('Nome completo',dados.colaboradorNome,'wide')}${opUniField('CPF',dados.colaboradorCPF)}${opUniField('Matrícula / operador',dados.colaboradorMatricula)}${opUniField('Cargo / função',dados.colaboradorCargo)}${opUniField('Setor',dados.colaboradorSetor)}${opUniField('Data de admissão',opFormatoData(dados.dataAdmissao))}</div></section>
-        <section class="uniform-section"><div class="uniform-section-title">2. Dados da entrega</div><div class="uniform-grid">${opUniField('Data da entrega',opFormatoData(dados.dataEntrega))}${opUniField('Unidade / loja',dados.unidadeDocumento)}${opUniField('Responsável pela entrega',dados.entregadorNome)}${opUniField('Observações',dados.observacoes,'full')}</div></section>
-        <section class="uniform-section"><div class="uniform-section-title">3. Itens entregues</div>${opUniTableEntrega(dados.uniformesEntregues)}</section>
+        <section class="uniform-section"><div class="uniform-section-title">2. Dados da entrega</div><div class="uniform-grid">${opUniField('Data da entrega',opFormatoData(dados.dataEntrega))}${opUniField('Unidade / loja',dados.unidadeDocumento)}${opUniField('Responsável pela entrega',dados.entregadorNome)}${opUniField('Motivo da entrega',dados.motivoEntrega,'wide')}${opUniField('Observações',dados.observacoes,'full')}</div></section>
+        <section class="uniform-section"><div class="uniform-section-title">3. Uniformes entregues</div>${opUniTableEntrega(dados.uniformesEntregues)}</section>
         <section class="uniform-section"><div class="uniform-section-title">4. Termo de responsabilidade</div><div class="uniform-note">${opBr(dados.termoResponsabilidade||'')}</div></section>
-        <section class="uniform-section"><div class="uniform-section-title">5. Assinaturas</div><div class="uniform-signatures">${opUniAss('Colaborador',dados.assinaturaColaborador||dados.colaboradorNome)}${opUniAss('Responsável pela entrega',dados.assinaturaEntregador||dados.entregadorNome)}${opUniAss('Gestor / líder',dados.assinaturaGestor||dados.gestorNome)}${opUniAss('Data',opFormatoData(dados.dataAssinatura))}</div></section>
+        <section class="uniform-section"><div class="uniform-section-title">5. Assinaturas</div><div class="uniform-signatures">${opUniAss('Colaborador',dados.colaboradorNome)}${opUniAss('Responsável pela entrega',dados.entregadorNome)}${opUniAss('Gestor / líder',dados.gestorNome)}${opUniAss('Data',opFormatoData(dados.dataAssinatura))}</div></section>
         <footer class="uniform-footer">Este documento é de uso interno da LOJAS AVENIDA S/A e não possui validade fiscal.<strong>LOJAS AVENIDA S/A — LOJA 24</strong></footer>
       </div></div>`;
     }
@@ -24247,10 +24589,10 @@ window.addEventListener('load', async () => {
         ${opUniHeader('TERMO DE DEVOLUÇÃO DE UNIFORME','TDU-24',dados)}
         <section class="uniform-section"><div class="uniform-section-title">1. Dados do colaborador</div><div class="uniform-grid">${opUniField('Nome completo',dados.colaboradorNome,'wide')}${opUniField('CPF',dados.colaboradorCPF)}${opUniField('Matrícula / operador',dados.colaboradorMatricula)}${opUniField('Cargo / função',dados.colaboradorCargo)}${opUniField('Setor',dados.colaboradorSetor)}${opUniField('Data de desligamento ou solicitação',opFormatoData(dados.dataDesligamentoOuSolicitacao))}</div></section>
         <section class="uniform-section"><div class="uniform-section-title">2. Dados da devolução</div><div class="uniform-grid">${opUniField('Data da devolução',opFormatoData(dados.dataDevolucao))}${opUniField('Unidade / loja',dados.unidadeDocumento)}${opUniField('Responsável pelo recebimento',dados.conferenteNome)}${opUniField('Motivo da devolução',dados.motivoDevolucao,'wide')}${opUniField('Observações',dados.observacoes,'full')}</div></section>
-        <section class="uniform-section"><div class="uniform-section-title">3. Itens devolvidos</div>${opUniTableDevolucao(dados.uniformesDevolvidos)}</section>
-        <section class="uniform-section"><div class="uniform-section-title">4. Verificação / conferência</div><div class="uniform-check-grid">${opUniCheck('Itens completos?',dados.itensCompletos)}${opUniCheck('Há avarias?',dados.haAvarias)}${opUniCheck('Necessita reposição?',dados.necessitaReposicao)}${opUniCheck('Pendências encontradas?',dados.pendenciasEncontradas)}</div><div class="uniform-note"><b>Detalhamento das pendências (se houver)</b>${opBr(dados.detalhamentoPendencias||'Sem pendências informadas.')}</div></section>
+        <section class="uniform-section"><div class="uniform-section-title">3. Uniformes devolvidos</div>${opUniTableDevolucao(dados.uniformesDevolvidos)}</section>
+        <section class="uniform-section"><div class="uniform-section-title">4. Verificação / conferência</div><div class="uniform-check-grid">${opUniCheck('Quantidade devolvida confere?',dados.itensCompletos)}${opUniCheck('Há avarias?',dados.haAvarias)}${opUniCheck('Necessita reposição?',dados.necessitaReposicao)}${opUniCheck('Há item não devolvido / pendência?',dados.pendenciasEncontradas)}</div><div class="uniform-note"><b>Detalhamento de avarias, faltas, desgaste ou pendências</b>${opBr(dados.detalhamentoPendencias||'Sem pendências informadas.')}</div></section>
         <section class="uniform-section"><div class="uniform-section-title">5. Termo de ciência</div><div class="uniform-note">${opBr(dados.termoCiencia||'')}</div></section>
-        <section class="uniform-section"><div class="uniform-section-title">6. Assinaturas</div><div class="uniform-signatures">${opUniAss('Colaborador',dados.assinaturaColaborador||dados.colaboradorNome)}${opUniAss('Responsável pelo recebimento',dados.assinaturaConferente||dados.conferenteNome)}${opUniAss('Gestor / líder',dados.assinaturaGestor||dados.gestorNome)}${opUniAss('Data',opFormatoData(dados.dataAssinatura))}</div></section>
+        <section class="uniform-section"><div class="uniform-section-title">6. Assinaturas</div><div class="uniform-signatures">${opUniAss('Colaborador',dados.colaboradorNome)}${opUniAss('Responsável pelo recebimento',dados.conferenteNome)}${opUniAss('Gestor / líder',dados.gestorNome)}${opUniAss('Data',opFormatoData(dados.dataAssinatura))}</div></section>
         <footer class="uniform-footer">Documento de uso interno. Proibida a reprodução total ou parcial sem autorização.<strong>LOJAS AVENIDA S/A — LOJA 24</strong></footer>
       </div></div>`;
     }
@@ -29850,6 +30192,507 @@ window.addEventListener('load', async () => {
       </div>`;
     }
 
+
+    /* ===== V51.79 — ARQUIVO DOS TERMOS DE UNIFORME / PERSISTÊNCIA ROBUSTA ===== */
+    function opSalvarHistoricoUniformesLocal(lista){
+      localStorage.setItem(OPERATION_UNIFORM_HISTORY_KEY,JSON.stringify(Array.isArray(lista)?lista:[]));
+    }
+    function opArquivoUniformePorId(id){
+      return operacaoHistoricoUniformes.find(item=>String(item.id)===String(id))||null;
+    }
+    function opArquivosUniformeDoModelo(tplId=operacaoModeloAtual){
+      return operacaoHistoricoUniformes
+        .filter(item=>String(item.tipoDocumento||'')===String(tplId||''))
+        .slice()
+        .sort((a,b)=>String(b.atualizadoEm||b.salvoEm||'').localeCompare(String(a.atualizadoEm||a.salvoEm||'')));
+    }
+    async function opSincronizarArquivoUniforme(tpl,dados,{criar=true}={}){
+      if(!opEhTermoUniforme(tpl?.id)||!dados) return null;
+      dados=opNormalizarDadosUniformeUnitarios(tpl.id,dados);
+
+      /*
+       * V51.79 — operação transacional:
+       * nunca altera a lista exibida antes de confirmar a persistência.
+       * IndexedDB é o armazenamento principal; localStorage é apenas espelho.
+       */
+      const novaLista=opCloneSeguro(operacaoHistoricoUniformes);
+      let id=String(dados.arquivoUniformeId||'').trim();
+      let indice=id?novaLista.findIndex(item=>String(item.id)===id):-1;
+      if(indice<0 && dados.numeroDocumento){
+        indice=novaLista.findIndex(item=>String(item.tipoDocumento)===tpl.id && String(item.dados?.numeroDocumento||'')===String(dados.numeroDocumento));
+        if(indice>=0) id=novaLista[indice].id;
+      }
+      if(indice<0 && !criar) return null;
+      const agora=new Date().toISOString();
+      if(indice<0){
+        id=`UNI-HIST-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+        dados.arquivoUniformeId=id;
+        novaLista.unshift({
+          id,
+          tipoDocumento:tpl.id,
+          salvoEm:agora,
+          atualizadoEm:agora,
+          dados:opCloneSeguro(dados)
+        });
+      }else{
+        dados.arquivoUniformeId=id;
+        novaLista[indice]={
+          ...novaLista[indice],
+          tipoDocumento:tpl.id,
+          atualizadoEm:agora,
+          dados:opCloneSeguro(dados)
+        };
+      }
+
+      let idbOk=false;
+      let localOk=false;
+      let idbErro=null;
+      let localErro=null;
+      try{
+        await opSalvarHistoricoUniformesIndexedDB(novaLista);
+        idbOk=true;
+      }catch(err){
+        idbErro=err;
+        console.warn('IndexedDB indisponível para histórico de uniformes:',err);
+      }
+      try{
+        opSalvarHistoricoUniformesLocal(novaLista);
+        localOk=true;
+      }catch(err){
+        localErro=err;
+        console.warn('Espelho localStorage do histórico de uniformes não pôde ser atualizado:',err);
+      }
+      if(!idbOk && !localOk){
+        throw idbErro||localErro||new Error('Nenhum armazenamento local aceitou o documento.');
+      }
+
+      operacaoHistoricoUniformes=novaLista;
+      return operacaoHistoricoUniformes.find(item=>String(item.id)===String(id))||null;
+    }
+    function opStatusArquivoUniforme(dados){
+      return String(dados?.statusDocumento||'EM PREENCHIMENTO').toUpperCase();
+    }
+    function opDataArquivoUniforme(dados){
+      return dados?.dataEntrega||dados?.dataDevolucao||dados?.dataEmissao||'';
+    }
+    function opRotuloTipoArquivoUniforme(tipo){
+      return tipo==='devolucao_uniforme'?'TERMO DE DEVOLUÇÃO DE UNIFORME':'TERMO DE ENTREGA DE UNIFORME';
+    }
+    function renderAbasTermoUniforme(tpl){
+      const qtd=opArquivosUniformeDoModelo(tpl?.id).length;
+      const emArquivo=operacaoUniformeModo!=='novo';
+      return `<div class="quote-main-tabs uniform-main-tabs">
+        <button class="quote-main-tab ${!emArquivo?'active':''}" type="button" onclick="opMudarAbaTermoUniforme('novo')">✏️ PREENCHIMENTO</button>
+        <button class="quote-main-tab ${emArquivo?'active':''}" type="button" onclick="opMudarAbaTermoUniforme('arquivos')">📁 ARQUIVOS CRIADOS (${qtd})</button>
+      </div>`;
+    }
+    function opMudarAbaTermoUniforme(modo){
+      operacaoUniformeModo=modo==='novo'?'novo':'arquivos';
+      if(operacaoUniformeModo==='arquivos') operacaoUniformeArquivoSelecionadoId='';
+      operacaoPaginaAtual=0;
+      renderFormularioOperacao();
+      renderPreviewOperacao();
+    }
+    function opNovoTermoUniforme(){
+      const tpl=OPERATION_TEMPLATES[operacaoModeloAtual];
+      if(!opEhTermoUniforme(tpl?.id)) return;
+      operacaoRascunhos[tpl.id]=opNovoDocumentoCorporativo(tpl);
+      operacaoUniformeModo='novo';
+      operacaoUniformeArquivoSelecionadoId='';
+      operacaoPaginaAtual=0;
+      try{opSalvarRascunhosPersistentes();}catch(_){ }
+      renderFormularioOperacao();
+      renderPreviewOperacao();
+      document.getElementById('operacaoFormulario')?.scrollIntoView({behavior:'smooth',block:'start'});
+    }
+    function opContinuarArquivoUniforme(id){
+      const reg=opArquivoUniformePorId(id);
+      if(!reg) return;
+      const tpl=OPERATION_TEMPLATES[reg.tipoDocumento];
+      if(!tpl) return;
+      operacaoModeloAtual=tpl.id;
+      operacaoRascunhos[tpl.id]=opCloneSeguro(reg.dados);
+      operacaoUniformeModo='novo';
+      operacaoUniformeArquivoSelecionadoId=id;
+      operacaoPaginaAtual=0;
+      try{opSalvarRascunhosPersistentes();}catch(_){ }
+      renderBibliotecaOperacao();
+      renderFormularioOperacao();
+      renderPreviewOperacao();
+    }
+    function opAbrirArquivoUniforme(id){
+      const reg=opArquivoUniformePorId(id);
+      if(!reg) return;
+      operacaoUniformeModo='detalhe';
+      operacaoUniformeArquivoSelecionadoId=id;
+      operacaoPaginaAtual=0;
+      renderFormularioOperacao();
+      renderPreviewOperacao();
+    }
+    function opVoltarListaArquivosUniforme(){
+      operacaoUniformeModo='arquivos';
+      operacaoUniformeArquivoSelecionadoId='';
+      operacaoPaginaAtual=0;
+      renderFormularioOperacao();
+      renderPreviewOperacao();
+    }
+    function opResumoArquivosUniforme(tpl){
+      const lista=opArquivosUniformeDoModelo(tpl?.id);
+      const aguardando=lista.filter(item=>opStatusArquivoUniforme(item.dados)==='AGUARDANDO ASSINATURA').length;
+      const concluidos=lista.filter(item=>opStatusArquivoUniforme(item.dados)==='CONCLUÍDO').length;
+      return `<div class="uniform-archive-summary">
+        <div class="uniform-archive-stat"><small>Arquivos</small><b>${lista.length}</b></div>
+        <div class="uniform-archive-stat"><small>Aguardando assinatura</small><b>${aguardando}</b></div>
+        <div class="uniform-archive-stat"><small>Concluídos</small><b>${concluidos}</b></div>
+      </div>`;
+    }
+    function renderListaArquivosUniforme(tpl){
+      const lista=opArquivosUniformeDoModelo(tpl?.id);
+      const cards=lista.length?lista.map(reg=>{
+        const d=reg.dados||{};
+        const status=opStatusArquivoUniforme(d);
+        const temDigitalizado=!!String(d.digitalizadoNome||'').trim();
+        const podeAnexar=status==='AGUARDANDO ASSINATURA'||status==='CONCLUÍDO';
+        const arquivoAcao=temDigitalizado
+          ? `<button class="btn secondary" type="button" onclick="opAbrirDigitalizadoArquivoUniforme('${reg.id}')">👁 Digitalizado</button>`
+          : podeAnexar
+            ? `<label class="btn secondary uniform-lifecycle-upload">📤 Anexar assinado<input type="file" accept="application/pdf,image/jpeg,image/png,image/webp" onchange="opSubirDigitalizadoArquivoUniforme('${reg.id}',this)"></label>`
+            : '';
+        return `<article class="uniform-archive-card">
+          <div class="uniform-archive-person">
+            <strong>${opEscape(d.colaboradorNome||'Colaborador não informado')}</strong>
+            <small>${opEscape(d.numeroDocumento||'Sem número')} • ${opEscape(opFormatoData(opDataArquivoUniforme(d)))}</small>
+            <div class="uniform-file-pills"><span class="uniform-file-pill digital">🖥 Versão digital</span>${temDigitalizado?'<span class="uniform-file-pill scanned">✓ Digitalizado anexado</span>':'<span class="uniform-file-pill pending">○ Digitalizado pendente</span>'}</div>
+          </div>
+          <div class="uniform-archive-meta"><span class="uniform-status-chip ${opUniformeStatusClasse(status)}">${opEscape(status)}</span><small>${opEscape(d.colaboradorCargo||'Cargo não informado')} • ${opEscape(d.colaboradorSetor||'Setor não informado')}</small><small>Atualizado: ${opEscape(opUniformeDataHora(reg.atualizadoEm||reg.salvoEm))}</small></div>
+          <div class="uniform-archive-actions"><button class="btn secondary" type="button" onclick="opAbrirArquivoUniforme('${reg.id}')">👁 Ver arquivo</button>${status!=='CONCLUÍDO'?`<button class="btn secondary" type="button" onclick="opContinuarArquivoUniforme('${reg.id}')">✏️ ${status==='EM PREENCHIMENTO'?'Continuar':'Abrir formulário'}</button>`:''}${arquivoAcao}</div>
+        </article>`;
+      }).join(''):`<div class="uniform-archive-empty">📁 Nenhum termo foi salvo ainda.<br>Crie o documento de um colaborador e clique em <b>Salvar documento</b>. Ele aparecerá aqui para acompanhamento e posterior anexação do termo assinado.</div>`;
+      return `<div class="uniform-archive-shell"><div class="uniform-archive-toolbar"><div><h3>Arquivos criados</h3><p>Cada registro preserva a versão digital do termo e, quando houver, o arquivo digitalizado assinado.</p></div><div class="actions"><button class="btn" type="button" onclick="opNovoTermoUniforme()">＋ Novo documento</button></div></div>${opResumoArquivosUniforme(tpl)}<div class="uniform-archive-list">${cards}</div></div>`;
+    }
+    function renderDetalheArquivoUniforme(tpl,reg){
+      if(!reg) return renderListaArquivosUniforme(tpl);
+      const d=reg.dados||{};
+      const status=opStatusArquivoUniforme(d);
+      const temDigitalizado=!!String(d.digitalizadoNome||'').trim();
+      const upload=status==='EM PREENCHIMENTO'
+        ? ''
+        : `<label class="btn secondary uniform-lifecycle-upload">${temDigitalizado?'🔄 Substituir digitalizado':'📤 Anexar arquivo assinado'}<input type="file" accept="application/pdf,image/jpeg,image/png,image/webp" onchange="opSubirDigitalizadoArquivoUniforme('${reg.id}',this)"></label>`;
+      return `<div class="uniform-archive-detail">
+        <div class="uniform-archive-detail-head"><div><h3>${opEscape(d.colaboradorNome||'Colaborador')}</h3><p>${opEscape(opRotuloTipoArquivoUniforme(reg.tipoDocumento))} • ${opEscape(d.numeroDocumento||'Sem número')}</p></div><div class="uniform-archive-detail-actions"><button class="btn secondary" type="button" onclick="opVoltarListaArquivosUniforme()">← Arquivos</button>${status!=='CONCLUÍDO'?`<button class="btn" type="button" onclick="opContinuarArquivoUniforme('${reg.id}')">✏️ Abrir no formulário</button>`:''}${upload}${temDigitalizado?`<button class="btn secondary" type="button" onclick="opAbrirDigitalizadoArquivoUniforme('${reg.id}')">👁 Ver digitalizado</button><button class="btn secondary" type="button" onclick="opBaixarDigitalizadoArquivoUniforme('${reg.id}')">📥 Baixar digitalizado</button>`:''}</div></div>
+        <div class="uniform-archive-detail-grid">
+          <div class="uniform-archive-detail-box"><small>Situação</small><b>${opEscape(status)}</b></div>
+          <div class="uniform-archive-detail-box"><small>Versão digital</small><b>Disponível</b></div>
+          <div class="uniform-archive-detail-box"><small>Digitalizado</small><b>${temDigitalizado?'Anexado':'Pendente'}</b></div>
+          <div class="uniform-archive-detail-box"><small>Data do termo</small><b>${opEscape(opFormatoData(opDataArquivoUniforme(d)))}</b></div>
+        </div>
+        <div class="uniform-digital-note"><strong>Versão digital:</strong> a pré-visualização abaixo é a cópia preservada do termo criado no sistema. ${temDigitalizado?`<br><strong>Digitalizado:</strong> ${opEscape(d.digitalizadoNome||'arquivo assinado')} • ${opEscape(opUniformeTamanhoArquivo(d.digitalizadoTamanho))}.`:'<br><strong>Digitalizado:</strong> ainda não anexado.'}</div>
+      </div>`;
+    }
+    async function opSubirDigitalizadoArquivoUniforme(id,input){
+      const reg=opArquivoUniformePorId(id);
+      const file=input?.files?.[0];
+      if(input) input.value='';
+      if(!reg||!file) return;
+      const tpl=OPERATION_TEMPLATES[reg.tipoDocumento];
+      if(!tpl) return;
+      const dados=opCloneSeguro(reg.dados||{});
+      const status=opStatusArquivoUniforme(dados);
+      if(status==='EM PREENCHIMENTO'){alert('Este termo ainda está EM PREENCHIMENTO. Abra o formulário e imprima o documento antes de anexar a versão assinada.');return;}
+      const tipo=String(file.type||'').toLowerCase();
+      if(!(tipo==='application/pdf'||tipo.startsWith('image/'))){alert('Envie o documento digitalizado em PDF ou imagem.');return;}
+      if(Number(file.size)>OP_UNIFORM_DIGITAL_MAX_BYTES){alert('O arquivo digitalizado deve ter no máximo 20 MB.');return;}
+      try{
+        const salvo=await opSalvarUniformeDigitalizado(tpl,dados,file);
+        dados.statusDocumento='CONCLUÍDO';
+        dados.digitalizadoNome=salvo.nome;
+        dados.digitalizadoTipo=salvo.tipo;
+        dados.digitalizadoTamanho=String(salvo.tamanho||0);
+        dados.digitalizadoEm=salvo.adicionadoEm;
+        dados.arquivoUniformeId=reg.id;
+        const persistido=await opSincronizarArquivoUniforme(tpl,dados,{criar:false});
+        if(!persistido) throw new Error('Registro do uniforme não localizado para atualização.');
+        if(operacaoRascunhos[tpl.id]?.arquivoUniformeId===reg.id){operacaoRascunhos[tpl.id]=opCloneSeguro(persistido.dados);try{opSalvarRascunhosPersistentes();}catch(_){ }}
+        renderFormularioOperacao();renderPreviewOperacao();
+      }catch(err){console.error(err);alert('Não foi possível salvar o arquivo digitalizado neste navegador.');}
+    }
+    async function opAbrirDigitalizadoArquivoUniforme(id,baixar=false){
+      const reg=opArquivoUniformePorId(id);
+      if(!reg) return;
+      const tpl=OPERATION_TEMPLATES[reg.tipoDocumento];
+      if(!tpl) return;
+      try{
+        const arquivo=await opObterUniformeDigitalizado(tpl,reg.dados);
+        if(!arquivo?.arquivo){alert('O arquivo digitalizado não foi localizado neste dispositivo.');return;}
+        const blob=new Blob([arquivo.arquivo],{type:arquivo.tipo||'application/octet-stream'});
+        const url=URL.createObjectURL(blob);
+        if(baixar){const a=document.createElement('a');a.href=url;a.download=arquivo.nome||reg.dados?.digitalizadoNome||'uniforme-digitalizado';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);}
+        else{const janela=window.open(url,'_blank');if(!janela){alert('O navegador bloqueou a abertura do arquivo.');URL.revokeObjectURL(url);}else setTimeout(()=>URL.revokeObjectURL(url),60000);}
+      }catch(err){console.error(err);alert('Não foi possível abrir o arquivo digitalizado.');}
+    }
+    function opBaixarDigitalizadoArquivoUniforme(id){return opAbrirDigitalizadoArquivoUniforme(id,true);}
+
+    /* ===== V51.76 — FLUXO DE ASSINATURA DOS TERMOS DE UNIFORME ===== */
+    const OP_UNIFORM_DIGITAL_DB='GerencialAvenidaUniformesV1';
+    const OP_UNIFORM_DIGITAL_STORE='digitalizados';
+    const OP_UNIFORM_DIGITAL_MAX_BYTES=20*1024*1024;
+
+    function opEhTermoUniforme(id=operacaoModeloAtual){
+      return id==='entrega_uniforme'||id==='devolucao_uniforme';
+    }
+    function opUniformeStatusClasse(status){
+      const s=String(status||'').toUpperCase();
+      if(s==='CONCLUÍDO') return 'done';
+      if(s==='AGUARDANDO ASSINATURA') return 'waiting';
+      if(s==='CANCELADO') return 'cancelled';
+      return 'filling';
+    }
+    function opUniformeDataHora(valor){
+      const d=valor?new Date(valor):null;
+      return d&&!Number.isNaN(d.getTime())?d.toLocaleString('pt-BR'):'—';
+    }
+    function opUniformeTamanhoArquivo(bytes){
+      const n=Number(bytes)||0;
+      if(n<1024) return `${n} B`;
+      if(n<1024*1024) return `${(n/1024).toFixed(1)} KB`;
+      return `${(n/1024/1024).toFixed(1)} MB`;
+    }
+    function opUniformeChaveDigitalizado(tpl,dados){
+      return `${tpl?.id||operacaoModeloAtual}::${String(dados?.numeroDocumento||'SEM-NUMERO')}`;
+    }
+    function opAbrirBancoUniformeDigital(){
+      return new Promise((resolve,reject)=>{
+        if(!window.indexedDB){ reject(new Error('Armazenamento de arquivos indisponível neste navegador.')); return; }
+        const req=indexedDB.open(OP_UNIFORM_DIGITAL_DB,1);
+        req.onupgradeneeded=()=>{
+          const db=req.result;
+          if(!db.objectStoreNames.contains(OP_UNIFORM_DIGITAL_STORE)) db.createObjectStore(OP_UNIFORM_DIGITAL_STORE,{keyPath:'key'});
+        };
+        req.onsuccess=()=>resolve(req.result);
+        req.onerror=()=>reject(req.error||new Error('Falha ao abrir armazenamento de digitalizados.'));
+      });
+    }
+    const OP_UNIFORM_HISTORY_DB_KEY='__GERENCIAL_AV_HISTORICO_UNIFORMES_V1__';
+    async function opSalvarHistoricoUniformesIndexedDB(lista){
+      const db=await opAbrirBancoUniformeDigital();
+      const registro={
+        key:OP_UNIFORM_HISTORY_DB_KEY,
+        tipoRegistro:'historico-uniformes',
+        itens:opCloneSeguro(Array.isArray(lista)?lista:[]),
+        atualizadoEm:new Date().toISOString()
+      };
+      await new Promise((resolve,reject)=>{
+        const tx=db.transaction(OP_UNIFORM_DIGITAL_STORE,'readwrite');
+        tx.objectStore(OP_UNIFORM_DIGITAL_STORE).put(registro);
+        tx.oncomplete=()=>resolve();
+        tx.onerror=()=>reject(tx.error||new Error('Falha ao salvar histórico de uniformes.'));
+        tx.onabort=()=>reject(tx.error||new Error('Gravação do histórico de uniformes foi abortada.'));
+      });
+      try{db.close();}catch(_){ }
+      return true;
+    }
+    async function opCarregarHistoricoUniformesIndexedDB(){
+      const db=await opAbrirBancoUniformeDigital();
+      const registro=await new Promise((resolve,reject)=>{
+        const tx=db.transaction(OP_UNIFORM_DIGITAL_STORE,'readonly');
+        const req=tx.objectStore(OP_UNIFORM_DIGITAL_STORE).get(OP_UNIFORM_HISTORY_DB_KEY);
+        req.onsuccess=()=>resolve(req.result||null);
+        req.onerror=()=>reject(req.error||new Error('Falha ao carregar histórico de uniformes.'));
+      });
+      try{db.close();}catch(_){ }
+      return Array.isArray(registro?.itens)?registro.itens:[];
+    }
+    function opMesclarHistoricosUniformes(listaA,listaB){
+      const mapa=new Map();
+      [...(Array.isArray(listaA)?listaA:[]),...(Array.isArray(listaB)?listaB:[])].forEach(item=>{
+        if(!item?.id||!item?.dados) return;
+        const anterior=mapa.get(String(item.id));
+        if(!anterior){mapa.set(String(item.id),item);return;}
+        const ta=String(anterior.atualizadoEm||anterior.salvoEm||'');
+        const tb=String(item.atualizadoEm||item.salvoEm||'');
+        if(tb>=ta) mapa.set(String(item.id),item);
+      });
+      return Array.from(mapa.values())
+        .filter(item=>['entrega_uniforme','devolucao_uniforme'].includes(item.tipoDocumento||item.dados?.tipoDocumento||''))
+        .map(item=>{
+          const tipo=item.tipoDocumento||item.dados?.tipoDocumento;
+          return {...item,tipoDocumento:tipo,dados:opNormalizarDadosUniformeUnitarios(tipo,item.dados)};
+        })
+        .sort((a,b)=>String(b.atualizadoEm||b.salvoEm||'').localeCompare(String(a.atualizadoEm||a.salvoEm||'')));
+    }
+    async function opHidratarHistoricoUniformesPersistente(){
+      try{
+        const doBanco=await opCarregarHistoricoUniformesIndexedDB();
+        const mesclado=opMesclarHistoricosUniformes(operacaoHistoricoUniformes,doBanco);
+        if(mesclado.length || doBanco.length){
+          operacaoHistoricoUniformes=mesclado;
+          try{await opSalvarHistoricoUniformesIndexedDB(mesclado);}catch(_){ }
+          try{opSalvarHistoricoUniformesLocal(mesclado);}catch(_){ }
+        }else if(operacaoHistoricoUniformes.length){
+          /* primeira migração: leva os registros antigos do localStorage para IndexedDB */
+          try{await opSalvarHistoricoUniformesIndexedDB(operacaoHistoricoUniformes);}catch(_){ }
+        }
+        return true;
+      }catch(err){
+        console.warn('Histórico persistente de uniformes não pôde ser hidratado:',err);
+        return false;
+      }
+    }
+
+    function opArquivoParaArrayBuffer(file){
+      if(file?.arrayBuffer) return file.arrayBuffer();
+      return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error||new Error('Falha ao ler arquivo.'));r.readAsArrayBuffer(file);});
+    }
+    async function opSalvarUniformeDigitalizado(tpl,dados,file){
+      const db=await opAbrirBancoUniformeDigital();
+      const buffer=await opArquivoParaArrayBuffer(file);
+      const registro={key:opUniformeChaveDigitalizado(tpl,dados),nome:file.name||'documento-digitalizado',tipo:file.type||'application/octet-stream',tamanho:Number(file.size)||buffer.byteLength||0,arquivo:buffer,adicionadoEm:new Date().toISOString()};
+      await new Promise((resolve,reject)=>{const tx=db.transaction(OP_UNIFORM_DIGITAL_STORE,'readwrite');tx.objectStore(OP_UNIFORM_DIGITAL_STORE).put(registro);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error||new Error('Falha ao salvar digitalizado.'));});
+      try{db.close();}catch(_){ }
+      return registro;
+    }
+    async function opObterUniformeDigitalizado(tpl,dados){
+      const db=await opAbrirBancoUniformeDigital();
+      const key=opUniformeChaveDigitalizado(tpl,dados);
+      const registro=await new Promise((resolve,reject)=>{const tx=db.transaction(OP_UNIFORM_DIGITAL_STORE,'readonly');const req=tx.objectStore(OP_UNIFORM_DIGITAL_STORE).get(key);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error||new Error('Falha ao localizar digitalizado.'));});
+      try{db.close();}catch(_){ }
+      return registro;
+    }
+    async function opExcluirUniformeDigitalizadoArmazenado(tpl,dados){
+      const db=await opAbrirBancoUniformeDigital();
+      const key=opUniformeChaveDigitalizado(tpl,dados);
+      await new Promise((resolve,reject)=>{const tx=db.transaction(OP_UNIFORM_DIGITAL_STORE,'readwrite');tx.objectStore(OP_UNIFORM_DIGITAL_STORE).delete(key);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error||new Error('Falha ao excluir digitalizado.'));});
+      try{db.close();}catch(_){ }
+    }
+    function opFluxoTermoUniformeHTML(tpl,dados){
+      if(!opEhTermoUniforme(tpl?.id)) return '';
+      const status=String(dados.statusDocumento||'EM PREENCHIMENTO').toUpperCase();
+      const etapa=status==='CONCLUÍDO'?3:status==='AGUARDANDO ASSINATURA'?2:1;
+      const temArquivo=!!String(dados.digitalizadoNome||'').trim();
+      const nome=temArquivo?String(dados.digitalizadoNome):'Nenhum arquivo assinado anexado';
+      const detalhe=temArquivo?`${opUniformeTamanhoArquivo(dados.digitalizadoTamanho)} • anexado em ${opUniformeDataHora(dados.digitalizadoEm)}`:(status==='EM PREENCHIMENTO'?'Finalize o preenchimento e imprima o termo antes de anexar.':'Digitalize o termo assinado em PDF, JPG ou PNG e envie aqui.');
+      const upload=status==='EM PREENCHIMENTO'
+        ? `<button class="btn secondary" type="button" disabled title="Imprima o documento antes de anexar">📤 Subir digitalizado</button>`
+        : `<label class="btn secondary uniform-lifecycle-upload">${temArquivo?'🔄 Substituir digitalizado':'📤 Subir arquivo digitalizado'}<input type="file" accept="application/pdf,image/jpeg,image/png,image/webp" onchange="opSubirTermoUniformeDigitalizado(this)"></label>`;
+      return `<section class="uniform-lifecycle" aria-label="Fluxo do documento">
+        <div class="uniform-lifecycle-head"><div><h3>Fluxo do documento</h3><p>A situação é controlada automaticamente conforme o termo avança.</p></div><span class="uniform-status-chip ${opUniformeStatusClasse(status)}">${opEscape(status)}</span></div>
+        <div class="uniform-lifecycle-steps">
+          <div class="uniform-lifecycle-step ${etapa===1?'current':etapa>1?'complete':''}"><span class="n">${etapa>1?'✓':'1'}</span><strong>Em preenchimento</strong><small>Dados e peças são preenchidos digitalmente.</small></div>
+          <div class="uniform-lifecycle-step ${etapa===2?'current':etapa>2?'complete':''}"><span class="n">${etapa>2?'✓':'2'}</span><strong>Aguardando assinatura</strong><small>Ativado automaticamente ao imprimir o termo.</small></div>
+          <div class="uniform-lifecycle-step ${etapa===3?'current':''}"><span class="n">${etapa===3?'✓':'3'}</span><strong>Concluído</strong><small>Ativado somente após anexar o documento assinado.</small></div>
+        </div>
+        <div class="uniform-lifecycle-file"><div class="uniform-lifecycle-file-info"><strong>${opEscape(nome)}</strong><small>${opEscape(detalhe)}</small></div><div class="uniform-lifecycle-actions">${upload}${temArquivo?`<button class="btn secondary" type="button" onclick="opAbrirTermoUniformeDigitalizado()">👁 Abrir</button><button class="btn secondary" type="button" onclick="opBaixarTermoUniformeDigitalizado()">📥 Baixar</button><button class="btn danger" type="button" onclick="opRemoverTermoUniformeDigitalizado()">🗑 Remover</button>`:''}</div></div>
+        <div class="uniform-lifecycle-note"><strong>Regra:</strong> ${status==='CONCLUÍDO'?'o termo concluído fica bloqueado para edição enquanto o arquivo assinado estiver anexado. Remova o digitalizado para retornar a AGUARDANDO ASSINATURA.':'o status não pode ser alterado manualmente. Se um termo em “AGUARDANDO ASSINATURA” for editado, ele retorna para “EM PREENCHIMENTO” e deverá ser impresso novamente.'}</div>
+      </section>`;
+    }
+    function opAplicarBloqueioTermoUniformeConcluido(box,tpl){
+      if(!opEhTermoUniforme(tpl?.id)||!box) return;
+      const dados=valoresOperacao(tpl.id);
+      if(String(dados.statusDocumento||'').toUpperCase()!=='CONCLUÍDO') return;
+      box.querySelectorAll('.quote-form-section input,.quote-form-section select,.quote-form-section textarea,.corporate-repeater input,.corporate-repeater select,.corporate-repeater textarea,.corporate-repeater button').forEach(el=>{el.disabled=true;});
+      box.querySelectorAll('.quote-form-section,.corporate-repeater').forEach(el=>{el.style.opacity='.72';});
+    }
+    async function opMarcarEdicaoTermoUniforme(){
+      const tpl=OPERATION_TEMPLATES[operacaoModeloAtual];
+      if(!opEhTermoUniforme(tpl?.id)) return;
+      const atual=lerFormularioDocumentoCorporativo(tpl);
+      if(String(atual.statusDocumento||'').toUpperCase()!=='AGUARDANDO ASSINATURA') return;
+      atual.statusDocumento='EM PREENCHIMENTO';
+      atual.impressoEm='';
+      operacaoRascunhos[tpl.id]=atual;
+      try{
+        opSalvarRascunhosPersistentes();
+        if(atual.arquivoUniformeId) await opSincronizarArquivoUniforme(tpl,atual,{criar:false});
+      }catch(_){ }
+      const status=document.getElementById('operacaoSaveStatus');
+      if(status) status.textContent='↺ O termo foi alterado após a impressão. Situação retornada para EM PREENCHIMENTO.';
+      const campo=document.getElementById('op_statusDocumento');
+      if(campo) campo.value='EM PREENCHIMENTO';
+    }
+    async function opPrepararTermoUniformeParaImpressao(tpl){
+      if(!opEhTermoUniforme(tpl?.id)) return;
+      const dados=lerFormularioDocumentoCorporativo(tpl);
+      if(String(dados.statusDocumento||'').toUpperCase()!=='CONCLUÍDO'){
+        dados.statusDocumento='AGUARDANDO ASSINATURA';
+        dados.impressoEm=new Date().toISOString();
+        dados.tipoDocumento=tpl.id;
+        operacaoRascunhos[tpl.id]=dados;
+        try{
+          const registro=await opSincronizarArquivoUniforme(tpl,dados,{criar:true});
+          operacaoRascunhos[tpl.id]=opCloneSeguro(registro?.dados||dados);
+          opSalvarRascunhosPersistentes();
+        }catch(_){ }
+        renderFormularioOperacao();
+        renderPreviewOperacao();
+        const status=document.getElementById('operacaoSaveStatus');
+        if(status) status.textContent='🖨 Termo preparado para assinatura. Situação: AGUARDANDO ASSINATURA.';
+      }
+    }
+    async function opSubirTermoUniformeDigitalizado(input){
+      const tpl=OPERATION_TEMPLATES[operacaoModeloAtual];
+      const file=input?.files?.[0];
+      if(input) input.value='';
+      if(!opEhTermoUniforme(tpl?.id)||!file) return;
+      const dados=lerFormularioDocumentoCorporativo(tpl);
+      if(String(dados.statusDocumento||'').toUpperCase()==='EM PREENCHIMENTO'){
+        alert('Imprima o termo antes de anexar o arquivo assinado. A impressão mudará a situação para AGUARDANDO ASSINATURA.');
+        return;
+      }
+      const tipo=String(file.type||'').toLowerCase();
+      if(!(tipo==='application/pdf'||tipo.startsWith('image/'))){alert('Envie o documento digitalizado em PDF ou imagem.');return;}
+      if(Number(file.size)>OP_UNIFORM_DIGITAL_MAX_BYTES){alert('O arquivo digitalizado deve ter no máximo 20 MB.');return;}
+      const status=document.getElementById('operacaoSaveStatus');
+      if(status) status.textContent='Enviando arquivo digitalizado...';
+      try{
+        const reg=await opSalvarUniformeDigitalizado(tpl,dados,file);
+        dados.statusDocumento='CONCLUÍDO';
+        dados.digitalizadoNome=reg.nome;
+        dados.digitalizadoTipo=reg.tipo;
+        dados.digitalizadoTamanho=String(reg.tamanho||0);
+        dados.digitalizadoEm=reg.adicionadoEm;
+        dados.tipoDocumento=tpl.id;
+        operacaoRascunhos[tpl.id]=dados;
+        const registro=await opSincronizarArquivoUniforme(tpl,dados,{criar:true});
+        operacaoRascunhos[tpl.id]=opCloneSeguro(registro?.dados||dados);
+        opSalvarRascunhosPersistentes();
+        renderFormularioOperacao();
+        renderPreviewOperacao();
+        const status2=document.getElementById('operacaoSaveStatus');
+        if(status2) status2.textContent='✓ Arquivo assinado anexado. Documento CONCLUÍDO.';
+      }catch(err){console.error(err); if(status) status.textContent='Não foi possível armazenar o arquivo digitalizado.'; alert('Não foi possível salvar o arquivo digitalizado neste navegador.');}
+    }
+    async function opAbrirTermoUniformeDigitalizado(baixar=false){
+      const tpl=OPERATION_TEMPLATES[operacaoModeloAtual];
+      if(!opEhTermoUniforme(tpl?.id)) return;
+      const dados=valoresOperacao(tpl.id);
+      try{
+        const reg=await opObterUniformeDigitalizado(tpl,dados);
+        if(!reg?.arquivo){alert('O arquivo digitalizado não foi localizado neste dispositivo.');return;}
+        const blob=new Blob([reg.arquivo],{type:reg.tipo||'application/octet-stream'});
+        const url=URL.createObjectURL(blob);
+        if(baixar){const a=document.createElement('a');a.href=url;a.download=reg.nome||dados.digitalizadoNome||'uniforme-digitalizado';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);}
+        else{const janela=window.open(url,'_blank');if(!janela){alert('O navegador bloqueou a abertura do arquivo.');URL.revokeObjectURL(url);}else setTimeout(()=>URL.revokeObjectURL(url),60000);}
+      }catch(err){console.error(err);alert('Não foi possível abrir o arquivo digitalizado.');}
+    }
+    function opBaixarTermoUniformeDigitalizado(){ return opAbrirTermoUniformeDigitalizado(true); }
+    async function opRemoverTermoUniformeDigitalizado(){
+      const tpl=OPERATION_TEMPLATES[operacaoModeloAtual];
+      if(!opEhTermoUniforme(tpl?.id)) return;
+      const dados=valoresOperacao(tpl.id);
+      if(!confirm('Remover o arquivo assinado? O documento voltará para AGUARDANDO ASSINATURA.')) return;
+      try{
+        await opExcluirUniformeDigitalizadoArmazenado(tpl,dados);
+        dados.statusDocumento='AGUARDANDO ASSINATURA';
+        dados.digitalizadoNome='';dados.digitalizadoTipo='';dados.digitalizadoTamanho='';dados.digitalizadoEm='';
+        operacaoRascunhos[tpl.id]=dados;
+        if(dados.arquivoUniformeId) await opSincronizarArquivoUniforme(tpl,dados,{criar:false});
+        opSalvarRascunhosPersistentes();
+        renderFormularioOperacao();renderPreviewOperacao();
+        const status=document.getElementById('operacaoSaveStatus');
+        if(status) status.textContent='Arquivo digitalizado removido. Situação: AGUARDANDO ASSINATURA.';
+      }catch(err){console.error(err);alert('Não foi possível remover o arquivo digitalizado.');}
+    }
+
     function renderFormularioOperacao(){
       const tpl=OPERATION_TEMPLATES[operacaoModeloAtual];
       const box=document.getElementById('operacaoFormulario');
@@ -29875,7 +30718,10 @@ window.addEventListener('load', async () => {
           abasTopo.hidden=false;
           abasTopo.innerHTML=renderAbasSuperioresContratoVestuario();
         }else if(tpl?.kind==='corporate_form'){
-          if(tpl.id==='advertencia_disciplinar'){
+          if(opEhTermoUniforme(tpl.id)){
+            abasTopo.hidden=false;
+            abasTopo.innerHTML=renderAbasTermoUniforme(tpl);
+          }else if(tpl.id==='advertencia_disciplinar'){
             abasTopo.hidden=true;
             abasTopo.innerHTML='';
           }else if(tpl.id==='vale_quebra_caixa'){
@@ -29922,6 +30768,16 @@ window.addEventListener('load', async () => {
         titulo.textContent='Novo registro de departamento';
         desc.textContent='Escolha Registrar, Confirmar ou Mudar departamento.';
         box.innerHTML=renderSeletorMudancaDepartamento();
+        return;
+      }
+      if(opEhTermoUniforme(tpl.id) && operacaoUniformeModo!=='novo'){
+        if(editorActions) editorActions.style.display='none';
+        if(botaoHistorico) botaoHistorico.hidden=true;
+        const reg=operacaoUniformeArquivoSelecionadoId?opArquivoUniformePorId(operacaoUniformeArquivoSelecionadoId):null;
+        if(previewPanel) previewPanel.style.display=reg?'':'none';
+        titulo.textContent=reg?'Arquivo do colaborador':'Arquivos criados';
+        desc.textContent=reg?'Consulte a versão digital preservada e o documento assinado digitalizado.':'Documentos salvos por colaborador, com versão digital e digitalizado assinado.';
+        box.innerHTML=reg?renderDetalheArquivoUniforme(tpl,reg):renderListaArquivosUniforme(tpl);
         return;
       }
       if(editorActions) editorActions.style.display='';
@@ -29992,7 +30848,9 @@ window.addEventListener('load', async () => {
           : tpl.kind==='corporate_form'
             ? (tpl.id==='vale_quebra_caixa'
                 ? 'Use VALE para o documento de pagamento e FORMULÁRIO para registrar detalhadamente a ocorrência.'
-                : 'Preencha as abas do documento. Os responsáveis internos podem ser selecionados no Quadro de Funcionários.')
+                : (['entrega_uniforme','devolucao_uniforme'].includes(tpl.id)
+                    ? 'Selecione o colaborador e os responsáveis, informe as peças de uniforme e acompanhe o termo A4 em tempo real.'
+                    : 'Preencha as abas do documento. Os responsáveis internos podem ser selecionados no Quadro de Funcionários.'))
             : 'Altere os campos e acompanhe o resultado instantaneamente.';
       if(tpl.kind==='orcamento'){
         box.innerHTML=renderFormularioOrcamento();
@@ -30032,6 +30890,7 @@ window.addEventListener('load', async () => {
           campo.setAttribute('autocomplete','off');
           campo.setAttribute('data-form-type','other');
         });
+        opAplicarBloqueioTermoUniformeConcluido(box,tpl);
         return;
       }
       const campos=camposTemplateOperacao(tpl);
@@ -30300,6 +31159,14 @@ window.addEventListener('load', async () => {
         box.innerHTML='';
         return;
       }
+      if(opEhTermoUniforme(tpl.id) && operacaoUniformeModo!=='novo'){
+        const reg=operacaoUniformeArquivoSelecionadoId?opArquivoUniformePorId(operacaoUniformeArquivoSelecionadoId):null;
+        box.classList.remove('carousel-mode');
+        if(!reg){ titulo.textContent='Versão digital'; box.innerHTML=''; return; }
+        titulo.textContent=`Versão digital - ${reg.dados?.colaboradorNome||tpl.nome}`;
+        box.innerHTML=paginaEditavelHTML(tpl,opCloneSeguro(reg.dados||{}));
+        return;
+      }
       titulo.textContent=`Pré-visualização - ${tpl.nome}`;
       const dadosPreview=lerFormularioOperacao();
       const multipagina=tpl.kind==='orcamento'
@@ -30324,6 +31191,7 @@ window.addEventListener('load', async () => {
     }
     function atualizarPreviewOperacao(){
       const tpl=OPERATION_TEMPLATES[operacaoModeloAtual];
+      if(opEhTermoUniforme(tpl?.id)) opMarcarEdicaoTermoUniforme();
       if(tpl?.kind==='orcamento'){
         const total=opPaginarItensOrcamento(lerFormularioOperacao()).length;
         operacaoPaginaAtual=Math.max(0,Math.min(total-1,operacaoPaginaAtual));
@@ -30406,6 +31274,8 @@ window.addEventListener('load', async () => {
     function selecionarCategoriaOperacao(id){
       if(!OPERATION_CATEGORIES[id]) return;
       operacaoCategoriaAtual=id;
+      operacaoUniformeModo='novo';
+      operacaoUniformeArquivoSelecionadoId='';
       const documentos=(OPERATION_CATEGORIES[id].documentos||[]).filter(docId=>OPERATION_TEMPLATES[docId]);
       operacaoModeloAtual=documentos[0]||'';
       operacaoPaginaAtual=0;
@@ -30419,6 +31289,8 @@ window.addEventListener('load', async () => {
       if(!OPERATION_TEMPLATES[id]) return;
       operacaoModeloAtual=id;
       operacaoPaginaAtual=0;
+      operacaoUniformeModo='novo';
+      operacaoUniformeArquivoSelecionadoId='';
       if(id==='mudanca_departamento'){
         operacaoMudancaDepartamentoModo='lista';
         operacaoMudancaDepartamentoEditandoId='';
@@ -30430,7 +31302,7 @@ window.addEventListener('load', async () => {
       renderFormularioOperacao();
       renderPreviewOperacao();
     }
-    function salvarRascunhoOperacao(){
+    async function salvarRascunhoOperacao(){
       const tpl=OPERATION_TEMPLATES[operacaoModeloAtual];
       const status=document.getElementById('operacaoSaveStatus');
       if(!tpl||!tpl.editable){
@@ -30557,6 +31429,38 @@ window.addEventListener('load', async () => {
           statusAtual.textContent=
             `${mensagem} Formulário reiniciado para um novo contrato.`;
         }
+        return;
+      }
+
+      if(opEhTermoUniforme(tpl.id)){
+        let dados=lerFormularioOperacao();
+        if(!String(dados.colaboradorNome||'').trim()){
+          if(status) status.textContent='Selecione o colaborador antes de salvar o termo.';
+          document.getElementById('op_colaboradorId')?.focus();
+          return;
+        }
+        dados=opNormalizarDadosUniformeUnitarios(tpl.id,dados);
+        dados.tipoDocumento=tpl.id;
+        operacaoRascunhos[tpl.id]=dados;
+        let registro=null;
+        try{
+          registro=await opSincronizarArquivoUniforme(tpl,dados,{criar:true});
+        }catch(err){
+          console.error('Falha ao salvar o arquivo do uniforme:',err);
+          if(status) status.textContent='Não foi possível persistir o documento neste dispositivo. Nenhum arquivo fantasma foi criado.';
+          return;
+        }
+        operacaoRascunhos[tpl.id]=opCloneSeguro(registro?.dados||dados);
+        try{
+          opSalvarRascunhosPersistentes();
+        }catch(err){
+          /* O arquivo principal já foi salvo. Falha no cache do rascunho não deve gerar falso erro. */
+          console.warn('Arquivo de uniforme salvo, mas o cache do rascunho não pôde ser atualizado:',err);
+        }
+        renderFormularioOperacao();
+        renderPreviewOperacao();
+        const statusAtual=document.getElementById('operacaoSaveStatus');
+        if(statusAtual) statusAtual.textContent=`✓ ${dados.colaboradorNome} salvo em Arquivos criados. A versão digital foi preservada.`;
         return;
       }
 
@@ -30713,6 +31617,10 @@ window.addEventListener('load', async () => {
           opNovoDocumentoCorporativo(tpl);
       }else if(tpl.id==='advertencia_disciplinar'){
         operacaoRascunhos[tpl.id]=opMigrarAdvertenciaDisciplinar({});
+      }else if(opEhTermoUniforme(tpl.id)){
+        operacaoUniformeModo='novo';
+        operacaoUniformeArquivoSelecionadoId='';
+        operacaoRascunhos[tpl.id]=opNovoDocumentoCorporativo(tpl);
       }else if(tpl.kind==='corporate_form'){
         operacaoRascunhos[tpl.id]=opNovoDocumentoCorporativo(tpl);
       }else{
@@ -30788,8 +31696,81 @@ window.addEventListener('load', async () => {
       window.print();
       setTimeout(limpar,1800);
     }
-    function imprimirModeloOperacao(){
+    async function opImprimirTermoUniformeDedicado(tpl){
+      /*
+       * V51.80 — impressão isolada dos termos de uniforme.
+       * Não depende do layout geral do Gerencial nem das regras globais de @media print.
+       * Isso elimina o cenário em que o preview existe na tela, mas a folha sai em branco.
+       */
+      if(!opEhTermoUniforme(tpl?.id)) return false;
+
+      // O iframe é criado ainda dentro do clique do usuário; não depende de popup.
+      const frame=document.createElement('iframe');
+      frame.setAttribute('aria-hidden','true');
+      frame.style.position='fixed';
+      frame.style.left='-10000px';
+      frame.style.top='0';
+      frame.style.width='210mm';
+      frame.style.height='297mm';
+      frame.style.opacity='0';
+      frame.style.pointerEvents='none';
+      frame.style.border='0';
+      document.body.appendChild(frame);
+
+      try{
+        await opPrepararTermoUniformeParaImpressao(tpl);
+        const dados=valoresOperacao(tpl.id);
+        const pagina=paginaEditavelHTML(tpl,opCloneSeguro(dados));
+        if(!pagina || !String(pagina).includes('uniform-doc')) throw new Error('O termo não pôde ser montado para impressão.');
+
+        const estiloModelo=document.getElementById('uniforme-doc-modelo-aprovado-v49-4')?.textContent||'';
+        const estiloAssinatura=document.getElementById('uniforme-document-print-signature-v51-80')?.textContent||'';
+        const doc=frame.contentDocument||frame.contentWindow?.document;
+        if(!doc) throw new Error('Não foi possível preparar a área de impressão.');
+
+        doc.open();
+        doc.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${opEscape(tpl.nome||'Termo de Uniforme')}</title><style>
+          *{box-sizing:border-box}
+          html,body{margin:0!important;padding:0!important;width:210mm!important;min-width:210mm!important;height:297mm!important;min-height:297mm!important;background:#fff!important;overflow:hidden!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+          body{font-family:'Segoe UI',Arial,sans-serif!important}
+          .operation-page{display:block!important;position:relative!important;width:210mm!important;height:297mm!important;min-width:210mm!important;min-height:297mm!important;max-width:210mm!important;max-height:297mm!important;margin:0!important;padding:0!important;background:#fff!important;color:#1e1a1b!important;overflow:hidden!important;box-shadow:none!important;border:0!important;container-type:inline-size!important}
+          .operation-page.active{display:block!important}
+          @page{size:A4 portrait;margin:0}
+          @media print{html,body{width:210mm!important;height:297mm!important}.operation-page{width:210mm!important;height:297mm!important;break-after:auto!important;page-break-after:auto!important;container-type:inline-size!important}}
+          ${estiloModelo}
+          ${estiloAssinatura}
+        </style></head><body>${pagina}</body></html>`);
+        doc.close();
+
+        await new Promise(resolve=>{
+          let finalizado=false;
+          const fim=()=>{if(finalizado)return;finalizado=true;resolve();};
+          frame.onload=fim;
+          setTimeout(fim,350);
+        });
+
+        const win=frame.contentWindow;
+        if(!win) throw new Error('Janela de impressão indisponível.');
+        win.focus();
+        win.print();
+        setTimeout(()=>{try{frame.remove();}catch(_){ }},5000);
+        return true;
+      }catch(err){
+        console.error('Falha ao imprimir termo de uniforme:',err);
+        try{frame.remove();}catch(_){ }
+        const status=document.getElementById('operacaoSaveStatus');
+        if(status) status.textContent='Não foi possível preparar o termo para impressão.';
+        alert('Não foi possível imprimir o termo. O documento continua salvo e nenhuma informação foi perdida.');
+        return false;
+      }
+    }
+
+    async function imprimirModeloOperacao(){
       const tpl=OPERATION_TEMPLATES[operacaoModeloAtual]||{};
+      if(opEhTermoUniforme(tpl?.id)){
+        await opImprimirTermoUniformeDedicado(tpl);
+        return;
+      }
       if(tpl.kind==='static_pdf'){
         opImprimirPdfFixo(tpl);
         return;
@@ -30824,6 +31805,12 @@ window.addEventListener('load', async () => {
       renderBibliotecaOperacao();
       renderFormularioOperacao();
       renderPreviewOperacao();
+      /* V51.79 — carrega/migra o histórico robusto sem bloquear a abertura da tela. */
+      opHidratarHistoricoUniformesPersistente().then(()=>{
+        renderBibliotecaOperacao();
+        renderFormularioOperacao();
+        renderPreviewOperacao();
+      }).catch(err=>console.warn('Falha ao atualizar arquivos de uniforme:',err));
     }
     function opRecarregarBancoFuncionariosOrcamento(){
       const tpl=OPERATION_TEMPLATES[operacaoModeloAtual];
@@ -30837,6 +31824,11 @@ window.addEventListener('load', async () => {
       }
     }
 
+    window.opImprimirTermoUniformeDedicado=opImprimirTermoUniformeDedicado;
+    window.opSubirTermoUniformeDigitalizado=opSubirTermoUniformeDigitalizado;
+    window.opAbrirTermoUniformeDigitalizado=opAbrirTermoUniformeDigitalizado;
+    window.opBaixarTermoUniformeDigitalizado=opBaixarTermoUniformeDigitalizado;
+    window.opRemoverTermoUniformeDigitalizado=opRemoverTermoUniformeDigitalizado;
     window.opSelecionarAbaValeQuebraCaixa=opSelecionarAbaValeQuebraCaixa;
     window.opSelecionarFuncionarioFormularioVale=opSelecionarFuncionarioFormularioVale;
     window.abrirModalImpressaoValeQuebraCaixa=abrirModalImpressaoValeQuebraCaixa;
@@ -30915,6 +31907,15 @@ window.addEventListener('load', async () => {
     window.opAtualizarProtocoloOrcamento=opAtualizarProtocoloOrcamento;
     window.adicionarItemOrcamento=adicionarItemOrcamento;
     window.removerItemOrcamento=removerItemOrcamento;
+
+    window.opMudarAbaTermoUniforme=opMudarAbaTermoUniforme;
+    window.opNovoTermoUniforme=opNovoTermoUniforme;
+    window.opContinuarArquivoUniforme=opContinuarArquivoUniforme;
+    window.opAbrirArquivoUniforme=opAbrirArquivoUniforme;
+    window.opVoltarListaArquivosUniforme=opVoltarListaArquivosUniforme;
+    window.opSubirDigitalizadoArquivoUniforme=opSubirDigitalizadoArquivoUniforme;
+    window.opAbrirDigitalizadoArquivoUniforme=opAbrirDigitalizadoArquivoUniforme;
+    window.opBaixarDigitalizadoArquivoUniforme=opBaixarDigitalizadoArquivoUniforme;
 
     window.selecionarCategoriaOperacao=selecionarCategoriaOperacao;
     window.selecionarModeloOperacao=selecionarModeloOperacao;
@@ -31633,3 +32634,4 @@ console.info('[V51.73] Salvamento seguro ativo; Realtime monolítico permanece d
 </script>
 </body>
 </html>
+```
