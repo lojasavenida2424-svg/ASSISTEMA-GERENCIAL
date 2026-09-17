@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="referrer" content="no-referrer" />
-  <title>Gerencial de Loja • AV • V51.94</title>
+  <title>Gerencial de Loja • AV • V51.95</title>
   <!-- PWA / Ícones do Sistema Gerencial Avenida -->
   <meta name="theme-color" content="#291A1E">
   <meta name="application-name" content="Gerencial Avenida">
@@ -92,7 +92,12 @@
       const SOPHIA_SESSION_KEY = 'sophiaSessaoSeguraV1';
       const SOPHIA_HISTORY_KEY = 'sophiaHistoricoSessaoV1';
       const SOPHIA_BUILD = 'V39.1-SEMPREFLIGHT';
-      const GERENCIAL_BUILD = 'V51.94-FORMULARIO-OPERACOES-OCULTO';
+
+      // V51.95 — documentos de Operações centralizados no Supabase.
+      const OPERACOES_DOCS_FUNCTION_NAME = 'gerencial-documentos';
+      const OPERACOES_DOCS_SESSION_KEY = 'gerencialDocumentosSessaoV1';
+      const OPERACOES_DOCS_BUCKET = 'operacoes-documentos';
+      const GERENCIAL_BUILD = 'V51.95-OPERACOES-SUPABASE';
   </script>
   <style>
     :root {
@@ -15139,6 +15144,7 @@ function limparSessaoLocal(){
   sessionStorage.removeItem(SESSION_KEY);
   sessionStorage.removeItem(SOPHIA_SESSION_KEY);
   sessionStorage.removeItem(SOPHIA_HISTORY_KEY);
+  sessionStorage.removeItem(OPERACOES_DOCS_SESSION_KEY);
   localStorage.removeItem(SESSION_KEY);
 }
 function validarSessaoAtualContraConfig(){
@@ -15165,6 +15171,82 @@ function agendarExpiracaoSessao(){
 async function encerrarSessaoRevogada(motivo='Sua sessão não é mais válida. Entre novamente.'){
   if(logoutEmAndamento) return;
   await logout({forcado:true,motivo});
+}
+
+
+/* ===== V51.95 — OPERAÇÕES / COLABORADORES NO SUPABASE ===== */
+let operacoesDocsUltimoErro='';
+
+function tokenOperacoesDocumentosAtual(){
+  return sessionStorage.getItem(OPERACOES_DOCS_SESSION_KEY)||'';
+}
+
+async function chamarOperacoesDocumentosApi(payload, timeoutMs=30000){
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),timeoutMs);
+  try{
+    const endpoint=`${SUPABASE_URL}/functions/v1/${OPERACOES_DOCS_FUNCTION_NAME}`;
+    const resposta=await fetch(endpoint,{
+      method:'POST',
+      mode:'cors',
+      credentials:'omit',
+      cache:'no-store',
+      headers:{'Content-Type':'text/plain;charset=UTF-8'},
+      body:JSON.stringify(payload||{}),
+      signal:controller.signal
+    });
+    const bruto=await resposta.text();
+    let data={};
+    try{data=bruto?JSON.parse(bruto):{};}catch(_){data={error:bruto};}
+    if(!resposta.ok||data?.ok===false){
+      const detalhe=String(data?.error||bruto||`HTTP ${resposta.status}`).trim();
+      if(resposta.status===401||resposta.status===403){
+        sessionStorage.removeItem(OPERACOES_DOCS_SESSION_KEY);
+      }
+      throw new Error(`${detalhe} [${resposta.status}]`);
+    }
+    return data;
+  }catch(err){
+    if(err?.name==='AbortError') throw new Error('Tempo de conexão com os documentos esgotado.');
+    throw err;
+  }finally{
+    clearTimeout(timer);
+  }
+}
+
+async function criarSessaoOperacoesDocumentos(operador,senha){
+  operacoesDocsUltimoErro='';
+  if(!navigator.onLine){
+    operacoesDocsUltimoErro='Sem conexão com a internet.';
+    return false;
+  }
+  const op=normalizarOperador(operador);
+  const pass=String(senha||'').trim();
+  if(!op||!pass){
+    operacoesDocsUltimoErro='Operador ou senha indisponíveis.';
+    return false;
+  }
+  try{
+    const resposta=await chamarOperacoesDocumentosApi({
+      action:'session',
+      operador:op,
+      senha:pass
+    });
+    if(!resposta?.token) throw new Error('O servidor não forneceu uma sessão de documentos válida.');
+    sessionStorage.setItem(OPERACOES_DOCS_SESSION_KEY,resposta.token);
+    return true;
+  }catch(err){
+    operacoesDocsUltimoErro=String(err?.message||err||'Falha ao abrir sessão de documentos.');
+    sessionStorage.removeItem(OPERACOES_DOCS_SESSION_KEY);
+    console.warn('Sessão de Operações/Colaboradores indisponível:',err);
+    return false;
+  }
+}
+
+function garantirSessaoOperacoesDocumentos(){
+  const token=tokenOperacoesDocumentosAtual();
+  if(token) return token;
+  throw new Error('Sessão segura de documentos indisponível. Saia do sistema e entre novamente.');
 }
 
 async function login(){
@@ -15202,6 +15284,17 @@ async function login(){
       err.textContent='Operador não autorizado para acessar o sistema.';
       return;
     }
+
+    /* A senha é utilizada somente neste instante para obter o token temporário
+       da Edge Function. Ela não é armazenada pelo módulo de documentos. */
+    const permsDocs=permissoesUsuario(operadorInput);
+    if(operadorInput==='133'||permsDocs?.operacoes||permsDocs?.colaboradores){
+      const docsOk=await criarSessaoOperacoesDocumentos(operadorInput,pass);
+      if(!docsOk){
+        console.warn('Login principal concluído, mas Operações/Colaboradores não abriu sessão no Supabase:',operacoesDocsUltimoErro);
+      }
+    }
+
     usuarioAtual={...user}; delete usuarioAtual.senha;
     sessionStorage.setItem(SESSION_KEY,JSON.stringify(criarRegistroSessao(user)));
     agendarExpiracaoSessao();
@@ -22142,6 +22235,143 @@ window.addEventListener('load', async () => {
 
     const OPERACAO_HISTORICO_POR_PAGINA = 25;
 
+    /* V51.95 — o Supabase é a fonte compartilhada dos documentos.
+       IndexedDB/localStorage continuam apenas como cache/contingência local. */
+    function opSituacaoSupabase(dados={}){
+      const s=String(dados.statusDocumento||dados.status||'').trim().toUpperCase();
+      if(s==='CONCLUÍDO'||s==='CONCLUIDO') return 'CONCLUIDO';
+      if(s.includes('AGUARDANDO')) return 'AGUARDANDO ASSINATURA';
+      return 'EM PREENCHIMENTO';
+    }
+    function opSituacaoLocal(situacao){
+      const s=String(situacao||'').trim().toUpperCase();
+      if(s==='CONCLUIDO') return 'CONCLUÍDO';
+      if(s==='AGUARDANDO ASSINATURA') return 'AGUARDANDO ASSINATURA';
+      return 'EM PREENCHIMENTO';
+    }
+    function opDadosSemMetaSupabase(dados={}){
+      const copia=opCloneSeguro(dados||{});
+      if(copia&&typeof copia==='object') delete copia.__gerencialArquivo;
+      return copia;
+    }
+    function opDadosComMetaSupabase(reg){
+      const dados=opDadosSemMetaSupabase(reg?.dados||{});
+      dados.__gerencialArquivo={
+        localArchiveId:String(reg?.id||''),
+        sourceType:String(reg?.sourceType||'snapshot'),
+        sourceId:String(reg?.sourceId||''),
+        sourceKey:String(reg?.sourceKey||''),
+        criadoEm:String(reg?.criadoEm||'')
+      };
+      return dados;
+    }
+    async function opSalvarRegistroCentralSupabase(tpl,reg){
+      if(!tpl||!reg) throw new Error('Documento inválido para sincronização.');
+      const token=garantirSessaoOperacoesDocumentos();
+      const dados=opDadosComMetaSupabase(reg);
+      const resposta=await chamarOperacoesDocumentosApi({
+        action:'save',
+        token,
+        id:String(reg.supabaseId||''),
+        tipo_documento:tpl.id,
+        categoria:String(reg.pasta||opArquivoCentralPasta(tpl.id)||'OUTROS DOCUMENTOS'),
+        colaborador_id:String(dados.colaboradorId||''),
+        colaborador_nome:String(reg.colaboradorNome||''),
+        numero_documento:String(reg.numeroDocumento||''),
+        situacao:opSituacaoSupabase(dados),
+        dados
+      });
+      if(!resposta?.documento?.id) throw new Error('O Supabase não confirmou o salvamento do documento.');
+      reg.supabaseId=String(resposta.documento.id);
+      reg.supabaseSincronizadoEm=String(resposta.documento.atualizado_em||new Date().toISOString());
+      return resposta.documento;
+    }
+    function opDocumentoSupabaseParaArquivoCentral(doc){
+      if(!doc?.id||!doc?.tipo_documento) return null;
+      const tpl=OPERATION_TEMPLATES[doc.tipo_documento];
+      if(!tpl) return null;
+      const dadosBrutos=opCloneSeguro(doc.dados||{});
+      const meta=dadosBrutos?.__gerencialArquivo&&typeof dadosBrutos.__gerencialArquivo==='object'
+        ? dadosBrutos.__gerencialArquivo
+        : {};
+      delete dadosBrutos.__gerencialArquivo;
+      if(!String(dadosBrutos.statusDocumento||'').trim()){
+        dadosBrutos.statusDocumento=opSituacaoLocal(doc.situacao);
+      }
+      if(doc.arquivo_assinado_path){
+        dadosBrutos.digitalizadoPath=String(doc.arquivo_assinado_path||'');
+        dadosBrutos.digitalizadoNome=String(doc.arquivo_assinado_nome||dadosBrutos.digitalizadoNome||'');
+        dadosBrutos.digitalizadoTipo=String(doc.arquivo_assinado_tipo||dadosBrutos.digitalizadoTipo||'');
+        dadosBrutos.digitalizadoEm=String(doc.concluido_em||dadosBrutos.digitalizadoEm||'');
+      }
+      const sourceType=String(meta.sourceType||'supabase');
+      const sourceId=String(meta.sourceId||doc.id);
+      const sourceKey=String(meta.sourceKey||(sourceId?`${sourceType}:${sourceId}`:`supabase:${doc.id}`));
+      const id=String(meta.localArchiveId||`SB-${doc.id}`);
+      return {
+        id,
+        supabaseId:String(doc.id),
+        supabaseSincronizadoEm:String(doc.atualizado_em||doc.criado_em||''),
+        sourceType,
+        sourceId,
+        sourceKey,
+        templateId:tpl.id,
+        templateNome:tpl.nome,
+        categoriaId:tpl.categoria||'',
+        pasta:String(doc.categoria||opArquivoCentralPasta(tpl.id)),
+        colaboradorNome:String(doc.colaborador_nome||opArquivoCentralNomeColaborador(tpl.id,dadosBrutos)||''),
+        numeroDocumento:String(doc.numero_documento||opArquivoCentralNumero(dadosBrutos)||''),
+        status:String(dadosBrutos.statusDocumento||opSituacaoLocal(doc.situacao)),
+        criadoEm:String(doc.criado_em||meta.criadoEm||doc.atualizado_em||new Date().toISOString()),
+        atualizadoEm:String(doc.atualizado_em||doc.criado_em||new Date().toISOString()),
+        dados:dadosBrutos
+      };
+    }
+    async function opListarArquivoCentralSupabase(){
+      const token=garantirSessaoOperacoesDocumentos();
+      const resposta=await chamarOperacoesDocumentosApi({
+        action:'list',
+        token,
+        limit:1000
+      });
+      return (Array.isArray(resposta?.documentos)?resposta.documentos:[])
+        .map(opDocumentoSupabaseParaArquivoCentral)
+        .filter(Boolean);
+    }
+    async function opExcluirArquivoCentralSupabase(reg){
+      if(!reg?.supabaseId) return true;
+      const token=garantirSessaoOperacoesDocumentos();
+      await chamarOperacoesDocumentosApi({
+        action:'delete',
+        token,
+        id:String(reg.supabaseId)
+      });
+      return true;
+    }
+    async function opMigrarArquivoCentralParaSupabase(lista){
+      if(!navigator.onLine||!tokenOperacoesDocumentosAtual()) return lista;
+      const saida=opCloneSeguro(Array.isArray(lista)?lista:[]);
+      let alterou=false;
+      for(let i=0;i<saida.length;i++){
+        const reg=saida[i];
+        if(!reg||reg.supabaseId) continue;
+        const tpl=OPERATION_TEMPLATES[reg.templateId];
+        if(!tpl) continue;
+        try{
+          await opSalvarRegistroCentralSupabase(tpl,reg);
+          alterou=true;
+        }catch(err){
+          console.warn('Migração de documento local para o Supabase interrompida:',err);
+          break;
+        }
+      }
+      if(alterou){
+        try{await opPersistirArquivoCentral(saida);}catch(err){console.warn('Cache local não pôde receber IDs do Supabase:',err);}
+      }
+      return saida;
+    }
+
+
     function opArquivoCentralDataHora(valor){
       const d=valor?new Date(valor):null;
       return d&&!Number.isNaN(d.getTime())?d.toLocaleString('pt-BR'):'—';
@@ -22259,6 +22489,11 @@ window.addEventListener('load', async () => {
         existente=operacaoArquivoCentral.find(item=>String(item.id)===String(operacaoArquivoCentralEditandoId) && item.templateId===tpl.id)||null;
       }
       const reg=opArquivoCentralCriarRegistro(tpl,dados,{...opcoes,id:existente?.id||opcoes.id,criadoEm:existente?.criadoEm||opcoes.criadoEm});
+      if(existente?.supabaseId) reg.supabaseId=existente.supabaseId;
+
+      /* Supabase confirma primeiro; o armazenamento local passa a ser cache. */
+      await opSalvarRegistroCentralSupabase(tpl,reg);
+
       const lista=operacaoArquivoCentral.filter(item=>String(item.id)!==String(reg.id) && (!reg.sourceKey||item.sourceKey!==reg.sourceKey));
       lista.unshift(reg);
       await opPersistirArquivoCentral(lista.slice(0,4000));
@@ -22284,9 +22519,28 @@ window.addEventListener('load', async () => {
       let local=[]; try{local=JSON.parse(localStorage.getItem(OPERATION_MASTER_ARCHIVE_KEY)||'[]')||[];}catch(_){local=[];}
       let idb=[]; try{idb=await opCarregarArquivoCentralIndexedDB();}catch(_){idb=[];}
       const migrados=opArquivoCentralHistoricosLegados();
-      const mesclado=opArquivoCentralMesclar(local,idb,migrados);
-      operacaoArquivoCentral=mesclado;
-      try{await opPersistirArquivoCentral(mesclado);}catch(_){ }
+
+      let remotos=[];
+      if(navigator.onLine&&tokenOperacoesDocumentosAtual()){
+        try{
+          remotos=await opListarArquivoCentralSupabase();
+        }catch(err){
+          console.warn('Documentos do Supabase não puderam ser carregados; usando cache local:',err);
+        }
+      }
+
+      let mesclado=opArquivoCentralMesclar(local,idb,migrados,remotos);
+
+      /* Primeira execução da V51.95: documentos antigos do navegador são enviados
+         ao Supabase e recebem o UUID remoto sem perder o ID/cache anterior. */
+      try{
+        mesclado=await opMigrarArquivoCentralParaSupabase(mesclado);
+      }catch(err){
+        console.warn('Migração do arquivo local para o Supabase incompleta:',err);
+      }
+
+      operacaoArquivoCentral=opArquivoCentralMesclar(mesclado,remotos);
+      try{await opPersistirArquivoCentral(operacaoArquivoCentral);}catch(_){ }
       renderHomeOperacoes();
     }
     function opSelecionarAbaOperacoes(aba){
@@ -22397,6 +22651,8 @@ window.addEventListener('load', async () => {
       const identificacao=[reg.templateNome,reg.colaboradorNome||'',reg.numeroDocumento||''].filter(Boolean).join(' — ');
       if(!confirm(`Excluir definitivamente ${identificacao||'este documento'}?\n\nEsta ação remove o arquivo da pasta e do histórico de origem. Não será possível desfazer.`)) return;
       try{
+        /* O registro compartilhado é removido do Supabase antes do cache local. */
+        await opExcluirArquivoCentralSupabase(reg);
         await opRemoverOrigemArquivoCentral(reg);
         const nova=operacaoArquivoCentral.filter(item=>String(item.id)!==String(id));
         await opPersistirArquivoCentral(nova);
@@ -22420,6 +22676,19 @@ window.addEventListener('load', async () => {
       const salvo=await opSincronizarArquivoUniforme(tpl,dados,{criar:true});
       const novoDados=opCloneSeguro(salvo?.dados||dados);
       const atualizado={...reg,dados:novoDados,status:'AGUARDANDO ASSINATURA',atualizadoEm:new Date().toISOString()};
+      const centralAtual=operacaoArquivoCentral.find(item=>String(item.id)===String(reg.id))||reg;
+      if(centralAtual?.supabaseId){
+        const token=garantirSessaoOperacoesDocumentos();
+        const remoto=await chamarOperacoesDocumentosApi({
+          action:'mark_printed',
+          token,
+          id:String(centralAtual.supabaseId)
+        });
+        if(remoto?.documento?.id){
+          atualizado.supabaseId=String(remoto.documento.id);
+          atualizado.supabaseSincronizadoEm=String(remoto.documento.atualizado_em||new Date().toISOString());
+        }
+      }
       const lista=operacaoArquivoCentral.map(item=>String(item.id)===String(reg.id)?atualizado:item);
       await opPersistirArquivoCentral(lista);
       renderHomeOperacoes();
@@ -31005,7 +31274,12 @@ window.addEventListener('load', async () => {
       operacaoHistoricoUniformes=novaLista;
       const registroFinal=operacaoHistoricoUniformes.find(item=>String(item.id)===String(id))||null;
       if(registroFinal){
-        try{await opRegistrarArquivoCentral(tpl,registroFinal.dados,{sourceType:'uniforme',sourceId:registroFinal.id,criadoEm:registroFinal.salvoEm,atualizadoEm:registroFinal.atualizadoEm});}catch(err){console.warn('Arquivo central não pôde ser atualizado para o termo de uniforme:',err);}
+        await opRegistrarArquivoCentral(tpl,registroFinal.dados,{
+          sourceType:'uniforme',
+          sourceId:registroFinal.id,
+          criadoEm:registroFinal.salvoEm,
+          atualizadoEm:registroFinal.atualizadoEm
+        });
       }
       return registroFinal;
     }
@@ -31148,18 +31422,19 @@ window.addEventListener('load', async () => {
       if(!(tipo==='application/pdf'||tipo.startsWith('image/'))){alert('Envie o documento digitalizado em PDF ou imagem.');return;}
       if(Number(file.size)>OP_UNIFORM_DIGITAL_MAX_BYTES){alert('O arquivo digitalizado deve ter no máximo 20 MB.');return;}
       try{
-        const salvo=await opSalvarUniformeDigitalizado(tpl,dados,file);
-        dados.statusDocumento='CONCLUÍDO';
-        dados.digitalizadoNome=salvo.nome;
-        dados.digitalizadoTipo=salvo.tipo;
-        dados.digitalizadoTamanho=String(salvo.tamanho||0);
-        dados.digitalizadoEm=salvo.adicionadoEm;
         dados.arquivoUniformeId=reg.id;
+        const remoto=await opEnviarUniformeDigitalizadoSupabase(tpl,dados,file);
+        dados.statusDocumento='CONCLUÍDO';
+        dados.digitalizadoNome=String(remoto.arquivo_assinado_nome||file.name||'documento-assinado');
+        dados.digitalizadoTipo=String(remoto.arquivo_assinado_tipo||file.type||'');
+        dados.digitalizadoTamanho=String(file.size||0);
+        dados.digitalizadoEm=String(remoto.concluido_em||new Date().toISOString());
+        dados.digitalizadoPath=String(remoto.arquivo_assinado_path||'');
         const persistido=await opSincronizarArquivoUniforme(tpl,dados,{criar:false});
         if(!persistido) throw new Error('Registro do uniforme não localizado para atualização.');
         if(operacaoRascunhos[tpl.id]?.arquivoUniformeId===reg.id){operacaoRascunhos[tpl.id]=opCloneSeguro(persistido.dados);try{opSalvarRascunhosPersistentes();}catch(_){ }}
         renderFormularioOperacao();renderPreviewOperacao();
-      }catch(err){console.error(err);alert('Não foi possível salvar o arquivo digitalizado neste navegador.');}
+      }catch(err){console.error(err);alert('Não foi possível salvar o arquivo digitalizado no Supabase.');}
     }
     async function opAbrirDigitalizadoArquivoUniforme(id,baixar=false){
       const reg=opArquivoUniformePorId(id);
@@ -31167,13 +31442,22 @@ window.addEventListener('load', async () => {
       const tpl=OPERATION_TEMPLATES[reg.tipoDocumento];
       if(!tpl) return;
       try{
-        const arquivo=await opObterUniformeDigitalizado(tpl,reg.dados);
-        if(!arquivo?.arquivo){alert('O arquivo digitalizado não foi localizado neste dispositivo.');return;}
-        const blob=new Blob([arquivo.arquivo],{type:arquivo.tipo||'application/octet-stream'});
-        const url=URL.createObjectURL(blob);
-        if(baixar){const a=document.createElement('a');a.href=url;a.download=arquivo.nome||reg.dados?.digitalizadoNome||'uniforme-digitalizado';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);}
-        else{const janela=window.open(url,'_blank');if(!janela){alert('O navegador bloqueou a abertura do arquivo.');URL.revokeObjectURL(url);}else setTimeout(()=>URL.revokeObjectURL(url),60000);}
-      }catch(err){console.error(err);alert('Não foi possível abrir o arquivo digitalizado.');}
+        const central=opArquivoCentralDoUniforme(reg.id)||
+          operacaoArquivoCentral.find(item=>item.templateId===tpl.id&&String(item.numeroDocumento||'')===String(reg.dados?.numeroDocumento||''))||
+          null;
+        if(!central?.supabaseId){alert('Este arquivo ainda não está sincronizado com o Supabase.');return;}
+        const url=await opUrlUniformeDigitalizadoSupabase(central,baixar);
+        if(baixar){
+          const a=document.createElement('a');
+          a.href=url;
+          a.download=reg.dados?.digitalizadoNome||'uniforme-digitalizado';
+          a.rel='noopener';
+          document.body.appendChild(a);a.click();a.remove();
+        }else{
+          const janela=window.open(url,'_blank','noopener');
+          if(!janela) alert('O navegador bloqueou a abertura do arquivo.');
+        }
+      }catch(err){console.error(err);alert('Não foi possível abrir o arquivo digitalizado no Supabase.');}
     }
     function opBaixarDigitalizadoArquivoUniforme(id){return opAbrirDigitalizadoArquivoUniforme(id,true);}
 
@@ -31284,6 +31568,79 @@ window.addEventListener('load', async () => {
       }
     }
 
+
+    function opArquivoCentralDoUniforme(registroId){
+      const sid=String(registroId||'');
+      if(!sid) return null;
+      return operacaoArquivoCentral.find(item=>item.sourceKey===`uniforme:${sid}`)||null;
+    }
+    async function opGarantirCentralUniformeSupabase(tpl,dados){
+      let central=null;
+      const sid=String(dados?.arquivoUniformeId||'');
+      if(sid) central=opArquivoCentralDoUniforme(sid);
+      if(!central&&operacaoArquivoCentralModo==='editar'&&operacaoArquivoCentralEditandoId){
+        central=opArquivoCentral.find(item=>String(item.id)===String(operacaoArquivoCentralEditandoId))||null;
+      }
+      if(central?.supabaseId) return central;
+
+      const registro=await opSincronizarArquivoUniforme(tpl,dados,{criar:true});
+      central=registro?opArquivoCentralDoUniforme(registro.id):null;
+      if(!central?.supabaseId) throw new Error('O documento precisa estar salvo no Supabase antes de anexar o arquivo.');
+      return central;
+    }
+    async function opEnviarUniformeDigitalizadoSupabase(tpl,dados,file){
+      const central=await opGarantirCentralUniformeSupabase(tpl,dados);
+      const token=garantirSessaoOperacoesDocumentos();
+      const prep=await chamarOperacoesDocumentosApi({
+        action:'prepare_upload',
+        token,
+        id:String(central.supabaseId),
+        filename:file.name||'documento-assinado.pdf',
+        mime:file.type||'application/octet-stream',
+        size:Number(file.size)||0
+      });
+
+      if(!prep?.path||!prep?.token) throw new Error('O servidor não preparou o upload do arquivo.');
+      const envio=await supabaseclient.storage
+        .from(OPERACOES_DOCS_BUCKET)
+        .uploadToSignedUrl(prep.path,prep.token,file,{
+          contentType:file.type||'application/octet-stream'
+        });
+      if(envio?.error) throw envio.error;
+
+      const fim=await chamarOperacoesDocumentosApi({
+        action:'finalize_upload',
+        token,
+        id:String(central.supabaseId),
+        path:String(prep.path),
+        filename:file.name||'documento-assinado.pdf',
+        mime:file.type||'application/octet-stream'
+      });
+      if(!fim?.documento?.id) throw new Error('O Supabase não confirmou o arquivo digitalizado.');
+      return fim.documento;
+    }
+    async function opUrlUniformeDigitalizadoSupabase(central,baixar=false){
+      if(!central?.supabaseId) throw new Error('Documento não sincronizado com o Supabase.');
+      const token=garantirSessaoOperacoesDocumentos();
+      const resposta=await chamarOperacoesDocumentosApi({
+        action:'signed_download',
+        token,
+        id:String(central.supabaseId),
+        download:!!baixar
+      });
+      if(!resposta?.url) throw new Error('O servidor não forneceu o arquivo digitalizado.');
+      return resposta.url;
+    }
+    async function opRemoverUniformeDigitalizadoSupabase(central){
+      if(!central?.supabaseId) return;
+      const token=garantirSessaoOperacoesDocumentos();
+      await chamarOperacoesDocumentosApi({
+        action:'remove_upload',
+        token,
+        id:String(central.supabaseId)
+      });
+    }
+
     function opArquivoParaArrayBuffer(file){
       if(file?.arrayBuffer) return file.arrayBuffer();
       return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error||new Error('Falha ao ler arquivo.'));r.readAsArrayBuffer(file);});
@@ -31389,12 +31746,13 @@ window.addEventListener('load', async () => {
       const status=document.getElementById('operacaoSaveStatus');
       if(status) status.textContent='Enviando arquivo digitalizado...';
       try{
-        const reg=await opSalvarUniformeDigitalizado(tpl,dados,file);
+        const remoto=await opEnviarUniformeDigitalizadoSupabase(tpl,dados,file);
         dados.statusDocumento='CONCLUÍDO';
-        dados.digitalizadoNome=reg.nome;
-        dados.digitalizadoTipo=reg.tipo;
-        dados.digitalizadoTamanho=String(reg.tamanho||0);
-        dados.digitalizadoEm=reg.adicionadoEm;
+        dados.digitalizadoNome=String(remoto.arquivo_assinado_nome||file.name||'documento-assinado');
+        dados.digitalizadoTipo=String(remoto.arquivo_assinado_tipo||file.type||'');
+        dados.digitalizadoTamanho=String(file.size||0);
+        dados.digitalizadoEm=String(remoto.concluido_em||new Date().toISOString());
+        dados.digitalizadoPath=String(remoto.arquivo_assinado_path||'');
         dados.tipoDocumento=tpl.id;
         operacaoRascunhos[tpl.id]=dados;
         const registro=await opSincronizarArquivoUniforme(tpl,dados,{criar:true});
@@ -31404,20 +31762,31 @@ window.addEventListener('load', async () => {
         renderPreviewOperacao();
         const status2=document.getElementById('operacaoSaveStatus');
         if(status2) status2.textContent='✓ Arquivo assinado anexado. Documento CONCLUÍDO.';
-      }catch(err){console.error(err); if(status) status.textContent='Não foi possível armazenar o arquivo digitalizado.'; alert('Não foi possível salvar o arquivo digitalizado neste navegador.');}
+      }catch(err){console.error(err); if(status) status.textContent='Não foi possível armazenar o arquivo digitalizado.'; alert('Não foi possível salvar o arquivo digitalizado no Supabase.');}
     }
     async function opAbrirTermoUniformeDigitalizado(baixar=false){
       const tpl=OPERATION_TEMPLATES[operacaoModeloAtual];
       if(!opEhTermoUniforme(tpl?.id)) return;
       const dados=valoresOperacao(tpl.id);
       try{
-        const reg=await opObterUniformeDigitalizado(tpl,dados);
-        if(!reg?.arquivo){alert('O arquivo digitalizado não foi localizado neste dispositivo.');return;}
-        const blob=new Blob([reg.arquivo],{type:reg.tipo||'application/octet-stream'});
-        const url=URL.createObjectURL(blob);
-        if(baixar){const a=document.createElement('a');a.href=url;a.download=reg.nome||dados.digitalizadoNome||'uniforme-digitalizado';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);}
-        else{const janela=window.open(url,'_blank');if(!janela){alert('O navegador bloqueou a abertura do arquivo.');URL.revokeObjectURL(url);}else setTimeout(()=>URL.revokeObjectURL(url),60000);}
-      }catch(err){console.error(err);alert('Não foi possível abrir o arquivo digitalizado.');}
+        let central=null;
+        if(dados.arquivoUniformeId) central=opArquivoCentralDoUniforme(dados.arquivoUniformeId);
+        if(!central&&operacaoArquivoCentralModo==='editar'&&operacaoArquivoCentralEditandoId){
+          central=opArquivoCentralBuscar(operacaoArquivoCentralEditandoId);
+        }
+        if(!central?.supabaseId){alert('Este documento ainda não está sincronizado com o Supabase.');return;}
+        const url=await opUrlUniformeDigitalizadoSupabase(central,baixar);
+        if(baixar){
+          const a=document.createElement('a');
+          a.href=url;
+          a.download=dados.digitalizadoNome||'uniforme-digitalizado';
+          a.rel='noopener';
+          document.body.appendChild(a);a.click();a.remove();
+        }else{
+          const janela=window.open(url,'_blank','noopener');
+          if(!janela) alert('O navegador bloqueou a abertura do arquivo.');
+        }
+      }catch(err){console.error(err);alert('Não foi possível abrir o arquivo digitalizado no Supabase.');}
     }
     function opBaixarTermoUniformeDigitalizado(){ return opAbrirTermoUniformeDigitalizado(true); }
     async function opRemoverTermoUniformeDigitalizado(){
@@ -31426,9 +31795,14 @@ window.addEventListener('load', async () => {
       const dados=valoresOperacao(tpl.id);
       if(!confirm('Remover o arquivo assinado? O documento voltará para AGUARDANDO ASSINATURA.')) return;
       try{
-        await opExcluirUniformeDigitalizadoArmazenado(tpl,dados);
+        let central=null;
+        if(dados.arquivoUniformeId) central=opArquivoCentralDoUniforme(dados.arquivoUniformeId);
+        if(!central&&operacaoArquivoCentralModo==='editar'&&operacaoArquivoCentralEditandoId){
+          central=opArquivoCentralBuscar(operacaoArquivoCentralEditandoId);
+        }
+        if(central?.supabaseId) await opRemoverUniformeDigitalizadoSupabase(central);
         dados.statusDocumento='AGUARDANDO ASSINATURA';
-        dados.digitalizadoNome='';dados.digitalizadoTipo='';dados.digitalizadoTamanho='';dados.digitalizadoEm='';
+        dados.digitalizadoNome='';dados.digitalizadoTipo='';dados.digitalizadoTamanho='';dados.digitalizadoEm='';dados.digitalizadoPath='';
         operacaoRascunhos[tpl.id]=dados;
         if(dados.arquivoUniformeId) await opSincronizarArquivoUniforme(tpl,dados,{criar:false});
         opSalvarRascunhosPersistentes();
@@ -32216,7 +32590,7 @@ window.addEventListener('load', async () => {
           registro=await opSincronizarArquivoUniforme(tpl,dados,{criar:true});
         }catch(err){
           console.error('Falha ao salvar o arquivo do uniforme:',err);
-          if(status) status.textContent='Não foi possível persistir o documento neste dispositivo. Nenhum arquivo fantasma foi criado.';
+          if(status) status.textContent='Não foi possível confirmar o documento no Supabase. Os campos foram mantidos para nova tentativa.';
           return;
         }
         operacaoRascunhos[tpl.id]=opCloneSeguro(registro?.dados||dados);
@@ -32229,7 +32603,7 @@ window.addEventListener('load', async () => {
         renderFormularioOperacao();
         renderPreviewOperacao();
         const statusAtual=document.getElementById('operacaoSaveStatus');
-        if(statusAtual) statusAtual.textContent=`✓ ${dados.colaboradorNome} salvo em Arquivos criados. A versão digital foi preservada.`;
+        if(statusAtual) statusAtual.textContent=`✓ ${dados.colaboradorNome} salvo no Supabase e em Arquivos criados. A versão digital foi preservada.`;
         return;
       }
 
@@ -32408,7 +32782,7 @@ window.addEventListener('load', async () => {
         operacaoArquivoCentralModo='novo';
       }
       try{opSalvarRascunhosPersistentes();}catch(err){console.warn('Documento arquivado; cache do formulário não atualizado:',err);}
-      if(status) status.textContent=`✓ ${tpl.nome} salvo em Operações${opArquivoCentralNomeColaborador(tpl.id,dadosGerais)?' e vinculado ao colaborador.':'.'}`;
+      if(status) status.textContent=`✓ ${tpl.nome} salvo no Supabase${opArquivoCentralNomeColaborador(tpl.id,dadosGerais)?' e vinculado ao colaborador.':'.'}`;
       renderHomeOperacoes();
     }
     function restaurarPadraoOperacao(){
