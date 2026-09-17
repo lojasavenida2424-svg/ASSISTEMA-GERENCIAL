@@ -1,10 +1,11 @@
+```
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="referrer" content="no-referrer" />
-  <title>Gerencial de Loja • AV • V51.92</title>
+  <title>Gerencial de Loja • AV • V51.94</title>
   <!-- PWA / Ícones do Sistema Gerencial Avenida -->
   <meta name="theme-color" content="#291A1E">
   <meta name="application-name" content="Gerencial Avenida">
@@ -91,7 +92,7 @@
       const SOPHIA_SESSION_KEY = 'sophiaSessaoSeguraV1';
       const SOPHIA_HISTORY_KEY = 'sophiaHistoricoSessaoV1';
       const SOPHIA_BUILD = 'V39.1-SEMPREFLIGHT';
-      const GERENCIAL_BUILD = 'V51.92-DEVOLUCAO-UNIFORME-CORRIGIDA';
+      const GERENCIAL_BUILD = 'V51.94-FORMULARIO-OPERACOES-OCULTO';
   </script>
   <style>
     :root {
@@ -599,7 +600,17 @@
       font-weight: 900; text-align:left; transition:.2s;
     }
     .nav-btn:hover, .nav-btn.active { background: var(--amarelo-escuro); box-shadow: inset 5px 0 0 var(--preto-logo); }
-    .nav-btn .ico { width:24px; text-align:center; }
+    .nav-btn .ico {
+      width:24px;
+      height:24px;
+      flex:0 0 24px;
+      display:inline-grid;
+      place-items:center;
+      text-align:center;
+      line-height:1;
+      font-size:1rem;
+      vertical-align:middle;
+    }
 
     .theme-btn { position:absolute; top:12px; right:12px; width:38px; height:38px; padding:0; border:1px solid rgba(41,26,30,.20); border-radius:50%; background:var(--preto-logo); color:var(--amarelo); display:grid; place-items:center; font-size:1rem; cursor:pointer; box-shadow:0 7px 16px rgba(41,26,30,.18); transition:transform .18s ease, box-shadow .18s ease, background .18s ease; }
     .theme-btn:hover { transform:translateY(-2px) rotate(-8deg); box-shadow:0 10px 22px rgba(41,26,30,.24); }
@@ -11317,6 +11328,14 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
     #operacoesBiblioteca[hidden],
     #operacoesBibliotecaIntro[hidden] { display:none !important; }
 
+    /* V51.94 — hidden do workspace deve vencer layouts específicos
+       como quote-workspace, corporate-form e demais displays !important. */
+    #operacoes #operacoesWorkspace[hidden],
+    body #operacoes #operacoesWorkspace[hidden] {
+      display:none !important;
+      visibility:hidden !important;
+    }
+
     /* Documentos Recentes pertencem exclusivamente à tela inicial de Operações. */
     #operacoesCriacao .ops-recent-panel,
     #operacoesCriacao #operacoesRecentes,
@@ -11520,7 +11539,7 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
       <button class="nav-btn" onclick="showPage('anotacoes', this)"><span class="ico">📝</span>Central de Anotações</button>
       <button class="nav-btn" onclick="showPage('tarefas', this)"><span class="ico">✅</span>Quadro de Tarefas</button>
       <button class="nav-btn" onclick="showPage('operacoes', this)"><span class="ico">⚙️</span>Operações</button>
-      <button class="nav-btn" onclick="showPage('colaboradores', this)"><span class="ico">🗂️</span>Colaboradores</button>
+      <button class="nav-btn" onclick="showPage('colaboradores', this)"><span class="ico" aria-hidden="true">👤</span>Colaboradores</button>
       <button class="nav-btn" onclick="showPage('funcionarios', this)"><span class="ico">👥</span>Quadro de Funcionários</button>
       <button class="nav-btn" onclick="showPage('operadores', this)"><span class="ico">💳</span>Operadores</button>
       <button class="nav-btn" onclick="showPage('escalas', this)"><span class="ico">🗓️</span>Escalas</button>
@@ -33479,7 +33498,11 @@ console.info('[V51.73] Salvamento seguro ativo; Realtime monolítico permanece d
     const criarBtn=el('opsDocumentCreateBtn');
     if(criacao){criacao.classList.add('ops-document-landing');criacao.classList.remove('ops-document-filling');}
     if(criarBtn) criarBtn.hidden=false;
-    if(workspace) workspace.hidden=true;
+    if(workspace){
+      workspace.hidden=true;
+      workspace.style.setProperty('display','none','important');
+      workspace.style.setProperty('visibility','hidden','important');
+    }
     if(espera) espera.hidden=false;
     if(biblioteca) biblioteca.hidden=false;
     if(intro) intro.hidden=false;
@@ -33495,7 +33518,11 @@ console.info('[V51.73] Salvamento seguro ativo; Realtime monolítico permanece d
     const criarBtn=el('opsDocumentCreateBtn');
     if(criacao){criacao.classList.remove('ops-document-landing');criacao.classList.add('ops-document-filling');}
     if(criarBtn) criarBtn.hidden=true;
-    if(workspace) workspace.hidden=false;
+    if(workspace){
+      workspace.style.removeProperty('display');
+      workspace.style.removeProperty('visibility');
+      workspace.hidden=false;
+    }
     if(espera) espera.hidden=true;
     if(biblioteca) biblioteca.hidden=true;
     if(intro) intro.hidden=true;
@@ -33511,14 +33538,16 @@ console.info('[V51.73] Salvamento seguro ativo; Realtime monolítico permanece d
       select?.focus();
       return;
     }
-    if(fluxo==='editing'){
-      /* + CRIAR durante uma edição inicia um novo documento do mesmo modelo. */
-      const id=select.value;
-      if(typeof originalSelecionarModelo==='function') originalSelecionarModelo(id);
+    /* V51.94 — o formulário só nasce efetivamente neste clique.
+       Reconstrói o modelo selecionado para impedir que um formulário antigo
+       (por exemplo, Devolução de Uniforme) reapareça sob outro documento. */
+    const id=select.value;
+    if(typeof originalSelecionarModelo==='function'){
+      originalSelecionarModelo(id);
     }
-    /* Mudança de Departamento possui três modalidades. O + CRIAR superior
-       deve abrir diretamente esse seletor, sem exibir a antiga lista com outro +. */
-    if(select.value==='mudanca_departamento' && typeof window.abrirSeletorMudancaDepartamento==='function'){
+
+    /* Mudança de Departamento possui três modalidades. */
+    if(id==='mudanca_departamento' && typeof window.abrirSeletorMudancaDepartamento==='function'){
       window.abrirSeletorMudancaDepartamento();
     }
     setFilling('filling');
@@ -33574,6 +33603,15 @@ console.info('[V51.73] Salvamento seguro ativo; Realtime monolítico permanece d
     const criacao=el('operacoesCriacao');
     if(home?.hidden) home.style.setProperty('display','none','important'); else if(home) home.style.removeProperty('display');
     if(criacao?.hidden) criacao.style.setProperty('display','none','important'); else if(criacao) criacao.style.removeProperty('display');
+
+    const workspace=el('operacoesWorkspace');
+    if(workspace?.hidden){
+      workspace.style.setProperty('display','none','important');
+      workspace.style.setProperty('visibility','hidden','important');
+    }else if(workspace){
+      workspace.style.removeProperty('display');
+      workspace.style.removeProperty('visibility');
+    }
   });
   const root=el('operacoes');
   if(root) observer.observe(root,{attributes:true,subtree:true,attributeFilter:['hidden']});
