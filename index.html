@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="referrer" content="no-referrer" />
-  <title>Assistência Gerencial Avenida — V52.17 Destaques padronizados</title>
+  <title>Assistência Gerencial Avenida — V52.19 Acessos Gerencial</title>
   <!-- PWA / Ícones do Sistema Gerencial Avenida -->
   <meta name="theme-color" content="#291A1E">
   <meta name="application-name" content="Gerencial Avenida">
@@ -97,7 +97,7 @@
       const OPERACOES_DOCS_FUNCTION_NAME = 'gerencial-documentos';
       const OPERACOES_DOCS_SESSION_KEY = 'gerencialDocumentosSessaoV1';
       const OPERACOES_DOCS_BUCKET = 'operacoes-documentos';
-      const GERENCIAL_BUILD = 'V52.17-DESTAQUES-PADRONIZADOS';
+      const GERENCIAL_BUILD = 'V52.18-LOGIN-USUARIOS-OFICIAIS';
   </script>
   <style>
     :root {
@@ -14333,10 +14333,10 @@ const areasTarefaPorSetor = {
 
 const departamentosLoja = [...new Set(Object.values(areasTarefaPorSetor).flat())];
 
+// V52.19 — somente o operador 133 é indispensável ao Gerencial.
+// Os demais operadores, inclusive 139 e 144, são usuários comuns: podem receber ou perder acesso pelo painel do desenvolvedor.
 const usuariosOficiais = [
-  { nome:'ALANA ARAUJO', operadorPadrao:'139', cargo:'GERENTE DE LOJA' },
-  { nome:'JOAO PEDRO', operadorPadrao:'133', cargo:'VISUAL MERCHANDISING' },
-  { nome:'KAILANY', operadorPadrao:'144', cargo:'ADMINISTRATIVO' }
+  { nome:'JOAO PEDRO', operadorPadrao:'133', cargo:'VISUAL MERCHANDISING' }
 ];
 
 const funcionariosPadrao = [
@@ -15250,6 +15250,54 @@ function atualizarStatusConexao(){
     setSyncStatus('ONLINE • verificando sincronização','syncing');
   }
 }
+async function garantirUsuariosOficiaisOnlineAntesDoLogin(){
+  if(!supabaseclient || !navigator.onLine) return false;
+  try{
+    const {data,error}=await comTimeout(
+      supabaseclient.from(ONLINE_TABLE).select('dados,updated_at').eq('id',GLOBAL_ROW_ID).maybeSingle(),
+      SUPABASE_OPERATION_TIMEOUT_MS
+    );
+    if(error) throw error;
+
+    const bruto=data?.dados && typeof data.dados==='object' ? cloneJSONSeguro(data.dados,{}) : {};
+    const usuariosAntes=Array.isArray(bruto.usuarios) ? bruto.usuarios : [];
+    const operadoresAntes=new Set(usuariosAntes.map(u=>normalizarOperador(u?.operador)).filter(Boolean));
+    const faltantes=usuariosOficiais
+      .map(u=>normalizarOperador(u.operadorPadrao))
+      .filter(op=>op && !operadoresAntes.has(op));
+    const credenciaisIncompletas=usuariosOficiais
+      .map(u=>normalizarOperador(u.operadorPadrao))
+      .filter(op=>{
+        const existente=usuariosAntes.find(u=>normalizarOperador(u?.operador)===op);
+        return !!existente && !String(existente?.senha||'').trim();
+      });
+
+    const cfg=normalizarConfigGlobal(bruto);
+    globalConfig=cfg;
+    globalConfigBase=cloneJSONSeguro(cfg,{});
+
+    // Só grava antes do login quando realmente falta um usuário oficial ou a linha global não existe.
+    // Senhas e permissões de usuários que já existem são preservadas por normalizarConfigGlobal().
+    if(!data || faltantes.length || credenciaisIncompletas.length){
+      cfg.atualizadoEm=agoraBR();
+      const {error:erroSalvar}=await comTimeout(
+        supabaseclient.from(ONLINE_TABLE).upsert(
+          {id:GLOBAL_ROW_ID,dados:cfg},
+          {onConflict:'id'}
+        ),
+        SUPABASE_OPERATION_TIMEOUT_MS
+      );
+      if(erroSalvar) throw erroSalvar;
+      globalConfigBase=cloneJSONSeguro(cfg,{});
+      console.info('Usuários oficiais reconciliados antes do login:', {faltantes,credenciaisIncompletas});
+    }
+    return true;
+  }catch(err){
+    console.warn('Não foi possível reconciliar os usuários oficiais antes do login:',err);
+    return false;
+  }
+}
+
 async function carregarConfigGlobalOnline(){
   try{
     const {data,error}=await comTimeout(
@@ -16282,35 +16330,42 @@ async function login(){
   const botaoLogin=document.querySelector('.login-btn');
   if(botaoLogin) botaoLogin.disabled=true;
   err.textContent='';
-  showAppLoader('Entrando no sistema','Validando o acesso no servidor e carregando os dados da loja...');
+  showAppLoader('Entrando no sistema','Validando seu acesso no Gerencial e carregando os dados da loja...');
   try{
-    // Validação real no servidor pela Edge Function; não confia na comparação local.
-    const autenticado=await criarSessaoSophia(operadorInput,pass);
-    if(!autenticado){
-      const detalhe=String(sophiaUltimoErro||'');
-      err.textContent=/\[401\]|\[403\]|senha|credencial/i.test(detalhe)?'Operador ou senha inválidos.':'Não foi possível validar o acesso no servidor. Tente novamente com conexão estável.';
-      return;
-    }
+    // V52.20 — o Gerencial autentica pelos usuários liberados no próprio config_global_v1.
+    // A Edge Function da SOPHIA é complementar e NÃO pode bloquear um operador autorizado no Gerencial.
+    await garantirUsuariosOficiaisOnlineAntesDoLogin();
     const configOk=await carregarConfigGlobalOnline();
     if(!configOk){
-      sessionStorage.removeItem(SOPHIA_SESSION_KEY);
-      err.textContent='A senha foi validada, mas não foi possível carregar as permissões. Verifique a conexão e tente novamente.';
+      err.textContent='Não foi possível carregar os acessos do Gerencial. Verifique a conexão e tente novamente.';
       return;
     }
+
     const user=usuarioGlobalPorOperador(operadorInput);
     if(!user){
-      sessionStorage.removeItem(SOPHIA_SESSION_KEY);
       err.textContent='Operador não autorizado para acessar o sistema.';
       return;
     }
 
-    /* A senha é utilizada somente neste instante para obter o token temporário
-       da Edge Function. Ela não é armazenada pelo módulo de documentos. */
+    const senhaConfigurada=String(user.senha||senhaPorOperador(operadorInput)).trim();
+    if(pass!==senhaConfigurada){
+      err.textContent='Operador ou senha inválidos.';
+      return;
+    }
+
+    // A partir daqui o login principal está autorizado pelo Gerencial.
+    // Serviços auxiliares tentam abrir suas próprias sessões sem impedir a entrada.
+    const sophiaOk=await criarSessaoSophia(operadorInput,pass);
+    if(!sophiaOk){
+      console.warn('Login do Gerencial autorizado, mas a sessão da SOPHIA não foi aberta:',sophiaUltimoErro);
+      sessionStorage.removeItem(SOPHIA_SESSION_KEY);
+    }
+
     const permsDocs=permissoesUsuario(operadorInput);
     if(operadorInput==='133'||permsDocs?.operacoes||permsDocs?.colaboradores){
       const docsOk=await criarSessaoOperacoesDocumentos(operadorInput,pass);
       if(!docsOk){
-        console.warn('Login principal concluído, mas Operações/Colaboradores não abriu sessão no Supabase:',operacoesDocsUltimoErro);
+        console.warn('Login do Gerencial autorizado, mas Operações/Colaboradores não abriu sessão segura:',operacoesDocsUltimoErro);
       }
     }
 
@@ -16349,9 +16404,16 @@ function ocultarIdentificacaoLogin(){
 }
 
 function usuarioAutorizadoNaTelaLogin(operador){
-  return usuarioGlobalPorOperador(operador) ||
-    (db?.usuarios || []).find(usuario=>normalizarOperador(usuario.operador)===operador) ||
-    null;
+  const op=normalizarOperador(operador);
+  const oficial=usuariosOficiais.find(usuario=>normalizarOperador(usuario.operadorPadrao)===op);
+  return usuarioGlobalPorOperador(op) ||
+    (db?.usuarios || []).find(usuario=>normalizarOperador(usuario.operador)===op) ||
+    (oficial ? {
+      nome:oficial.nome,
+      operador:op,
+      cargo:oficial.cargo,
+      matricula:matriculaPorOperador(op)
+    } : null);
 }
 function nomeLoginTemSobrenome(nome){
   return String(nome||'').trim().split(/\s+/).filter(Boolean).length>=3;
@@ -16379,9 +16441,11 @@ async function obterNomeCompletoTelaLogin(operador,autorizado){
   return consulta;
 }
 
+let loginPreviewConsultaSeq = 0;
 async function atualizarIdentificacaoLogin(mostrar = false){
   const preview = document.getElementById('loginUserPreview');
   if(!preview) return;
+  const consultaSeq = ++loginPreviewConsultaSeq;
   if(!mostrar) {
     ocultarIdentificacaoLogin();
     const opDigitado=normalizarOperador(document.getElementById('loginUser')?.value||'');
@@ -16399,6 +16463,31 @@ async function atualizarIdentificacaoLogin(mostrar = false){
     preview.className = 'login-user-preview empty';
     preview.innerHTML = `<div><small>Identificação</small><b id="loginUserFullName">Digite seu operador</b><small>Depois pressione TAB</small></div><span class="preview-operator">--</span>`;
     return;
+  }
+
+  /*
+   * V52.21 — a identificação precisa usar a MESMA configuração online do login.
+   * Em versões anteriores a prévia consultava apenas o estado local, então um operador
+   * recém-liberado podia aparecer como "Acesso não autorizado" até efetuar o login.
+   */
+  if(navigator.onLine && supabaseclient){
+    preview.className = 'login-user-preview empty';
+    preview.innerHTML = `
+      <div>
+        <small>Identificação</small>
+        <b id="loginUserFullName">Verificando acesso...</b>
+        <small>Consultando usuários autorizados</small>
+      </div>
+      <span class="preview-operator">OP. ${escapeHTML(operador)}</span>
+    `;
+    try{
+      await carregarConfigGlobalOnline();
+    }catch(err){
+      console.warn('Não foi possível atualizar os acessos antes da identificação:',err);
+    }
+    if(consultaSeq !== loginPreviewConsultaSeq) return;
+    const operadorAindaDigitado=normalizarOperador(document.getElementById('loginUser')?.value||'');
+    if(operadorAindaDigitado!==operador) return;
   }
 
   /*
@@ -20271,15 +20360,42 @@ function renderEscalas(){
 
 /* ===== FIM DAS FUNÇÕES RESTAURADAS ===== */
 
+function operadoresCadastradosParaAcessoGerencial(){
+  // V52.19 — a origem da liberação de login é o cadastro de Operadores/Funcionários,
+  // e não a lista de usuários que já possuem acesso. Assim TODOS os operadores cadastrados
+  // podem ser selecionados para receber login, independentemente do status do funcionário.
+  const porOperador=new Map();
+  (Array.isArray(db?.funcionarios)?db.funcionarios:[]).forEach(f=>{
+    const op=normalizarOperador(f?.operador);
+    if(!op) return;
+    const atual=porOperador.get(op);
+    const candidato={
+      ...f,
+      operador:op,
+      nome:String(f?.nome||`OPERADOR ${op}`).trim()||`OPERADOR ${op}`,
+      matricula:String(f?.matricula||matriculaPorOperador(op)).trim(),
+      cargo:String(f?.cargo||'USUÁRIO DO SISTEMA').trim(),
+      status:String(f?.status||'ATIVO').trim()
+    };
+    // Em caso de duplicidade, prioriza o cadastro com mais informações.
+    const score=x=>['nome','matricula','cargo','setor','departamento'].reduce((n,k)=>n+(String(x?.[k]||'').trim()?1:0),0);
+    if(!atual || score(candidato)>score(atual)) porOperador.set(op,candidato);
+  });
+  return [...porOperador.values()].sort((a,b)=>{
+    const na=Number(normalizarOperador(a.operador)), nb=Number(normalizarOperador(b.operador));
+    if(Number.isFinite(na)&&Number.isFinite(nb)&&na!==nb) return na-nb;
+    return norm(a.nome).localeCompare(norm(b.nome));
+  });
+}
 function funcionariosDisponiveisParaLogin(){
-  const permitidos=new Set((globalConfig?.usuarios||[]).map(u=>normalizarOperador(u.operador)));
-  return (db.funcionarios||[]).filter(f=>normalizarOperador(f.operador)&&String(f.status||'ATIVO').toUpperCase()!=='DESLIGADO'&&!permitidos.has(normalizarOperador(f.operador))).sort((a,b)=>norm(a.nome).localeCompare(norm(b.nome)));
+  const comLogin=new Set((globalConfig?.usuarios||[]).map(u=>normalizarOperador(u.operador)).filter(Boolean));
+  return operadoresCadastradosParaAcessoGerencial().filter(f=>!comLogin.has(normalizarOperador(f.operador)));
 }
 async function adicionarUsuarioLogin(){
   if(normalizarOperador(usuarioAtual?.operador)!=='133')return;
   const op=normalizarOperador(document.getElementById('configNovoUsuarioLogin')?.value);
   if(!op){alert('Selecione um funcionário com número de operador.');return;}
-  const f=(db.funcionarios||[]).find(x=>normalizarOperador(x.operador)===op); if(!f)return;
+  const f=operadoresCadastradosParaAcessoGerencial().find(x=>normalizarOperador(x.operador)===op); if(!f){alert('Operador não encontrado no cadastro do sistema.');return;}
   const senhaTemporaria=gerarSenhaTemporariaSegura();
   const configAnterior=cloneJSONSeguro(globalConfig,{});
   globalConfig=normalizarConfigGlobal(globalConfig);
@@ -20296,7 +20412,7 @@ async function adicionarUsuarioLogin(){
 }
 async function removerUsuarioLogin(op){
   if(normalizarOperador(usuarioAtual?.operador)!=='133')return; const operador=normalizarOperador(op);
-  if(operadoresOficiaisLogin().includes(operador)){alert('Usuário padrão não pode ser removido.');return;}
+  if(operador==='133'){alert('O operador 133 é indispensável e não pode ter o acesso removido.');return;}
   const u=usuarioGlobalPorOperador(operador);
   if(u&&confirm('Remover o acesso de '+u.nome+'?')){
     const configAnterior=cloneJSONSeguro(globalConfig,{});
@@ -20314,11 +20430,11 @@ function renderUsuariosLoginRows(){
     const matricula=String(dadosAtuais.matricula||usuario.matricula||matriculaPorOperador(operador)).trim();
     const cargo=String(dadosAtuais.cargo||usuario.cargo||'').trim();
     const desenvolvedor=operador==='133';
-    const podeRemover=!operadoresOficiaisLogin().includes(operador);
-    return `<tr><td class="config-user-name-cell" title="${escapeHTML(nomeCompleto)}"><span class="config-user-name-main">${escapeHTML(nomeCompleto)}</span>${desenvolvedor?'<span class="badge b-vm">&lt;/&gt; DESENVOLVEDOR</span>':''}</td><td><b>${escapeHTML(operador)}</b></td><td>${escapeHTML(matricula)}</td><td class="config-user-role-cell">${escapeHTML(cargo)}</td><td><span class="badge b-ok">Protegida</span></td><td class="no-print"><div class="config-user-actions"><button class="btn small secondary config-action-permissions" onclick="editarPermissoesUsuario('${operador}')">Permissões</button><button class="btn small config-action-password" onclick="abrirAlteracaoSenha('${operador}')">🔑 Alterar senha</button>${podeRemover?`<button class="btn small danger config-action-status" onclick="removerUsuarioLogin('${operador}')">Remover</button>`:'<span class="badge b-ok config-action-status">Padrão</span>'}</div></td></tr>`;
+    const podeRemover=operador!=='133';
+    return `<tr><td class="config-user-name-cell" title="${escapeHTML(nomeCompleto)}"><span class="config-user-name-main">${escapeHTML(nomeCompleto)}</span>${desenvolvedor?'<span class="badge b-vm">&lt;/&gt; DESENVOLVEDOR</span>':''}</td><td><b>${escapeHTML(operador)}</b></td><td>${escapeHTML(matricula)}</td><td class="config-user-role-cell">${escapeHTML(cargo)}</td><td><span class="badge b-ok">Protegida</span></td><td class="no-print"><div class="config-user-actions"><button class="btn small secondary config-action-permissions" onclick="editarPermissoesUsuario('${operador}')">Permissões</button><button class="btn small config-action-password" onclick="abrirAlteracaoSenha('${operador}')">🔑 Alterar senha</button>${podeRemover?`<button class="btn small danger config-action-status" onclick="removerUsuarioLogin('${operador}')">Remover</button>`:'<span class="badge b-ok config-action-status">INDISPENSÁVEL</span>'}</div></td></tr>`;
   }).join('');
 }
-function renderSelectNovoUsuarioLogin(){ const a=funcionariosDisponiveisParaLogin(); return a.length?'<option value="">Selecione um funcionário</option>'+a.map(f=>`<option value="${escapeHTML(normalizarOperador(f.operador))}">${escapeHTML(f.nome)} — OP. ${escapeHTML(normalizarOperador(f.operador))}</option>`).join(''):'<option value="">Nenhum funcionário disponível</option>'; }
+function renderSelectNovoUsuarioLogin(){ const a=funcionariosDisponiveisParaLogin(); return a.length?'<option value="">Selecione um operador cadastrado</option>'+a.map(f=>{const st=String(f.status||'ATIVO').toUpperCase();return `<option value="${escapeHTML(normalizarOperador(f.operador))}">OP. ${escapeHTML(normalizarOperador(f.operador))} — ${escapeHTML(f.nome)}${st&&st!=='ATIVO'?` — ${escapeHTML(st)}`:''}</option>`;}).join(''):'<option value="">Todos os operadores cadastrados já possuem login</option>'; }
 function editarPermissoesUsuario(op){
   const operador=normalizarOperador(op),u=usuarioGlobalPorOperador(operador); if(!u)return;
   const p=permissoesUsuario(operador),dev=operador==='133';
@@ -20366,7 +20482,7 @@ function abrirAlteracaoSenha(op){
   const proprio=normalizarOperador(usuarioAtual?.operador)===operador;
   if(!dev && !(proprio && temPermissao('alterarSenha'))){ alert('Você não possui permissão para alterar esta senha.'); return; }
   const u=usuarioGlobalPorOperador(operador); if(!u)return;
-  const html=`<div class="modal-head"><div><h2>🔑 Alterar senha</h2><p>${escapeHTML(u.nome)} • Operador ${escapeHTML(operador)}</p></div><button class="icon-btn" onclick="fecharModalPermissoes()">✕</button></div><div class="section-card" style="box-shadow:none;margin:0;"><div class="form-grid"><div class="field w6"><label>Nova senha</label><input id="novaSenhaUsuario" type="password" minlength="8" autocomplete="new-password" placeholder="Mínimo de 8 caracteres"></div><div class="field w6"><label>Confirmar nova senha</label><input id="confirmarSenhaUsuario" type="password" minlength="8" autocomplete="new-password" placeholder="Repita a nova senha"></div><div class="field w12 actions"><button class="btn" onclick="salvarNovaSenha('${operador}')">💾 Salvar nova senha</button>${dev?`<button class="btn secondary" onclick="redefinirSenhaPadrao('${operador}')">🎲 Gerar senha temporária</button>`:''}</div></div><p style="color:var(--muted);font-weight:750;margin:12px 0 0;">Use pelo menos 8 caracteres, combinando letras e números. A senha atual não é exibida pelo sistema.</p></div>`;
+  const html=`<div class="modal-head"><div><h2>🔑 Alterar senha</h2><p>${escapeHTML(u.nome)} • Operador ${escapeHTML(operador)}</p></div><button class="icon-btn" onclick="fecharModalPermissoes()">✕</button></div><div class="section-card" style="box-shadow:none;margin:0;"><div class="form-grid"><div class="field w6"><label>Nova senha</label><input id="novaSenhaUsuario" type="password" minlength="4" autocomplete="new-password" placeholder="Mínimo de 4 caracteres"></div><div class="field w6"><label>Confirmar nova senha</label><input id="confirmarSenhaUsuario" type="password" minlength="4" autocomplete="new-password" placeholder="Repita a nova senha"></div><div class="field w12 actions"><button class="btn" onclick="salvarNovaSenha('${operador}')">💾 Salvar nova senha</button>${dev?`<button class="btn secondary" onclick="redefinirSenhaPadrao('${operador}')">🎲 Gerar senha temporária</button>`:''}</div></div><p style="color:var(--muted);font-weight:750;margin:12px 0 0;">Use pelo menos 4 caracteres. A senha atual não é exibida pelo sistema.</p></div>`;
   document.getElementById('modalPermissoesConteudo').innerHTML=html;
   document.getElementById('modalPermissoes').classList.add('active');
 }
@@ -20374,8 +20490,7 @@ async function salvarNovaSenha(op){
   const operador=normalizarOperador(op);
   const nova=String(document.getElementById('novaSenhaUsuario')?.value||'').trim();
   const confirma=String(document.getElementById('confirmarSenhaUsuario')?.value||'').trim();
-  if(nova.length<8){alert('A nova senha deve ter pelo menos 8 caracteres.');return;}
-  if(!/[A-Za-z]/.test(nova)||!/\d/.test(nova)){alert('Use uma senha com pelo menos uma letra e um número.');return;}
+  if(nova.length<4){alert('A nova senha deve ter pelo menos 4 caracteres.');return;}
   if(nova!==confirma){alert('As senhas informadas não são iguais.');return;}
   const u=(globalConfig?.usuarios||[]).find(x=>normalizarOperador(x.operador)===operador); if(!u)return;
   const anterior={senha:u.senha,credencialVersao:u.credencialVersao};
@@ -20467,7 +20582,7 @@ function renderConfig(){
       <div class="field w8"><label>Usuário que será configurado</label><select id="configUsuarioPermissoes">${opcoesPermissao}</select></div>
       <div class="field w4 actions"><button class="btn" type="button" onclick="abrirPermissoesSelecionadas()">⚙️ Editar permissões</button></div>
     </div>
-    <p style="margin:12px 0 0;color:var(--muted);font-weight:750;">As abas desmarcadas desaparecerão do painel do usuário. O operador 133 mantém acesso integral permanente.</p>
+    <p style="margin:12px 0 0;color:var(--muted);font-weight:750;">As abas desmarcadas desaparecerão do painel do usuário. Somente o operador 133 mantém acesso integral permanente e não pode ser removido.</p>
   </div>
 
   <div class="config-login-stack">
@@ -20475,13 +20590,13 @@ function renderConfig(){
       <div class="section-title">
         <div>
           <h2>Usuários com login</h2>
-          <p>Libere novos acessos e também edite as permissões pelo botão de cada usuário.</p>
+          <p>Todos os operadores cadastrados no sistema podem receber acesso. Apenas o operador 133 é indispensável.</p>
         </div>
       </div>
 
       <div class="config-add-user-row">
         <div class="field">
-          <label>Adicionar usuário</label>
+          <label>Liberar acesso para operador cadastrado</label>
           <select id="configNovoUsuarioLogin">${renderSelectNovoUsuarioLogin()}</select>
         </div>
         <div class="actions">
