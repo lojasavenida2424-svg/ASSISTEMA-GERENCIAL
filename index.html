@@ -36562,7 +36562,7 @@ console.info('[V51.73] Salvamento seguro ativo; Realtime monolítico permanece d
     panel=document.createElement('div'); panel.id='escalaMonthPanel'; panel.className='section-card escala-month-panel'; panel.setAttribute('data-escala-modulo','trabalho');
     panel.innerHTML=`<div class="section-title"><div><h1>Escala Mensal</h1><p>Consolidação automática das escalas de domingo e feriado. Clique em qualquer célula ou use o teclado: T = trabalho, F = folga e - = não trabalha.</p></div><div class="actions no-print"><button class="btn secondary" type="button" onclick="fecharEscalaMensal()">✕ Fechar</button></div></div>
     <div class="escala-month-toolbar no-print"><div class="field"><label>Mês</label><input id="escalaMesRef" type="month"></div><button class="btn" type="button" onclick="gerarEscalaMensal()">GERAR / ATUALIZAR</button><button class="btn secondary" type="button" onclick="salvarEscalaMensal()">💾 SALVAR MÊS</button><button class="btn secondary" type="button" onclick="imprimirEscalaMensal()">🖨️ IMPRIMIR</button></div>
-    <div class="escala-month-note">Ao atualizar, dados de DOMINGO e FERIADO são importados novamente. Ajustes manuais já salvos permanecem preservados. Na tabela mensal, selecione uma célula e pressione T, F ou - para mudar rapidamente.</div><div id="escalaMonthTable"></div><div class="escala-month-obs"><label><b>OBSERVAÇÃO</b></label><textarea id="escalaMonthObs" placeholder="Observações gerais da escala mensal..."></textarea></div>`;
+    <div class="escala-month-note">A escala mensal começa com todos em T = Trabalho, importa automaticamente DOMINGO e FERIADO já criados, aplica as folgas lançadas nessas escalas e preserva os ajustes manuais salvos. Use mouse ou teclado: T = trabalho, F = folga e - = não trabalha.</div><div id="escalaMonthTable"></div><div class="escala-month-obs"><label><b>OBSERVAÇÃO</b></label><textarea id="escalaMonthObs" placeholder="Observações gerais da escala mensal..."></textarea></div>`;
     const creator=$('escalaCreatorPanel'); creator?.parentNode?.insertBefore(panel,creator);
     return panel;
   }
@@ -36589,13 +36589,73 @@ console.info('[V51.73] Salvamento seguro ativo; Realtime monolítico permanece d
   }
   const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
   const folgaFixa={DAIANE:1,LUIZA:3,'MARIA EDUARDA':3,KAILANY:2,JOICE:2,CELIO:1,DIEGO:1,JOAO:5};
-  function baseStatus(nome,date){ const n=norm(nome),dow=date.getDay(); if(n.includes('LUCAS MIGUEL')&&(dow===0||dow===6))return 'X'; if(n.includes('HELEN')&&dow===0)return 'F'; const key=Object.keys(folgaFixa).find(k=>n.includes(k)); if(key&&dow===folgaFixa[key])return 'F'; if(dow===0)return 'F'; return 'T'; }
+  function baseStatus(nome,date){ return 'T'; }
   function pessoasEscala(e){ return [...(e.abertura||[]),...(e.fechamento||[])].map(p=>norm(p.nome)); }
   function mensalGerado(period){
     const [y,m]=period.split('-').map(Number), days=new Date(y,m,0).getDate(), funcs=colaboradores(), cells={};
-    funcs.forEach(f=>{cells[f.id]={};for(let d=1;d<=days;d++){const dt=new Date(y,m-1,d);cells[f.id][d]={status:baseStatus(f.nome,dt),origem:'normal',manual:false};}});
-    (db.escalas||[]).filter(e=>String(e.data||'').slice(0,7)===period).forEach(e=>{const day=Number(String(e.data).slice(8,10)),workers=pessoasEscala(e),tipo=String(e.tipo||'').toUpperCase();funcs.forEach(f=>{const c=cells[f.id]?.[day];if(!c)return;const trabalha=workers.includes(norm(f.nome));if(tipo==='DOMINGO'){if(norm(f.nome).includes('HELEN')){c.status='F';c.origem='regra';}else if(norm(f.nome).includes('LUCAS MIGUEL')){c.status='X';c.origem='regra';}else{c.status=trabalha?'T':'F';c.origem='domingo';}}else if(tipo==='FERIADO'){if(norm(f.nome).includes('LUCAS MIGUEL')){c.status='X';c.origem='regra';}else{c.status=trabalha?'T':'F';c.origem='feriado';}}});(e.folgas||[]).forEach(fl=>{if(String(fl.diaFolga||'').slice(0,7)!==period)return;const dd=Number(String(fl.diaFolga).slice(8,10));const f=funcs.find(x=>x.id===fl.funcId||norm(x.nome)===norm(fl.nome));if(f&&cells[f.id]?.[dd]){cells[f.id][dd].status='F';cells[f.id][dd].origem='folga';}});});
-    const saved=(db.escalasMensais||{})[period]; if(saved?.manual){Object.entries(saved.manual).forEach(([fid,daysMap])=>Object.entries(daysMap||{}).forEach(([d,status])=>{if(cells[fid]?.[d])cells[fid][d]={status,origem:'manual',manual:true};}));}
+
+    // Padrão inicial: todos começam como T = Trabalho.
+    funcs.forEach(f=>{
+      cells[f.id]={};
+      for(let d=1;d<=days;d++){
+        const dt=new Date(y,m-1,d);
+        cells[f.id][d]={status:baseStatus(f.nome,dt),origem:'padrao',manual:false};
+      }
+    });
+
+    // Usa apenas a versão mais recente de cada escala DOMINGO/FERIADO por data.
+    // Isso evita que uma escala antiga do mesmo dia sobrescreva a escala atual.
+    const escalasMes=(db.escalas||[])
+      .filter(e=>String(e.data||'').slice(0,7)===period && ['DOMINGO','FERIADO'].includes(String(e.tipo||'').toUpperCase()))
+      .sort((a,b)=>String(b.atualizadoEm||b.criadoEm||'').localeCompare(String(a.atualizadoEm||a.criadoEm||'')));
+    const porDiaTipo=new Map();
+    escalasMes.forEach(e=>{
+      const tipo=String(e.tipo||'').toUpperCase();
+      const chave=`${String(e.data||'')}|${tipo}`;
+      if(!porDiaTipo.has(chave)) porDiaTipo.set(chave,e);
+    });
+
+    [...porDiaTipo.values()].forEach(e=>{
+      const day=Number(String(e.data||'').slice(8,10));
+      if(!day || day<1 || day>days) return;
+      const workers=pessoasEscala(e), tipo=String(e.tipo||'').toUpperCase();
+
+      funcs.forEach(f=>{
+        const c=cells[f.id]?.[day];
+        if(!c) return;
+        const nome=norm(f.nome);
+        const trabalha=workers.includes(nome);
+
+        if(tipo==='DOMINGO'){
+          if(nome.includes('HELEN')){ c.status='F'; c.origem='regra-domingo'; }
+          else if(nome.includes('LUCAS MIGUEL')){ c.status='X'; c.origem='regra-domingo'; }
+          else { c.status=trabalha?'T':'F'; c.origem='domingo'; }
+        }else if(tipo==='FERIADO'){
+          if(nome.includes('LUCAS MIGUEL')){ c.status='X'; c.origem='regra-feriado'; }
+          else { c.status=trabalha?'T':'F'; c.origem='feriado'; }
+        }
+      });
+
+      // Folgas compensatórias informadas dentro das escalas DOMINGO/FERIADO.
+      (e.folgas||[]).forEach(fl=>{
+        if(String(fl.diaFolga||'').slice(0,7)!==period) return;
+        const dd=Number(String(fl.diaFolga||'').slice(8,10));
+        if(!dd || dd<1 || dd>days) return;
+        const f=funcs.find(x=>x.id===fl.funcId||norm(x.nome)===norm(fl.nome));
+        if(f&&cells[f.id]?.[dd]){
+          cells[f.id][dd].status='F';
+          cells[f.id][dd].origem='folga-importada';
+        }
+      });
+    });
+
+    // Ajustes manuais salvos têm prioridade sobre o padrão e sobre as escalas importadas.
+    const saved=(db.escalasMensais||{})[period];
+    if(saved?.manual){
+      Object.entries(saved.manual).forEach(([fid,daysMap])=>Object.entries(daysMap||{}).forEach(([d,status])=>{
+        if(cells[fid]?.[d]) cells[fid][d]={status,origem:'manual',manual:true};
+      }));
+    }
     return {period,y,m,days,funcs,cells,obs:saved?.obs||'',manual:saved?.manual||{}};
   }
   let atual=null;
@@ -36672,7 +36732,7 @@ console.info('[V51.73] Salvamento seguro ativo; Realtime monolítico permanece d
       const iso=`${atual.period}-${String(d).padStart(2,'0')}`;
       const e=(db.escalas||[]).filter(x=>String(x.data||'')===iso&&String(x.tipo||'').toUpperCase()==='DOMINGO').sort((a,b)=>String(b.criadoEm||b.atualizadoEm||'').localeCompare(String(a.criadoEm||a.atualizadoEm||'')))[0];
       if(e){ const seen=new Set(); return [...(e.abertura||[]),...(e.fechamento||[])].map(p=>p.nome).filter(n=>{const k=norm(n);if(!k||seen.has(k))return false;seen.add(k);return true;}); }
-      return atual.funcs.filter(f=>atual.cells[f.id]?.[d]?.status==='T'&&!norm(f.nome).includes('HELEN')&&!norm(f.nome).includes('LUCAS MIGUEL')).map(f=>f.nome);
+      return [];
     };
     const rows=atual.funcs.map(f=>`<tr><th>${esc(nomeCurto(f.nome))}</th>${dias.map(d=>{const c=atual.cells[f.id][d];const sun=new Date(atual.y,atual.m-1,d).getDay()===0;const val=c.status==='X'?'–':c.status;const cls=c.status==='X'?'off':c.status==='F'?'folga':sun&&c.status==='T'?'domingo':'';return `<td class="${cls}">${val}</td>`;}).join('')}</tr>`).join('');
     const dayHead=dias.map(d=>{const dow=new Date(atual.y,atual.m-1,d).getDay();return `<th class="${dow===0?'sun':''}"><b>${String(d).padStart(2,'0')}</b><span>${nomesDia[dow]}</span></th>`;}).join('');
