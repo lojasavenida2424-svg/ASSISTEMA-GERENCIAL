@@ -1,70 +1,31 @@
-# Integração — Assistência Gerencial x AV Resultados
+# Integração AV Resultados ↔ Assistência Gerencial
 
-## Fonte oficial
+## Caminho oficial
 
-O módulo AV Resultados consome os dados do registro compartilhado do Assistência Gerencial no Supabase.
+- Gerencial: `/ASSISTEMA-GERENCIAL/`
+- Resultados: `/ASSISTEMA-GERENCIAL/resultados/`
 
-A aba **Acompanhamento Gerencial** é a fonte oficial para os indicadores de Venda e Ativados.
+## Fonte oficial dos dados
 
-### Metas
-Origem:
+O AV Resultados usa o **Acompanhamento Gerencial** como fonte de Venda e Ativados.
 
-`dados.gerencial.distribuicoes[AAAA-MM][AAAA-MM-DD]`
+- `gerencial.distribuicoes[AAAA-MM][AAAA-MM-DD].venda` → meta diária de Venda
+- `gerencial.distribuicoes[AAAA-MM][AAAA-MM-DD].ativados` → meta diária de Ativados
+- soma da distribuição do mês → metas mensais
+- `gerencial.resultados[]` → Venda e Ativados realizados
+- `funcionarios[]` → colaboradores/operadores
 
-Campos utilizados:
-- `venda` — meta de Venda do dia;
-- `ativados` — meta de Ativados do dia.
+## Leitura em duas camadas
 
-No AV Resultados:
-- Meta de Venda do dia = `venda` da data;
-- Meta mensal de Venda = soma de `venda` de todas as datas do mês;
-- Meta de Ativados do dia = `ativados` da data;
-- Meta mensal de Ativados = soma de `ativados` de todas as datas do mês.
+1. Cache oficial do Gerencial no mesmo domínio:
+   - `adminGerencialLojaV7_gerencial_compartilhados_v1_cache`
+   - `adminGerencialLojaV7_gerencial_compartilhados_v1_base_sync`
+2. Supabase:
+   - tabela `assistencia_gerencial`
+   - linha `gerencial_compartilhados_v1`
 
-### Resultados realizados
-Origem:
+A linha `dados_compartilhados_v1` permanece somente como fallback legado.
 
-`dados.gerencial.resultados[]`
+## Atualização
 
-Campos utilizados:
-- `data` — data do resultado;
-- `venda` / `realizado` / `vendas` — Venda realizada;
-- `ativados` — Ativados realizados;
-- `meta` — fallback da meta de Venda quando não existir distribuição;
-- `metaAtivados` — fallback da meta de Ativados quando não existir distribuição.
-
-No AV Resultados:
-- Venda realizada do dia = resultado lançado para a mesma data;
-- Venda acumulada do mês = soma dos resultados lançados no mês;
-- Ativados do dia = resultado lançado para a mesma data;
-- Ativados acumulados = soma dos resultados lançados no mês.
-
-A Distribuição tem prioridade sobre os campos `meta` e `metaAtivados` presentes em Resultado Comercial.
-
-## Colaboradores
-
-O cadastro de colaboradores continua vindo da lista `funcionarios` compartilhada pelo Gerencial. O AV Resultados não deve manter uma segunda lista operacional independente.
-
-## Indicadores exclusivos do AV Resultados
-
-Continuam sendo controlados pelo próprio AV Resultados:
-- PF e produtos financeiros;
-- PCJ;
-- GAME;
-- AV Premia;
-- percentuais individuais e demais lançamentos específicos do módulo Resultados.
-
-## Sincronização
-
-O AV Resultados consulta o registro `gerencial_compartilhados_v1` da tabela `assistencia_gerencial` e assina alterações em tempo real. Quando o Acompanhamento Gerencial é salvo, o Resultados reaplica metas e resultados vindos do Gerencial.
-
-
-## Caminho oficial do AV Resultados
-
-O módulo AV Resultados está publicado dentro deste mesmo repositório, em `resultados/index.html`.
-
-- GitHub: `ASSISTEMA-GERENCIAL > resultados > index.html`
-- GitHub Pages: `https://lojasavenida2424-svg.github.io/ASSISTEMA-GERENCIAL/resultados/`
-- Escopo PWA: `/ASSISTEMA-GERENCIAL/resultados/`
-
-Os atalhos do Gerencial e do Comunicação AV usam a URL canônica acima para não depender da pasta de origem da página que abriu o módulo.
+O Resultados sincroniza o Gerencial em toda inicialização. Também observa alterações do `localStorage` entre abas e reaplica os dados quando a aba volta a ficar visível.

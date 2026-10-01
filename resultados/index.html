@@ -5568,6 +5568,10 @@
     const MANAGEMENT_TABLE = "assistencia_gerencial";
     const MANAGEMENT_SHARED_ROW = "gerencial_compartilhados_v1";
     const MANAGEMENT_LEGACY_SHARED_ROW = "dados_compartilhados_v1";
+    const MANAGEMENT_LOCAL_CACHE_KEYS = Object.freeze([
+      "adminGerencialLojaV7_gerencial_compartilhados_v1_cache",
+      "adminGerencialLojaV7_gerencial_compartilhados_v1_base_sync"
+    ]);
     const EMPLOYEE_CACHE_KEY = "av_resultados_funcionarios_gerencial_cache";
     const MANAGEMENT_GOALS_CACHE_KEY = "av_resultados_metas_gerencial_cache";
 
@@ -5698,7 +5702,7 @@
     const CLOUD_RETRY_DELAYS = [900, 2500, 7000, 15000];
     const RECOVERY_STORAGE_KEY = "av_resultados_operadores_recovery_v1";
     const PERSISTENCE_STARTUP_TIMEOUT = 4500;
-    const EMPLOYEE_SYNC_TIMEOUT = 3500;
+    const EMPLOYEE_SYNC_TIMEOUT = 9000;
     let persistenceReady = false;
     let persistenceReadyResolve = null;
     const persistenceReadyPromise = new Promise(resolve => {
@@ -7536,7 +7540,8 @@
           access:accessFromRole(refreshedRole)
         };
       }
-      setEmployeeSyncStatus(`${employees.length} funcionários • ${source === "online" ? "Acompanhamento Gerencial online" : "cache do Gerencial"}`, source === "online" ? "online" : "offline");
+      const sourceLabel = source === "online" ? "Acompanhamento Gerencial online" : source === "local" ? "Gerencial neste navegador" : "cache do Gerencial";
+      setEmployeeSyncStatus(`${employees.length} funcionários • ${sourceLabel}`, source === "online" || source === "local" ? "online" : "offline");
       return true;
     }
 
@@ -7716,8 +7721,35 @@
       return employeesApplied || goalsApplied;
     }
 
+    function readManagementPayloadFromLocalStorage(){
+      for(const key of MANAGEMENT_LOCAL_CACHE_KEYS){
+        try{
+          const raw = safeStorageGet(key);
+          if(!raw) continue;
+          const parsed = JSON.parse(raw);
+          if(parsed && typeof parsed === "object" && (Array.isArray(parsed.funcionarios) || parsed.gerencial)){
+            return { payload:parsed, key };
+          }
+        }catch(error){
+          console.warn(`Cache local do Gerencial inválido (${key}):`, error);
+        }
+      }
+      return null;
+    }
+
+    function applyManagementLocalBridge(){
+      const local = readManagementPayloadFromLocalStorage();
+      if(!local) return false;
+      const applied = applyManagementPayload(local.payload, "local");
+      if(applied){
+        setEmployeeSyncStatus(`${employees.length} funcionários • dados locais do Gerencial`, "online");
+      }
+      return applied;
+    }
+
     async function loadEmployeesFromManagement(){
       setEmployeeSyncStatus("Sincronizando Gerencial");
+      let restored = applyManagementLocalBridge();
       try{
         if(!window.supabase) throw new Error("Biblioteca do Supabase indisponível");
         managementClient = managementClient || window.supabase.createClient(
@@ -7753,7 +7785,6 @@
         return true;
       }catch(error){
         console.warn("Não foi possível carregar dados do Assistência Gerencial:", error);
-        let restored = false;
 
         try{
           const cachedEmployees = JSON.parse(safeStorageGet(EMPLOYEE_CACHE_KEY) || "null");
@@ -7795,6 +7826,22 @@
         )
         .subscribe();
     }
+
+    window.addEventListener("storage", event => {
+      if(!MANAGEMENT_LOCAL_CACHE_KEYS.includes(String(event.key || ""))) return;
+      if(applyManagementLocalBridge()){
+        buildRecordOperatorOptions();
+        renderAllSafely();
+      }
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if(document.visibilityState !== "visible") return;
+      if(applyManagementLocalBridge()){
+        buildRecordOperatorOptions();
+        renderAllSafely();
+      }
+    });
 
     function pfTotal(rec){ return Number(rec.bolsa||0)+Number(rec.compra||0)+Number(rec.protecao||0)+Number(rec.sabadao||0)+Number(rec.sms||0)+Number(rec.vida||0); }
     function monthRecords(date = today()){ return db.records.filter(r => r.date.startsWith(monthPrefix(date))); }
@@ -10483,14 +10530,12 @@ ${fallbackText}`;
 
     async function initApp(){
       await withTimeout(persistenceReadyPromise, PERSISTENCE_STARTUP_TIMEOUT + 1000, true, "Inicialização dos dados");
+      if(!employeesLoaded) employees = mapManagementEmployees([]);
+      await withTimeout(loadEmployeesFromManagement(), EMPLOYEE_SYNC_TIMEOUT, false, "Sincronização do Gerencial");
       if(!employeesLoaded){
         employees = mapManagementEmployees([]);
-        await withTimeout(loadEmployeesFromManagement(), EMPLOYEE_SYNC_TIMEOUT, false, "Sincronização de funcionários");
-        if(!employeesLoaded){
-          employees = mapManagementEmployees([]);
-          employeesLoaded = true;
-          setEmployeeSyncStatus(`${employees.length} funcionários • lista local`, "offline");
-        }
+        employeesLoaded = true;
+        setEmployeeSyncStatus(`${employees.length} funcionários • lista de segurança`, "offline");
       }
       const own = getEmployee(currentUser.operator);
       if(own){
