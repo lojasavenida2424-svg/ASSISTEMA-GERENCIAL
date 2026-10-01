@@ -18,6 +18,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="./icons/favicon-16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
   <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="canonical" href="https://lojasavenida2424-svg.github.io/ASSISTEMA-GERENCIAL/resultados/">
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
@@ -15200,7 +15201,7 @@ ${fallbackText}`;
 <script id="av-resultados-pwa-register">
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw-pwa.js').catch(err => {
+      navigator.serviceWorker.register('./sw-pwa.js', { scope: './' }).catch(err => {
         console.warn('PWA Service Worker indisponível:', err);
       });
     });

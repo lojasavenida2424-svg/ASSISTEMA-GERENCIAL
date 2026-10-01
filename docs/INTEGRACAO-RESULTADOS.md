@@ -57,3 +57,14 @@ Continuam sendo controlados pelo próprio AV Resultados:
 ## Sincronização
 
 O AV Resultados consulta o registro `gerencial_compartilhados_v1` da tabela `assistencia_gerencial` e assina alterações em tempo real. Quando o Acompanhamento Gerencial é salvo, o Resultados reaplica metas e resultados vindos do Gerencial.
+
+
+## Caminho oficial do AV Resultados
+
+O módulo AV Resultados está publicado dentro deste mesmo repositório, em `resultados/index.html`.
+
+- GitHub: `ASSISTEMA-GERENCIAL > resultados > index.html`
+- GitHub Pages: `https://lojasavenida2424-svg.github.io/ASSISTEMA-GERENCIAL/resultados/`
+- Escopo PWA: `/ASSISTEMA-GERENCIAL/resultados/`
+
+Os atalhos do Gerencial e do Comunicação AV usam a URL canônica acima para não depender da pasta de origem da página que abriu o módulo.

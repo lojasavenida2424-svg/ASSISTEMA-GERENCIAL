@@ -1,4 +1,4 @@
-const CACHE_NAME = 'av-resultados-v59-integrado';
+const CACHE_NAME = 'av-resultados-v60-caminho-gerencial';
 const APP_SHELL = [
   './',
   './index.html',
