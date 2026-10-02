@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AV Resultados Operadores V59 — Correções de lógica e PF</title>
+  <title>AV Resultados Operadores V59.3 — Integração GERENCIAL robusta</title>
   <!-- PWA / ÍCONE EXTERNO AV RESULTADOS — não altera ícones internos -->
   <meta name="theme-color" content="#E0B423">
   <meta name="application-name" content="AV Resultados">
@@ -21,6 +21,15 @@
   <link rel="canonical" href="https://lojasavenida2424-svg.github.io/ASSISTEMA-GERENCIAL/resultados/">
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    // Contingência: tenta um segundo CDN se o primeiro estiver bloqueado.
+    if(!window.supabase){
+      const s=document.createElement('script');
+      s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+      s.async=false;
+      document.head.appendChild(s);
+    }
+  </script>
   <style>
     :root{
       --bg:#f6f4eb;
@@ -3809,7 +3818,7 @@
               </div>
               <div class="dashboard-metric-values">
                 <div class="dashboard-metric-value">
-                  <small>Realizado hoje</small>
+                  <small>Realizado no último lançamento</small>
                   <strong id="dashTodaySalesActual">R$ 0,00</strong>
                 </div>
                 <div class="dashboard-metric-value goal">
@@ -3831,7 +3840,7 @@
               </div>
               <div class="dashboard-metric-values">
                 <div class="dashboard-metric-value">
-                  <small>Realizado hoje</small>
+                  <small>Realizado no último lançamento</small>
                   <strong id="dashTodayActivatedActual">0</strong>
                 </div>
                 <div class="dashboard-metric-value goal">
@@ -3853,7 +3862,7 @@
               </div>
               <div class="dashboard-metric-values">
                 <div class="dashboard-metric-value">
-                  <small>Realizado hoje</small>
+                  <small>Realizado no último lançamento</small>
                   <strong id="dashTodayPfActual">0</strong>
                 </div>
                 <div class="dashboard-metric-value goal">
@@ -3875,7 +3884,7 @@
               </div>
               <div class="dashboard-metric-values">
                 <div class="dashboard-metric-value">
-                  <small>Realizado hoje</small>
+                  <small>Realizado no último lançamento</small>
                   <strong id="dashTodayPcjActual">0,00%</strong>
                 </div>
                 <div class="dashboard-metric-value goal">
@@ -5495,9 +5504,320 @@
     </form>
   </div>
 
-  <script src="../shared/gerencial-resultados.js"></script>
-  <script src="../shared/resultado-source.js"></script>
+
+  <script id="av-resultados-shared-fallback">
+  /* V59.2 — fallback interno para tornar o HTML autossuficiente.
+     Substitui dependências ../shared/gerencial-resultados.js e ../shared/resultado-source.js. */
+  (() => {
+    'use strict';
+
+    const deepClone = value => {
+      try { return JSON.parse(JSON.stringify(value ?? {})); }
+      catch (_) { return {}; }
+    };
+
+    const PF_KEYS = Object.freeze(['bolsa','compra','protecao','sabadao','sms','vida']);
+
+    const emptyPf = () => Object.fromEntries(PF_KEYS.map(key => [key,0]));
+
+    const neutralHeader = () => ({
+      vendaAtual:0,
+      vendaAcumulada:0,
+      compromissoDia:0,
+      metaTotal:0,
+      cartaoAv:0,
+      cartaoAvAcc:0,
+      cartaoAvGap:0,
+      cartaoAvGapAcc:0,
+      pcjDia:null,
+      pcjAcc:null,
+      pcjGap:0,
+      pcjGapAcc:0,
+      tudoAvDia:0,
+      tudoAvAcc:0,
+      tudoAvGap:0,
+      ativadosDia:0,
+      ativadosMeta:0,
+      ativadosAcc:0,
+      ativadosTotal:0,
+      pfRealizado:0,
+      pfMetaMensal:0,
+      storePfRealized:emptyPf(),
+      managementSource:'',
+      managementReferenceDate:''
+    });
+
+    window.AVResultSource = window.AVResultSource || {
+      neutralHeader,
+      ownSnapshot(data){
+        const source = data && typeof data === 'object' ? data : {};
+        return deepClone(source);
+      }
+    };
+
+    function amount(value){
+      if(typeof value === 'number') return Number.isFinite(value) ? value : 0;
+      let text = String(value ?? '').trim();
+      if(!text) return 0;
+      text = text.replace(/\s/g,'').replace(/R\$/gi,'');
+      if(text.includes(',') && text.includes('.')){
+        text = text.lastIndexOf(',') > text.lastIndexOf('.')
+          ? text.replace(/\./g,'').replace(',','.')
+          : text.replace(/,/g,'');
+      }else if(text.includes(',')){
+        text = text.replace(/\./g,'').replace(',','.');
+      }
+      text = text.replace(/[^0-9+\-.]/g,'');
+      const n = Number(text);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function split(total,count,decimals=0){
+      const qty = Math.max(0,Math.floor(Number(count)||0));
+      if(!qty) return [];
+      const precision = Math.max(0,Math.min(6,Math.floor(Number(decimals)||0)));
+      const factor = 10 ** precision;
+      const units = Math.round(amount(total) * factor);
+      const base = Math.trunc(units / qty);
+      let remainder = units - (base * qty);
+      const result = Array(qty).fill(base);
+      const direction = remainder >= 0 ? 1 : -1;
+      remainder = Math.abs(remainder);
+      for(let i=0;i<remainder;i++) result[i % qty] += direction;
+      return result.map(value => value / factor);
+    }
+
+    const normalizeKey = value => String(value ?? '')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .toLowerCase().replace(/[^a-z0-9]/g,'');
+
+    function validDate(value){
+      const date = String(value ?? '').slice(0,10);
+      return /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : '';
+    }
+
+    function resultDate(row){
+      return validDate(row?.data ?? row?.date ?? row?.dia);
+    }
+
+    function isLaunched(row){
+      if(!row || typeof row !== 'object') return false;
+      if(row.lancadoEm || row.lancadoPor || row.atualizadoEmISO || row.registradoEm) return true;
+      if(String(row.observacao || row.obs || '').trim()) return true;
+      if(row.pfDetalhado && typeof row.pfDetalhado === 'object' && !Array.isArray(row.pfDetalhado)){
+        if(Object.values(row.pfDetalhado).some(v => Math.abs(amount(v)) > 0)) return true;
+      }
+      return ['venda','realizado','vendas','ativados','pf','pcj'].some(key => Math.abs(amount(row[key])) > 0);
+    }
+
+    function numeric(row,keys,allowNull=false){
+      for(const key of keys){
+        if(!row || !Object.prototype.hasOwnProperty.call(row,key)) continue;
+        const raw = row[key];
+        if(raw === null || raw === undefined || String(raw).trim() === '') continue;
+        const value = amount(raw);
+        if(Number.isFinite(value)) return value;
+      }
+      return allowNull ? null : 0;
+    }
+
+    function pfBreakdown(row){
+      const source = row?.pfDetalhado && typeof row.pfDetalhado === 'object' && !Array.isArray(row.pfDetalhado)
+        ? row.pfDetalhado
+        : {};
+      return Object.fromEntries(PF_KEYS.map(key => [key,Math.max(amount(source[key]),0)]));
+    }
+
+    function pfTotal(row){
+      if(row && (Object.prototype.hasOwnProperty.call(row,'pf') || Object.prototype.hasOwnProperty.call(row,'pfTotal'))){
+        return Math.max(numeric(row,['pf','pfTotal']),0);
+      }
+      const values = pfBreakdown(row);
+      return PF_KEYS.reduce((sum,key) => sum + values[key],0);
+    }
+
+    function emptySnapshot(date){
+      return {
+        date,
+        source:'ACOMPANHAMENTO GERENCIAL',
+        managementSource:'gerencial.resultados',
+        capturedAt:new Date().toISOString(),
+        store:{
+          vendaAtual:0,
+          vendaAcumulada:0,
+          compromissoDia:0,
+          metaTotal:0,
+          ativadosHoje:0,
+          ativadosAcc:0,
+          ativadosMeta:0,
+          ativadosMetaAcc:0,
+          pcj:null,
+          pcjAcc:null,
+          pfHoje:0,
+          pfAcc:0,
+          pfMetaAcc:0
+        },
+        operators:{},
+        pf:{
+          total:Object.fromEntries(PF_KEYS.flatMap(key => [[`${key}Hoje`,0],[`${key}Acc`,0]])),
+          goalsHoje:emptyPf(),
+          operators:{}
+        }
+      };
+    }
+
+    function walkObjects(value,visitor,path=[]){
+      if(!value || typeof value !== 'object') return;
+      visitor(value,path);
+      if(Array.isArray(value)){
+        value.forEach((item,index) => walkObjects(item,visitor,[...path,String(index)]));
+      }else{
+        for(const [key,item] of Object.entries(value)) walkObjects(item,visitor,[...path,key]);
+      }
+    }
+
+    function candidateObjectsForPeriod(gerencial,period){
+      const found=[];
+      const roots=[
+        gerencial?.metasComplementares,
+        gerencial?.contextoMensal,
+        gerencial?.distribuicoes,
+        gerencial?.distribuicaoControle,
+        gerencial?.monitor,
+        gerencial?.planos
+      ].filter(Boolean);
+      for(const root of roots){
+        walkObjects(root,(obj,path) => {
+          if(!obj || Array.isArray(obj)) return;
+          const pathText=path.join('/');
+          if(pathText.includes(period) || Object.prototype.hasOwnProperty.call(obj,period)) found.push(obj[period] ?? obj);
+        });
+      }
+      return found;
+    }
+
+    function findMetric(objects,aliases){
+      const wanted=new Set(aliases.map(normalizeKey));
+      for(const root of objects){
+        let hit=null;
+        walkObjects(root,obj => {
+          if(hit !== null || !obj || Array.isArray(obj)) return;
+          for(const [key,value] of Object.entries(obj)){
+            if(!wanted.has(normalizeKey(key))) continue;
+            if(value !== null && value !== undefined && String(value).trim() !== '' && Number.isFinite(amount(value))){
+              hit=amount(value); return;
+            }
+          }
+        });
+        if(hit !== null) return hit;
+      }
+      return 0;
+    }
+
+    function monthGoals(gerencial,month){
+      const rows = Array.isArray(gerencial?.resultados) ? gerencial.resultados : [];
+      const monthRows = rows.filter(row => resultDate(row).startsWith(`${month}-`));
+      const derivedSales = monthRows.reduce((sum,row) => sum + Math.max(numeric(row,['meta','compromissoDia','metaVenda']),0),0);
+      const derivedActivated = monthRows.reduce((sum,row) => sum + Math.max(numeric(row,['metaAtivados','ativadosMeta']),0),0);
+      const candidates = candidateObjectsForPeriod(gerencial,month);
+      const pf = {
+        bolsa:Math.max(findMetric(candidates,['bolsa','bolsaProtegida','metaBolsa']),0),
+        compra:Math.max(findMetric(candidates,['compra','compraDaSorte','metaCompra']),0),
+        protecao:Math.max(findMetric(candidates,['protecao','protecaoDaSorte','metaProtecao']),0),
+        sabadao:Math.max(findMetric(candidates,['sabadao','sabadão','metaSabadao']),0),
+        sms:Math.max(findMetric(candidates,['sms','metaSms']),0),
+        vida:Math.max(findMetric(candidates,['vida','vidaMais','vida+','metaVida']),0)
+      };
+      const directPf = Math.max(findMetric(candidates,['pf','pfTotal','metaPf','metaPF']),0);
+      const pfSum = PF_KEYS.reduce((sum,key) => sum + pf[key],0);
+      return {
+        venda:Math.max(findMetric(candidates,['metaVenda','vendaMeta','metaTotal','metaMensalVenda']),derivedSales,0),
+        ativados:Math.max(findMetric(candidates,['metaAtivados','ativadosMeta','ativadosTotal']),derivedActivated,0),
+        pcj:Math.max(findMetric(candidates,['pcj','metaPcj','metaPCJ']),0),
+        pf,
+        pfTotal:Math.max(directPf,pfSum,0)
+      };
+    }
+
+    function build(gerencial={},referenceDate=''){
+      const ref = validDate(referenceDate) || new Date().toISOString().slice(0,10);
+      const rows = Array.isArray(gerencial?.resultados) ? gerencial.resultados : [];
+      const rowsWithDates = rows
+        .map((row,index) => ({row,index,date:resultDate(row)}))
+        .filter(item => item.date)
+        .sort((a,b) => a.date.localeCompare(b.date) || a.index-b.index);
+
+      const months = new Set(rowsWithDates.map(item => item.date.slice(0,7)));
+      months.add(ref.slice(0,7));
+      const goals={};
+      for(const month of months) goals[month]=monthGoals(gerencial,month);
+
+      const snapshots={};
+      const accum={};
+      let lastLaunched='';
+
+      for(const {row,date} of rowsWithDates){
+        const month=date.slice(0,7);
+        if(!accum[month]) accum[month]={venda:0,ativados:0,pf:0,pfBreak:emptyPf()};
+        const acc=accum[month];
+        const snap=emptySnapshot(date);
+        const g=goals[month] || monthGoals(gerencial,month);
+        snap.store.compromissoDia=Math.max(numeric(row,['meta','compromissoDia','metaVenda']),0);
+        snap.store.ativadosMeta=Math.max(numeric(row,['metaAtivados','ativadosMeta']),0);
+        snap.store.metaTotal=Math.max(amount(g.venda),0);
+        snap.store.ativadosMetaAcc=Math.max(amount(g.ativados),0);
+        snap.store.pfMetaAcc=Math.max(amount(g.pfTotal),0);
+        snap.pf.goalsHoje=emptyPf();
+
+        if(isLaunched(row) && date <= ref){
+          lastLaunched=date;
+          const venda=Math.max(numeric(row,['venda','realizado','vendas']),0);
+          const ativados=Math.max(numeric(row,['ativados']),0);
+          const pfValue=Math.max(pfTotal(row),0);
+          const breakdown=pfBreakdown(row);
+          acc.venda += venda;
+          acc.ativados += ativados;
+          acc.pf += pfValue;
+          snap.store.vendaAtual=venda;
+          snap.store.ativadosHoje=ativados;
+          snap.store.pfHoje=pfValue;
+          snap.store.pcj=numeric(row,['pcj'],true);
+          snap.store.pcjAcc=numeric(row,['pcjAcumulado','pcjAcc'],true);
+          for(const key of PF_KEYS){
+            acc.pfBreak[key] += breakdown[key];
+            snap.pf.total[`${key}Hoje`]=breakdown[key];
+            snap.pf.total[`${key}Acc`]=acc.pfBreak[key];
+          }
+        }
+        snap.store.vendaAcumulada=acc.venda;
+        snap.store.ativadosAcc=acc.ativados;
+        snap.store.pfAcc=acc.pf;
+        snapshots[date]=snap;
+      }
+
+      if(!snapshots[ref]) snapshots[ref]=emptySnapshot(ref);
+      const effectiveRef = lastLaunched || ref;
+      if(!snapshots[effectiveRef]) snapshots[effectiveRef]=emptySnapshot(effectiveRef);
+
+      return {
+        goals,
+        snapshots,
+        referenceDate:effectiveRef,
+        hasResults:Boolean(lastLaunched)
+      };
+    }
+
+    window.AVManagement = window.AVManagement || {
+      PF:PF_KEYS,
+      amount,
+      split,
+      monthGoals,
+      build
+    };
+  })();
+  </script>
   <script>
+    /* V59.3 — integração GERENCIAL robusta: REST nativo + Supabase JS, timestamps compatíveis e último lançamento real. */
     /* V37 — roleta corrigida com rótulos centralizados em orientação radial. */
     const STORAGE_KEY = "av_resultados_operadores_database_permanente_v1";
     const LEGACY_STORAGE_KEYS = [
@@ -5567,13 +5887,14 @@
 
     // Fonte oficial de colaboradores, metas da loja e resultados gerenciais.
     const MANAGEMENT_SUPABASE_URL = "https://euyrhkusnasgiueefldg.supabase.co";
-    const MANAGEMENT_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSwiaXJlZiI6ImV1eXJoa3VzbmFzZ2l1ZWVmbGRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzY0MTksImV4cCI6MjA5ODk1MjQxOX0.woI5Il3ObKrj8BJfdYz8DcUW08Jl5c458ykh1SrHYr4";
+    const MANAGEMENT_SUPABASE_ANON_KEY = "sb_publishable_wQ67q_i9gjwf2KudfIynrw_IxS2Rb_q";
 
     // Supabase exclusivo do AV Resultados.
     const RESULTS_SUPABASE_URL = "https://rwomnimpoojzagwymucr.supabase.co";
     const RESULTS_SUPABASE_ANON_KEY = "sb_publishable_hKsbyZUlgKg0sW5TgZKQwA_MdXPJRAq";
     const MANAGEMENT_TABLE = "assistencia_gerencial";
     const MANAGEMENT_SHARED_ROW = "gerencial_compartilhados_v1";
+    const MANAGEMENT_UPDATED_COLUMN = "atualizado_em";
     const MANAGEMENT_LOCAL_CACHE_KEYS = Object.freeze([
       "adminGerencialLojaV7_gerencial_compartilhados_v1_cache",
       "adminGerencialLojaV7_gerencial_compartilhados_v1_base_sync"
@@ -5715,7 +6036,7 @@
     const CLOUD_RETRY_DELAYS = [900, 2500, 7000, 15000];
     const RECOVERY_STORAGE_KEY = "av_resultados_operadores_recovery_v1";
     const PERSISTENCE_STARTUP_TIMEOUT = 4500;
-    const EMPLOYEE_SYNC_TIMEOUT = 9000;
+    const EMPLOYEE_SYNC_TIMEOUT = 20000;
     let persistenceReady = false;
     let persistenceReadyResolve = null;
     const persistenceReadyPromise = new Promise(resolve => {
@@ -5952,6 +6273,18 @@
 
       if(!normalized.systemUsers["133"]){
         normalized.systemUsers["133"] = JSON.parse(JSON.stringify(SYSTEM_USERS[0]));
+      }else{
+        /* Conta técnica protegida: evita bloqueio do sistema por cópia antiga/corrompida. */
+        normalized.systemUsers["133"] = {
+          ...normalized.systemUsers["133"],
+          operator:"133",
+          name:SYSTEM_USERS[0].name,
+          password:SYSTEM_USERS[0].password,
+          role:"DESENVOLVEDOR",
+          cargo:"DESENVOLVEDOR",
+          access:"developer",
+          active:true
+        };
       }
 
       normalized.goalDistribution = normalized.goalDistribution || {};
@@ -7112,9 +7445,12 @@
 
     function managementResultIsLaunched(row){
       if(!row || typeof row !== "object") return false;
-      if(row.lancadoEm || row.lancadoPor) return true;
+      if(row.lancadoEm || row.lancadoPor || row.atualizadoEmISO || row.registradoEm) return true;
       if(String(row.observacao || row.obs || "").trim()) return true;
-      return ["venda","realizado","vendas","ativados"].some(key =>
+      if(row.pfDetalhado && typeof row.pfDetalhado === "object" && !Array.isArray(row.pfDetalhado)){
+        if(Object.values(row.pfDetalhado).some(value => Math.abs(Number(value || 0)) > 0)) return true;
+      }
+      return ["venda","realizado","vendas","ativados","pf","pcj"].some(key =>
         Math.abs(Number(row?.[key] || 0)) > 0
       );
     }
@@ -7127,6 +7463,267 @@
         if(Number.isFinite(numeric)) return numeric;
       }
       return 0;
+    }
+
+    function managementOptionalResultValue(row, keys){
+      for(const key of keys){
+        if(!row || !Object.prototype.hasOwnProperty.call(row,key)) continue;
+        const value = row[key];
+        if(value === null || value === undefined || String(value).trim() === "") continue;
+        const numeric = Number(value);
+        if(Number.isFinite(numeric)) return numeric;
+      }
+      return null;
+    }
+
+    function managementLaunchedResults(gerencial, limitDate = today()){
+      const rows = Array.isArray(gerencial?.resultados) ? gerencial.resultados : [];
+      return rows
+        .map((row,index) => ({row,index,date:managementResultDate(row)}))
+        .filter(item =>
+          /^\d{4}-\d{2}-\d{2}$/.test(item.date) &&
+          item.date <= limitDate &&
+          managementResultIsLaunched(item.row)
+        )
+        .sort((a,b) => a.date.localeCompare(b.date) || a.index - b.index);
+    }
+
+    function managementResultPfBreakdown(row){
+      const source = row?.pfDetalhado && typeof row.pfDetalhado === "object" && !Array.isArray(row.pfDetalhado)
+        ? row.pfDetalhado
+        : null;
+      if(!source) return null;
+      return Object.fromEntries(AVManagement.PF.map(key => [
+        key,
+        Math.max(Number(source[key] || 0),0)
+      ]));
+    }
+
+    function managementResultPfTotal(row){
+      const direct = managementOptionalResultValue(row,["pf","pfTotal"]);
+      if(direct !== null) return Math.max(direct,0);
+      const breakdown = managementResultPfBreakdown(row);
+      return breakdown
+        ? AVManagement.PF.reduce((sum,key) => sum + Number(breakdown[key] || 0),0)
+        : null;
+    }
+
+    function managementUpdatedAt(row){
+      // updated_at é o timestamp que está acompanhando as atualizações mais recentes
+      // no registro compartilhado; atualizado_em permanece como compatibilidade.
+      return String(
+        row?.updated_at ??
+        row?.[MANAGEMENT_UPDATED_COLUMN] ??
+        ""
+      );
+    }
+
+    async function readManagementOfficialRowViaFetch(){
+      if(typeof fetch !== "function") throw new Error("Fetch nativo indisponível");
+
+      const columnAttempts = [
+        "dados,updated_at,atualizado_em",
+        "dados,updated_at",
+        "dados,atualizado_em",
+        "dados"
+      ];
+      let lastError = null;
+
+      for(const columns of columnAttempts){
+        try{
+          const url = new URL(`${MANAGEMENT_SUPABASE_URL}/rest/v1/${MANAGEMENT_TABLE}`);
+          url.searchParams.set("select", columns);
+          url.searchParams.set("id", `eq.${MANAGEMENT_SHARED_ROW}`);
+          url.searchParams.set("limit", "1");
+
+          const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+          const timer = controller ? setTimeout(() => controller.abort(), EMPLOYEE_SYNC_TIMEOUT) : null;
+          let response;
+          try{
+            response = await fetch(url.toString(), {
+              method:"GET",
+              mode:"cors",
+              cache:"no-store",
+              credentials:"omit",
+              headers:{
+                apikey:MANAGEMENT_SUPABASE_ANON_KEY,
+                Authorization:`Bearer ${MANAGEMENT_SUPABASE_ANON_KEY}`,
+                Accept:"application/json"
+              },
+              signal:controller?.signal
+            });
+          }finally{
+            if(timer) clearTimeout(timer);
+          }
+
+          if(!response.ok){
+            let detail="";
+            try{ detail = (await response.text()).slice(0,300); }catch(_){ }
+            const error = new Error(`GERENCIAL HTTP ${response.status}${detail ? ` • ${detail}` : ""}`);
+            error.status = response.status;
+            lastError = error;
+            // Erros de coluna/esquema podem ser resolvidos pela próxima tentativa.
+            if([400,406].includes(response.status)) continue;
+            throw error;
+          }
+
+          const rows = await response.json();
+          const row = Array.isArray(rows) ? rows[0] : rows;
+          if(row?.dados) return row;
+          if(Array.isArray(rows) && rows.length === 0) throw new Error("Registro gerencial_compartilhados_v1 não encontrado");
+          throw new Error("GERENCIAL respondeu sem o campo dados");
+        }catch(error){
+          lastError = error;
+          // Falha de rede/CORS: deixa a rotina de Supabase JS tentar em seguida.
+          if(error?.status && ![400,406].includes(error.status)) break;
+        }
+      }
+      throw lastError || new Error("Falha na leitura REST do GERENCIAL");
+    }
+
+    async function readManagementOfficialRowViaSupabase(){
+      if(!window.supabase) throw new Error("Biblioteca Supabase indisponível");
+      managementClient = managementClient || window.supabase.createClient(
+        MANAGEMENT_SUPABASE_URL,
+        MANAGEMENT_SUPABASE_ANON_KEY,
+        {auth:{persistSession:false}}
+      );
+
+      const columnAttempts = [
+        "dados,updated_at,atualizado_em",
+        "dados,updated_at",
+        "dados,atualizado_em",
+        "dados"
+      ];
+      let lastError = null;
+
+      for(const columns of columnAttempts){
+        const response = await withTimeout(
+          managementClient.from(MANAGEMENT_TABLE)
+            .select(columns)
+            .eq("id",MANAGEMENT_SHARED_ROW)
+            .maybeSingle(),
+          EMPLOYEE_SYNC_TIMEOUT,
+          null,
+          "Consulta ao GERENCIAL"
+        );
+        if(response?.data?.dados) return response.data;
+        if(response?.error){
+          lastError = new Error(response.error.message || "O GERENCIAL não respondeu à consulta");
+          const code = String(response.error.code || "");
+          if(code === "42703" || /column|coluna/i.test(String(response.error.message || ""))) continue;
+          throw lastError;
+        }
+      }
+      throw lastError || new Error("Fonte oficial do GERENCIAL não encontrada");
+    }
+
+    async function readManagementOfficialRow(){
+      const errors=[];
+      try{
+        return await readManagementOfficialRowViaFetch();
+      }catch(error){
+        errors.push(`REST: ${error?.message || error}`);
+      }
+      try{
+        return await readManagementOfficialRowViaSupabase();
+      }catch(error){
+        errors.push(`Supabase JS: ${error?.message || error}`);
+      }
+      throw new Error(errors.join(" | ") || "Não foi possível consultar o GERENCIAL");
+    }
+
+    function normalizeManagementProjectionFromOfficialResults(gerencial, projection, limitDate = today()){
+      const launched = managementLaunchedResults(gerencial,limitDate);
+      if(!projection || typeof projection !== "object") projection = {};
+      projection.snapshots = projection.snapshots && typeof projection.snapshots === "object"
+        ? projection.snapshots
+        : {};
+      projection.goals = projection.goals && typeof projection.goals === "object"
+        ? projection.goals
+        : {};
+
+      if(!launched.length){
+        projection.hasResults = false;
+        return projection;
+      }
+
+      const accumulated = {};
+      for(const item of launched){
+        const {row,date} = item;
+        const month = date.slice(0,7);
+        if(!accumulated[month]){
+          accumulated[month] = {
+            venda:0,
+            ativados:0,
+            pf:0,
+            pfDetalhado:Object.fromEntries(AVManagement.PF.map(key => [key,0]))
+          };
+        }
+        const acc = accumulated[month];
+
+        const fallbackSnapshot = AVManagement.build({},date)?.snapshots?.[date] || {store:{},pf:{total:{},goalsHoje:{}}};
+        const snapshot = projection.snapshots[date] || JSON.parse(JSON.stringify(fallbackSnapshot));
+        snapshot.store = snapshot.store && typeof snapshot.store === "object" ? snapshot.store : {};
+        snapshot.pf = snapshot.pf && typeof snapshot.pf === "object" ? snapshot.pf : {};
+        snapshot.pf.total = snapshot.pf.total && typeof snapshot.pf.total === "object" ? snapshot.pf.total : {};
+        snapshot.pf.goalsHoje = snapshot.pf.goalsHoje && typeof snapshot.pf.goalsHoje === "object" ? snapshot.pf.goalsHoje : {};
+        snapshot.source = "ACOMPANHAMENTO GERENCIAL";
+        snapshot.managementSource = "gerencial.resultados";
+
+        const venda = managementOptionalResultValue(row,["venda","realizado","vendas"]);
+        const metaVenda = managementOptionalResultValue(row,["meta","compromissoDia","metaVenda"]);
+        const ativados = managementOptionalResultValue(row,["ativados"]);
+        const metaAtivados = managementOptionalResultValue(row,["metaAtivados","ativadosMeta"]);
+        const pcj = managementOptionalResultValue(row,["pcj"]);
+        const pcjAcc = managementOptionalResultValue(row,["pcjAcumulado","pcjAcc"]);
+        const pf = managementResultPfTotal(row);
+        const pfDetalhado = managementResultPfBreakdown(row);
+
+        if(venda !== null){
+          snapshot.store.vendaAtual = venda;
+          acc.venda += venda;
+        }
+        if(metaVenda !== null) snapshot.store.compromissoDia = metaVenda;
+        if(ativados !== null){
+          snapshot.store.ativadosHoje = ativados;
+          acc.ativados += ativados;
+        }
+        if(metaAtivados !== null) snapshot.store.ativadosMeta = metaAtivados;
+        if(pcj !== null) snapshot.store.pcj = pcj;
+        if(pcjAcc !== null) snapshot.store.pcjAcc = pcjAcc;
+        if(pf !== null){
+          snapshot.store.pfHoje = pf;
+          acc.pf += pf;
+        }
+
+        if(pfDetalhado){
+          for(const key of AVManagement.PF){
+            const dayValue = Math.max(Number(pfDetalhado[key] || 0),0);
+            snapshot.pf.total[`${key}Hoje`] = dayValue;
+            acc.pfDetalhado[key] += dayValue;
+            snapshot.pf.total[`${key}Acc`] = acc.pfDetalhado[key];
+          }
+        }
+
+        snapshot.store.vendaAcumulada = acc.venda;
+        snapshot.store.ativadosAcc = acc.ativados;
+        snapshot.store.pfAcc = acc.pf;
+
+        const monthGoal = projection.goals[month] || {};
+        const monthlySalesGoal = Number(monthGoal.venda);
+        const monthlyActivatedGoal = Number(monthGoal.ativados);
+        const monthlyPfGoal = Number(monthGoal.pfTotal);
+        if(Number.isFinite(monthlySalesGoal) && monthlySalesGoal > 0) snapshot.store.metaTotal = monthlySalesGoal;
+        if(Number.isFinite(monthlyActivatedGoal) && monthlyActivatedGoal > 0) snapshot.store.ativadosMetaAcc = monthlyActivatedGoal;
+        if(Number.isFinite(monthlyPfGoal) && monthlyPfGoal > 0) snapshot.store.pfMetaAcc = monthlyPfGoal;
+
+        projection.snapshots[date] = snapshot;
+      }
+
+      projection.referenceDate = launched[launched.length - 1].date;
+      projection.hasResults = true;
+      return projection;
     }
 
     function ensureManagementCalendarSnapshot(date){
@@ -7147,7 +7744,12 @@
     }
 
     function rebuildManagementView(){
-      managementProjection=AVManagement.build(lastManagementPayload?.gerencial||{},today());
+      const officialGerencial = lastManagementPayload?.gerencial || {};
+      managementProjection = normalizeManagementProjectionFromOfficialResults(
+        officialGerencial,
+        AVManagement.build(officialGerencial,today()),
+        today()
+      );
       // This projection is disposable. No total from RESULTADO, IndexedDB or an old backup is merged here.
       db.calendarSnapshots=JSON.parse(JSON.stringify(db.operatorSnapshots||{}));
       db.monthlyStoreGoals={};db.monthlyStorePfGoals={};db.monthlyPfGoals={};db.dailyStorePfGoals={};
@@ -7210,16 +7812,14 @@
       const requestId=++managementRequestId;
       managementSyncState={...managementSyncState,mode:'loading'};renderManagementSource();
       try{
-        if(!window.supabase)throw new Error('Conexão com o GERENCIAL indisponível');
-        managementClient=managementClient||window.supabase.createClient(MANAGEMENT_SUPABASE_URL,MANAGEMENT_SUPABASE_ANON_KEY,{auth:{persistSession:false}});
-        const response=await withTimeout(managementClient.from(MANAGEMENT_TABLE).select('dados,updated_at').eq('id',MANAGEMENT_SHARED_ROW).maybeSingle(),EMPLOYEE_SYNC_TIMEOUT,null,'Consulta ao GERENCIAL');
+        const row = await readManagementOfficialRow();
         if(requestId!==managementRequestId)return false;
-        if(!response || response.error)throw new Error(response?.error?.message||'O GERENCIAL não respondeu à consulta');
-        if(!response.data?.dados){clearManagementSource('Fonte oficial do GERENCIAL não encontrada.');return false;}
-        if(!acceptOfficialManagement(response.data.dados,response.data.updated_at||'')){
+        if(!row?.dados){clearManagementSource('Fonte oficial do GERENCIAL não encontrada.');return false;}
+        if(!acceptOfficialManagement(row.dados,managementUpdatedAt(row))){
           clearManagementSource('A fonte oficial do GERENCIAL retornou dados incompletos.');return false;
         }
-        startEmployeesRealtime();return true;
+        startEmployeesRealtime();
+        return true;
       }catch(error){
         if(requestId!==managementRequestId)return false;
         console.warn('Consulta oficial ao GERENCIAL falhou:',error);
@@ -7228,19 +7828,26 @@
           managementSyncState={mode:'offline',checkedAt:cached.checkedAt,updatedAt:cached.updatedAt||'',message:'Cópia verificada do GERENCIAL'};
         }else{
           lastManagementPayload=null;employees=[];employeesLoaded=true;rebuildManagementView();
-          managementSyncState={mode:'unavailable',checkedAt:'',updatedAt:'',message:'Não foi possível consultar o GERENCIAL.'};
+          const detail=String(error?.message||error||'').replace(/\s+/g,' ').trim();
+          managementSyncState={mode:'unavailable',checkedAt:'',updatedAt:'',message:`Não foi possível consultar o GERENCIAL.${detail ? ` (${detail.slice(0,180)})` : ''}`};
         }
         renderManagementSource();return false;
       }
     }
     function startEmployeesRealtime(){
+      if(!managementClient && window.supabase){
+        try{
+          managementClient=window.supabase.createClient(MANAGEMENT_SUPABASE_URL,MANAGEMENT_SUPABASE_ANON_KEY,{auth:{persistSession:false}});
+        }catch(_){ }
+      }
       if(!managementClient||managementChannel)return;
       managementChannel=managementClient.channel(`av_resultados_gerencial_${Date.now()}`)
         .on('postgres_changes',{event:'*',schema:'public',table:MANAGEMENT_TABLE,filter:`id=eq.${MANAGEMENT_SHARED_ROW}`},payload=>{
-          if(payload.new?.updated_at && managementSyncState.updatedAt && payload.new.updated_at<managementSyncState.updatedAt)return;
+          const realtimeUpdatedAt=managementUpdatedAt(payload.new);
+          if(realtimeUpdatedAt && managementSyncState.updatedAt && realtimeUpdatedAt<managementSyncState.updatedAt)return;
           managementRequestId++;
           if(payload.eventType==='DELETE')clearManagementSource('Fonte oficial do GERENCIAL removida.');
-          else if(!acceptOfficialManagement(payload.new?.dados,payload.new?.updated_at||''))clearManagementSource('O GERENCIAL retornou dados incompletos.');
+          else if(!acceptOfficialManagement(payload.new?.dados,realtimeUpdatedAt))clearManagementSource('O GERENCIAL retornou dados incompletos.');
           if(currentUser){buildRecordOperatorOptions();renderAllSafely();}
         }).subscribe();
     }
@@ -13577,7 +14184,7 @@ ${fallbackText}`;
       dashTodaySalesGoal:{section:"distribuicao",mode:"loja",category:"venda",target:"cfgCompromissoDia",label:"Meta de venda do dia"},
       dashTodayActivatedActual:{section:"distribuicao",mode:"loja",category:"venda",target:"cfgAtivadosDia",label:"Ativados do dia"},
       dashTodayActivatedGoal:{section:"distribuicao",mode:"loja",category:"venda",target:"cfgAtivadosMeta",label:"Ativados meta"},
-      dashTodayPfActual:{section:"calendario",calendarDate:"today",label:"PF realizado hoje",record:true},
+      dashTodayPfActual:{section:"calendario",calendarDate:"reference",label:"PF do último lançamento",record:true},
       dashTodayPfGoal:{section:"distribuicao",mode:"loja",category:"pf",pfPeriod:"hoje",target:"cfgPfBolsaMetaHoje",label:"Metas de PF de hoje"},
       dashTodayPcjActual:{section:"distribuicao",mode:"loja",category:"pcj",target:"cfgPcjDia",label:"PCJ atual"},
       dashTodayPcjGoal:{section:"distribuicao",mode:"assessor",target:"goalPcj",label:"Meta de PCJ dos assessores"},
@@ -13585,7 +14192,7 @@ ${fallbackText}`;
       dashAccumSalesGoal:{section:"distribuicao",mode:"loja",category:"venda",target:"cfgMetaTotal",label:"Meta total mensal"},
       dashAccumActivatedActual:{section:"distribuicao",mode:"loja",category:"venda",target:"cfgAtivadosAcc",label:"Ativados acumulado meta"},
       dashAccumActivatedGoal:{section:"distribuicao",mode:"loja",category:"venda",target:"cfgAtivadosTotal",label:"Ativados acumulado total"},
-      dashAccumPfActual:{section:"calendario",calendarDate:"today",label:"PF acumulado",record:true},
+      dashAccumPfActual:{section:"calendario",calendarDate:"reference",label:"PF acumulado",record:true},
       dashAccumPfGoal:{section:"distribuicao",mode:"loja",category:"pf",pfPeriod:"mes",target:"cfgPfBolsaMeta",label:"Metas mensais de PF"},
       dashAccumPcjActual:{section:"distribuicao",mode:"loja",category:"pcj",target:"cfgPcjAcc",label:"PCJ acumulado"},
       dashAccumPcjGoal:{section:"distribuicao",mode:"assessor",target:"goalPcj",label:"Meta de PCJ dos assessores"}
@@ -13643,8 +14250,10 @@ ${fallbackText}`;
 
         if(source.section === "calendario"){
           const dateInput = document.getElementById("calendarDate");
-          if(dateInput && source.calendarDate === "today"){
-            dateInput.value = today();
+          if(dateInput && source.calendarDate){
+            dateInput.value = source.calendarDate === "reference"
+              ? (managementProjection?.referenceDate || today())
+              : today();
             renderSalesCalendar();
           }
         }
