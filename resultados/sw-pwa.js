@@ -1,7 +1,9 @@
-const CACHE_NAME = 'av-resultados-v60-caminho-gerencial';
+const CACHE_NAME = 'av-resultados-v62-fonte-oficial-exclusiva';
 const APP_SHELL = [
   './',
   './index.html',
+  '../shared/gerencial-resultados.js',
+  '../shared/resultado-source.js',
   './manifest.webmanifest',
   './favicon.ico',
   './favicon.svg',
@@ -19,12 +21,13 @@ self.addEventListener('install', event => {
 });
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))))
+    caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith('av-resultados-') && key !== CACHE_NAME).map(key => caches.delete(key))))
   );
   self.clients.claim();
 });
 self.addEventListener('fetch', event => {
   if(event.request.method !== 'GET') return;
+  if(new URL(event.request.url).origin !== self.location.origin) return;
   event.respondWith(
     fetch(event.request)
       .then(response => {
@@ -32,6 +35,6 @@ self.addEventListener('fetch', event => {
         caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy)).catch(() => {});
         return response;
       })
-      .catch(() => caches.match(event.request).then(hit => hit || caches.match('./index.html')))
+      .catch(() => caches.match(event.request).then(hit => hit || (event.request.mode === 'navigate' ? caches.match('./index.html') : Response.error())))
   );
 });

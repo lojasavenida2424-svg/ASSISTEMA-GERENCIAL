@@ -13842,6 +13842,15 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
                   <div class="field"><label>Ativados realizados</label><input id="agResultadoAtivados" type="number" min="0" step="1" placeholder="0"></div>
                   <div class="field"><label>Atingimento de Ativados (%)</label><input id="agResultadoAtingimentoAtivados" type="text" value="0%" readonly></div>
                 </div>
+                <div class="ag-result-analysis-grid" style="margin:16px 0"><div class="field"><label>PCJ do dia (%)</label><input id="agResultadoPcj" type="number" min="0" max="100" step="0.01" placeholder="Não informado"></div>
+<div class="field"><label>PCJ acumulado no mês (%)</label><input id="agResultadoPcjAcumulado" type="number" min="0" max="100" step="0.01" placeholder="Não informado"><small>Informe o percentual acumulado do relatório; percentuais diários não são somados.</small></div>
+<div class="field"><label>PF — Bolsa protegida (quantidade)</label><input id="agResultadoPF_bolsa" type="number" min="0" step="1" placeholder="0" oninput="agAtualizarTotalPF()"></div>
+<div class="field"><label>PF — Compra da Sorte (quantidade)</label><input id="agResultadoPF_compra" type="number" min="0" step="1" placeholder="0" oninput="agAtualizarTotalPF()"></div>
+<div class="field"><label>PF — Proteção da Sorte (quantidade)</label><input id="agResultadoPF_protecao" type="number" min="0" step="1" placeholder="0" oninput="agAtualizarTotalPF()"></div>
+<div class="field"><label>PF — Sabadão (quantidade)</label><input id="agResultadoPF_sabadao" type="number" min="0" step="1" placeholder="0" oninput="agAtualizarTotalPF()"></div>
+<div class="field"><label>PF — SMS (quantidade)</label><input id="agResultadoPF_sms" type="number" min="0" step="1" placeholder="0" oninput="agAtualizarTotalPF()"></div>
+<div class="field"><label>PF — Vida (quantidade)</label><input id="agResultadoPF_vida" type="number" min="0" step="1" placeholder="0" oninput="agAtualizarTotalPF()"></div>
+<div class="field"><label>Total de PF do dia</label><input id="agResultadoPF" type="number" readonly value="0"></div></div>
                 <div id="agResultadoAnaliseBox" class="ag-result-analysis"></div>
                 <div class="field" style="margin-top:12px;"><label>Observação complementar</label><textarea id="agResultadoObs" placeholder="Opcional: informação adicional que não foi contemplada na análise orientada."></textarea></div>
                 <div id="agResultadoRegraNote" class="acomp-ger-inline-note"></div>
@@ -13886,6 +13895,9 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
               <div id="agDistHighActions" class="ag-dist-actions no-print"></div>
             </div>
 
+<div class="card" style="padding:18px;margin:16px 0">
+<h3>Metas da loja — PCJ e Produtos Financeiros</h3><p>Selecione o mês no topo. O RESULTADO consulta estas metas e permite distribuí-las entre os colaboradores.</p>
+<div class="ag-result-analysis-grid"><div class="field"><label>Meta de PCJ (%)</label><input id="agMetaPCJ" type="number" min="0" max="100" step="0.01"></div><div class="field"><label>Bolsa protegida — meta mensal</label><input id="agMetaPF_bolsa" type="number" min="0" step="1"></div><div class="field"><label>Compra da Sorte — meta mensal</label><input id="agMetaPF_compra" type="number" min="0" step="1"></div><div class="field"><label>Proteção da Sorte — meta mensal</label><input id="agMetaPF_protecao" type="number" min="0" step="1"></div><div class="field"><label>Sabadão — meta mensal</label><input id="agMetaPF_sabadao" type="number" min="0" step="1"></div><div class="field"><label>SMS — meta mensal</label><input id="agMetaPF_sms" type="number" min="0" step="1"></div><div class="field"><label>Vida — meta mensal</label><input id="agMetaPF_vida" type="number" min="0" step="1"></div></div><button type="button" class="btn" onclick="agSalvarMetasComplementares()">Salvar metas de PCJ e PF</button></div>
             <div id="agDistLockBanner" class="ag-dist-lock-banner"></div>
             <div id="agDistSummary" class="ag-dist-summary"></div>
 
@@ -14134,7 +14146,7 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
               <span class="sistema-av-open">ABRIR SISTEMA ↗</span>
             </a>
 
-            <a class="sistema-av-button" data-sistema-av-link="resultado" onclick="return validarAcessoSistemaAv(event,'resultado')" href="https://lojasavenida2424-svg.github.io/ASSISTEMA-GERENCIAL/resultados/" target="_blank" rel="noopener noreferrer" aria-label="Abrir Sistema AV Resultado">
+            <a class="sistema-av-button" data-sistema-av-link="resultado" onclick="return validarAcessoSistemaAv(event,'resultado')" href="./resultados/" target="_blank" rel="noopener noreferrer" aria-label="Abrir Sistema AV Resultado">
               <div class="sistema-av-logo">
                 <span class="logo-fallback" aria-hidden="true">📊</span>
                 <img src="./resultados/icons/icon-192.png" alt="Ícone do Sistema AV Resultado" onerror="this.style.display='none'" />
@@ -21952,6 +21964,7 @@ window.addEventListener('load', async () => {
 });
 </script>
 
+<script src="shared/gerencial-resultados.js"></script>
 <script id="v51-22-recovery-modules">
 (() => {
   'use strict';
@@ -21965,12 +21978,7 @@ window.addEventListener('load', async () => {
   const nowBR = () => typeof g.agoraBR === 'function' ? g.agoraBR() : new Date().toLocaleString('pt-BR');
   const makeId = prefix => typeof g.uid === 'function' ? g.uid(prefix) : `${prefix}_${Date.now()}_${Math.random().toString(16).slice(2)}`;
   const save = () => { if (typeof g.saveDB === 'function') return g.saveDB(); return false; };
-  const safeNumber = value => {
-    if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
-    const normalized = String(value ?? '').trim().replace(/\s/g,'').replace(/R\$/gi,'').replace(/\./g,'').replace(',','.').replace(/[^0-9.-]/g,'');
-    const n = Number(normalized);
-    return Number.isFinite(n) ? n : 0;
-  };
+  const safeNumber = value => g.AVManagement.number(value);
   const brl = n => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(safeNumber(n));
   const pct = n => `${safeNumber(n).toFixed(1).replace('.',',')}%`;
   const formatDate = iso => {
@@ -22259,39 +22267,7 @@ window.addEventListener('load', async () => {
   let agResultadoAnaliseDraft={};
   const AG_BLOQUEIO_META_ATIVO=false; // V51.43 — bloqueio mensal removido; o bloqueio agora é por dia com resultado lançado
   const AG_RESET_DIAS_V5145='v51_45_reset_acomp_gerencial_mes_atual';
-  function agAplicarResetDiasV5145(){
-    const d=currentDB();
-    if(!d || !d.gerencial || typeof d.gerencial!=='object') return false;
-    d.gerencial._migrations=d.gerencial._migrations&&typeof d.gerencial._migrations==='object'&&!Array.isArray(d.gerencial._migrations)?d.gerencial._migrations:{};
-    if(d.gerencial._migrations[AG_RESET_DIAS_V5145]) return false;
-    const period=today().slice(0,7);
-    d.gerencial.distribuicoes=d.gerencial.distribuicoes&&typeof d.gerencial.distribuicoes==='object'&&!Array.isArray(d.gerencial.distribuicoes)?d.gerencial.distribuicoes:{};
-    d.gerencial.distribuicaoControle=d.gerencial.distribuicaoControle&&typeof d.gerencial.distribuicaoControle==='object'&&!Array.isArray(d.gerencial.distribuicaoControle)?d.gerencial.distribuicaoControle:{};
-    d.gerencial.contextoMensal=d.gerencial.contextoMensal&&typeof d.gerencial.contextoMensal==='object'&&!Array.isArray(d.gerencial.contextoMensal)?d.gerencial.contextoMensal:{};
-    d.gerencial.eventosMensais=d.gerencial.eventosMensais&&typeof d.gerencial.eventosMensais==='object'&&!Array.isArray(d.gerencial.eventosMensais)?d.gerencial.eventosMensais:{};
-    d.gerencial.resultados=Array.isArray(d.gerencial.resultados)?d.gerencial.resultados:[];
-    d.gerencial.setores=Array.isArray(d.gerencial.setores)?d.gerencial.setores:[];
-    d.gerencial.equipe=Array.isArray(d.gerencial.equipe)?d.gerencial.equipe:[];
-
-    // Zera somente o período atual do Acompanhamento Gerencial.
-    delete d.gerencial.distribuicoes[period];
-    delete d.gerencial.distribuicaoControle[period];
-    delete d.gerencial.contextoMensal[period];
-    delete d.gerencial.eventosMensais[period];
-
-    const manterForaDoPeriodo=r=>{
-      const data=String(r?.data||r?.date||r?.dia||'').slice(0,10);
-      const periodo=String(r?.periodo||r?.mes||'');
-      return !(data.startsWith(period) || periodo===period);
-    };
-    d.gerencial.resultados=d.gerencial.resultados.filter(manterForaDoPeriodo);
-    d.gerencial.setores=d.gerencial.setores.filter(manterForaDoPeriodo);
-    d.gerencial.equipe=d.gerencial.equipe.filter(manterForaDoPeriodo);
-
-    if(d.gerencial.monitor&&String(d.gerencial.monitor.ultimaDataResultado||'').startsWith(period)) d.gerencial.monitor.ultimaDataResultado='';
-    d.gerencial._migrations[AG_RESET_DIAS_V5145]={aplicadoEm:nowBR(),periodo:period};
-    return true;
-  }
+  function agAplicarResetDiasV5145(){ return false; } // Migração destrutiva desativada; preservar o histórico.
   function ensureGerencial(){
     const d=currentDB(); if(!d)return null;
     d.gerencial=d.gerencial&&typeof d.gerencial==='object'?d.gerencial:{};
@@ -22307,7 +22283,7 @@ window.addEventListener('load', async () => {
   function agPeriod(){const el=$('agPeriodo');const p=el?.value||today().slice(0,7);if(el&&!el.value)el.value=p;return p;}
   function agDateOf(row){return String(row?.data||row?.date||row?.dia||'').slice(0,10);}
   function agRowsPeriod(rows,period=agPeriod()){return (rows||[]).filter(r=>{const d=agDateOf(r);return !d||d.startsWith(period)||String(r.periodo||r.mes||'')===period;});}
-  function agResultadoLancado(row){if(!row)return false;if(row.lancadoEm||row.lancadoPor)return true;if(String(row.observacao||row.obs||'').trim())return true;return ['venda','realizado','vendas','ativados'].some(k=>Math.abs(safeNumber(row[k]))>0);}
+  function agResultadoLancado(row){if(!row)return false;if(row.lancadoEm||row.lancadoPor)return true;if(String(row.observacao||row.obs||'').trim())return true;return g.AVManagement.launched(row);}
   function agFindResultadoByDate(date){const ger=ensureGerencial();if(!ger)return null;const alvo=String(date||'').slice(0,10);return ger.resultados.find(r=>agDateOf(r)===alvo)||null;}
   function agFindOrCreateResultado(date){const ger=ensureGerencial();if(!ger)return null;const alvo=String(date||'').slice(0,10) || today();let row=agFindResultadoByDate(alvo);if(!row){row={id:makeId('ag_resultado'),data:alvo,venda:0,meta:0,ativados:0,metaAtivados:0,observacao:''};ger.resultados.push(row);}return row;}
   function agDataReferenciaPeriodo(period=agPeriod()){
@@ -22427,6 +22403,7 @@ window.addEventListener('load', async () => {
     if($('agResultadoVenda')) $('agResultadoVenda').value='';
     if($('agResultadoAtivados')) $('agResultadoAtivados').value='';
     if($('agResultadoObs')) $('agResultadoObs').value='';
+    ['agResultadoPcj','agResultadoPcjAcumulado',...g.AVManagement.PF.map(k=>'agResultadoPF_'+k)].forEach(id=>{if($(id))$(id).value='';});g.agAtualizarTotalPF();
     agResultadoAnaliseDraft={};agResultadoFaixaAtual='';
     agPreencherResultadoRapido(d,false);
     if(fechar) agFecharLancamentoResultado(true);
@@ -22440,6 +22417,8 @@ window.addEventListener('load', async () => {
       if($('agResultadoVenda')) $('agResultadoVenda').value=row?String(getNum(row,['venda','realizado','vendas'])):'';
       if($('agResultadoAtivados')) $('agResultadoAtivados').value=row?String(getNum(row,['ativados'])):'';
       if($('agResultadoObs')) $('agResultadoObs').value=row?.observacao||row?.obs||'';
+      $('agResultadoPcj').value=row?.pcj??'';$('agResultadoPcjAcumulado').value=row?.pcjAcumulado??'';
+      g.AVManagement.PF.forEach(k=>$('agResultadoPF_'+k).value=row?.pfDetalhado?.[k]??'');g.agAtualizarTotalPF();
       agResultadoAnaliseDraft=clone(row?.analiseResultado||{});agResultadoFaixaAtual='';
     }
     const note=$('agResultadoRegraNote');if(note)note.innerHTML=`Resultado permitido: <b>${esc(formatDate(d))}</b>, referente exclusivamente ao dia anterior. A meta deste dia vem da distribuição mensal. Depois que o resultado for lançado, somente este dia ficará bloqueado para alteração.`;
@@ -22464,7 +22443,7 @@ window.addEventListener('load', async () => {
   function agFecharLancamentoResultado(force=false){
     const panel=$('agResultadoRapidoPanel'); if(!panel) return;
     if(!force){
-      const changed=['agResultadoVenda','agResultadoAtivados','agResultadoObs'].some(id=>String($(id)?.value||'').trim());
+      const changed=['agResultadoVenda','agResultadoAtivados','agResultadoObs','agResultadoPcj','agResultadoPcjAcumulado',...g.AVManagement.PF.map(k=>'agResultadoPF_'+k)].some(id=>String($(id)?.value||'').trim());
       if(changed&&!confirm('Fechar o lançamento de resultado?'))return;
     }
     panel.classList.remove('active');
@@ -22479,7 +22458,7 @@ window.addEventListener('load', async () => {
     return `<div style="display:grid;gap:10px;padding:8px;">${valid.slice(0,31).map(x=>{const v=safeNumber(x.value),w=Math.max(2,Math.min(100,Math.abs(v)/max*100));const label=money?brl(v):percent?pct(v):new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2}).format(v);return `<div style="display:grid;grid-template-columns:minmax(75px,120px) minmax(120px,1fr) auto;gap:9px;align-items:center;font-size:.76rem;font-weight:800;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(x.label)}</span><span style="height:12px;background:var(--soft);border-radius:999px;overflow:hidden;"><i style="display:block;height:100%;width:${w}%;background:var(--amarelo);border-radius:inherit;"></i></span><b>${esc(label)}</b></div>`;}).join('')}</div>`;
   }
   function agBuiltinDefs(){return {
-    resultados:{nome:'Resultado Comercial',columns:[['data','Data','date'],['venda','Venda','number'],['meta','Meta de venda','number'],['ativados','Ativados','number'],['metaAtivados','Meta Ativados','number']]},
+    resultados:{nome:'Resultado Comercial',columns:[['data','Data','date'],['venda','Venda','number'],['meta','Meta de venda','number'],['ativados','Ativados','number'],['metaAtivados','Meta Ativados','number'],['pcj','PCJ do dia (%)','number'],['pcjAcumulado','PCJ acumulado (%)','number'],['pf','PF (quantidade)','number']]},
     setores:{nome:'Resultado por Setor',columns:[['data','Data','date'],['setor','Setor','text'],['realizado','Realizado','number'],['meta','Meta','number']]},
     equipe:{nome:'Performance da Equipe',columns:[['data','Data','date'],['funcionario','Funcionário','text'],['venda','Venda','number'],['ativados','Ativados','number']]}
   };}
@@ -22604,6 +22583,7 @@ window.addEventListener('load', async () => {
     if(!m)return ['Realizado registrado','b-info'];const ating=venda/m*100;return ating>=100?['Meta atingida','b-ok']:ating>=85?['Próximo da meta','b-warn']:['Abaixo da meta','b-bad'];
   }
   function agRenderDistribution(){
+    agCarregarMetasComplementares();
     const ger=ensureGerencial(),period=agPeriod(),saved=ger.distribuicoes[period]||{},has=agDistribuicaoTemDados(period),locked=false,reopen=agPodeReabrirDistribuicao(period),data=agDistEditing?agDistDraft:saved;
     const body=$('agDistHighBody'),summary=$('agDistSummary'),status=$('agDistStatus'),actions=$('agDistHighActions'),banner=$('agDistLockBanner'),editor=$('agDistMonthlyEditor');if(!body||!summary||!status||!actions||!banner||!editor)return;
     const dates=agDiasPeriodo(period),tot=agTotaisDistribuicao(data),rows=ger.resultados||[];let realized=0,pending=0;
@@ -22667,6 +22647,7 @@ window.addEventListener('load', async () => {
     const period=agPeriod();let modal=$('agCalendarioMetaModal');if(!modal){modal=document.createElement('div');modal.id='agCalendarioMetaModal';modal.className='modal-backdrop';document.body.appendChild(modal);}const [y,m]=period.split('-').map(Number);const nome=new Date(y,m-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});modal.innerHTML=`<div class="modal ag-dist-calendar-modal"><div class="modal-head"><div><h2>Calendário de Meta</h2><p>Visualização das metas distribuídas para ${esc(nome)}. Este calendário é somente leitura.</p></div><button class="icon-btn" type="button" data-close>✕</button></div>${agRenderCalendarioMeta(period)}</div>`;const close=()=>modal.classList.remove('active');modal.querySelector('[data-close]').onclick=close;modal.onclick=e=>{if(e.target===modal)close();};modal.classList.add('active');
   }
   function agCampoResultadoEditavel(row,key){
+    if(['pcj','pcjAcumulado','pf'].includes(key))return false;
     if(!row)return false;const date=agDateOf(row);if(['meta','metaVenda','metaAtivados'].includes(key))return false;
     if(['venda','realizado','vendas','ativados'].includes(key))return date===agOntemISO();
     return date===agOntemISO();
@@ -22706,7 +22687,25 @@ window.addEventListener('load', async () => {
   g.agAdicionarColunaCustom=()=>{const sheet=agActiveSheet();if(sheet.builtin){alert('As colunas das planilhas padrão são fixas.');return;}const nome=prompt('Nome da coluna:','Nova coluna');if(!String(nome||'').trim())return;const tipo=(prompt('Tipo da coluna: texto, numero ou data','texto')||'texto').toLowerCase();let id=String(nome).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')||makeId('col');while(sheet.columns.some(c=>c[0]===id))id+='_2';sheet.raw.colunas.push({id,nome:String(nome).trim(),tipo:tipo.startsWith('num')?'number':tipo.startsWith('data')?'date':'text'});save();agRenderSheet();g.agAtualizarEixosGrafico();};
   g.agAdicionarLinhaAtual=()=>{const sheet=agActiveSheet();if(sheet.id==='resultados'){agAbrirLancamentoResultado();return;}const row={id:makeId('ag_linha')};sheet.columns.forEach(([k,l,t])=>row[k]=t==='number'?0:t==='date'?today():'');sheet.rows.push(row);save();agRenderSheet();agRenderOverview();};
   g.agIrParaPlanilhaResultado=()=>{agSheetKey='resultados';g.agAbrirSubaba('planilhas',document.querySelector('[data-ag-tab="planilhas"]'));agRenderSheet();setTimeout(()=>g.agAdicionarLinhaAtual(),30);};
-  g.agSalvarResultadoRapido=e=>{e?.preventDefault?.();const data=String($('agResultadoData')?.value||'').slice(0,10),permitido=agOntemISO();if(data!==permitido){alert(`Hoje só é permitido lançar o resultado de ${formatDate(permitido)}.`);return;}const meta=agMetaDia(data);if(!meta){alert('Não existe meta distribuída para este dia.');return;}const venda=safeNumber($('agResultadoVenda')?.value||0),ativados=safeNumber($('agResultadoAtivados')?.value||0);if([venda,ativados].some(v=>v<0)){alert('Os valores realizados não podem ser negativos.');return;}const analise=agColetarAnaliseResultado(),valid=agValidarAnaliseResultado(analise);if(!valid.ok){alert(valid.msg);return;}const ger=ensureGerencial(),row=agFindOrCreateResultado(data);row.data=data;row.venda=venda;row.ativados=ativados;row.meta=safeNumber(meta.venda);row.metaAtivados=safeNumber(meta.ativados);row.analiseResultado=analise;row.observacao=String($('agResultadoObs')?.value||'').trim();row.periodo=data.slice(0,7);row.lancadoEm=nowBR();row.lancadoPor=currentUser()?.nome||'';ger.monitor.ultimaDataResultado=data;save();agRenderOverview();g.agRenderComparativos();agRenderSheet();agRenderDistribution();agFecharLancamentoResultado(true);};
+  g.agAtualizarTotalPF=()=>{$('agResultadoPF').value=g.AVManagement.PF.reduce((sum,k)=>sum+safeNumber($('agResultadoPF_'+k)?.value),0);};
+  function agColetarIndicadoresExtras(){
+    const pcjRaw=$('agResultadoPcj').value,accRaw=$('agResultadoPcjAcumulado').value;
+    const pfDetalhado=Object.fromEntries(g.AVManagement.PF.map(k=>[k,Number($('agResultadoPF_'+k).value||0)]));
+    if(Object.values(pfDetalhado).some(v=>!Number.isInteger(v)||v<0)||[pcjRaw,accRaw].some(v=>v!==''&&(!Number.isFinite(Number(v))||Number(v)<0||Number(v)>100))){alert('PF deve ser uma quantidade inteira e PCJ deve ficar entre 0 e 100%.');return null;}
+    return {pcj:pcjRaw===''?null:Number(pcjRaw),pcjAcumulado:accRaw===''?null:Number(accRaw),pfDetalhado,pf:g.AVManagement.pfTotal(pfDetalhado)};
+  }
+  function agCarregarMetasComplementares(){
+    const meta=ensureGerencial()?.metasComplementares?.[agPeriod()]||{};
+    if($('agMetaPCJ'))$('agMetaPCJ').value=meta.pcj??'';
+    g.AVManagement.PF.forEach(k=>{if($('agMetaPF_'+k))$('agMetaPF_'+k).value=meta.pf?.[k]??'';});
+  }
+  g.agSalvarMetasComplementares=()=>{
+    const ger=ensureGerencial();if(!ger)return;
+    const pcj=Number($('agMetaPCJ').value||0),pf=Object.fromEntries(g.AVManagement.PF.map(k=>[k,Number($('agMetaPF_'+k).value||0)]));
+    if(!Number.isFinite(pcj)||pcj<0||pcj>100||Object.values(pf).some(v=>!Number.isInteger(v)||v<0)){alert('Informe quantidades inteiras positivas ou zero e PCJ entre 0 e 100%.');return;}
+    ger.metasComplementares=ger.metasComplementares||{};ger.metasComplementares[agPeriod()]={pcj,pf,atualizadoEm:new Date().toISOString()};save();alert('Metas de PCJ e PF salvas para o RESULTADO.');
+  };
+  g.agSalvarResultadoRapido=e=>{e?.preventDefault?.();const data=String($('agResultadoData')?.value||'').slice(0,10),permitido=agOntemISO();if(data!==permitido){alert(`Hoje só é permitido lançar o resultado de ${formatDate(permitido)}.`);return;}const meta=agMetaDia(data);if(!meta){alert('Não existe meta distribuída para este dia.');return;}const venda=safeNumber($('agResultadoVenda')?.value||0),ativados=safeNumber($('agResultadoAtivados')?.value||0);if([venda,ativados].some(v=>v<0)||!Number.isInteger(ativados)){alert('Os valores realizados não podem ser negativos.');return;}const extras=agColetarIndicadoresExtras();if(!extras)return;const analise=agColetarAnaliseResultado(),valid=agValidarAnaliseResultado(analise);if(!valid.ok){alert(valid.msg);return;}const ger=ensureGerencial(),row=agFindOrCreateResultado(data);Object.assign(row,extras);row.atualizadoEmISO=new Date().toISOString();row.data=data;row.venda=venda;row.ativados=ativados;row.meta=safeNumber(meta.venda);row.metaAtivados=safeNumber(meta.ativados);row.analiseResultado=analise;row.observacao=String($('agResultadoObs')?.value||'').trim();row.periodo=data.slice(0,7);row.lancadoEm=nowBR();row.lancadoPor=currentUser()?.nome||'';ger.monitor.ultimaDataResultado=data;save();agRenderOverview();g.agRenderComparativos();agRenderSheet();agRenderDistribution();agFecharLancamentoResultado(true);};
   g.agSalvarPlano=e=>{e?.preventDefault?.();const ger=ensureGerencial();const id=$('agPlanoId')?.value||makeId('ag_plano');const existing=ger.planos.find(p=>p.id===id);const rec={id,indicador:$('agPlanoIndicador')?.value||'',problema:String($('agPlanoProblema')?.value||'').trim(),responsavel:$('agPlanoResponsavel')?.value||'',acao:String($('agPlanoAcao')?.value||'').trim(),prazo:$('agPlanoPrazo')?.value||'',status:$('agPlanoStatus')?.value||'Pendente',criadoEm:existing?.criadoEm||nowBR(),atualizadoEm:nowBR(),atualizadoPor:currentUser()?.nome||''};if(!rec.problema||!rec.acao||!rec.prazo){alert('Preencha problema, ação e prazo.');return;}if(existing)Object.assign(existing,rec);else ger.planos.unshift(rec);save();g.agLimparPlanoForm();agRenderPlans();};
   g.agLimparPlanoForm=()=>{const form=$('agPlanoForm');form?.reset();if($('agPlanoId'))$('agPlanoId').value='';setSelectHTML('agPlanoResponsavel',employeeOptions(),'');};
   g.agAtualizarEixosGrafico=()=>{const source=$('agGrafFonte');if(!source)return;const sheets=agAllSheets();source.innerHTML=sheets.map(s=>`<option value="${esc(s.id)}">${esc(s.nome)}</option>`).join('');if(!sheets.some(s=>s.id===source.value))source.value=agSheetKey;const old=agSheetKey;agSheetKey=source.value;const sheet=agActiveSheet();agSheetKey=old;const x=$('agGrafX'),y=$('agGrafY');if(x)x.innerHTML=sheet.columns.map(c=>`<option value="${esc(c[0])}">${esc(c[1])}</option>`).join('');if(y){const num=sheet.columns.filter(c=>c[2]==='number');y.innerHTML=(num.length?num:sheet.columns).map(c=>`<option value="${esc(c[0])}">${esc(c[1])}</option>`).join('');}g.agRenderGraficoPersonalizado();};
@@ -22802,8 +22801,8 @@ window.addEventListener('load', async () => {
   g.agAbrirImportacaoAcompanhamento=()=>$('agImportAcompanhamentoFile')?.click();
   function readWorkbookFile(file,callback){if(!file)return;const reader=new FileReader();reader.onload=()=>{try{if(!g.XLSX)throw new Error('Biblioteca de Excel indisponível.');const wb=g.XLSX.read(reader.result,{type:'array',cellDates:false});callback(wb);}catch(err){console.error(err);alert('Não foi possível importar o arquivo. '+(err.message||''));}};reader.readAsArrayBuffer(file);}
   function aoaToObjects(aoa){if(!aoa?.length)return[];const headers=(aoa[0]||[]).map((h,i)=>String(h||`Coluna ${i+1}`).trim());return (aoa.slice(1)||[]).filter(r=>r.some(v=>v!==''&&v!==null&&v!==undefined)).map(r=>Object.fromEntries(headers.map((h,i)=>[h,r[i]??''])));}
-  function normalizeHeaderKey(h){const s=String(h||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');const map={data:'data',dia:'data',venda:'venda',vendas:'venda',meta:'meta',metavenda:'meta',ativados:'ativados',metaativados:'metaAtivados',setor:'setor',realizado:'realizado',funcionario:'funcionario',colaborador:'funcionario'};return map[s]||null;}
-  function mapImportedRows(aoa){const objects=aoaToObjects(aoa);return objects.map(obj=>{const out={id:makeId('ag_import')};Object.entries(obj).forEach(([h,v])=>{const k=normalizeHeaderKey(h);if(k)out[k]=['venda','meta','ativados','metaAtivados','realizado'].includes(k)?safeNumber(v):String(v??'');});return out;});}
+  function normalizeHeaderKey(h){const s=String(h||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');const map={data:'data',dia:'data',venda:'venda',vendas:'venda',meta:'meta',metavenda:'meta',ativados:'ativados',metaativados:'metaAtivados',pcj:'pcj',pcjdodia:'pcj',pcjacumulado:'pcjAcumulado',pf:'pf',setor:'setor',realizado:'realizado',funcionario:'funcionario',colaborador:'funcionario'};return map[s]||null;}
+  function mapImportedRows(aoa){const objects=aoaToObjects(aoa);return objects.map(obj=>{const out={id:makeId('ag_import')};Object.entries(obj).forEach(([h,v])=>{const k=normalizeHeaderKey(h);if(k)out[k]=['venda','meta','ativados','metaAtivados','realizado','pcj','pcjAcumulado','pf'].includes(k)?safeNumber(v):String(v??'');});return out;});}
   g.agImportarAcompanhamento=e=>{const file=e?.target?.files?.[0];readWorkbookFile(file,wb=>{const ger=ensureGerencial();const names=wb.SheetNames;let imported=0;names.forEach(name=>{const aoa=g.XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,defval:''});const lower=name.toLowerCase();if(lower.includes('setor')){const rows=mapImportedRows(aoa);ger.setores.push(...rows);imported+=rows.length;}else if(lower.includes('equipe')){const rows=mapImportedRows(aoa);ger.equipe.push(...rows);imported+=rows.length;}else if(lower.includes('resultado')||lower.includes('comercial')){const rows=mapImportedRows(aoa);ger.resultados.push(...rows);imported+=rows.length;}else{const headers=(aoa[0]||[]).map((h,i)=>({id:`c${i+1}`,nome:String(h||`Coluna ${i+1}`),tipo:'text'}));const linhas=(aoa.slice(1)||[]).filter(r=>r.some(v=>v!==''&&v!=null)).map(r=>Object.fromEntries(headers.map((c,i)=>[c.id,r[i]??''])));ger.planilhas.push({id:makeId('ag_planilha'),nome:name,colunas:headers,linhas});imported+=linhas.length;}});save();g.renderAcompanhamentoGerencial();alert(`${imported} registro(s) importado(s).`);});if(e?.target)e.target.value='';};
   g.agImportarPlanilha=e=>{const file=e?.target?.files?.[0];if(!file)return;readWorkbookFile(file,wb=>{const aoa=g.XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});if(!aoa.length)return;const headers=(aoa[0]||[]).map((h,i)=>({id:`c${i+1}`,nome:String(h||`Coluna ${i+1}`),tipo:'text'}));const linhas=aoa.slice(1).filter(r=>r.some(v=>v!==''&&v!=null)).map(r=>Object.fromEntries(headers.map((c,i)=>[c.id,r[i]??''])));const ger=ensureGerencial();const id=makeId('ag_planilha');ger.planilhas.push({id,nome:file.name.replace(/\.[^.]+$/,''),colunas:headers,linhas});agSheetKey=id;save();agRenderSheet();g.agAtualizarEixosGrafico();});e.target.value='';};
   g.renderAcompanhamentoGerencial=()=>{const ger=ensureGerencial();if(!ger)return;const resetAplicado=agAplicarResetDiasV5145();if(resetAplicado){agDistEditing=false;agDistDraft={};agContextoMesDraft={feriados:null,eventos:null};save();}const period=$('agPeriodo');if(period&&!period.value)period.value=today().slice(0,7);setSelectHTML('agPlanoResponsavel',employeeOptions($('agPlanoResponsavel')?.value||''),$('agPlanoResponsavel')?.value||'');const venda=$('agResultadoVenda'),ativados=$('agResultadoAtivados');if(venda&&!venda.dataset.agBound){venda.addEventListener('input',agAtualizarAtingimentoRapido);venda.dataset.agBound='1';}if(ativados&&!ativados.dataset.agBound){ativados.addEventListener('input',agAtualizarAtingimentoRapido);ativados.dataset.agBound='1';}agRenderOverview();agRenderSheet();agRenderDistribution();agRenderPlans();g.agAtualizarEixosGrafico();g.agRenderComparativos();};

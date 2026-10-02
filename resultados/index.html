@@ -3753,7 +3753,7 @@
         <div>
           <div class="eyebrow">AV Resultados Operadores</div>
           <h1 id="pageTitle">Painel principal</h1>
-          <p id="pageSubtitle">Resultados realizados e metas de Hoje e do Acumulado.</p>
+          <p id="pageSubtitle">Resultados do último dia lançado e acumulado do mês, recebidos do GERENCIAL.</p>
         </div>
         <div class="actions">
           <div class="action-badges">
@@ -3789,12 +3789,14 @@
       </header>
 
       <section id="dashboard" class="section active">
+        <div id="managementSourceNote" class="source-note" style="margin-bottom:12px" role="status">Sincronizando Acompanhamento Gerencial…</div>
+        <button id="refreshManagementSourceBtn" class="btn btn-secondary" style="margin-bottom:18px" type="button">↻ Atualizar dados do GERENCIAL</button>
         <div class="dashboard-period-block">
           <div class="dashboard-period-heading">
             <div>
               <div class="eyebrow">Resultado diário</div>
-              <h3>HOJE</h3>
-              <p>Compare o valor realizado hoje com o objetivo definido para o dia.</p>
+              <h3>ÚLTIMO DIA LANÇADO</h3>
+              <p>Resultado oficial do Gerencial. Confira a data de referência ao lado.</p>
             </div>
             <span id="dashboardTodayDate" class="tag brand-soft">HOJE</span>
           </div>
@@ -4695,7 +4697,7 @@
               <label for="distributionTypeSelect">Tipo de meta</label>
               <select id="distributionTypeSelect" class="control">
                 <option value="assessor">META ASSESSOR</option>
-                <option value="loja">META DE LOJA</option>
+                <option value="loja">LOJA — CONSULTA DO GERENCIAL</option>
               </select>
               <small id="distributionTypeHint">Metas mensais individuais por operador.</small>
             </div>
@@ -4719,8 +4721,8 @@
           <div class="employee-summary" style="margin-bottom:18px">
             <div class="employee-summary-card">
               <div class="header-label">PF — Produto Financeiro</div>
-              <strong style="font-size:15px">5 categorias</strong>
-              <div class="header-sub">Bolsa Protegida, Sabadão, Vida+, Compra da Sorte e SMS</div>
+              <strong style="font-size:15px">6 categorias</strong>
+              <div class="header-sub">Bolsa Protegida, Compra da Sorte, Proteção da Sorte, Sabadão, SMS e Vida+</div>
             </div>
             <div class="employee-summary-card">
               <div class="header-label">PCJ</div>
@@ -4734,7 +4736,10 @@
             </div>
           </div>
 
+          <div class="form-grid" style="margin-bottom:18px"><div class="field"><label for="distributionMonth">Mês das metas individuais</label><input id="distributionMonth" class="control" type="month"></div></div>
+          <div id="distributionBalance" class="source-note" style="margin-bottom:18px"></div>
           <form id="goalDistributionForm">
+            <div class="field" style="margin-bottom:16px"><label>Meta mensal de Venda (R$)</label><input id="goalVenda" class="control goal-distribution-field" type="number" min="0" step="0.01" value="0" required></div>
             <div class="form-grid">
               <div class="field span-2">
                 <label>Operador</label>
@@ -4808,7 +4813,7 @@
             </div>
 
             <div id="distributionSaveActions" style="display:flex;justify-content:flex-end;margin-top:18px">
-              <button class="btn btn-primary" type="submit">Salvar distribuição</button>
+              <button class="btn btn-secondary" type="button" id="distributeAllGoalsBtn" style="margin-right:10px">Dividir metas da loja igualmente</button><button class="btn btn-primary" type="submit">Salvar distribuição</button>
             </div>
           </form>
         </div>
@@ -4820,7 +4825,7 @@
               <div>
                 <div class="eyebrow">Objetivos gerais da unidade</div>
                 <h3>Meta de Loja</h3>
-                <small>Escolha uma categoria para administrar vendas, indicadores de PCJ ou Produtos Financeiros da loja.</small>
+                <small>Consulte os dados lançados no Acompanhamento Gerencial.</small>
               </div>
               <span id="distributionStoreModeBadge" class="tag brand-soft">VISUALIZAÇÃO</span>
             </div>
@@ -5116,7 +5121,7 @@
               </div>
             </div>
 
-            <div id="storeGoalReadOnlyNote" class="source-note hidden">Seu acesso permite apenas visualizar as metas gerais da loja. Alterações são realizadas por gerente ou desenvolvedor.</div>
+            <div id="storeGoalReadOnlyNote" class="source-note hidden">Resultados e metas da loja vêm do Acompanhamento Gerencial. <a href="../index.html">Abrir GERENCIAL</a>.</div>
             <div id="storeGoalSaveActions" style="display:flex;justify-content:flex-end;margin-top:18px"><button class="btn btn-primary" type="submit">Salvar meta da loja</button></div>
           </form>
         </div>
@@ -5490,6 +5495,8 @@
     </form>
   </div>
 
+  <script src="../shared/gerencial-resultados.js"></script>
+  <script src="../shared/resultado-source.js"></script>
   <script>
     /* V37 — roleta corrigida com rótulos centralizados em orientação radial. */
     const STORAGE_KEY = "av_resultados_operadores_database_permanente_v1";
@@ -5558,7 +5565,7 @@
       "DESENVOLVEDOR": { ...FULL_ACCESS_PERMISSIONS }
     };
 
-    // Supabase do Assistência Gerencial: usado apenas para carregar funcionários.
+    // Fonte oficial de colaboradores, metas da loja e resultados gerenciais.
     const MANAGEMENT_SUPABASE_URL = "https://euyrhkusnasgiueefldg.supabase.co";
     const MANAGEMENT_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSwiaXJlZiI6ImV1eXJoa3VzbmFzZ2l1ZWVmbGRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzY0MTksImV4cCI6MjA5ODk1MjQxOX0.woI5Il3ObKrj8BJfdYz8DcUW08Jl5c458ykh1SrHYr4";
 
@@ -5567,7 +5574,6 @@
     const RESULTS_SUPABASE_ANON_KEY = "sb_publishable_hKsbyZUlgKg0sW5TgZKQwA_MdXPJRAq";
     const MANAGEMENT_TABLE = "assistencia_gerencial";
     const MANAGEMENT_SHARED_ROW = "gerencial_compartilhados_v1";
-    const MANAGEMENT_LEGACY_SHARED_ROW = "dados_compartilhados_v1";
     const MANAGEMENT_LOCAL_CACHE_KEYS = Object.freeze([
       "adminGerencialLojaV7_gerencial_compartilhados_v1_cache",
       "adminGerencialLojaV7_gerencial_compartilhados_v1_base_sync"
@@ -5658,6 +5664,7 @@
     };
 
     const EMPTY_GOAL_DISTRIBUTION = {
+      venda:0,
       ativados:0,
       bolsa:0,
       compra:0,
@@ -5688,7 +5695,13 @@
       sourceFound:false
     }));
 
-    let employees = [...fallbackEmployees];
+    let lastManagementPayload = null;
+    let managementRequestId=0;
+    let managementSyncState={mode:'loading',checkedAt:'',updatedAt:'',message:'Consultando o GERENCIAL'};
+    const MANAGEMENT_VERIFIED_CACHE_KEY='av_resultados_gerencial_oficial_v2';
+    const MANAGEMENT_SOURCE_ID='assistencia_gerencial/gerencial_compartilhados_v1';
+    let managementProjection = null;
+    let employees = [];
     let managementClient = null;
     let managementChannel = null;
     let dataClient = null;
@@ -5714,19 +5727,19 @@
     let premiaWheelSpinning = false;
 
 
-    const SIGA_SNAPSHOT_DATE = "2026-07-10";
+    const SIGA_SNAPSHOT_DATE = "";
     const OFFICIAL_SNAPSHOT_VERSION = "2026-07-10_acompanhamento_compromissos_v3";
     const CALENDAR_HISTORY_VERSION = "2026-07-01_ate_2026-07-10_v1";
     const PF_HISTORY_VERSION = "2026-07-01_ate_2026-07-10_pf_v1";
 
     const DAILY_RESULTS_PATCH_VERSION = "2026-07-12_resultados_loja_operadores_v1";
-    const DAILY_RESULTS_PATCH = {"date":"2026-07-12","store":{"vendaAtual":21907,"compromissoDia":26518,"vendaAcumulada":196975,"metaTotal":520980,"atingimentoHoje":82.61,"atingimentoAcc":37.81,"cartaoAv":36.61,"cartaoAvAcc":40.99,"cartaoGap":-1400,"cartaoGapAcc":-3963,"pcj":55.28,"pcjAcc":55.38,"pcjGap":1626,"pcjGapAcc":16455,"taxaAtivacaoHoje":14.29,"taxaAtivacaoAcc":12.07,"ativadosHoje":4,"ativadosAcc":35,"ativadosMeta":4,"ativadosMetaAcc":85,"baseAtivacaoHoje":28,"baseAtivacaoAcc":290,"pfHoje":49,"pfAcc":450,"pfMetaHoje":35,"pfMetaAcc":685,"tudoAv":78.62,"tudoAvAcc":79.02},"operators":{"total":{"cartaoHoje":36.61,"cartaoAcc":40.99,"cartaoGapHoje":-1400,"cartaoGapAcc":-3963,"pcjHoje":55.28,"pcjAcc":55.38,"pcjGapHoje":1626,"pcjGapAcc":16455,"tudoAvHoje":78.62,"tudoAvAcc":79.02},"36":{"cartaoHoje":24.58,"cartaoAcc":39.83,"cartaoGapHoje":-1393,"cartaoGapAcc":-1296,"pcjHoje":86.56,"pcjAcc":61.99,"pcjGapHoje":959,"pcjGapAcc":4393,"tudoAvHoje":73.17,"tudoAvAcc":75.99},"145":{"cartaoHoje":46.09,"cartaoAcc":39.27,"cartaoGapHoje":195,"cartaoGapAcc":-931,"pcjHoje":46.78,"pcjAcc":58.94,"pcjGapHoje":342,"pcjGapAcc":2347,"tudoAvHoje":81.4,"tudoAvAcc":79.89},"31":{"cartaoHoje":36.48,"cartaoAcc":38.34,"cartaoGapHoje":-268,"cartaoGapAcc":-1111,"pcjHoje":47.24,"pcjAcc":57.06,"pcjGapHoje":184,"pcjGapAcc":2016,"tudoAvHoje":81.25,"tudoAvAcc":84.12},"29":{"cartaoHoje":50.15,"cartaoAcc":48.03,"cartaoGapHoje":226,"cartaoGapAcc":1038,"pcjHoje":47.72,"pcjAcc":62.49,"pcjGapHoje":201,"pcjGapAcc":2721,"tudoAvHoje":77.27,"tudoAvAcc":77.54},"37":{"cartaoHoje":22.27,"cartaoAcc":33.07,"cartaoGapHoje":-159,"cartaoGapAcc":-1800,"pcjHoje":0.0,"pcjAcc":58.4,"pcjGapHoje":-60,"pcjGapAcc":1402,"tudoAvHoje":85.71,"tudoAvAcc":83.72},"144":{"cartaoHoje":0.0,"cartaoAcc":35.44,"cartaoGapHoje":0,"cartaoGapAcc":-2020,"pcjHoje":0.0,"pcjAcc":32.98,"pcjGapHoje":0,"pcjGapAcc":-191,"tudoAvHoje":0.0,"tudoAvAcc":69.23},"35":{"cartaoHoje":0.0,"cartaoAcc":50.75,"cartaoGapHoje":0,"cartaoGapAcc":2231,"pcjHoje":0.0,"pcjAcc":64.98,"pcjGapHoje":0,"pcjGapAcc":4381,"tudoAvHoje":0.0,"tudoAvAcc":85.34},"133":{"cartaoHoje":0.0,"cartaoAcc":43.5,"cartaoGapHoje":0,"cartaoGapAcc":14,"pcjHoje":0.0,"pcjAcc":0.0,"pcjGapHoje":0,"pcjGapAcc":-419,"tudoAvHoje":0.0,"tudoAvAcc":79.17},"124":{"cartaoHoje":0.0,"cartaoAcc":41.82,"cartaoGapHoje":0,"cartaoGapAcc":-75,"pcjHoje":0.0,"pcjAcc":13.28,"pcjGapHoje":0,"pcjGapAcc":-575,"tudoAvHoje":0.0,"tudoAvAcc":75.93},"143":{"cartaoHoje":0.0,"cartaoAcc":42.7,"cartaoGapHoje":0,"cartaoGapAcc":-12,"pcjHoje":0.0,"pcjAcc":57.55,"pcjGapHoje":0,"pcjGapAcc":381,"tudoAvHoje":0.0,"tudoAvAcc":84.62}},"pf":{"total":{"pfHoje":49,"pfAcc":450},"operators":{},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-12T23:59:59"},"closedOperators":["144","35","133","124","143"],"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-12T23:59:59"};
+    const DAILY_RESULTS_PATCH = {}; // Cargas fixas desativadas.
 
-    const SIGA_SNAPSHOT = {"total":{"cartaoHoje":49.44,"cartaoAcc":41.51,"cartaoGapHoje":1156,"cartaoGapAcc":-2256,"pcjHoje":65.93,"pcjAcc":56.5,"pcjGapHoje":2746,"pcjGapAcc":13476,"tudoAvHoje":76.87,"tudoAvAcc":79.83,"bolsaHoje":0,"bolsaAcc":1,"compraHoje":0,"compraAcc":79,"protecaoHoje":0,"protecaoAcc":1,"sabadaoHoje":2,"sabadaoAcc":227,"smsHoje":0,"smsAcc":0,"vidaHoje":0,"vidaAcc":0,"pfHoje":2,"pfAcc":308},"35":{"cartaoHoje":60.02,"cartaoAcc":51.38,"cartaoGapHoje":820,"cartaoGapAcc":2046,"pcjHoje":70.9,"pcjAcc":69.3,"pcjGapHoje":1039,"pcjGapAcc":4301,"tudoAvHoje":88.89,"tudoAvAcc":83.54,"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":33,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":9,"smsHoje":0,"smsAcc":0,"vidaHoje":0,"vidaAcc":0,"pfHoje":0,"pfAcc":42},"36":{"cartaoHoje":56.06,"cartaoAcc":41.96,"cartaoGapHoje":549,"cartaoGapAcc":-287,"pcjHoje":62.19,"pcjAcc":60.11,"pcjGapHoje":640,"pcjGapAcc":2904,"tudoAvHoje":64.52,"tudoAvAcc":79.37,"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":3,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":18,"smsHoje":0,"smsAcc":0,"vidaHoje":0,"vidaAcc":0,"pfHoje":0,"pfAcc":21},"29":{"cartaoHoje":45.48,"cartaoAcc":47.65,"cartaoGapHoje":63,"cartaoGapAcc":812,"pcjHoje":100.0,"pcjAcc":65.3,"pcjGapHoje":754,"pcjGapAcc":2520,"tudoAvHoje":72.73,"tudoAvAcc":77.59,"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":3,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":40,"smsHoje":0,"smsAcc":0,"vidaHoje":0,"vidaAcc":0,"pfHoje":0,"pfAcc":43},"31":{"cartaoHoje":58.14,"cartaoAcc":40.15,"cartaoGapHoje":367,"cartaoGapAcc":-507,"pcjHoje":63.74,"pcjAcc":60.67,"pcjGapHoje":405,"pcjGapAcc":1834,"tudoAvHoje":80.95,"tudoAvAcc":88.7,"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":3,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":51,"smsHoje":0,"smsAcc":0,"vidaHoje":0,"vidaAcc":0,"pfHoje":0,"pfAcc":54},"144":{"cartaoHoje":46.08,"cartaoAcc":33.09,"cartaoGapHoje":50,"cartaoGapAcc":-2166,"pcjHoje":37.22,"pcjAcc":25.32,"pcjGapHoje":17,"pcjGapAcc":-701,"tudoAvHoje":84.62,"tudoAvAcc":69.03,"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":1,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":2,"sabadaoAcc":41,"smsHoje":0,"smsAcc":0,"vidaHoje":0,"vidaAcc":0,"pfHoje":2,"pfAcc":42},"145":{"cartaoHoje":26.24,"cartaoAcc":36.57,"cartaoGapHoje":-166,"cartaoGapAcc":-943,"pcjHoje":0.0,"pcjAcc":62.5,"pcjGapHoje":-91,"pcjGapAcc":1475,"tudoAvHoje":72.73,"tudoAvAcc":80.34,"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":9,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":26,"smsHoje":0,"smsAcc":0,"vidaHoje":0,"vidaAcc":0,"pfHoje":0,"pfAcc":35},"37":{"cartaoHoje":0.0,"cartaoAcc":34.81,"cartaoGapHoje":-402,"cartaoGapAcc":-1364,"pcjHoje":0.0,"pcjAcc":60.37,"pcjGapHoje":0,"pcjGapAcc":1470,"tudoAvHoje":100.0,"tudoAvAcc":84.21,"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":15,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":0,"smsAcc":0,"vidaHoje":0,"vidaAcc":0,"pfHoje":0,"pfAcc":15},"124":{"cartaoHoje":12.31,"cartaoAcc":39.18,"cartaoGapHoje":-125,"cartaoGapAcc":-178,"pcjHoje":0.0,"pcjAcc":19.2,"pcjGapHoje":-17,"pcjGapAcc":-289,"tudoAvHoje":50.0,"tudoAvAcc":70.73,"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":9,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":17,"smsHoje":0,"smsAcc":0,"vidaHoje":0,"vidaAcc":0,"pfHoje":0,"pfAcc":26},"133":{"cartaoHoje":0.0,"cartaoAcc":43.5,"cartaoGapHoje":0,"cartaoGapAcc":14,"pcjHoje":0.0,"pcjAcc":0.0,"pcjGapHoje":0,"pcjGapAcc":-419,"tudoAvHoje":0.0,"tudoAvAcc":79.17,"bolsaHoje":0,"bolsaAcc":1,"compraHoje":0,"compraAcc":3,"protecaoHoje":0,"protecaoAcc":1,"sabadaoHoje":0,"sabadaoAcc":8,"smsHoje":0,"smsAcc":0,"vidaHoje":0,"vidaAcc":0,"pfHoje":0,"pfAcc":13},"143":{"cartaoHoje":0.0,"cartaoAcc":52.95,"cartaoGapHoje":0,"cartaoGapAcc":317,"pcjHoje":0.0,"pcjAcc":57.55,"pcjGapHoje":0,"pcjGapAcc":381,"tudoAvHoje":0.0,"tudoAvAcc":94.12,"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":0,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":17,"smsHoje":0,"smsAcc":0,"vidaHoje":0,"vidaAcc":0,"pfHoje":0,"pfAcc":17}};
+    const SIGA_SNAPSHOT = {total:{}}; // Cargas fixas desativadas.
 
-    const DAILY_SALES_HISTORY = {"2026-07-01":{"store":{"vendaAtual":7440,"compromissoDia":11722,"ativadosHoje":0,"ativadosMeta":2,"cartaoAv":38.43,"cartaoAvAcc":38.43,"cartaoGap":-340,"cartaoGapAcc":-340,"pcj":61.15,"pcjAcc":61.15,"pcjGap":748,"pcjGapAcc":748,"tudoAv":79.63,"tudoAvAcc":79.63},"operators":{"total":{"cartaoHoje":38.43,"cartaoAcc":38.43,"cartaoGapHoje":-340,"cartaoGapAcc":-340,"pcjHoje":61.15,"pcjAcc":61.15,"pcjGapHoje":748,"pcjGapAcc":748,"tudoAvHoje":79.63,"tudoAvAcc":79.63},"144":{"cartaoHoje":24.98,"cartaoAcc":24.98,"cartaoGapHoje":-477,"cartaoGapAcc":-477,"pcjHoje":25.07,"pcjAcc":25.07,"pcjGapHoje":-66,"pcjGapAcc":-66,"tudoAvHoje":73.33,"tudoAvAcc":73.33},"37":{"cartaoHoje":27.36,"cartaoAcc":27.36,"cartaoGapHoje":-210,"cartaoGapAcc":-210,"pcjHoje":99.98,"pcjAcc":99.98,"pcjGapHoje":239,"pcjGapAcc":239,"tudoAvHoje":66.67,"tudoAvAcc":66.67},"36":{"cartaoHoje":57.83,"cartaoAcc":57.83,"cartaoGapHoje":183,"cartaoGapAcc":183,"pcjHoje":71.07,"pcjAcc":71.07,"pcjGapHoje":258,"pcjGapAcc":258,"tudoAvHoje":100.0,"tudoAvAcc":100.0},"31":{"cartaoHoje":47.14,"cartaoAcc":47.14,"cartaoGapHoje":46,"cartaoGapAcc":46,"pcjHoje":100.0,"pcjAcc":100.0,"pcjGapHoje":342,"pcjGapAcc":342,"tudoAvHoje":100.0,"tudoAvAcc":100.0},"124":{"cartaoHoje":48.11,"cartaoAcc":48.11,"cartaoGapHoje":30,"cartaoGapAcc":30,"pcjHoje":0.0,"pcjAcc":0.0,"pcjGapHoje":-98,"pcjGapAcc":-98,"tudoAvHoje":60.0,"tudoAvAcc":60.0},"145":{"cartaoHoje":97.35,"cartaoAcc":97.35,"cartaoGapHoje":173,"cartaoGapAcc":173,"pcjHoje":58.59,"pcjAcc":58.59,"pcjGapHoje":73,"pcjGapAcc":73,"tudoAvHoje":100.0,"tudoAvAcc":100.0},"35":{"cartaoHoje":0.0,"cartaoAcc":0.0,"cartaoGapHoje":-84,"cartaoGapAcc":-84,"pcjHoje":0.0,"pcjAcc":0.0,"pcjGapHoje":0,"pcjGapAcc":0,"tudoAvHoje":50.0,"tudoAvAcc":50.0}},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-01T23:59:59"},"2026-07-02":{"store":{"vendaAtual":7988,"compromissoDia":13962,"ativadosHoje":1,"ativadosMeta":2,"cartaoAv":40.4,"cartaoAvAcc":39.45,"cartaoGap":-208,"cartaoGapAcc":-548,"pcj":47.34,"pcjAcc":53.83,"pcjGap":398,"pcjGapAcc":1146,"tudoAv":86.76,"tudoAvAcc":83.61},"operators":{"total":{"cartaoHoje":40.4,"cartaoAcc":39.45,"cartaoGapHoje":-208,"cartaoGapAcc":-548,"pcjHoje":47.34,"pcjAcc":53.83,"pcjGapHoje":398,"pcjGapAcc":1146,"tudoAvHoje":86.76,"tudoAvAcc":83.61},"145":{"cartaoHoje":35.1,"cartaoAcc":42.92,"cartaoGapHoje":-175,"cartaoGapAcc":-2,"pcjHoje":50.55,"pcjAcc":52.84,"pcjGapHoje":121,"pcjGapAcc":193,"tudoAvHoje":85.71,"tudoAvAcc":87.5},"31":{"cartaoHoje":28.89,"cartaoAcc":35.51,"cartaoGapHoje":-277,"cartaoGapAcc":-231,"pcjHoje":87.64,"pcjAcc":93.59,"pcjGapHoje":298,"pcjGapAcc":640,"tudoAvHoje":100.0,"tudoAvAcc":100.0},"37":{"cartaoHoje":50.13,"cartaoAcc":36.37,"cartaoGapHoje":63,"cartaoGapAcc":-147,"pcjHoje":100.0,"pcjAcc":99.99,"pcjGapHoje":286,"pcjGapAcc":525,"tudoAvHoje":77.78,"tudoAvAcc":71.43},"124":{"cartaoHoje":69.62,"cartaoAcc":60.91,"cartaoGapHoje":228,"cartaoGapAcc":258,"pcjHoje":0.0,"pcjAcc":0.0,"pcjGapHoje":-209,"pcjGapAcc":-306,"tudoAvHoje":66.67,"tudoAvAcc":63.64},"36":{"cartaoHoje":67.82,"cartaoAcc":61.22,"cartaoGapHoje":158,"cartaoGapAcc":342,"pcjHoje":0.0,"pcjAcc":44.32,"pcjGapHoje":-151,"pcjGapAcc":107,"tudoAvHoje":75.0,"tudoAvAcc":92.31},"29":{"cartaoHoje":50.32,"cartaoAcc":50.32,"cartaoGapHoje":41,"cartaoGapAcc":41,"pcjHoje":71.32,"pcjAcc":71.32,"pcjGapHoje":101,"pcjGapAcc":101,"tudoAvHoje":100.0,"tudoAvAcc":100.0},"35":{"cartaoHoje":24.0,"cartaoAcc":17.24,"cartaoGapHoje":-95,"cartaoGapAcc":-179,"pcjHoje":0.0,"pcjAcc":0.0,"pcjGapHoje":-42,"pcjGapAcc":-42,"tudoAvHoje":75.0,"tudoAvAcc":66.67},"144":{"cartaoHoje":4.63,"cartaoAcc":22.35,"cartaoGapHoje":-151,"cartaoGapAcc":-628,"pcjHoje":0.0,"pcjAcc":24.4,"pcjGapHoje":-6,"pcjGapAcc":-72,"tudoAvHoje":87.5,"tudoAvAcc":78.26}},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-02T23:59:59"},"2026-07-03":{"store":{"vendaAtual":16181,"compromissoDia":17818,"ativadosHoje":0,"ativadosMeta":3,"cartaoAv":36.1,"cartaoAvAcc":37.73,"cartaoGap":-1117,"cartaoGapAcc":-1664,"pcj":53.21,"pcjAcc":53.53,"pcjGap":1064,"pcjGapAcc":2210,"tudoAv":85.11,"tudoAvAcc":84.26},"operators":{"total":{"cartaoHoje":36.1,"cartaoAcc":37.73,"cartaoGapHoje":-1117,"cartaoGapAcc":-1664,"pcjHoje":53.21,"pcjAcc":53.53,"pcjGapHoje":1064,"pcjGapAcc":2210,"tudoAvHoje":85.11,"tudoAvAcc":84.26},"36":{"cartaoHoje":31.22,"cartaoAcc":39.23,"cartaoGapHoje":-606,"cartaoGapAcc":-264,"pcjHoje":52.76,"pcjAcc":49.25,"pcjGapHoje":285,"pcjGapAcc":392,"tudoAvHoje":87.5,"tudoAvAcc":89.19},"145":{"cartaoHoje":32.68,"cartaoAcc":38.04,"cartaoGapHoje":-238,"cartaoGapAcc":-240,"pcjHoje":42.97,"pcjAcc":48.8,"pcjGapHoje":60,"pcjGapAcc":254,"tudoAvHoje":90.0,"tudoAvAcc":88.89},"35":{"cartaoHoje":34.49,"cartaoAcc":30.26,"cartaoGapHoje":-182,"cartaoGapAcc":-361,"pcjHoje":99.99,"pcjAcc":86.01,"pcjGapHoje":480,"pcjGapAcc":438,"tudoAvHoje":92.86,"tudoAvAcc":85.0},"31":{"cartaoHoje":61.14,"cartaoAcc":45.61,"cartaoGapHoje":363,"cartaoGapAcc":133,"pcjHoje":39.87,"pcjAcc":65.21,"pcjGapHoje":60,"pcjGapAcc":700,"tudoAvHoje":100.0,"tudoAvAcc":100.0},"144":{"cartaoHoje":13.94,"cartaoAcc":19.41,"cartaoGapHoje":-477,"cartaoGapAcc":-1105,"pcjHoje":0.0,"pcjAcc":18.26,"pcjGapHoje":-80,"pcjGapAcc":-152,"tudoAvHoje":71.43,"tudoAvAcc":76.67},"29":{"cartaoHoje":80.46,"cartaoAcc":71.99,"cartaoGapHoje":531,"cartaoGapAcc":572,"pcjHoje":49.15,"pcjAcc":53.51,"pcjGapHoje":161,"pcjGapAcc":263,"tudoAvHoje":66.67,"tudoAvAcc":81.25},"37":{"cartaoHoje":11.27,"cartaoAcc":26.96,"cartaoGapHoje":-422,"cartaoGapAcc":-569,"pcjHoje":99.99,"pcjAcc":99.99,"pcjGapHoje":97,"pcjGapAcc":622,"tudoAvHoje":80.0,"tudoAvAcc":74.19},"124":{"cartaoHoje":0.0,"cartaoAcc":53.48,"cartaoGapHoje":-66,"cartaoGapAcc":172,"pcjHoje":0.0,"pcjAcc":0.0,"pcjGapHoje":0,"pcjGapAcc":-306,"tudoAvHoje":0.0,"tudoAvAcc":58.33}},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-03T23:59:59"},"2026-07-04":{"store":{"vendaAtual":26027,"compromissoDia":34854,"ativadosHoje":7,"ativadosMeta":6,"cartaoAv":46.3,"cartaoAvAcc":41.6,"cartaoGap":858,"cartaoGapAcc":-807,"pcj":63.31,"pcjAcc":58.44,"pcjGap":3411,"pcjGapAcc":5621,"tudoAv":81.42,"tudoAvAcc":82.96},"operators":{"total":{"cartaoHoje":46.3,"cartaoAcc":41.6,"cartaoGapHoje":858,"cartaoGapAcc":-807,"pcjHoje":63.31,"pcjAcc":58.44,"pcjGapHoje":3411,"pcjGapAcc":5621,"tudoAvHoje":81.42,"tudoAvAcc":82.96},"29":{"cartaoHoje":50.16,"cartaoAcc":55.83,"cartaoGapHoje":403,"cartaoGapAcc":975,"pcjHoje":71.67,"pcjAcc":65.59,"pcjGapHoje":1035,"pcjGapAcc":1298,"tudoAvHoje":70.59,"tudoAvAcc":74.0},"35":{"cartaoHoje":55.87,"cartaoAcc":46.41,"cartaoGapHoje":624,"cartaoGapAcc":262,"pcjHoje":61.4,"pcjAcc":67.33,"pcjGapHoje":715,"pcjGapAcc":1153,"tudoAvHoje":100.0,"tudoAvAcc":93.18},"36":{"cartaoHoje":55.08,"cartaoAcc":45.01,"cartaoGapHoje":487,"cartaoGapAcc":222,"pcjHoje":85.85,"pcjAcc":65.58,"pcjGapHoje":1128,"pcjGapAcc":1521,"tudoAvHoje":81.48,"tudoAvAcc":85.94},"37":{"cartaoHoje":27.65,"cartaoAcc":27.28,"cartaoGapHoje":-471,"cartaoGapAcc":-1041,"pcjHoje":81.39,"pcjAcc":91.25,"pcjGapHoje":394,"pcjGapAcc":1016,"tudoAvHoje":84.0,"tudoAvAcc":78.57},"31":{"cartaoHoje":43.16,"cartaoAcc":44.81,"cartaoGapHoje":4,"cartaoGapAcc":137,"pcjHoje":32.97,"pcjAcc":55.05,"pcjGapHoje":-22,"pcjGapAcc":678,"tudoAvHoje":85.0,"tudoAvAcc":94.44},"144":{"cartaoHoje":40.09,"cartaoAcc":26.54,"cartaoGapHoje":-72,"cartaoGapAcc":-1177,"pcjHoje":0.0,"pcjAcc":8.74,"pcjGapHoje":-346,"pcjGapAcc":-498,"tudoAvHoje":80.0,"tudoAvAcc":78.0},"145":{"cartaoHoje":51.2,"cartaoAcc":42.29,"cartaoGapHoje":189,"cartaoGapAcc":-51,"pcjHoje":84.33,"pcjAcc":62.7,"pcjGapHoje":582,"pcjGapAcc":836,"tudoAvHoje":85.0,"tudoAvAcc":87.5},"124":{"cartaoHoje":23.82,"cartaoAcc":42.92,"cartaoGapHoje":-173,"cartaoGapAcc":-2,"pcjHoje":0.0,"pcjAcc":0.0,"pcjGapHoje":-75,"pcjGapAcc":-382,"tudoAvHoje":62.5,"tudoAvAcc":60.0},"133":{"cartaoHoje":0.0,"cartaoAcc":0.0,"cartaoGapHoje":-132,"cartaoGapAcc":-132,"pcjHoje":0.0,"pcjAcc":0.0,"pcjGapHoje":0,"pcjGapAcc":0,"tudoAvHoje":60.0,"tudoAvAcc":60.0}},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-04T23:59:59"},"2026-07-05":{"store":{"vendaAtual":13842,"compromissoDia":24226,"ativadosHoje":5,"ativadosMeta":4,"cartaoAv":46.2,"cartaoAvAcc":42.49,"cartaoGap":443,"cartaoGapAcc":-364,"pcj":48.46,"pcjAcc":56.34,"pcjGap":861,"pcjGapAcc":6482,"tudoAv":75.53,"tudoAvAcc":81.54},"operators":{"total":{"cartaoHoje":46.2,"cartaoAcc":42.49,"cartaoGapHoje":443,"cartaoGapAcc":-364,"pcjHoje":48.46,"pcjAcc":56.34,"pcjGapHoje":861,"pcjGapAcc":6482,"tudoAvHoje":75.53,"tudoAvAcc":81.54},"144":{"cartaoHoje":39.18,"cartaoAcc":31.28,"cartaoGapHoje":-164,"cartaoGapAcc":-1340,"pcjHoje":27.17,"pcjAcc":17.39,"pcjGapHoje":-131,"pcjGapAcc":-630,"tudoAvHoje":58.82,"tudoAvAcc":70.24},"143":{"cartaoHoje":53.45,"cartaoAcc":53.45,"cartaoGapHoje":330,"cartaoGapAcc":330,"pcjHoje":57.55,"pcjAcc":57.55,"pcjGapHoje":381,"pcjGapAcc":381,"tudoAvHoje":93.75,"tudoAvAcc":93.75},"35":{"cartaoHoje":50.88,"cartaoAcc":47.67,"cartaoGapHoje":238,"cartaoGapAcc":500,"pcjHoje":88.92,"pcjAcc":73.83,"pcjGapHoje":628,"pcjGapAcc":1981,"tudoAvHoje":73.91,"tudoAvAcc":66.67},"36":{"cartaoHoje":27.88,"cartaoAcc":42.13,"cartaoGapHoje":-338,"cartaoGapAcc":-116,"pcjHoje":49.07,"pcjAcc":63.74,"pcjGapHoje":88,"pcjGapAcc":1608,"tudoAvHoje":87.5,"tudoAvAcc":86.25},"133":{"cartaoHoje":75.91,"cartaoAcc":59.82,"cartaoGapHoje":377,"cartaoGapAcc":244,"pcjHoje":0.0,"pcjAcc":0.0,"pcjGapHoje":-304,"pcjGapAcc":-304,"tudoAvHoje":100.0,"tudoAvAcc":80.0},"124":{"cartaoHoje":0.0,"cartaoAcc":42.92,"cartaoGapHoje":0,"cartaoGapAcc":-2,"pcjHoje":0.0,"pcjAcc":0.0,"pcjGapHoje":0,"pcjGapAcc":-382,"tudoAvHoje":0.0,"tudoAvAcc":60.0},"29":{"cartaoHoje":0.0,"cartaoAcc":55.83,"cartaoGapHoje":0,"cartaoGapAcc":975,"pcjHoje":0.0,"pcjAcc":65.59,"pcjGapHoje":0,"pcjGapAcc":1298,"tudoAvHoje":0.0,"tudoAvAcc":74.0},"145":{"cartaoHoje":0.0,"cartaoAcc":42.29,"cartaoGapHoje":0,"cartaoGapAcc":-51,"pcjHoje":0.0,"pcjAcc":62.7,"pcjGapHoje":0,"pcjGapAcc":836,"tudoAvHoje":0.0,"tudoAvAcc":87.5},"31":{"cartaoHoje":0.0,"cartaoAcc":44.81,"cartaoGapHoje":0,"cartaoGapAcc":137,"pcjHoje":0.0,"pcjAcc":55.05,"pcjGapHoje":0,"pcjGapAcc":678,"tudoAvHoje":0.0,"tudoAvAcc":94.44},"37":{"cartaoHoje":0.0,"cartaoAcc":27.28,"cartaoGapHoje":0,"cartaoGapAcc":-1041,"pcjHoje":0.0,"pcjAcc":91.25,"pcjGapHoje":0,"pcjGapAcc":1016,"tudoAvHoje":0.0,"tudoAvAcc":78.57}},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-05T23:59:59"},"2026-07-06":{"store":{"vendaAtual":12269,"compromissoDia":16984,"ativadosHoje":1,"ativadosMeta":3,"cartaoAv":33.96,"cartaoAvAcc":null,"cartaoGap":null,"cartaoGapAcc":null,"pcj":58.27,"pcjAcc":null,"pcjGap":null,"pcjGapAcc":null,"tudoAv":null,"tudoAvAcc":null},"operators":{},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-06T23:59:59"},"2026-07-07":{"store":{"vendaAtual":12797,"compromissoDia":19016,"ativadosHoje":3,"ativadosMeta":3,"cartaoAv":44.87,"cartaoAvAcc":41.72,"cartaoGap":239,"cartaoGapAcc":-1234,"pcj":68.38,"pcjAcc":58.26,"pcjGap":1916,"pcjGapAcc":9368,"tudoAv":84.95,"tudoAvAcc":82.24},"operators":{"total":{"cartaoHoje":44.87,"cartaoAcc":41.72,"cartaoGapHoje":239,"cartaoGapAcc":-1234,"pcjHoje":68.38,"pcjAcc":58.26,"pcjGapHoje":1916,"pcjGapAcc":9368,"tudoAvHoje":84.95,"tudoAvAcc":82.24},"35":{"cartaoHoje":52.04,"cartaoAcc":48.74,"cartaoGapHoje":313,"cartaoGapAcc":813,"pcjHoje":54.49,"pcjAcc":68.79,"pcjGapHoje":351,"pcjGapAcc":2332,"tudoAvHoje":75.0,"tudoAvAcc":83.91},"36":{"cartaoHoje":43.36,"cartaoAcc":41.72,"cartaoGapHoje":12,"cartaoGapAcc":-215,"pcjHoje":68.61,"pcjAcc":64.73,"pcjGapHoje":482,"pcjGapAcc":2090,"tudoAvHoje":85.29,"tudoAvAcc":85.59},"29":{"cartaoHoje":37.18,"cartaoAcc":51.61,"cartaoGapHoje":-129,"cartaoGapAcc":846,"pcjHoje":92.73,"pcjAcc":70.01,"pcjGapHoje":477,"pcjGapAcc":1774,"tudoAvHoje":100.0,"tudoAvAcc":78.69},"37":{"cartaoHoje":70.92,"cartaoAcc":34.59,"cartaoGapHoje":426,"cartaoGapAcc":-802,"pcjHoje":85.5,"pcjAcc":78.02,"pcjGapHoje":547,"pcjGapAcc":1419,"tudoAvHoje":87.5,"tudoAvAcc":81.08},"133":{"cartaoHoje":28.48,"cartaoAcc":45.93,"cartaoGapHoje":-168,"cartaoGapAcc":77,"pcjHoje":0.0,"pcjAcc":0.0,"pcjGapHoje":-115,"pcjGapAcc":-419,"tudoAvHoje":75.0,"tudoAvAcc":77.27},"124":{"cartaoHoje":23.94,"cartaoAcc":38.5,"cartaoGapHoje":-215,"cartaoGapAcc":-173,"pcjHoje":99.99,"pcjAcc":23.71,"pcjGapHoje":175,"pcjGapAcc":-167,"tudoAvHoje":100.0,"tudoAvAcc":75.76},"143":{"cartaoHoje":0.0,"cartaoAcc":52.95,"cartaoGapHoje":0,"cartaoGapAcc":317,"pcjHoje":0.0,"pcjAcc":57.55,"pcjGapHoje":0,"pcjGapAcc":381,"tudoAvHoje":0.0,"tudoAvAcc":94.12},"145":{"cartaoHoje":0.0,"cartaoAcc":45.24,"cartaoGapHoje":0,"cartaoGapAcc":229,"pcjHoje":0.0,"pcjAcc":62.14,"pcjGapHoje":0,"pcjGapAcc":1255,"tudoAvHoje":0.0,"tudoAvAcc":83.54},"144":{"cartaoHoje":0.0,"cartaoAcc":33.01,"cartaoGapHoje":0,"cartaoGapAcc":-1483,"pcjHoje":0.0,"pcjAcc":27.52,"pcjGapHoje":0,"pcjGapAcc":-367,"tudoAvHoje":0.0,"tudoAvAcc":71.03},"31":{"cartaoHoje":0.0,"cartaoAcc":35.65,"cartaoGapHoje":0,"cartaoGapAcc":-841,"pcjHoje":0.0,"pcjAcc":61.21,"pcjGapHoje":0,"pcjGapAcc":1070,"tudoAvHoje":0.0,"tudoAvAcc":95.83}},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-07T23:59:59"},"2026-07-08":{"store":{"vendaAtual":10181,"compromissoDia":23809,"ativadosHoje":3,"ativadosMeta":3,"cartaoAv":50.61,"cartaoAvAcc":42.57,"cartaoGap":775,"cartaoGapAcc":-459,"pcj":58.8,"pcjAcc":58.32,"pcjGap":1226,"pcjGapAcc":10595,"tudoAv":80.49,"tudoAvAcc":82.05},"operators":{"total":{"cartaoHoje":50.61,"cartaoAcc":42.57,"cartaoGapHoje":775,"cartaoGapAcc":-459,"pcjHoje":58.8,"pcjAcc":58.32,"pcjGapHoje":1226,"pcjGapAcc":10595,"tudoAvHoje":80.49,"tudoAvAcc":82.05},"35":{"cartaoHoje":65.0,"cartaoAcc":52.22,"cartaoGapHoje":848,"cartaoGapAcc":1661,"pcjHoje":68.29,"pcjAcc":68.65,"pcjGapHoje":834,"pcjGapAcc":3166,"tudoAvHoje":79.31,"tudoAvAcc":82.76},"29":{"cartaoHoje":37.46,"cartaoAcc":49.07,"cartaoGapHoje":-119,"cartaoGapAcc":727,"pcjHoje":51.74,"pcjAcc":67.51,"pcjGapHoje":135,"pcjGapAcc":1909,"tudoAvHoje":78.57,"tudoAvAcc":78.67},"37":{"cartaoHoje":64.68,"cartaoAcc":39.27,"cartaoGapHoje":381,"cartaoGapAcc":-421,"pcjHoje":25.57,"pcjAcc":64.58,"pcjGapHoje":-107,"pcjGapAcc":1312,"tudoAvHoje":92.31,"tudoAvAcc":82.76},"31":{"cartaoHoje":45.28,"cartaoAcc":36.51,"cartaoGapHoje":25,"cartaoGapAcc":-816,"pcjHoje":81.36,"pcjAcc":63.43,"pcjGapHoje":234,"pcjGapAcc":1304,"tudoAvHoje":100.0,"tudoAvAcc":96.1},"145":{"cartaoHoje":0.0,"cartaoAcc":41.99,"cartaoGapHoje":-340,"cartaoGapAcc":-111,"pcjHoje":0.0,"pcjAcc":62.14,"pcjGapHoje":0,"pcjGapAcc":1255,"tudoAvHoje":77.78,"tudoAvAcc":82.95},"144":{"cartaoHoje":38.91,"cartaoAcc":33.21,"cartaoGapHoje":-21,"cartaoGapAcc":-1504,"pcjHoje":99.98,"pcjAcc":30.39,"pcjGapHoje":131,"pcjGapAcc":-235,"tudoAvHoje":66.67,"tudoAvAcc":70.59},"133":{"cartaoHoje":0.0,"cartaoAcc":45.93,"cartaoGapHoje":0,"cartaoGapAcc":77,"pcjHoje":0.0,"pcjAcc":0.0,"pcjGapHoje":0,"pcjGapAcc":-419,"tudoAvHoje":0.0,"tudoAvAcc":77.27},"124":{"cartaoHoje":0.0,"cartaoAcc":38.5,"cartaoGapHoje":0,"cartaoGapAcc":-173,"pcjHoje":0.0,"pcjAcc":23.71,"pcjGapHoje":0,"pcjGapAcc":-167,"tudoAvHoje":0.0,"tudoAvAcc":75.76},"143":{"cartaoHoje":0.0,"cartaoAcc":52.95,"cartaoGapHoje":0,"cartaoGapAcc":317,"pcjHoje":0.0,"pcjAcc":57.55,"pcjGapHoje":0,"pcjGapAcc":381,"tudoAvHoje":0.0,"tudoAvAcc":94.12},"36":{"cartaoHoje":0.0,"cartaoAcc":41.72,"cartaoGapHoje":0,"cartaoGapAcc":-215,"pcjHoje":0.0,"pcjAcc":64.73,"pcjGapHoje":0,"pcjGapAcc":2090,"tudoAvHoje":0.0,"tudoAvAcc":85.59}},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-08T23:59:59"},"2026-07-09":{"store":{"vendaAtual":26328,"compromissoDia":18182,"ativadosHoje":4,"ativadosMeta":3,"cartaoAv":31.78,"cartaoAvAcc":40.44,"cartaoGap":-2954,"cartaoGapAcc":-3412,"pcj":36.61,"pcjAcc":54.94,"pcjGap":135,"pcjGapAcc":10730,"tudoAv":71.88,"tudoAvAcc":80.26},"operators":{"total":{"cartaoHoje":31.78,"cartaoAcc":40.44,"cartaoGapHoje":-2954,"cartaoGapAcc":-3412,"pcjHoje":36.61,"pcjAcc":54.94,"pcjGapHoje":135,"pcjGapAcc":10730,"tudoAvHoje":71.88,"tudoAvAcc":80.26},"36":{"cartaoHoje":33.47,"cartaoAcc":39.42,"cartaoGapHoje":-620,"cartaoGapAcc":-835,"pcjHoje":42.94,"pcjAcc":59.57,"pcjGapHoje":173,"pcjGapAcc":2263,"tudoAvHoje":72.5,"tudoAvAcc":82.28},"144":{"cartaoHoje":28.34,"cartaoAcc":32.04,"cartaoGapHoje":-712,"cartaoGapAcc":-2216,"pcjHoje":0.0,"pcjAcc":23.94,"pcjGapHoje":-482,"pcjGapAcc":-717,"tudoAvHoje":52.17,"tudoAvAcc":67.61},"37":{"cartaoHoje":30.77,"cartaoAcc":36.88,"cartaoGapHoje":-541,"cartaoGapAcc":-962,"pcjHoje":46.64,"pcjAcc":60.37,"pcjGapHoje":158,"pcjGapAcc":1470,"tudoAvHoje":86.36,"tudoAvAcc":83.49},"29":{"cartaoHoje":43.74,"cartaoAcc":48.02,"cartaoGapHoje":22,"cartaoGapAcc":749,"pcjHoje":23.83,"pcjAcc":59.67,"pcjGapHoje":-143,"pcjGapAcc":1766,"tudoAvHoje":78.95,"tudoAvAcc":78.72},"31":{"cartaoHoje":40.94,"cartaoAcc":37.32,"cartaoGapHoje":-58,"cartaoGapAcc":-874,"pcjHoje":45.93,"pcjAcc":59.92,"pcjGapHoje":126,"pcjGapAcc":1429,"tudoAvHoje":64.71,"tudoAvAcc":90.43},"145":{"cartaoHoje":18.0,"cartaoAcc":37.32,"cartaoGapHoje":-665,"cartaoGapAcc":-776,"pcjHoje":100.0,"pcjAcc":65.69,"pcjGapHoje":311,"pcjGapAcc":1566,"tudoAvHoje":72.22,"tudoAvAcc":81.13},"35":{"cartaoHoje":15.31,"cartaoAcc":49.26,"cartaoGapHoje":-436,"cartaoGapAcc":1225,"pcjHoje":75.08,"pcjAcc":68.82,"pcjGapHoje":97,"pcjGapAcc":3263,"tudoAvHoje":80.0,"tudoAvAcc":82.44},"124":{"cartaoHoje":71.67,"cartaoAcc":41.74,"cartaoGapHoje":119,"cartaoGapAcc":-54,"pcjHoje":0.0,"pcjAcc":19.74,"pcjGapHoje":-104,"pcjGapAcc":-272,"tudoAvHoje":50.0,"tudoAvAcc":72.97},"133":{"cartaoHoje":0.0,"cartaoAcc":43.5,"cartaoGapHoje":-63,"cartaoGapAcc":14,"pcjHoje":0.0,"pcjAcc":0.0,"pcjGapHoje":0,"pcjGapAcc":-419,"tudoAvHoje":100.0,"tudoAvAcc":79.17},"143":{"cartaoHoje":0.0,"cartaoAcc":52.95,"cartaoGapHoje":0,"cartaoGapAcc":317,"pcjHoje":0.0,"pcjAcc":57.55,"pcjGapHoje":0,"pcjGapAcc":381,"tudoAvHoje":0.0,"tudoAvAcc":94.12}},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-09T23:59:59"},"2026-07-10":{"store":{"vendaAtual":17958,"compromissoDia":19537,"ativadosHoje":2,"ativadosMeta":4,"cartaoAv":49.44,"cartaoAvAcc":41.51,"cartaoGap":1156,"cartaoGapAcc":-2256,"pcj":65.93,"pcjAcc":56.5,"pcjGap":2746,"pcjGapAcc":13476,"tudoAv":76.87,"tudoAvAcc":79.83},"operators":{"total":{"cartaoHoje":49.44,"cartaoAcc":41.51,"cartaoGapHoje":1156,"cartaoGapAcc":-2256,"pcjHoje":65.93,"pcjAcc":56.5,"pcjGapHoje":2746,"pcjGapAcc":13476,"tudoAvHoje":76.87,"tudoAvAcc":79.83},"35":{"cartaoHoje":60.02,"cartaoAcc":51.38,"cartaoGapHoje":820,"cartaoGapAcc":2046,"pcjHoje":70.9,"pcjAcc":69.3,"pcjGapHoje":1039,"pcjGapAcc":4301,"tudoAvHoje":88.89,"tudoAvAcc":83.54},"36":{"cartaoHoje":56.06,"cartaoAcc":41.96,"cartaoGapHoje":549,"cartaoGapAcc":-287,"pcjHoje":62.19,"pcjAcc":60.11,"pcjGapHoje":640,"pcjGapAcc":2904,"tudoAvHoje":64.52,"tudoAvAcc":79.37},"29":{"cartaoHoje":45.48,"cartaoAcc":47.65,"cartaoGapHoje":63,"cartaoGapAcc":812,"pcjHoje":100.0,"pcjAcc":65.3,"pcjGapHoje":754,"pcjGapAcc":2520,"tudoAvHoje":72.73,"tudoAvAcc":77.59},"31":{"cartaoHoje":58.14,"cartaoAcc":40.15,"cartaoGapHoje":367,"cartaoGapAcc":-507,"pcjHoje":63.74,"pcjAcc":60.67,"pcjGapHoje":405,"pcjGapAcc":1834,"tudoAvHoje":80.95,"tudoAvAcc":88.7},"144":{"cartaoHoje":46.08,"cartaoAcc":33.09,"cartaoGapHoje":50,"cartaoGapAcc":-2166,"pcjHoje":37.22,"pcjAcc":25.32,"pcjGapHoje":17,"pcjGapAcc":-701,"tudoAvHoje":84.62,"tudoAvAcc":69.03},"145":{"cartaoHoje":26.24,"cartaoAcc":36.57,"cartaoGapHoje":-166,"cartaoGapAcc":-943,"pcjHoje":0.0,"pcjAcc":62.5,"pcjGapHoje":-91,"pcjGapAcc":1475,"tudoAvHoje":72.73,"tudoAvAcc":80.34},"37":{"cartaoHoje":0.0,"cartaoAcc":34.81,"cartaoGapHoje":-402,"cartaoGapAcc":-1364,"pcjHoje":0.0,"pcjAcc":60.37,"pcjGapHoje":0,"pcjGapAcc":1470,"tudoAvHoje":100.0,"tudoAvAcc":84.21},"124":{"cartaoHoje":12.31,"cartaoAcc":39.18,"cartaoGapHoje":-125,"cartaoGapAcc":-178,"pcjHoje":0.0,"pcjAcc":19.2,"pcjGapHoje":-17,"pcjGapAcc":-289,"tudoAvHoje":50.0,"tudoAvAcc":70.73},"133":{"cartaoHoje":0.0,"cartaoAcc":43.5,"cartaoGapHoje":0,"cartaoGapAcc":14,"pcjHoje":0.0,"pcjAcc":0.0,"pcjGapHoje":0,"pcjGapAcc":-419,"tudoAvHoje":0.0,"tudoAvAcc":79.17},"143":{"cartaoHoje":0.0,"cartaoAcc":52.95,"cartaoGapHoje":0,"cartaoGapAcc":317,"pcjHoje":0.0,"pcjAcc":57.55,"pcjGapHoje":0,"pcjGapAcc":381,"tudoAvHoje":0.0,"tudoAvAcc":94.12}},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-10T23:59:59"}};
+    const DAILY_SALES_HISTORY = {}; // Cargas fixas desativadas.
 
-    const DAILY_PF_HISTORY = {"2026-07-01":{"total":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":7,"compraAcc":7,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":10,"sabadaoAcc":10,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":17,"pfAcc":17},"operators":{"31":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":1,"compraAcc":1,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":1,"pfAcc":1},"37":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":2,"compraAcc":2,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":2,"pfAcc":2},"124":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":2,"compraAcc":2,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":2,"pfAcc":2},"144":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":0,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":10,"sabadaoAcc":10,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":10,"pfAcc":10},"145":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":2,"compraAcc":2,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":2,"pfAcc":2}},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-01T23:59:59"},"2026-07-02":{"total":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":6,"compraAcc":13,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":13,"sabadaoAcc":23,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":19,"pfAcc":36},"operators":{"29":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":0,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":7,"sabadaoAcc":7,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":7,"pfAcc":7},"31":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":2,"compraAcc":3,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":3,"sabadaoAcc":3,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":5,"pfAcc":6},"36":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":0,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":1,"sabadaoAcc":1,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":1,"pfAcc":1},"37":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":2,"compraAcc":4,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":2,"pfAcc":4},"124":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":1,"compraAcc":3,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":1,"pfAcc":3},"144":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":0,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":2,"sabadaoAcc":12,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":2,"pfAcc":12},"145":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":1,"compraAcc":3,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":1,"pfAcc":3}},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-02T23:59:59"},"2026-07-03":{"total":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":9,"compraAcc":22,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":20,"sabadaoAcc":43,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":29,"pfAcc":65},"operators":{"29":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":0,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":5,"sabadaoAcc":12,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":5,"pfAcc":12},"31":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":3,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":1,"sabadaoAcc":4,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":1,"pfAcc":7},"35":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":4,"compraAcc":4,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":4,"pfAcc":4},"36":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":2,"compraAcc":2,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":9,"sabadaoAcc":10,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":11,"pfAcc":12},"37":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":1,"compraAcc":5,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":1,"pfAcc":5},"124":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":3,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":3},"144":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":0,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":12,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":12},"145":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":2,"compraAcc":5,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":5,"sabadaoAcc":5,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":7,"pfAcc":10}},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-03T23:59:59"},"2026-07-04":{"total":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":18,"compraAcc":40,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":41,"sabadaoAcc":84,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":59,"pfAcc":124},"operators":{"29":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":1,"compraAcc":1,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":7,"sabadaoAcc":19,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":8,"pfAcc":20},"31":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":3,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":12,"sabadaoAcc":16,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":12,"pfAcc":19},"35":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":11,"compraAcc":15,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":11,"pfAcc":15},"36":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":2,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":10,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":12},"37":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":3,"compraAcc":8,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":3,"pfAcc":8},"124":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":1,"compraAcc":4,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":1,"pfAcc":4},"144":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":0,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":13,"sabadaoAcc":25,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":13,"pfAcc":25},"145":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":2,"compraAcc":7,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":9,"sabadaoAcc":14,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":11,"pfAcc":21}},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-04T23:59:59"},"2026-07-05":{"total":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":7,"compraAcc":47,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":26,"sabadaoAcc":110,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":33,"pfAcc":157},"operators":{"29":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":1,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":19,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":20},"31":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":3,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":16,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":19},"35":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":5,"compraAcc":20,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":5,"pfAcc":20},"36":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":2,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":5,"sabadaoAcc":15,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":5,"pfAcc":17},"37":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":8,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":8},"124":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":4,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":4},"133":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":2,"compraAcc":2,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":2,"pfAcc":2},"143":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":0,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":17,"sabadaoAcc":17,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":17,"pfAcc":17},"144":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":0,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":4,"sabadaoAcc":29,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":4,"pfAcc":29},"145":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":7,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":14,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":21}},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-05T23:59:59"},"2026-07-06":{"total":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":4,"compraAcc":51,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":20,"sabadaoAcc":130,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":24,"pfAcc":181},"operators":{"29":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":1,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":19,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":20},"31":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":3,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":8,"sabadaoAcc":24,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":8,"pfAcc":27},"35":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":20,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":20},"36":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":2,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":15,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":17},"37":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":8,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":8},"124":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":2,"compraAcc":6,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":2,"pfAcc":6},"133":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":2,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":2},"143":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":0,"compraAcc":0,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":0,"sabadaoAcc":17,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":17},"144":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":1,"compraAcc":1,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":3,"sabadaoAcc":32,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":4,"pfAcc":33},"145":{"bolsaHoje":null,"bolsaAcc":null,"compraHoje":1,"compraAcc":8,"protecaoHoje":null,"protecaoAcc":null,"sabadaoHoje":9,"sabadaoAcc":23,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":10,"pfAcc":31}},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-06T23:59:59"},"2026-07-07":{"total":{"bolsaHoje":1,"bolsaAcc":1,"compraHoje":10,"compraAcc":61,"protecaoHoje":1,"protecaoAcc":1,"sabadaoHoje":36,"sabadaoAcc":166,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":48,"pfAcc":229},"operators":{"29":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":1,"compraAcc":2,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":4,"sabadaoAcc":23,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":5,"pfAcc":25},"31":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":3,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":24,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":27},"35":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":1,"compraAcc":21,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":9,"sabadaoAcc":9,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":10,"pfAcc":30},"36":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":1,"compraAcc":3,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":3,"sabadaoAcc":18,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":4,"pfAcc":21},"37":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":4,"compraAcc":12,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":4,"pfAcc":12},"124":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":2,"compraAcc":8,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":12,"sabadaoAcc":12,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":14,"pfAcc":20},"133":{"bolsaHoje":1,"bolsaAcc":1,"compraHoje":1,"compraAcc":3,"protecaoHoje":1,"protecaoAcc":1,"sabadaoHoje":8,"sabadaoAcc":8,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":11,"pfAcc":13},"143":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":0,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":17,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":17},"144":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":1,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":32,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":33},"145":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":8,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":23,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":31}},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-07T23:59:59"},"2026-07-08":{"total":{"bolsaHoje":0,"bolsaAcc":1,"compraHoje":13,"compraAcc":74,"protecaoHoje":0,"protecaoAcc":1,"sabadaoHoje":24,"sabadaoAcc":190,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":37,"pfAcc":266},"operators":{"29":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":2,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":9,"sabadaoAcc":32,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":9,"pfAcc":34},"31":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":3,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":10,"sabadaoAcc":34,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":10,"pfAcc":37},"35":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":11,"compraAcc":32,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":9,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":11,"pfAcc":41},"36":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":3,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":18,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":21},"37":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":2,"compraAcc":14,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":2,"pfAcc":14},"124":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":8,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":12,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":20},"133":{"bolsaHoje":0,"bolsaAcc":1,"compraHoje":0,"compraAcc":3,"protecaoHoje":0,"protecaoAcc":1,"sabadaoHoje":0,"sabadaoAcc":8,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":13},"143":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":0,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":17,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":17},"144":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":1,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":5,"sabadaoAcc":37,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":5,"pfAcc":38},"145":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":8,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":23,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":31}},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-08T23:59:59"},"2026-07-09":{"total":{"bolsaHoje":0,"bolsaAcc":1,"compraHoje":5,"compraAcc":79,"protecaoHoje":0,"protecaoAcc":1,"sabadaoHoje":35,"sabadaoAcc":225,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":40,"pfAcc":306},"operators":{"29":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":1,"compraAcc":3,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":8,"sabadaoAcc":40,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":9,"pfAcc":43},"31":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":3,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":17,"sabadaoAcc":51,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":17,"pfAcc":54},"35":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":1,"compraAcc":33,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":9,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":1,"pfAcc":42},"36":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":3,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":18,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":21},"37":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":1,"compraAcc":15,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":1,"pfAcc":15},"124":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":1,"compraAcc":9,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":5,"sabadaoAcc":17,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":6,"pfAcc":26},"133":{"bolsaHoje":0,"bolsaAcc":1,"compraHoje":0,"compraAcc":3,"protecaoHoje":0,"protecaoAcc":1,"sabadaoHoje":0,"sabadaoAcc":8,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":13},"143":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":0,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":17,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":17},"144":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":1,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":2,"sabadaoAcc":39,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":2,"pfAcc":40},"145":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":1,"compraAcc":9,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":3,"sabadaoAcc":26,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":4,"pfAcc":35}},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-09T23:59:59"},"2026-07-10":{"total":{"bolsaHoje":0,"bolsaAcc":1,"compraHoje":0,"compraAcc":79,"protecaoHoje":0,"protecaoAcc":1,"sabadaoHoje":2,"sabadaoAcc":227,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":2,"pfAcc":308},"operators":{"29":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":3,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":40,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":43},"31":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":3,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":51,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":54},"35":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":33,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":9,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":42},"36":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":3,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":18,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":21},"37":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":15,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":0,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":15},"124":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":9,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":17,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":26},"133":{"bolsaHoje":0,"bolsaAcc":1,"compraHoje":0,"compraAcc":3,"protecaoHoje":0,"protecaoAcc":1,"sabadaoHoje":0,"sabadaoAcc":8,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":13},"143":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":0,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":17,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":17},"144":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":1,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":2,"sabadaoAcc":41,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":2,"pfAcc":42},"145":{"bolsaHoje":0,"bolsaAcc":0,"compraHoje":0,"compraAcc":9,"protecaoHoje":0,"protecaoAcc":0,"sabadaoHoje":0,"sabadaoAcc":26,"smsHoje":null,"smsAcc":null,"vidaHoje":null,"vidaAcc":null,"pfHoje":0,"pfAcc":35}},"source":"SISTEMA OFICIAL DA LOJA","capturedAt":"2026-07-10T23:59:59"}};
+    const DAILY_PF_HISTORY = {}; // Cargas fixas desativadas.
 
     function buildDailyCalendarSnapshots(){
       const dates = new Set([
@@ -5781,51 +5794,7 @@
       return String(Date.now()) + Math.random().toString(16).slice(2);
     }
 
-    function seedRecords(){
-      const t = SIGA_SNAPSHOT_DATE;
-      const m = monthPrefix(t);
-      const baselineDate = `${m}-01`;
-      const rows = [];
-
-      STORE_ROSTER.forEach(item => {
-        const s = SIGA_SNAPSHOT[item.operator];
-        if(!s) return;
-
-        rows.push({
-          id:uuid(),
-          operator:item.operator,
-          date:baselineDate,
-          ativados:0,
-          bolsa:Math.max(s.bolsaAcc - s.bolsaHoje, 0),
-          compra:Math.max(s.compraAcc - s.compraHoje, 0),
-          protecao:Math.max(s.protecaoAcc - s.protecaoHoje, 0),
-          sabadao:Math.max(s.sabadaoAcc - s.sabadaoHoje, 0),
-          sms:Math.max(s.smsAcc - s.smsHoje, 0),
-          vida:Math.max(s.vidaAcc - s.vidaHoje, 0),
-          pcj:s.pcjAcc,
-          tudoAv:s.tudoAvAcc,
-          source:"SIGA_ACC"
-        });
-
-        rows.push({
-          id:uuid(),
-          operator:item.operator,
-          date:t,
-          ativados:0,
-          bolsa:s.bolsaHoje,
-          compra:s.compraHoje,
-          protecao:s.protecaoHoje,
-          sabadao:s.sabadaoHoje,
-          sms:s.smsHoje,
-          vida:s.vidaHoje,
-          pcj:s.pcjHoje,
-          tudoAv:s.tudoAvHoje,
-          source:"SIGA_HOJE"
-        });
-      });
-
-      return rows;
-    }
+    function seedRecords(){ return []; }
 
     const STORE_PF_DEFINITIONS = [
       {key:"bolsa", label:"Bolsa Protegida"},
@@ -5885,43 +5854,10 @@
     }
 
     const seedData = {
-      header: {
-        vendaAtual: 0,
-        compromissoDia: 0,
-        cartaoAv: SIGA_SNAPSHOT.total.cartaoHoje,
-        cartaoAvAcc: SIGA_SNAPSHOT.total.cartaoAcc,
-        cartaoAvGap: SIGA_SNAPSHOT.total.cartaoGapHoje,
-        cartaoAvGapAcc: SIGA_SNAPSHOT.total.cartaoGapAcc,
-        pcjDia: SIGA_SNAPSHOT.total.pcjHoje,
-        pcjAcc: SIGA_SNAPSHOT.total.pcjAcc,
-        pcjGap: SIGA_SNAPSHOT.total.pcjGapHoje,
-        pcjGapAcc: SIGA_SNAPSHOT.total.pcjGapAcc,
-        tudoAvDia: SIGA_SNAPSHOT.total.tudoAvHoje,
-        tudoAvAcc: SIGA_SNAPSHOT.total.tudoAvAcc,
-        tudoAvGap: 0,
-        ativadosDia: 0,
-        ativadosMeta: 0,
-        ativadosAcc: 0,
-        ativadosTotal: 0,
-        pfRealizado: 0,
-        pfMetaMensal: 0,
-        storePfRealized: {
-          bolsa:Math.max(Number(SIGA_SNAPSHOT.total.bolsaAcc || 0),0),
-          compra:Math.max(Number(SIGA_SNAPSHOT.total.compraAcc || 0),0),
-          protecao:Math.max(Number(SIGA_SNAPSHOT.total.protecaoAcc || 0),0),
-          sabadao:Math.max(Number(SIGA_SNAPSHOT.total.sabadaoAcc || 0),0),
-          sms:Math.max(Number(SIGA_SNAPSHOT.total.smsAcc || 0),0),
-          vida:Math.max(Number(SIGA_SNAPSHOT.total.vidaAcc || 0),0)
-        },
-        vendaAcumulada: 0,
-        metaTotal: 0
-      },
-      pcjSnapshots: SIGA_SNAPSHOT,
-      snapshotDate: SIGA_SNAPSHOT_DATE,
-      calendarSnapshots: {
-        ...buildDailyCalendarSnapshots(),
-        [SIGA_SNAPSHOT_DATE]: buildOfficialCalendarSnapshot()
-      },
+      header:AVResultSource.neutralHeader(),
+      pcjSnapshots:{},
+      snapshotDate:'',
+      calendarSnapshots:{},
       monthlyStoreGoals: {
         [monthPrefix(today())]: 0
       },
@@ -5994,237 +5930,10 @@
     }
 
     function normalizeDBShape(data){
-      const normalized = data && typeof data === "object" ? data : JSON.parse(JSON.stringify(seedData));
-      normalized.header = normalized.header || {};
-      normalized.header.tudoAvDia = Number(normalized.header.tudoAvDia ?? SIGA_SNAPSHOT.total.tudoAvHoje);
-      normalized.header.tudoAvAcc = Number(normalized.header.tudoAvAcc ?? SIGA_SNAPSHOT.total.tudoAvAcc);
-      normalized.header.ativadosDia = Number(
-        normalized.header.ativadosDia ??
-        normalized.calendarSnapshots?.[today()]?.store?.ativadosHoje ??
-        0
-      );
-      normalized.header.ativadosMeta = Number(
-        normalized.header.ativadosMeta ??
-        normalized.calendarSnapshots?.[today()]?.store?.ativadosMeta ??
-        DAILY_RESULTS_PATCH?.store?.ativadosMeta ??
-        0
-      );
-
-      const activatedMonthSnapshots = Object.entries(normalized.calendarSnapshots || {})
-        .filter(([date]) => String(date).startsWith(`${monthPrefix(today())}-`))
-        .sort(([dateA],[dateB]) => dateA.localeCompare(dateB));
-      const latestActivatedSnapshot = activatedMonthSnapshots.length
-        ? activatedMonthSnapshots[activatedMonthSnapshots.length - 1][1]
-        : null;
-      const hadSeparateActivatedFields = normalized.header.ativadosAcc !== undefined;
-      const legacyActivatedValue = Number(normalized.header.ativadosTotal ?? 0);
-
-      normalized.header.ativadosAcc = Number(
-        normalized.header.ativadosAcc ??
-        latestActivatedSnapshot?.store?.ativadosAcc ??
-        DAILY_RESULTS_PATCH?.store?.ativadosAcc ??
-        legacyActivatedValue ??
-        0
-      );
-
-      normalized.header.ativadosTotal = Number(
-        hadSeparateActivatedFields
-          ? (normalized.header.ativadosTotal ?? 0)
-          : (
-              latestActivatedSnapshot?.store?.ativadosMetaAcc ??
-              DAILY_RESULTS_PATCH?.store?.ativadosMetaAcc ??
-              normalized.header.ativadosMetaTotal ??
-              0
-            )
-      );
-      normalized.header.cartaoAv = Number(
-        normalized.header.cartaoAv ??
-        latestActivatedSnapshot?.store?.cartaoAv ??
-        normalized.pcjSnapshots?.total?.cartaoHoje ??
-        0
-      );
-      normalized.header.cartaoAvAcc = Number(
-        normalized.header.cartaoAvAcc ??
-        latestActivatedSnapshot?.store?.cartaoAvAcc ??
-        normalized.pcjSnapshots?.total?.cartaoAcc ??
-        0
-      );
-      normalized.header.cartaoAvGap = Number(
-        normalized.header.cartaoAvGap ??
-        latestActivatedSnapshot?.store?.cartaoGap ??
-        normalized.pcjSnapshots?.total?.cartaoGapHoje ??
-        0
-      );
-      normalized.header.cartaoAvGapAcc = Number(
-        normalized.header.cartaoAvGapAcc ??
-        latestActivatedSnapshot?.store?.cartaoGapAcc ??
-        normalized.pcjSnapshots?.total?.cartaoGapAcc ??
-        DAILY_RESULTS_PATCH?.store?.cartaoGapAcc ??
-        0
-      );
-      normalized.header.pcjDia = Number(
-        normalized.header.pcjDia ??
-        latestActivatedSnapshot?.store?.pcj ??
-        normalized.pcjSnapshots?.total?.pcjHoje ??
-        0
-      );
-      normalized.header.pcjAcc = Number(
-        normalized.header.pcjAcc ??
-        latestActivatedSnapshot?.store?.pcjAcc ??
-        normalized.pcjSnapshots?.total?.pcjAcc ??
-        0
-      );
-      normalized.header.pcjGap = Number(
-        normalized.header.pcjGap ??
-        latestActivatedSnapshot?.store?.pcjGap ??
-        normalized.pcjSnapshots?.total?.pcjGapHoje ??
-        0
-      );
-      normalized.header.pcjGapAcc = Number(
-        normalized.header.pcjGapAcc ??
-        latestActivatedSnapshot?.store?.pcjGapAcc ??
-        normalized.pcjSnapshots?.total?.pcjGapAcc ??
-        DAILY_RESULTS_PATCH?.store?.pcjGapAcc ??
-        0
-      );
-      normalized.header.tudoAvGap = Number(normalized.header.tudoAvGap ?? 0);
-
-      const hadMonthlyStoreGoals =
-        normalized.monthlyStoreGoals &&
-        typeof normalized.monthlyStoreGoals === "object" &&
-        !Array.isArray(normalized.monthlyStoreGoals);
-
-      normalized.monthlyStoreGoals = hadMonthlyStoreGoals
-        ? normalized.monthlyStoreGoals
-        : { [monthPrefix(today())]:Number(normalized.header.metaTotal || 0) };
-
-      if(normalized.monthlyStoreGoals[monthPrefix(today())] === undefined){
-        normalized.monthlyStoreGoals[monthPrefix(today())] = 0;
-      }
-
-      Object.keys(normalized.monthlyStoreGoals).forEach(month => {
-        normalized.monthlyStoreGoals[month] = Math.max(
-          Number(normalized.monthlyStoreGoals[month] || 0),
-          0
-        );
-      });
-
-      normalized.calendarSnapshots =
-        normalized.calendarSnapshots &&
-        typeof normalized.calendarSnapshots === "object"
-          ? normalized.calendarSnapshots
-          : {};
-
-      const currentPfMonth = monthPrefix(today());
-      const currentPfSnapshots = Object.entries(normalized.calendarSnapshots)
-        .filter(([date]) => String(date).startsWith(`${currentPfMonth}-`))
-        .sort(([dateA],[dateB]) => dateA.localeCompare(dateB));
-      const latestPfSnapshot = currentPfSnapshots.length
-        ? currentPfSnapshots[currentPfSnapshots.length - 1][1]
-        : null;
-
-      const pfRealizadoFallback =
-        latestPfSnapshot?.store?.pfAcc ??
-        latestPfSnapshot?.pf?.total?.pfAcc ??
-        normalized.pcjSnapshots?.total?.pfAcc ??
-        0;
-
-      normalized.header.pfRealizado = Math.max(
-        Number(normalized.header.pfRealizado ?? pfRealizadoFallback ?? 0),
-        0
-      );
-
-      const hadMonthlyPfGoals =
-        normalized.monthlyPfGoals &&
-        typeof normalized.monthlyPfGoals === "object" &&
-        !Array.isArray(normalized.monthlyPfGoals);
-
-      const pfTargetFallback =
-        latestPfSnapshot?.store?.pfMetaAcc ??
-        latestPfSnapshot?.store?.pfMetaMensal ??
-        normalized.header.pfMetaMensal ??
-        0;
-
-      normalized.monthlyPfGoals = hadMonthlyPfGoals
-        ? normalized.monthlyPfGoals
-        : { [currentPfMonth]:Math.max(Number(pfTargetFallback || 0),0) };
-
-      if(normalized.monthlyPfGoals[currentPfMonth] === undefined){
-        normalized.monthlyPfGoals[currentPfMonth] = Math.max(
-          Number(pfTargetFallback || 0),
-          0
-        );
-      }
-
-      Object.keys(normalized.monthlyPfGoals).forEach(month => {
-        normalized.monthlyPfGoals[month] = Math.max(
-          Number(normalized.monthlyPfGoals[month] || 0),
-          0
-        );
-      });
-
-      normalized.header.pfMetaMensal = normalized.monthlyPfGoals[currentPfMonth];
-
-      const storePfFallback = currentStorePfSnapshotFallback(normalized,currentPfMonth);
-      normalized.header.storePfRealized = normalizeStorePfBreakdown(
-        normalized.header.storePfRealized || storePfFallback
-      );
-      const storePfRealizedTotal = storePfBreakdownTotal(normalized.header.storePfRealized);
-      if(storePfRealizedTotal > 0){
-        normalized.header.pfRealizado = storePfRealizedTotal;
-      }
-
-      const hadMonthlyStorePfGoals =
-        normalized.monthlyStorePfGoals &&
-        typeof normalized.monthlyStorePfGoals === "object" &&
-        !Array.isArray(normalized.monthlyStorePfGoals);
-
-      normalized.monthlyStorePfGoals = hadMonthlyStorePfGoals
-        ? normalized.monthlyStorePfGoals
-        : { [currentPfMonth]:normalizeStorePfBreakdown({}) };
-
-      if(!normalized.monthlyStorePfGoals[currentPfMonth]){
-        normalized.monthlyStorePfGoals[currentPfMonth] = normalizeStorePfBreakdown({});
-      }
-
-      Object.keys(normalized.monthlyStorePfGoals).forEach(month => {
-        normalized.monthlyStorePfGoals[month] = normalizeStorePfBreakdown(
-          normalized.monthlyStorePfGoals[month]
-        );
-      });
-
-      normalized.dailyStorePfGoals =
-        normalized.dailyStorePfGoals &&
-        typeof normalized.dailyStorePfGoals === "object" &&
-        !Array.isArray(normalized.dailyStorePfGoals)
-          ? normalized.dailyStorePfGoals
-          : {};
-
-      Object.keys(normalized.dailyStorePfGoals).forEach(date => {
-        normalized.dailyStorePfGoals[date] =
-          normalizeStorePfBreakdown(
-            normalized.dailyStorePfGoals[date]
-          );
-      });
-
-      if(!normalized.dailyStorePfGoals[today()]){
-        normalized.dailyStorePfGoals[today()] =
-          normalizeStorePfBreakdown({});
-      }
-
-      const currentStorePfGoalTotal = storePfBreakdownTotal(
-        normalized.monthlyStorePfGoals[currentPfMonth]
-      );
-      if(currentStorePfGoalTotal > 0){
-        normalized.monthlyPfGoals[currentPfMonth] = currentStorePfGoalTotal;
-        normalized.header.pfMetaMensal = currentStorePfGoalTotal;
-      }
-
-      if(!normalized.calendarSnapshots[SIGA_SNAPSHOT_DATE]){
-        normalized.calendarSnapshots[SIGA_SNAPSHOT_DATE] =
-          buildOfficialCalendarSnapshot();
-      }
-
+      const normalized = AVResultSource.ownSnapshot(data && typeof data === "object" ? data : seedData);
+      normalized.header=AVResultSource.neutralHeader();
+      normalized.calendarSnapshots=JSON.parse(JSON.stringify(normalized.operatorSnapshots||{}));
+      normalized.pcjSnapshots={};normalized.snapshotDate='';
       normalized.employeeAccounts = normalized.employeeAccounts || {};
       Object.entries(DEFAULT_EMPLOYEE_ACCOUNTS).forEach(([operator, account]) => {
         if(!normalized.employeeAccounts[operator]){
@@ -6462,8 +6171,8 @@
         if(record.protecao === undefined) record.protecao = 0;
       });
       normalized.audit = Array.isArray(normalized.audit) ? normalized.audit : [];
-      normalized.pcjSnapshots = normalized.pcjSnapshots || SIGA_SNAPSHOT;
-      normalized.snapshotDate = normalized.snapshotDate || SIGA_SNAPSHOT_DATE;
+      normalized.pcjSnapshots = {};
+      normalized.snapshotDate = "";
 
       const recordDates = normalized.records
         .flatMap(record => [record.updatedAt, record.createdAt])
@@ -6492,169 +6201,10 @@
         dailyResultsPatchVersion:String(normalized._meta?.dailyResultsPatchVersion || "")
       };
 
-      if(normalized._meta.officialSnapshotVersion !== OFFICIAL_SNAPSHOT_VERSION){
-        normalized.pcjSnapshots = JSON.parse(JSON.stringify(SIGA_SNAPSHOT));
-        normalized.snapshotDate = SIGA_SNAPSHOT_DATE;
-        normalized.calendarSnapshots[SIGA_SNAPSHOT_DATE] =
-          buildOfficialCalendarSnapshot();
-
-        normalized.header.cartaoAv = SIGA_SNAPSHOT.total.cartaoHoje;
-        normalized.header.cartaoAvAcc = SIGA_SNAPSHOT.total.cartaoAcc;
-        normalized.header.cartaoAvGap = SIGA_SNAPSHOT.total.cartaoGapHoje;
-        normalized.header.cartaoAvGapAcc = SIGA_SNAPSHOT.total.cartaoGapAcc;
-        normalized.header.pcjDia = SIGA_SNAPSHOT.total.pcjHoje;
-        normalized.header.pcjAcc = SIGA_SNAPSHOT.total.pcjAcc;
-        normalized.header.pcjGap = SIGA_SNAPSHOT.total.pcjGapHoje;
-        normalized.header.pcjGapAcc = SIGA_SNAPSHOT.total.pcjGapAcc;
-        normalized.header.tudoAvDia = SIGA_SNAPSHOT.total.tudoAvHoje;
-        normalized.header.tudoAvAcc = SIGA_SNAPSHOT.total.tudoAvAcc;
-
-        const manualRecords = normalized.records.filter(record =>
-          !String(record.source || "").startsWith("SIGA")
-        );
-
-        normalized.records = [
-          ...seedRecords(),
-          ...manualRecords
-        ];
-
-        normalized._meta.revision += 1;
-        normalized._meta.updatedAt = new Date().toISOString();
-        normalized._meta.lastWriter = "official_snapshot_2026_07_10";
-        normalized._meta.officialSnapshotVersion = OFFICIAL_SNAPSHOT_VERSION;
-      }
-
-      if(normalized._meta.calendarHistoryVersion !== CALENDAR_HISTORY_VERSION){
-        normalized.calendarSnapshots = {
-          ...normalized.calendarSnapshots,
-          ...buildDailyCalendarSnapshots(),
-          [SIGA_SNAPSHOT_DATE]: buildOfficialCalendarSnapshot()
-        };
-
-        normalized._meta.revision += 1;
-        normalized._meta.updatedAt = new Date().toISOString();
-        normalized._meta.lastWriter = "calendar_history_2026_07_01_10";
-        normalized._meta.calendarHistoryVersion = CALENDAR_HISTORY_VERSION;
-      }
-
-      if(normalized._meta.pfHistoryVersion !== PF_HISTORY_VERSION){
-        const combinedSnapshots = buildDailyCalendarSnapshots();
-
-        Object.entries(combinedSnapshots).forEach(([date, snapshot]) => {
-          normalized.calendarSnapshots[date] = {
-            ...(normalized.calendarSnapshots[date] || {}),
-            ...snapshot,
-            store:{
-              ...(normalized.calendarSnapshots[date]?.store || {}),
-              ...(snapshot.store || {})
-            },
-            operators:{
-              ...(normalized.calendarSnapshots[date]?.operators || {}),
-              ...(snapshot.operators || {})
-            },
-            pf:snapshot.pf
-              ? JSON.parse(JSON.stringify(snapshot.pf))
-              : normalized.calendarSnapshots[date]?.pf || null
-          };
-        });
-
-        normalized.pcjSnapshots = JSON.parse(JSON.stringify(SIGA_SNAPSHOT));
-        normalized.snapshotDate = SIGA_SNAPSHOT_DATE;
-
-        const manualRecords = normalized.records.filter(record =>
-          !String(record.source || "").startsWith("SIGA")
-        );
-        normalized.records = [
-          ...seedRecords(),
-          ...manualRecords
-        ];
-
-        normalized._meta.revision += 1;
-        normalized._meta.updatedAt = new Date().toISOString();
-        normalized._meta.lastWriter = "pf_history_2026_07_01_10";
-        normalized._meta.pfHistoryVersion = PF_HISTORY_VERSION;
-      }
-
-
-      if(normalized._meta.dailyResultsPatchVersion !== DAILY_RESULTS_PATCH_VERSION){
-        const patch = JSON.parse(JSON.stringify(DAILY_RESULTS_PATCH));
-        const patchDate = patch.date;
-        const patchMonth = monthPrefix(patchDate);
-
-        normalized.pcjSnapshots = normalized.pcjSnapshots || {};
-        Object.entries(patch.operators || {}).forEach(([operator, values]) => {
-          normalized.pcjSnapshots[operator] = {
-            ...(normalized.pcjSnapshots[operator] || {}),
-            ...values
-          };
-        });
-        normalized.snapshotDate = patchDate;
-
-        normalized.calendarSnapshots = normalized.calendarSnapshots || {};
-        normalized.calendarSnapshots[patchDate] = {
-          ...(normalized.calendarSnapshots[patchDate] || {}),
-          store:{
-            ...(normalized.calendarSnapshots[patchDate]?.store || {}),
-            ...patch.store
-          },
-          operators:JSON.parse(JSON.stringify(patch.operators || {})),
-          pf:JSON.parse(JSON.stringify(patch.pf || null)),
-          source:patch.source,
-          capturedAt:patch.capturedAt
-        };
-
-        normalized.header = {
-          ...normalized.header,
-          vendaAtual:Number(patch.store.vendaAtual || 0),
-          compromissoDia:Number(patch.store.compromissoDia || 0),
-          vendaAcumulada:Number(patch.store.vendaAcumulada || 0),
-          metaTotal:Number(patch.store.metaTotal || 0),
-          cartaoAv:Number(patch.store.cartaoAv || 0),
-          cartaoAvAcc:Number(patch.store.cartaoAvAcc || 0),
-          cartaoAvGap:Number(patch.store.cartaoGap || 0),
-          cartaoAvGapAcc:Number(patch.store.cartaoGapAcc || 0),
-          pcjDia:Number(patch.store.pcj || 0),
-          pcjAcc:Number(patch.store.pcjAcc || 0),
-          pcjGap:Number(patch.store.pcjGap || 0),
-          pcjGapAcc:Number(patch.store.pcjGapAcc || 0),
-          tudoAvDia:Number(patch.store.tudoAv || 0),
-          tudoAvAcc:Number(patch.store.tudoAvAcc || 0),
-          ativadosDia:Number(patch.store.ativadosHoje || 0),
-          ativadosAcc:Number(patch.store.ativadosAcc || 0),
-          ativadosTotal:Number(patch.store.ativadosMetaAcc || 0),
-          pfRealizado:Number(patch.store.pfAcc ?? patch.pf?.total?.pfAcc ?? 0),
-          pfMetaMensal:Number(patch.store.pfMetaAcc || 0)
-        };
-
-        normalized.monthlyStoreGoals = normalized.monthlyStoreGoals || {};
-        normalized.monthlyStoreGoals[patchMonth] = Number(patch.store.metaTotal || 0);
-        normalized.monthlyPfGoals = normalized.monthlyPfGoals || {};
-        normalized.monthlyPfGoals[patchMonth] = Number(patch.store.pfMetaAcc || 0);
-
-        /* Operadores sem caixa aberto no relatório oficial não podem manter
-           lançamentos de teste ou resultados manuais na mesma data. */
-        const closedOperators = new Set((patch.closedOperators || []).map(normalizeOperator));
-        normalized.records = (normalized.records || []).filter(record => !(
-          record.date === patchDate &&
-          closedOperators.has(normalizeOperator(record.operator))
-        ));
-
-        normalized.audit = Array.isArray(normalized.audit) ? normalized.audit : [];
-        normalized.audit.unshift({
-          id:`import_${patchDate.replaceAll("-", "")}`,
-          at:new Date().toISOString(),
-          operator:"SISTEMA",
-          user:"Sistema",
-          action:"IMPORTAÇÃO OFICIAL",
-          details:"Resultados gerais da loja e acompanhamento de Cartão AV, PCJ e Tudo AV dos operadores em 12/07/2026. Valores ACC substituídos pelo acumulado oficial."
-        });
-        normalized.audit = normalized.audit.slice(0,250);
-
-        normalized._meta.revision += 1;
-        normalized._meta.updatedAt = new Date().toISOString();
-        normalized._meta.lastWriter = "official_results_2026_07_12";
-        normalized._meta.dailyResultsPatchVersion = DAILY_RESULTS_PATCH_VERSION;
-      }
+      normalized._meta.managementOwnershipVersion=2;
+      normalized.header=AVResultSource.neutralHeader();
+      normalized.monthlyStoreGoals={};normalized.monthlyPfGoals={};normalized.monthlyStorePfGoals={};normalized.dailyStorePfGoals={};
+      normalized.pcjSnapshots={};normalized.snapshotDate='';
 
       return normalized;
     }
@@ -7153,6 +6703,7 @@
     }
 
     function persistLocalSnapshot(databaseState = db){
+      databaseState=AVResultSource.ownSnapshot(databaseState);
       const serialized = JSON.stringify(databaseState);
       const localSaved = safeStorageSet(STORAGE_KEY, serialized);
       writeIndexedDatabase(databaseState);
@@ -7206,7 +6757,7 @@
     }
 
     async function writeRemoteDatabase(databaseState = db, options = {}){
-      const payload = JSON.parse(JSON.stringify(databaseState));
+      const payload = AVResultSource.ownSnapshot(databaseState);
       const revision = Number(payload?._meta?.revision || 0);
       const updatedAt = new Date().toISOString();
 
@@ -7395,8 +6946,7 @@
           renderAllSafely();
         }
 
-        /* A interface não deve aguardar o envio ao Supabase. */
-        writeRemoteDatabase(db, { retry:true });
+        // Carregamento não publica automaticamente snapshots antigos no banco do RESULTADO.
         return true;
       }catch(error){
         console.warn("Falha na restauração persistente:", error);
@@ -7478,16 +7028,13 @@
         rawList.forEach(item => {
           const operator = normalizeOperator(item?.operador ?? item?.operator);
           const status = String(item?.status || "ATIVO").trim().toUpperCase();
-          if(operator && status !== "INATIVO"){
+          if(operator && !["INATIVO","DESLIGADO","DEMITIDO"].includes(status)){
             sourceByOperator.set(operator, item);
           }
         });
       }
 
-      const operators = new Set([
-        ...sourceByOperator.keys(),
-        ...Object.keys(db.employeeAccounts || {}).map(normalizeOperator).filter(Boolean)
-      ]);
+      const operators = new Set(sourceByOperator.keys());
 
       return [...operators]
         .map(operator => {
@@ -7523,7 +7070,7 @@
 
     function applyManagementEmployees(rawList, source="online"){
       const mapped = mapManagementEmployees(rawList);
-      if(!mapped.length) return false;
+      if(!Array.isArray(rawList)) return false;
       employees = mapped;
       employeesLoaded = true;
       safeStorageSet(EMPLOYEE_CACHE_KEY, JSON.stringify(employees));
@@ -7599,249 +7146,121 @@
       return snapshot;
     }
 
-    function applyManagementGoals(rawManagement, source="online"){
-      const gerencial = rawManagement?.gerencial;
-      if(!gerencial || typeof gerencial !== "object") return false;
-
-      const distributions =
-        gerencial.distribuicoes &&
-        typeof gerencial.distribuicoes === "object" &&
-        !Array.isArray(gerencial.distribuicoes)
-          ? gerencial.distribuicoes
-          : {};
-      const results = Array.isArray(gerencial.resultados)
-        ? gerencial.resultados.filter(managementResultIsLaunched)
-        : [];
-
-      if(!Object.keys(distributions).length && !results.length) return false;
-
-      db.monthlyStoreGoals = db.monthlyStoreGoals || {};
-      db.calendarSnapshots = db.calendarSnapshots || {};
-
-      // 1) METAS: fonte oficial = Distribuição da aba Acompanhamento Gerencial.
-      Object.entries(distributions).forEach(([month,distribution]) => {
-        if(!/^\d{4}-\d{2}$/.test(String(month))) return;
-        const totals = managementDistributionTotals(distribution);
-        db.monthlyStoreGoals[month] = totals.venda;
-
-        Object.entries(distribution || {}).forEach(([date,dayGoal]) => {
-          if(!/^\d{4}-\d{2}-\d{2}$/.test(String(date))) return;
-          const snapshot = ensureManagementCalendarSnapshot(date);
-          snapshot.store.compromissoDia = Math.max(Number(dayGoal?.venda || 0),0);
-          snapshot.store.ativadosMeta = Math.max(Number(dayGoal?.ativados || 0),0);
-          snapshot.store.metaTotal = totals.venda;
-          snapshot.store.ativadosMetaAcc = totals.ativados;
-        });
-      });
-
-      // 2) REALIZADO: fonte oficial = Resultado Comercial da aba Acompanhamento Gerencial.
-      const resultsByMonth = new Map();
-      results.forEach(row => {
-        const date = managementResultDate(row);
-        if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
-        const month = date.slice(0,7);
-        if(!resultsByMonth.has(month)) resultsByMonth.set(month,[]);
-        resultsByMonth.get(month).push({...row,__date:date});
-      });
-
-      resultsByMonth.forEach((monthRows,month) => {
-        monthRows.sort((a,b) => a.__date.localeCompare(b.__date));
-        let vendaAcc = 0;
-        let ativadosAcc = 0;
-        const monthDistribution = distributions[month] || {};
-        const monthTotals = managementDistributionTotals(monthDistribution);
-
-        monthRows.forEach(row => {
-          const date = row.__date;
-          const venda = Math.max(managementResultValue(row,["venda","realizado","vendas"]),0);
-          const ativados = Math.max(managementResultValue(row,["ativados"]),0);
-          vendaAcc += venda;
-          ativadosAcc += ativados;
-
-          const snapshot = ensureManagementCalendarSnapshot(date);
-          const dayDistribution = monthDistribution?.[date] || {};
-          const goalVenda = Number(dayDistribution?.venda ?? row?.meta ?? row?.metaVenda ?? 0);
-          const goalAtivados = Number(dayDistribution?.ativados ?? row?.metaAtivados ?? 0);
-
-          snapshot.store.vendaAtual = venda;
-          snapshot.store.vendaAcumulada = vendaAcc;
-          snapshot.store.ativadosHoje = ativados;
-          snapshot.store.ativadosAcc = ativadosAcc;
-          snapshot.store.compromissoDia = Math.max(Number.isFinite(goalVenda) ? goalVenda : 0,0);
-          snapshot.store.ativadosMeta = Math.max(Number.isFinite(goalAtivados) ? goalAtivados : 0,0);
-          snapshot.store.metaTotal = monthTotals.venda || Math.max(Number(row?.metaTotal || 0),0);
-          snapshot.store.ativadosMetaAcc = monthTotals.ativados;
-          snapshot.managementResult = true;
-        });
-      });
-
-      // 3) Cabeçalho atual: metas do dia + acumulados realizados do mês vêm do Gerencial.
-      const currentDate = today();
-      const currentMonth = monthPrefix(currentDate);
-      const currentDistribution = distributions[currentMonth] || {};
-      const currentDayGoal = currentDistribution[currentDate] || {};
-      const currentTotals = managementDistributionTotals(currentDistribution);
-      const currentMonthResults = (resultsByMonth.get(currentMonth) || []).slice();
-      const todayResult = currentMonthResults.find(row => row.__date === currentDate) || null;
-      const monthSalesRealized = currentMonthResults.reduce(
-        (sum,row) => sum + Math.max(managementResultValue(row,["venda","realizado","vendas"]),0),0
-      );
-      const monthActivatedRealized = currentMonthResults.reduce(
-        (sum,row) => sum + Math.max(managementResultValue(row,["ativados"]),0),0
-      );
-
-      db.header = db.header || {};
-      db.header.compromissoDia = Math.max(Number(currentDayGoal?.venda || 0),0);
-      db.header.metaTotal = currentTotals.venda;
-      db.header.ativadosMeta = Math.max(Number(currentDayGoal?.ativados || 0),0);
-      db.header.ativadosTotal = currentTotals.ativados;
-      db.header.vendaAtual = todayResult
-        ? Math.max(managementResultValue(todayResult,["venda","realizado","vendas"]),0)
-        : 0;
-      db.header.vendaAcumulada = monthSalesRealized;
-      db.header.ativadosDia = todayResult
-        ? Math.max(managementResultValue(todayResult,["ativados"]),0)
-        : 0;
-      db.header.ativadosAcc = monthActivatedRealized;
-      db.header.managementSource = "ACOMPANHAMENTO GERENCIAL";
-
-      if(source === "online"){
-        safeStorageSet(MANAGEMENT_GOALS_CACHE_KEY, JSON.stringify({
-          gerencial:{distribuicoes,resultados:results},
-          syncedAt:new Date().toISOString()
-        }));
+    function rebuildManagementView(){
+      managementProjection=AVManagement.build(lastManagementPayload?.gerencial||{},today());
+      // This projection is disposable. No total from RESULTADO, IndexedDB or an old backup is merged here.
+      db.calendarSnapshots=JSON.parse(JSON.stringify(db.operatorSnapshots||{}));
+      db.monthlyStoreGoals={};db.monthlyStorePfGoals={};db.monthlyPfGoals={};db.dailyStorePfGoals={};
+      for(const [month,goal] of Object.entries(managementProjection.goals)){
+        db.monthlyStoreGoals[month]=goal.venda;db.monthlyStorePfGoals[month]=goal.pf;db.monthlyPfGoals[month]=goal.pfTotal;
       }
-
-      return true;
-    }
-
-    function applyManagementPayload(payload, source="online"){
-      const employeesApplied = applyManagementEmployees(payload?.funcionarios, source);
-      const goalsApplied = applyManagementGoals(payload, source);
-      return employeesApplied || goalsApplied;
-    }
-
-    function readManagementPayloadFromLocalStorage(){
-      for(const key of MANAGEMENT_LOCAL_CACHE_KEYS){
-        try{
-          const raw = safeStorageGet(key);
-          if(!raw) continue;
-          const parsed = JSON.parse(raw);
-          if(parsed && typeof parsed === "object" && (Array.isArray(parsed.funcionarios) || parsed.gerencial)){
-            return { payload:parsed, key };
-          }
-        }catch(error){
-          console.warn(`Cache local do Gerencial inválido (${key}):`, error);
-        }
+      for(const [date,snapshot] of Object.entries(managementProjection.snapshots)){
+        const individual=db.operatorSnapshots?.[date]||{};
+        db.calendarSnapshots[date]={...snapshot,operators:individual.operators||{},pf:{...snapshot.pf,operators:individual.pf?.operators||{}}};
+        db.dailyStorePfGoals[date]=snapshot.pf.goalsHoje;
       }
-      return null;
+      const ref=managementProjection.referenceDate,store=managementProjection.snapshots[ref]?.store||{};
+      const totals=managementProjection.snapshots[ref]?.pf?.total||{};
+      db.header={...AVResultSource.neutralHeader(),managementSource:'ACOMPANHAMENTO GERENCIAL',managementReferenceDate:ref,
+        vendaAtual:store.vendaAtual||0,vendaAcumulada:store.vendaAcumulada||0,compromissoDia:store.compromissoDia||0,metaTotal:store.metaTotal||0,
+        ativadosDia:store.ativadosHoje||0,ativadosAcc:store.ativadosAcc||0,ativadosMeta:store.ativadosMeta||0,ativadosTotal:store.ativadosMetaAcc||0,
+        pcjDia:store.pcj,pcjAcc:store.pcjAcc,pfRealizado:store.pfAcc||0,pfMetaMensal:store.pfMetaAcc||0,
+        storePfRealized:Object.fromEntries(AVManagement.PF.map(k=>[k,totals[k+'Acc']||0]))};
     }
-
-    function applyManagementLocalBridge(){
-      const local = readManagementPayloadFromLocalStorage();
-      if(!local) return false;
-      const applied = applyManagementPayload(local.payload, "local");
-      if(applied){
-        setEmployeeSyncStatus(`${employees.length} funcionários • dados locais do Gerencial`, "online");
-      }
-      return applied;
+    function applyManagementGoals(payload){
+      if(!payload?.gerencial || typeof payload.gerencial!=='object' || Array.isArray(payload.gerencial))return false;
+      lastManagementPayload=JSON.parse(JSON.stringify({gerencial:payload.gerencial,funcionarios:payload.funcionarios||[]}));
+      rebuildManagementView();return true;
     }
-
-    async function loadEmployeesFromManagement(){
-      setEmployeeSyncStatus("Sincronizando Gerencial");
-      let restored = applyManagementLocalBridge();
+    function applyManagementPayload(payload,source='online'){
+      if(!payload?.gerencial || !Array.isArray(payload.funcionarios))return false;
+      if(!applyManagementGoals(payload))return false;
+      applyManagementEmployees(payload.funcionarios,source);return true;
+    }
+    function verifiedManagementCache(){
       try{
-        if(!window.supabase) throw new Error("Biblioteca do Supabase indisponível");
-        managementClient = managementClient || window.supabase.createClient(
-          MANAGEMENT_SUPABASE_URL,
-          MANAGEMENT_SUPABASE_ANON_KEY,
-          { auth:{ persistSession:false } }
-        );
-
-        let { data, error } = await managementClient
-          .from(MANAGEMENT_TABLE)
-          .select("dados,updated_at")
-          .eq("id", MANAGEMENT_SHARED_ROW)
-          .maybeSingle();
-
-        if(error) throw error;
-
-        if(!data?.dados){
-          const legacy = await managementClient
-            .from(MANAGEMENT_TABLE)
-            .select("dados,updated_at")
-            .eq("id", MANAGEMENT_LEGACY_SHARED_ROW)
-            .maybeSingle();
-          if(legacy.error) throw legacy.error;
-          data = legacy.data;
+        const value=JSON.parse(safeStorageGet(MANAGEMENT_VERIFIED_CACHE_KEY)||'null');
+        return value?.version===2 && value.source===MANAGEMENT_SOURCE_ID && value.project===MANAGEMENT_SUPABASE_URL && value.checkedAt && value.payload?.gerencial && Array.isArray(value.payload.funcionarios) ? value : null;
+      }catch(_){return null;}
+    }
+    function acceptOfficialManagement(payload,updatedAt=''){
+      if(!applyManagementPayload(payload,'online'))return false;
+      const checkedAt=new Date().toISOString();
+      managementSyncState={mode:'online',checkedAt,updatedAt,message:'GERENCIAL online'};
+      safeStorageSet(MANAGEMENT_VERIFIED_CACHE_KEY,JSON.stringify({version:2,source:MANAGEMENT_SOURCE_ID,project:MANAGEMENT_SUPABASE_URL,checkedAt,updatedAt,payload:lastManagementPayload}));
+      renderManagementSource();return true;
+    }
+    function clearManagementSource(message){
+      lastManagementPayload=null;employees=[];employeesLoaded=true;
+      try{localStorage.removeItem(MANAGEMENT_VERIFIED_CACHE_KEY);}catch(_){}
+      managementSyncState={mode:'unavailable',checkedAt:'',updatedAt:'',message};
+      rebuildManagementView();renderManagementSource();
+    }
+    function renderManagementSource(){
+      const state=managementSyncState,verified=state.checkedAt?new Date(state.checkedAt).toLocaleString('pt-BR'):'';
+      const status=state.mode==='online'?`${employees.length} colaboradores • GERENCIAL online`:state.mode==='offline'?`GERENCIAL offline • cópia de ${verified}`:state.mode==='loading'?'Consultando o GERENCIAL':state.message;
+      setEmployeeSyncStatus(status,state.mode==='online'?'online':'offline');
+      const note=$('#managementSourceNote');if(!note)return;
+      const reference=managementProjection?.hasResults?`Último lançamento: ${brDate(managementProjection.referenceDate)}.`:'Nenhum resultado lançado no GERENCIAL.';
+      note.textContent=state.mode==='online'?`Fonte: GERENCIAL online • conferido em ${verified}. ${reference}`:
+        state.mode==='offline'?`OFFLINE — cópia do GERENCIAL conferida em ${verified}. ${reference} Atualize para consultar o servidor.`:
+        state.mode==='loading'?'Consultando os dados oficiais do GERENCIAL…':`${state.message} Os indicadores ficam indisponíveis até a conexão com o GERENCIAL.`;
+    }
+    async function loadEmployeesFromManagement(){
+      const requestId=++managementRequestId;
+      managementSyncState={...managementSyncState,mode:'loading'};renderManagementSource();
+      try{
+        if(!window.supabase)throw new Error('Conexão com o GERENCIAL indisponível');
+        managementClient=managementClient||window.supabase.createClient(MANAGEMENT_SUPABASE_URL,MANAGEMENT_SUPABASE_ANON_KEY,{auth:{persistSession:false}});
+        const response=await withTimeout(managementClient.from(MANAGEMENT_TABLE).select('dados,updated_at').eq('id',MANAGEMENT_SHARED_ROW).maybeSingle(),EMPLOYEE_SYNC_TIMEOUT,null,'Consulta ao GERENCIAL');
+        if(requestId!==managementRequestId)return false;
+        if(!response || response.error)throw new Error(response?.error?.message||'O GERENCIAL não respondeu à consulta');
+        if(!response.data?.dados){clearManagementSource('Fonte oficial do GERENCIAL não encontrada.');return false;}
+        if(!acceptOfficialManagement(response.data.dados,response.data.updated_at||'')){
+          clearManagementSource('A fonte oficial do GERENCIAL retornou dados incompletos.');return false;
         }
-
-        if(!data?.dados) throw new Error("Dados compartilhados do Gerencial não encontrados");
-
-        const applied = applyManagementPayload(data.dados, "online");
-        if(!applied) throw new Error("Gerencial não retornou colaboradores ou metas válidas");
-
-        startEmployeesRealtime();
-        return true;
+        startEmployeesRealtime();return true;
       }catch(error){
-        console.warn("Não foi possível carregar dados do Assistência Gerencial:", error);
-
-        try{
-          const cachedEmployees = JSON.parse(safeStorageGet(EMPLOYEE_CACHE_KEY) || "null");
-          if(applyManagementEmployees(cachedEmployees, "cache")) restored = true;
-        }catch(_){ }
-
-        try{
-          const cachedGoals = JSON.parse(safeStorageGet(MANAGEMENT_GOALS_CACHE_KEY) || "null");
-          if(applyManagementGoals(cachedGoals, "cache")) restored = true;
-        }catch(_){ }
-
-        if(!employeesLoaded){
-          employees = mapManagementEmployees([]);
-          employeesLoaded = true;
+        if(requestId!==managementRequestId)return false;
+        console.warn('Consulta oficial ao GERENCIAL falhou:',error);
+        const cached=verifiedManagementCache();
+        if(cached && applyManagementPayload(cached.payload,'cache')){
+          managementSyncState={mode:'offline',checkedAt:cached.checkedAt,updatedAt:cached.updatedAt||'',message:'Cópia verificada do GERENCIAL'};
+        }else{
+          lastManagementPayload=null;employees=[];employeesLoaded=true;rebuildManagementView();
+          managementSyncState={mode:'unavailable',checkedAt:'',updatedAt:'',message:'Não foi possível consultar o GERENCIAL.'};
         }
-
-        setEmployeeSyncStatus(
-          `${employees.length} funcionários • ${restored ? "cache do Gerencial" : "lista de segurança"}`,
-          "offline"
-        );
-        return false;
+        renderManagementSource();return false;
       }
     }
-
     function startEmployeesRealtime(){
-      if(!managementClient) return;
-      if(managementChannel) managementClient.removeChannel(managementChannel);
-      managementChannel = managementClient
-        .channel(`av_resultados_gerencial_${Date.now()}`)
-        .on(
-          "postgres_changes",
-          { event:"*", schema:"public", table:MANAGEMENT_TABLE, filter:`id=eq.${MANAGEMENT_SHARED_ROW}` },
-          payload => {
-            if(applyManagementPayload(payload?.new?.dados, "online")){
-              buildRecordOperatorOptions();
-              renderAll();
-            }
-          }
-        )
-        .subscribe();
+      if(!managementClient||managementChannel)return;
+      managementChannel=managementClient.channel(`av_resultados_gerencial_${Date.now()}`)
+        .on('postgres_changes',{event:'*',schema:'public',table:MANAGEMENT_TABLE,filter:`id=eq.${MANAGEMENT_SHARED_ROW}`},payload=>{
+          if(payload.new?.updated_at && managementSyncState.updatedAt && payload.new.updated_at<managementSyncState.updatedAt)return;
+          managementRequestId++;
+          if(payload.eventType==='DELETE')clearManagementSource('Fonte oficial do GERENCIAL removida.');
+          else if(!acceptOfficialManagement(payload.new?.dados,payload.new?.updated_at||''))clearManagementSource('O GERENCIAL retornou dados incompletos.');
+          if(currentUser){buildRecordOperatorOptions();renderAllSafely();}
+        }).subscribe();
     }
-
-    window.addEventListener("storage", event => {
-      if(!MANAGEMENT_LOCAL_CACHE_KEYS.includes(String(event.key || ""))) return;
-      if(applyManagementLocalBridge()){
-        buildRecordOperatorOptions();
-        renderAllSafely();
-      }
+    let managementRefreshTimer=null;
+    function refreshManagementDisplay(){
+      clearTimeout(managementRefreshTimer);
+      managementRefreshTimer=setTimeout(async()=>{await loadEmployeesFromManagement();if(currentUser){buildRecordOperatorOptions();renderAllSafely();}},500);
+    }
+    window.addEventListener('storage',event=>{
+      // A local change only requests a fresh server read; old browser content is never a source.
+      if(MANAGEMENT_LOCAL_CACHE_KEYS.includes(String(event.key||'')))refreshManagementDisplay();
     });
-
-    document.addEventListener("visibilitychange", () => {
-      if(document.visibilityState !== "visible") return;
-      if(applyManagementLocalBridge()){
-        buildRecordOperatorOptions();
-        renderAllSafely();
-      }
-    });
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshManagementDisplay();});
+    window.addEventListener('online',refreshManagementDisplay);
+    setInterval(()=>{if(currentUser&&document.visibilityState==='visible')refreshManagementDisplay();},30000);
+    function managementSnapshot(date){
+      const official=managementProjection?.snapshots?.[date]||AVManagement.build({},date).snapshots[date];
+      const individual=db.operatorSnapshots?.[date]||{};
+      return {...official,operators:individual.operators||{},pf:{...official?.pf,operators:individual.pf?.operators||{}}};
+    }
 
     function pfTotal(rec){ return Number(rec.bolsa||0)+Number(rec.compra||0)+Number(rec.protecao||0)+Number(rec.sabadao||0)+Number(rec.sms||0)+Number(rec.vida||0); }
     function monthRecords(date = today()){ return db.records.filter(r => r.date.startsWith(monthPrefix(date))); }
@@ -7891,88 +7310,9 @@
         .sort(([dateA],[dateB]) => dateA.localeCompare(dateB));
     }
 
-    function calendarExactSnapshot(date){
-      return db.calendarSnapshots?.[date] || null;
-    }
+    function calendarExactSnapshot(date){ return managementSnapshot(date); }
 
-    function calendarRawSnapshotForDate(date){
-      const exact = calendarExactSnapshot(date);
-      if(exact) return JSON.parse(JSON.stringify(exact));
-
-      if(date === (db.snapshotDate || SIGA_SNAPSHOT_DATE)){
-        return {
-          store:{
-            cartaoAv:Number(db.pcjSnapshots?.total?.cartaoHoje || 0),
-            cartaoAvAcc:Number(db.pcjSnapshots?.total?.cartaoAcc || 0),
-            cartaoGap:Number(db.pcjSnapshots?.total?.cartaoGapHoje || 0),
-            cartaoGapAcc:Number(db.pcjSnapshots?.total?.cartaoGapAcc || 0),
-            pcj:Number(db.pcjSnapshots?.total?.pcjHoje || 0),
-            pcjAcc:Number(db.pcjSnapshots?.total?.pcjAcc || 0),
-            pcjGap:Number(db.pcjSnapshots?.total?.pcjGapHoje || 0),
-            pcjGapAcc:Number(db.pcjSnapshots?.total?.pcjGapAcc || 0),
-            tudoAv:Number(db.pcjSnapshots?.total?.tudoAvHoje || 0),
-            tudoAvAcc:Number(db.pcjSnapshots?.total?.tudoAvAcc || 0)
-          },
-          operators:JSON.parse(JSON.stringify(db.pcjSnapshots || {})),
-          pf:DAILY_PF_HISTORY[date]
-            ? JSON.parse(JSON.stringify(DAILY_PF_HISTORY[date]))
-            : null,
-          source:"SISTEMA OFICIAL DA LOJA",
-          capturedAt:`${date}T23:59:59`
-        };
-      }
-
-      if(date === today()){
-        const realized = getStorePfRealized();
-        return {
-          store:{
-            vendaAtual:Number(db.header.vendaAtual || 0),
-            compromissoDia:Number(db.header.compromissoDia || 0),
-            vendaAcumulada:Number(db.header.vendaAcumulada || 0),
-            cartaoAv:Number(db.header.cartaoAv || 0),
-            cartaoAvAcc:Number(db.header.cartaoAvAcc || 0),
-            cartaoGap:Number(db.header.cartaoAvGap || 0),
-            cartaoGapAcc:Number(db.header.cartaoAvGapAcc || 0),
-            pcj:Number(db.header.pcjDia || 0),
-            pcjAcc:Number(db.header.pcjAcc || 0),
-            pcjGap:Number(db.header.pcjGap || 0),
-            pcjGapAcc:Number(db.header.pcjGapAcc || 0),
-            tudoAv:Number(db.header.tudoAvDia || 0),
-            tudoAvAcc:Number(db.header.tudoAvAcc || 0),
-            ativadosHoje:Number(db.header.ativadosDia || 0),
-            ativadosAcc:Number(db.header.ativadosAcc || 0),
-            ativadosMetaAcc:Number(db.header.ativadosTotal || 0),
-            ativadosMeta:Number(db.header.ativadosMeta || 0),
-            pfAcc:Number(db.header.pfRealizado || 0),
-            pfMetaAcc:getStoreMonthlyPfGoal(monthPrefix(date))
-          },
-          operators:{},
-          pf:{
-            total:{
-              bolsaHoje:0,
-              bolsaAcc:Number(realized.bolsa || 0),
-              compraHoje:0,
-              compraAcc:Number(realized.compra || 0),
-              protecaoHoje:0,
-              protecaoAcc:Number(realized.protecao || 0),
-              sabadaoHoje:0,
-              sabadaoAcc:Number(realized.sabadao || 0),
-              smsHoje:0,
-              smsAcc:Number(realized.sms || 0),
-              vidaHoje:0,
-              vidaAcc:Number(realized.vida || 0),
-              pfHoje:0,
-              pfAcc:Number(db.header.pfRealizado || 0)
-            },
-            operators:{}
-          },
-          source:"AV RESULTADOS",
-          capturedAt:null
-        };
-      }
-
-      return null;
-    }
+    function calendarRawSnapshotForDate(date){ return managementSnapshot(date); }
 
     function calendarLatestValueEntry(date, paths){
       const entries = calendarSnapshotEntriesOnOrBefore(date);
@@ -8106,161 +7446,23 @@
       return null;
     }
 
-    function calendarAccumulatedCount(date, key){
-      const paths = key === "ativados"
-        ? [["store","ativadosAcc"]]
-        : key === "pf"
-          ? [["pf","total","pfAcc"],["operators","total","pfAcc"],["store","pfAcc"]]
-          : [["pf","total",`${key}Acc`],["operators","total",`${key}Acc`]];
-
-      let baselineEntry = calendarLatestValueEntry(date,paths);
-      let baseline = baselineEntry?.value ?? 0;
-
-      const headerFallback = calendarHeaderAccumulatedFallback(date,key);
-      if(Number.isFinite(headerFallback)){
-        baseline = headerFallback;
-        baselineEntry = {
-          date:db.snapshotDate || SIGA_SNAPSHOT_DATE,
-          snapshot:{source:"HEADER"}
-        };
-      }
-
-      const manualRecords = calendarManualRecordsUntilDate(
-        date,
-        baselineEntry
-      );
-
-      const addition = key === "ativados"
-        ? calendarSumRecords(manualRecords,"ativados")
-        : key === "pf"
-          ? calendarManualPfTotal(manualRecords)
-          : calendarSumRecords(manualRecords,key);
-
-      return Math.max(Number(baseline || 0) + Number(addition || 0),0);
+    function calendarAccumulatedCount(date,key){
+      const official=managementSnapshot(date);
+      if(key==='ativados')return official.store.ativadosAcc;
+      if(key==='pf')return official.store.pfAcc;
+      return official.pf.total[key+'Acc']||0;
     }
 
-    function calendarDailyCount(date, key){
-      const exact = calendarExactSnapshot(date);
-      const baselineEntry = exact
-        ? {date,snapshot:exact}
-        : null;
-
-      const paths = key === "ativados"
-        ? [["store","ativadosHoje"]]
-        : key === "pf"
-          ? [["pf","total","pfHoje"],["operators","total","pfHoje"]]
-          : [["pf","total",`${key}Hoje`],["operators","total",`${key}Hoje`]];
-
-      let baseline = 0;
-      if(exact){
-        for(const path of paths){
-          const value = path.reduce((current,part) => current?.[part], exact);
-          if(value === null || value === undefined || value === "") continue;
-          const numeric = Number(value);
-          if(Number.isFinite(numeric)){
-            baseline = numeric;
-            break;
-          }
-        }
-      }
-
-      const manualRecords = calendarManualRecordsForDate(
-        date,
-        null,
-        baselineEntry
-      );
-
-      const addition = key === "ativados"
-        ? calendarSumRecords(manualRecords,"ativados")
-        : key === "pf"
-          ? calendarManualPfTotal(manualRecords)
-          : calendarSumRecords(manualRecords,key);
-
-      return Math.max(Number(baseline || 0) + Number(addition || 0),0);
+    function calendarDailyCount(date,key){
+      const official=managementSnapshot(date);
+      if(key==='ativados')return official.store.ativadosHoje;
+      if(key==='pf')return official.store.pfHoje;
+      return official.pf.total[key+'Hoje']||0;
     }
 
-    function calendarStorePercentage(date, key, accumulated = false){
-      const storeKey = key === "pcj"
-        ? accumulated ? "pcjAcc" : "pcj"
-        : accumulated ? "tudoAvAcc" : "tudoAv";
-      const totalKey = key === "pcj"
-        ? accumulated ? "pcjAcc" : "pcjHoje"
-        : accumulated ? "tudoAvAcc" : "tudoAvHoje";
-
-      if(!accumulated){
-        const exact = calendarExactSnapshot(date);
-        const baselineEntry = exact ? {date,snapshot:exact} : null;
-        let baseline = null;
-
-        if(exact){
-          const candidates = [
-            exact?.store?.[storeKey],
-            exact?.operators?.total?.[totalKey]
-          ];
-          for(const candidate of candidates){
-            const numeric = Number(candidate);
-            if(Number.isFinite(numeric)){
-              baseline = numeric;
-              break;
-            }
-          }
-        }else if(date === today()){
-          const headerValue = Number(
-            key === "pcj" ? db.header?.pcjDia : db.header?.tudoAvDia
-          );
-          if(Number.isFinite(headerValue)) baseline = headerValue;
-        }
-
-        const manualRecords = calendarManualRecordsForDate(
-          date,
-          null,
-          baselineEntry
-        );
-        const manualAverage = calendarDailyManualPercentageAverage(
-          manualRecords,
-          key
-        );
-
-        const values = [];
-        if(Number.isFinite(baseline)) values.push(baseline);
-        if(Number.isFinite(manualAverage)) values.push(manualAverage);
-
-        return values.length
-          ? values.reduce((sum,value) => sum + value,0) / values.length
-          : 0;
-      }
-
-      let baselineEntry = calendarLatestValueEntry(date,[
-        ["store",storeKey],
-        ["operators","total",totalKey]
-      ]);
-      let baseline = baselineEntry?.value ?? null;
-
-      const headerFallback = calendarHeaderAccumulatedFallback(date,key);
-      if(Number.isFinite(headerFallback)){
-        baseline = headerFallback;
-        baselineEntry = {
-          date:db.snapshotDate || SIGA_SNAPSHOT_DATE,
-          snapshot:{source:"HEADER"}
-        };
-      }
-
-      const manualRecords = calendarManualRecordsUntilDate(
-        date,
-        baselineEntry
-      );
-      const manualDailyAverages = calendarMonthlyManualPercentageAverages(
-        manualRecords,
-        key
-      );
-
-      const values = [];
-      if(Number.isFinite(baseline)) values.push(baseline);
-      values.push(...manualDailyAverages);
-
-      return values.length
-        ? values.reduce((sum,value) => sum + value,0) / values.length
-        : 0;
+    function calendarStorePercentage(date,key,accumulated=false){
+      const store=managementSnapshot(date).store;
+      return store[key==='pcj'?(accumulated?'pcjAcc':'pcj'):(accumulated?'tudoAvAcc':'tudoAv')]??null;
     }
 
     function calendarLatestOperatorBaseline(operator, date){
@@ -10586,7 +9788,7 @@ ${fallbackText}`;
     }
 
     function distributionUsers(){
-      return [...employees].sort((a,b) =>
+      return employees.filter(employee=>employee.sourceFound && !["INATIVO","DESLIGADO","DEMITIDO"].includes(employee.status)).sort((a,b) =>
         Number(a.operator) - Number(b.operator) ||
         a.name.localeCompare(b.name, "pt-BR")
       );
@@ -10653,6 +9855,13 @@ ${fallbackText}`;
       return isDev() || currentCargo() === "GERENTE";
     }
 
+    function selectedDistributionMonth(){return $("#distributionMonth")?.value || goalMonthKey();}
+    function renderDistributionBalance(){
+      const month=selectedDistributionMonth(),target=managementProjection?.goals?.[month];
+      const assigned=distributionUsers().reduce((sum,user)=>{const goal=db.goalDistribution?.[month]?.[user.operator]||{};sum.venda+=Number(goal.venda||0);sum.ativados+=Number(goal.ativados||0);sum.pf+=goalPfTotal(goal);return sum;},{venda:0,ativados:0,pf:0});
+      const el=$("#distributionBalance");if(!el)return;
+      el.textContent=target?`Distribuído / meta da loja: Venda ${money(assigned.venda)} / ${money(target.venda)} • Ativados ${assigned.ativados} / ${target.ativados} • PF ${assigned.pf} / ${target.pfTotal}. PCJ é percentual por colaborador, sem soma entre pessoas.`:'Sincronize as metas da loja no Gerencial para comparar com a distribuição individual.';
+    }
     function selectedDistributionOperator(){
       return normalizeOperator($("#distributionOperator")?.value);
     }
@@ -10703,6 +9912,8 @@ ${fallbackText}`;
 
       const distribution = ensureGoalDistribution(currentUser.operator, currentMonth);
       const summary = summarizeUser(currentUser.operator, today());
+      let salesGoal=$("#userSalesGoal");if(!salesGoal){salesGoal=document.createElement('p');salesGoal.id='userSalesGoal';$("#userGoalMeta")?.after(salesGoal);}
+      salesGoal.textContent=`Meta mensal de venda: ${money(distribution.venda||0)}`;
 
       updateSidebarGoalRow(
         "Ativados",
@@ -10812,7 +10023,8 @@ ${fallbackText}`;
     }
 
     function loadGoalDistributionIntoForm(operator){
-      const distribution = ensureGoalDistribution(operator, goalMonthKey());
+      const distribution = ensureGoalDistribution(operator, selectedDistributionMonth());
+      $("#goalVenda").value=Number(distribution.venda||0);
 
       $("#goalAtivados").value = Number(distribution.ativados || 0);
       $("#goalBolsa").value = Number(distribution.bolsa || 0);
@@ -10984,7 +10196,9 @@ ${fallbackText}`;
       const select = $("#distributionOperator");
       if(!select || !currentUser) return;
 
-      const currentMonth = goalMonthKey();
+      const currentMonth = selectedDistributionMonth();
+      if(!$("#distributionMonth").value)$("#distributionMonth").value=currentMonth;
+      renderDistributionBalance();
       const monthBadge = $("#distributionMonthBadge");
       if(monthBadge){
         monthBadge.textContent = `META DE ${goalMonthLabel(currentMonth).toUpperCase()}`;
@@ -10996,14 +10210,6 @@ ${fallbackText}`;
       let allowedUsers = canManage
         ? users
         : users.filter(user => user.operator === currentUser.operator);
-
-      if(!allowedUsers.length && !canManage){
-        allowedUsers = [{
-          operator:currentUser.operator,
-          name:currentUser.name,
-          shortName:currentUser.shortName
-        }];
-      }
 
       const previous = normalizeOperator(select.value);
       select.innerHTML = allowedUsers.map(user => `
@@ -11025,7 +10231,7 @@ ${fallbackText}`;
 
       const fields = $$(".goal-distribution-field");
       fields.forEach(field => {
-        field.readOnly = !canManage;
+        field.readOnly = !canManage || !allowedUsers.length;
       });
 
       $("#distributionSaveActions").classList.toggle("hidden", !canManage);
@@ -11056,7 +10262,7 @@ ${fallbackText}`;
     }
 
     function canEditStoreMonthlyGoal(){
-      return isDev() || Number(today().slice(8,10)) === 1;
+      return false;
     }
 
     function ensureCalendarSnapshot(date){
@@ -11134,55 +10340,7 @@ ${fallbackText}`;
       snapshot.capturedAt = new Date().toISOString();
     }
 
-    function calendarSnapshotForDate(date){
-      const raw = calendarRawSnapshotForDate(date);
-      const manualDay = calendarManualRecordsForDate(date);
-
-      if(!raw && !manualDay.length) return null;
-
-      const snapshot = raw || {
-        store:{},
-        operators:{},
-        pf:{total:{},operators:{}},
-        source:"LANÇAMENTOS",
-        capturedAt:null
-      };
-
-      snapshot.store = snapshot.store || {};
-      snapshot.operators = snapshot.operators || {};
-      snapshot.pf = snapshot.pf || {};
-      snapshot.pf.total = snapshot.pf.total || {};
-      snapshot.pf.operators = snapshot.pf.operators || {};
-
-      snapshot.store.ativadosHoje = calendarDailyCount(date,"ativados");
-      snapshot.store.ativadosAcc = calendarAccumulatedCount(date,"ativados");
-
-      STORE_PF_DEFINITIONS.forEach(item => {
-        snapshot.pf.total[`${item.key}Hoje`] =
-          calendarDailyCount(date,item.key);
-        snapshot.pf.total[`${item.key}Acc`] =
-          calendarAccumulatedCount(date,item.key);
-      });
-
-      snapshot.pf.total.pfHoje = calendarDailyCount(date,"pf");
-      snapshot.pf.total.pfAcc = calendarAccumulatedCount(date,"pf");
-      snapshot.store.pfAcc = snapshot.pf.total.pfAcc;
-
-      snapshot.store.pcj = calendarStorePercentage(date,"pcj",false);
-      snapshot.store.pcjAcc = calendarStorePercentage(date,"pcj",true);
-      snapshot.store.tudoAv = calendarStorePercentage(date,"tudoAv",false);
-      snapshot.store.tudoAvAcc = calendarStorePercentage(
-        date,
-        "tudoAv",
-        true
-      );
-
-      snapshot.source = manualDay.length
-        ? `${snapshot.source || "AV RESULTADOS"} + LANÇAMENTOS`
-        : snapshot.source;
-
-      return snapshot;
-    }
+    function calendarSnapshotForDate(date){ return managementSnapshot(date); }
 
     function calendarDayRecords(operator, date){
       return db.records.filter(record =>
@@ -11456,31 +10614,8 @@ ${fallbackText}`;
       const store = snapshot?.store || {};
       const pfTotalOfficial = snapshot?.pf?.total || null;
 
-      const cartao = Number.isFinite(Number(store.cartaoAv))
-        ? Number(store.cartaoAv)
-        : totalOfficial
-          ? Number(totalOfficial.cartaoHoje || 0)
-          : null;
-      const cartaoGap = Number.isFinite(Number(store.cartaoGap))
-        ? Number(store.cartaoGap)
-        : totalOfficial
-          ? Number(totalOfficial.cartaoGapHoje || 0)
-          : null;
-      const pcj = Number.isFinite(Number(store.pcj))
-        ? Number(store.pcj)
-        : totalOfficial
-          ? Number(totalOfficial.pcjHoje || 0)
-          : calendarAverage(operatorRows.map(row => row.summary.pcj));
-      const pcjGap = Number.isFinite(Number(store.pcjGap))
-        ? Number(store.pcjGap)
-        : totalOfficial
-          ? Number(totalOfficial.pcjGapHoje || 0)
-          : null;
-      const tudoAv = Number.isFinite(Number(store.tudoAv))
-        ? Number(store.tudoAv)
-        : totalOfficial
-          ? Number(totalOfficial.tudoAvHoje || 0)
-          : calendarAverage(operatorRows.map(row => row.summary.tudoAv));
+      const storeNumber=key=>store[key]!==null&&store[key]!==undefined&&Number.isFinite(Number(store[key]))?Number(store[key]):null;
+      const cartao=storeNumber('cartaoAv'),cartaoGap=storeNumber('cartaoGap'),pcj=storeNumber('pcj'),pcjGap=storeNumber('pcjGap'),tudoAv=storeNumber('tudoAv');
 
       const hasSale = store.vendaAtual !== null &&
         store.vendaAtual !== undefined &&
@@ -11494,15 +10629,8 @@ ${fallbackText}`;
         store.compromissoDia
       );
 
-      const totalAtivados = Number.isFinite(Number(store.ativadosHoje))
-        ? Number(store.ativadosHoje)
-        : calculatedAtivados;
-      const totalPf = Number.isFinite(Number(pfTotalOfficial?.pfHoje))
-        ? Number(pfTotalOfficial.pfHoje)
-        : calculatedPf;
-      const totalPfAcc = Number.isFinite(Number(pfTotalOfficial?.pfAcc))
-        ? Number(pfTotalOfficial.pfAcc)
-        : null;
+      const totalAtivados=Number(store.ativadosHoje||0);
+      const totalPf=Number(store.pfHoje||0),totalPfAcc=Number(store.pfAcc||0);
 
       $("#calendarPeriodLabel").textContent = calendarLongDate(selectedDate);
       $("#calendarVenda").textContent = hasSale
@@ -11693,34 +10821,8 @@ ${fallbackText}`;
     }
 
     function calendarGoalDistributionTotals(month){
-      const totals = {
-        ativados:0,
-        bolsa:0,
-        compra:0,
-        protecao:0,
-        sabadao:0,
-        sms:0,
-        vida:0,
-        pcjValues:[]
-      };
-
-      Object.values(db.goalDistribution?.[month] || {}).forEach(distribution => {
-        totals.ativados += Math.max(Number(distribution?.ativados || 0), 0);
-        totals.bolsa += Math.max(Number(distribution?.bolsa || 0), 0);
-        totals.compra += Math.max(Number(distribution?.compra || 0), 0);
-        totals.protecao += Math.max(Number(distribution?.protecao || 0), 0);
-        totals.sabadao += Math.max(Number(distribution?.sabadao || 0), 0);
-        totals.sms += Math.max(Number(distribution?.sms || 0), 0);
-        totals.vida += Math.max(Number(distribution?.vida || 0), 0);
-        const pcjGoal = Number(distribution?.pcj || 0);
-        if(pcjGoal > 0) totals.pcjValues.push(pcjGoal);
-      });
-
-      totals.pf = totals.bolsa + totals.compra + totals.protecao + totals.sabadao + totals.sms + totals.vida;
-      totals.pcj = totals.pcjValues.length
-        ? totals.pcjValues.reduce((sum,value) => sum + value, 0) / totals.pcjValues.length
-        : 0;
-      return totals;
+      const official=managementProjection?.goals?.[month]||AVManagement.monthGoals({},month);
+      return {...official.pf,ativados:official.ativados,pcj:official.pcj,pf:official.pfTotal};
     }
 
     function calendarGoalMonthRecords(month){
@@ -11776,21 +10878,9 @@ ${fallbackText}`;
       return Math.max(calendarGoalRecordTotal(month,key),0);
     }
 
-    function calendarGoalSalesActual(month, entries){
-      const currentMonth = monthPrefix(today());
-      if(month === currentMonth && Number.isFinite(Number(db.header?.vendaAcumulada))){
-        return Math.max(Number(db.header.vendaAcumulada || 0),0);
-      }
-
-      const accumulated = calendarLatestNumeric(entries, [
-        ["store","vendaAcumulada"]
-      ]);
-      if(accumulated !== null) return Math.max(accumulated,0);
-
-      return entries.reduce((sum,[,snapshot]) => {
-        const value = Number(snapshot?.store?.vendaAtual);
-        return sum + (Number.isFinite(value) ? value : 0);
-      },0);
+    function calendarGoalSalesActual(month){
+      const dates=Object.keys(managementProjection?.snapshots||{}).filter(d=>d.startsWith(month+'-')&&d<=today()).sort();
+      return dates.length?managementSnapshot(dates[dates.length-1]).store.vendaAcumulada:0;
     }
 
     function calendarGoalActivatedActual(month, entries){
@@ -11808,29 +10898,8 @@ ${fallbackText}`;
       );
     }
 
-    function calendarGoalPercentageActual(month, entries, storeKey, totalKey, headerKey){
-      const referenceDate = calendarGoalReferenceDate(month);
-      const snapshot = calendarSnapshotForDate(referenceDate);
-
-      const dynamicValue =
-        snapshot?.store?.[storeKey] ??
-        snapshot?.operators?.total?.[totalKey];
-
-      if(
-        dynamicValue !== null &&
-        dynamicValue !== undefined &&
-        Number.isFinite(Number(dynamicValue))
-      ){
-        return Math.max(Number(dynamicValue),0);
-      }
-
-      const headerValue = month === monthPrefix(today())
-        ? Number(db.header?.[headerKey])
-        : null;
-
-      return Number.isFinite(headerValue)
-        ? Math.max(headerValue,0)
-        : 0;
+    function calendarGoalPercentageActual(month,entries,storeKey){
+      return managementSnapshot(calendarGoalReferenceDate(month)).store[storeKey]??null;
     }
 
     function calendarGoalMetric(title, subtitle, actual, target, format = "integer"){
@@ -11866,7 +10935,7 @@ ${fallbackText}`;
         : goals.pf > 0
           ? goals.pf
           : Math.max(Number(latestPfTarget || 0),0);
-      const pcjTarget = goals.pcj > 0 ? goals.pcj : 35;
+      const pcjTarget = managementProjection?.goals?.[month]?.pcj ?? 0;
 
       return [
         calendarGoalMetric(
@@ -11878,7 +10947,7 @@ ${fallbackText}`;
         ),
         calendarGoalMetric(
           "Ativados",
-          "Soma das metas individuais",
+          "Meta da loja no Gerencial",
           calendarGoalActivatedActual(month,entries),
           ativadosTarget
         ),
@@ -11970,91 +11039,9 @@ ${fallbackText}`;
       return new Date(year,month,0).getDate();
     }
 
-    function calendarGoalDailyPfTargets(date, snapshot, goals){
-      const month = monthPrefix(date);
-      const daysInMonth = calendarGoalDaysInMonth(date);
-      const configuredMonthly =
-        getStoreMonthlyPfBreakdownGoal(month);
-      const configuredDaily =
-        normalizeStorePfBreakdown(
-          snapshot?.pf?.goalsHoje ||
-          db?.dailyStorePfGoals?.[date] ||
-          {}
-        );
-
-      const configuredDailyTotal =
-        storePfBreakdownTotal(configuredDaily);
-
-      if(configuredDailyTotal > 0){
-        return {
-          total:configuredDailyTotal,
-          products:configuredDaily,
-          source:"daily"
-        };
-      }
-
-      const monthlyByProduct =
-        STORE_PF_DEFINITIONS.reduce((result,item) => {
-          const storeTarget =
-            Number(configuredMonthly?.[item.key] || 0);
-          const distributedTarget =
-            Number(goals?.[item.key] || 0);
-
-          result[item.key] = storeTarget > 0
-            ? storeTarget
-            : Math.max(distributedTarget,0);
-
-          return result;
-        },{});
-
-      const monthlyBreakdownTotal =
-        storePfBreakdownTotal(monthlyByProduct);
-      const configuredMonthlyTotal =
-        getStoreMonthlyPfGoal(month);
-      const monthlyTotal = configuredMonthlyTotal > 0
-        ? configuredMonthlyTotal
-        : Number(goals?.pf || 0) > 0
-          ? Number(goals.pf)
-          : monthlyBreakdownTotal;
-
-      const officialDailyTotal = Math.max(
-        Number(snapshot?.store?.pfMetaHoje || 0),
-        0
-      );
-
-      const total = officialDailyTotal > 0
-        ? officialDailyTotal
-        : monthlyTotal > 0
-          ? monthlyTotal / daysInMonth
-          : 0;
-
-      const products =
-        STORE_PF_DEFINITIONS.reduce((result,item) => {
-          const monthlyTarget =
-            Number(monthlyByProduct[item.key] || 0);
-
-          if(monthlyTarget <= 0){
-            result[item.key] = 0;
-            return result;
-          }
-
-          result[item.key] =
-            officialDailyTotal > 0 &&
-            monthlyBreakdownTotal > 0
-              ? officialDailyTotal *
-                (monthlyTarget / monthlyBreakdownTotal)
-              : monthlyTarget / daysInMonth;
-
-          return result;
-        },{});
-
-      return {
-        total,
-        products,
-        source:officialDailyTotal > 0
-          ? "official"
-          : "proportional"
-      };
+    function calendarGoalDailyPfTargets(date){
+      const official=managementSnapshot(date);
+      return {total:official.store.pfMetaHoje,products:official.pf.goalsHoje,source:'gerencial'};
     }
 
     function calendarGoalDailyMetrics(date = calendarGoalsDateKey()){
@@ -12066,7 +11053,7 @@ ${fallbackText}`;
       const month = monthPrefix(date);
       const goals = calendarGoalDistributionTotals(month);
       const store = snapshot.store || {};
-      const pcjTarget = goals.pcj > 0 ? goals.pcj : 35;
+      const pcjTarget = managementProjection?.goals?.[month]?.pcj ?? 0;
       const dailyActivatedTarget = Number(store.ativadosMeta || 0);
       const pfTargets = calendarGoalDailyPfTargets(
         date,
@@ -13063,6 +12050,7 @@ ${fallbackText}`;
 
 
     function renderAll(){
+      rebuildManagementView();renderManagementSource();
       renderUserGoalPanel();
       renderHeaderCards();
       renderSalesCalendar();
@@ -13083,6 +12071,7 @@ ${fallbackText}`;
     }
 
     function renderAllSafely(){
+      rebuildManagementView();renderManagementSource();
       const renderers = [
         ["metas individuais", renderUserGoalPanel],
         ["painel principal", renderHeaderCards],
@@ -13141,6 +12130,12 @@ ${fallbackText}`;
     }
 
     function updateDashboardMetric(prefix, actual, target, format = "integer"){
+      if(actual===null || actual===undefined){
+        const actualField=$(`#${prefix}Actual`);if(actualField)actualField.textContent='—';
+        const goalField=$(`#${prefix}Goal`);if(goalField)goalField.textContent=dashboardMetricValue(target,format);
+        const remainingField=$(`#${prefix}Remaining`);if(remainingField)remainingField.textContent='Não informado no Gerencial';
+        const fill=$(`#${prefix}Fill`);if(fill)fill.style.width='0%';const percentField=$(`#${prefix}Percent`);if(percentField)percentField.textContent='—';return;
+      }
       const safeActual = Math.max(Number(actual || 0),0);
       const safeTarget = Math.max(Number(target || 0),0);
       const percentage = safeTarget > 0
@@ -13189,8 +12184,9 @@ ${fallbackText}`;
     }
 
     function renderHeaderCards(){
+      rebuildManagementView();renderManagementSource();
       const h = db.header || {};
-      const currentDate = today();
+      const currentDate = managementProjection?.referenceDate || today();
       const currentMonth = monthPrefix(currentDate);
       const snapshot = calendarSnapshotForDate(currentDate) || {
         store:{},
@@ -13235,9 +12231,7 @@ ${fallbackText}`;
         calendarGoalDailyPfTargets(currentDate,snapshot,goals);
       const pfTodayGoal = Number(dailyPfTargets?.total || 0);
 
-      const pcjTarget = Number(goals.pcj || 0) > 0
-        ? Number(goals.pcj)
-        : 35;
+      const pcjTarget = managementProjection?.goals?.[currentMonth]?.pcj ?? Number(goals.pcj || 0);
       const pcjTodayActual =
         calendarStorePercentage(currentDate,"pcj",false);
 
@@ -13269,14 +12263,13 @@ ${fallbackText}`;
       const salesAccumActual = Number(
         store.vendaAcumulada ?? h.vendaAcumulada ?? 0
       );
-      const salesAccumGoal = getStoreMonthlyGoal(currentMonth);
+      const salesAccumGoal = Number(store.metaTotal ?? getStoreMonthlyGoal(currentMonth));
 
       const activatedAccumActual = Number(h.ativadosAcc || 0);
       const pfAccumActual =
         calendarAccumulatedCount(currentDate,"pf");
       const pfAccumGoal =
-        getStoreMonthlyPfGoal(currentMonth) ||
-        Number(goals.pf || 0);
+        managementProjection?.goals?.[currentMonth]?.pfTotal ?? getStoreMonthlyPfGoal(currentMonth);
       const pcjAccumActual =
         calendarStorePercentage(currentDate,"pcj",true);
 
@@ -13304,6 +12297,9 @@ ${fallbackText}`;
         pcjTarget,
         "percent"
       );
+      if(!lastManagementPayload){
+        for(const period of ['Today','Accum'])for(const [metric,format] of [['Sales','money'],['Activated','integer'],['Pf','integer'],['Pcj','percent']])updateDashboardMetric('dash'+period+metric,null,0,format);
+      }
     }
 
     function badge(value, goal=0){
@@ -13838,7 +12834,7 @@ ${fallbackText}`;
 
     function renderConfig(){
       const h = db.header;
-      const canManageStoreGoals = isAdmin();
+      const canManageStoreGoals = false;
       $("#cfgVendaAtual").value = formatBRLCurrency(h.vendaAtual);
       $("#cfgCompromissoDia").value = formatBRLCurrency(h.compromissoDia);
       $("#cfgCartaoAv").value = formatPercentageValue(h.cartaoAv || 0);
@@ -13862,7 +12858,7 @@ ${fallbackText}`;
 
       goalHint.classList.toggle("unlocked", canManageStoreGoals && canEditGoal);
       goalHint.textContent = !canManageStoreGoals
-        ? "Somente gerente ou desenvolvedor podem alterar as metas gerais da loja."
+        ? "Edite as metas da loja no Acompanhamento Gerencial."
         : canEditGoal
           ? isDev()
             ? "Desenvolvedor: edição liberada em qualquer dia do mês."
@@ -13949,6 +12945,21 @@ ${fallbackText}`;
       input.addEventListener("input", updateStorePfSummary);
     });
 
+    $("#distributeAllGoalsBtn").addEventListener("click",()=>{
+      if(!canManageGoalDistribution())return;
+      const users=distributionUsers(),month=selectedDistributionMonth(),target=managementProjection?.goals?.[month];
+      if(!target || !users.length){alert('Sincronize os colaboradores e as metas da loja no Gerencial.');return;}
+      if(!target.venda&&!target.ativados&&!target.pfTotal&&!target.pcj){alert('Defina as metas deste mês no Gerencial antes de distribuir.');return;}
+      const preview=`Distribuir as metas de ${goalMonthLabel(month)} entre ${users.length} colaboradores ativos?\n\nVenda: ${money(target.venda)}\nAtivados: ${target.ativados}\nPF: ${target.pfTotal}\nPCJ por colaborador: ${pct(target.pcj)}\n\n${users.map(u=>u.shortName+' ('+u.operator+')').join(', ')}\n\nAs metas individuais desse mês serão substituídas. Depois você poderá ajustar cada colaborador.`;
+      if(!confirm(preview))return;
+      const sales=AVManagement.split(target.venda,users.length,2),activated=AVManagement.split(target.ativados,users.length);
+      const products=Object.fromEntries(AVManagement.PF.map(k=>[k,AVManagement.split(target.pf[k],users.length)]));
+      const distribution=ensureGoalMonth(month);
+      users.forEach((user,i)=>distribution[user.operator]={venda:sales[i],ativados:activated[i],pcj:target.pcj,...Object.fromEntries(AVManagement.PF.map(k=>[k,products[k][i]]))});
+      addAudit('METAS INDIVIDUAIS DISTRIBUÍDAS',`${goalMonthLabel(month)}: ${users.length} colaboradores cadastrados no Gerencial.`);
+      saveDB();renderGoalDistribution();renderUserGoalPanel();alert('Metas individuais distribuídas.');
+    });
+    $("#distributionMonth").addEventListener("change",renderGoalDistribution);
     $("#distributionOperator").addEventListener("change", event => {
       loadGoalDistributionIntoForm(event.target.value);
     });
@@ -13962,15 +12973,17 @@ ${fallbackText}`;
       if(!canManageGoalDistribution()) return;
 
       const operator = selectedDistributionOperator();
-      if(!operator){
-        alert("Selecione um operador.");
+      if(!operator || !distributionUsers().some(user=>user.operator===operator)){
+        alert("Selecione um colaborador ativo cadastrado no Gerencial.");
         return;
       }
 
-      const currentMonth = goalMonthKey();
+      const currentMonth = selectedDistributionMonth();
+      if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(currentMonth) || !$("#goalDistributionForm").reportValidity())return;
       const monthDistribution = ensureGoalMonth(currentMonth);
 
       monthDistribution[operator] = {
+        venda:AVManagement.amount($("#goalVenda").value),
         ativados:Math.max(Number($("#goalAtivados").value || 0), 0),
         bolsa:Math.max(Number($("#goalBolsa").value || 0), 0),
         compra:Math.max(Number($("#goalCompra").value || 0), 0),
@@ -13983,7 +12996,7 @@ ${fallbackText}`;
 
       addAudit(
         "DISTRIBUIÇÃO DE META ATUALIZADA",
-        `Metas mensais de Ativados, PF e PCJ do operador ${operator} foram atualizadas para ${goalMonthLabel(currentMonth)}.`
+        `Metas mensais de Venda, Ativados, PF e PCJ do operador ${operator} foram atualizadas para ${goalMonthLabel(currentMonth)}.`
       );
 
       saveDB();
@@ -14018,82 +13031,8 @@ ${fallbackText}`;
     });
 
     $("#headerForm").addEventListener("submit", e => {
-      e.preventDefault();
-      if(!isAdmin()) return;
-
-      const currentMonth = storeGoalMonthKey();
-      const requestedGoal = parseBRLCurrency($("#cfgMetaTotal").value);
-      const pfRealized =
-        storePfFormBreakdown("realizado");
-      const pfGoals =
-        storePfFormBreakdown("meta");
-      const pfTodayGoals =
-        storePfTodayFormBreakdown();
-      const pfRealizedTotal =
-        storePfBreakdownTotal(pfRealized);
-      const pfGoalTotal =
-        storePfBreakdownTotal(pfGoals);
-
-      if(canEditStoreMonthlyGoal()){
-        db.monthlyStoreGoals[currentMonth] = requestedGoal;
-      }
-
-      db.monthlyStorePfGoals =
-        db.monthlyStorePfGoals || {};
-      db.monthlyStorePfGoals[currentMonth] =
-        normalizeStorePfBreakdown(pfGoals);
-
-      db.dailyStorePfGoals =
-        db.dailyStorePfGoals || {};
-      db.dailyStorePfGoals[today()] =
-        normalizeStorePfBreakdown(pfTodayGoals);
-
-      db.monthlyPfGoals = db.monthlyPfGoals || {};
-      db.monthlyPfGoals[currentMonth] = pfGoalTotal;
-
-      const activeMonthlyGoal = getStoreMonthlyGoal(currentMonth);
-
-      db.header = {
-        ...db.header,
-        vendaAtual:parseBRLCurrency($("#cfgVendaAtual").value),
-        compromissoDia:parseBRLCurrency($("#cfgCompromissoDia").value),
-        cartaoAv:parsePercentageValue($("#cfgCartaoAv").value),
-        cartaoAvAcc:parsePercentageValue($("#cfgCartaoAvAcc").value),
-        cartaoAvGap:parseGapInteger($("#cfgCartaoAvGap").value),
-        cartaoAvGapAcc:parseGapInteger($("#cfgCartaoAvGapAcc").value),
-        pcjDia:parsePercentageValue($("#cfgPcjDia").value),
-        pcjAcc:parsePercentageValue($("#cfgPcjAcc").value),
-        pcjGap:parseGapInteger($("#cfgPcjGap").value),
-        pcjGapAcc:parseGapInteger($("#cfgPcjGapAcc").value),
-        vendaAcumulada:parseBRLCurrency($("#cfgVendaAcumulada").value),
-        metaTotal:activeMonthlyGoal,
-        ativadosDia:Number($("#cfgAtivadosDia").value||0),
-        ativadosMeta:Number($("#cfgAtivadosMeta").value||0),
-        ativadosAcc:Number($("#cfgAtivadosAcc").value||0),
-        ativadosTotal:Number($("#cfgAtivadosTotal").value||0),
-        storePfRealized:normalizeStorePfBreakdown(pfRealized),
-        pfRealizado:pfRealizedTotal,
-        pfMetaMensal:pfGoalTotal
-      };
-
-      captureHeaderCalendarSnapshot(today());
-
-      addAudit(
-        "META DE LOJA ATUALIZADA",
-        canEditStoreMonthlyGoal()
-          ? "Metas de Venda, PCJ e Produtos Financeiros da loja foram atualizadas, incluindo as metas de PF de Hoje e do Mês."
-          : "Indicadores de Venda, PCJ e Produtos Financeiros foram atualizados; a Meta Total Mensal de venda permaneceu congelada."
-      );
-
-      saveDB();
-      renderAll();
-      alert(
-        canEditStoreMonthlyGoal()
-          ? "Meta de Loja atualizada: Venda, PCJ e PFs foram salvos."
-          : "Indicadores e PFs atualizados. A Meta Total Mensal de venda permanece congelada até o próximo dia 1."
-      );
+      e.preventDefault();alert('Os resultados e as metas da loja são definidos no Acompanhamento Gerencial.');
     });
-
 
     let currentSection = "dashboard";
 
@@ -14616,6 +13555,10 @@ ${fallbackText}`;
       renderEmployees(e.target.value);
     });
 
+    $("#refreshManagementSourceBtn").addEventListener('click',async()=>{
+      const button=$('#refreshManagementSourceBtn');button.disabled=true;
+      try{await loadEmployeesFromManagement();buildRecordOperatorOptions();renderAllSafely();}finally{button.disabled=false;}
+    });
     $("#refreshEmployeesBtn").addEventListener("click", async () => {
       const button = $("#refreshEmployeesBtn");
       button.disabled = true;
@@ -14769,7 +13712,7 @@ ${fallbackText}`;
       currentSection = sectionName;
 
       const labels = {
-        dashboard:["Painel principal","Resultados realizados e metas de Hoje e do Acumulado."],
+        dashboard:["Painel principal","Resultados do último dia lançado e acumulado do mês, recebidos do GERENCIAL."],
         calendario:["Calendário de Vendas","Consulte os resultados completos da loja e dos operadores por data."],
         operadores:["Operadores","Consulta comparativa dos resultados da equipe, sem inclusão de dados."],
         funcionarios:["Funcionários","Cadastre operador, nome, senha e cargo para aplicar as permissões definidas pelo desenvolvedor."],
@@ -15049,8 +13992,8 @@ ${fallbackText}`;
       const m = monthPrefix(ref);
       const daysInMonth = new Date(Number(m.slice(0,4)), Number(m.slice(5,7)), 0).getDate();
       const labels = Array.from({length:daysInMonth}, (_,i)=> String(i+1).padStart(2,"0"));
-      const ativados = labels.map(d => db.records.filter(r => r.date === `${m}-${d}`).reduce((s,r)=>s+Number(r.ativados||0),0));
-      const pf = labels.map(d => db.records.filter(r => r.date === `${m}-${d}`).reduce((s,r)=>s+pfTotal(r),0));
+      const ativados = labels.map(d => calendarDailyCount(`${m}-${d}`,"ativados"));
+      const pf = labels.map(d => calendarDailyCount(`${m}-${d}`,"pf"));
 
       const max = Math.max(...ativados, ...pf, 1) * 1.25;
       const pad = {left:46,right:18,top:18,bottom:34};
