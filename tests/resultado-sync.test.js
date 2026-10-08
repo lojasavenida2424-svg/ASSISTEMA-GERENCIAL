@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict');
+const sync=require('../shared/resultado-sync.js');
+const merge=sync.merge;
+assert.deepEqual(merge({a:1,b:1},{a:3,b:1},{a:1,b:5}),{a:3,b:5});
+assert.deepEqual(merge({users:[{id:'a',v:1},{id:'b',v:1}]},{users:[{id:'a',v:2},{id:'b',v:1}]},{users:[{id:'a',v:1},{id:'b',v:4}]}),{users:[{id:'a',v:2},{id:'b',v:4}]});
+assert.deepEqual(merge({a:1,b:2},{b:2},{a:1,b:3}),{b:3});
+assert.deepEqual(merge({a:1},{a:1,x:{v:2}},{a:4,y:9}),{a:4,y:9,x:{v:2}});
+assert.deepEqual(merge({values:['a']},{values:['a','b']},{values:['a','c']}),{values:['a','c','b']});
+assert.equal(merge({z:2},{z:3},{z:4}).z,3);
+const bad=JSON.parse('{"__proto__":{"polluted":true},"safe":1}');
+assert.equal(merge({},bad,{safe:2}).safe,1);
+assert.equal({}.polluted,undefined);
+console.log('7 cenários de mesclagem aprovados.');

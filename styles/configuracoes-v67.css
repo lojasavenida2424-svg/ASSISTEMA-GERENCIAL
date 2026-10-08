@@ -1,0 +1,154 @@
+/* V67 — Escopo exclusivo de Configurações. Preserva todos os demais módulos. */
+/* Trilho primário: ícones apenas, somente com Configurações ativa. */
+@media (min-width:1101px){
+  body.av-config-focus-v67 .sidebar{width:72px!important;min-width:72px!important;max-width:72px!important}
+  body.av-config-focus-v67 .main{width:calc(100% - 72px)!important;margin-left:72px!important;max-width:none!important}
+}
+@media (min-width:761px) and (max-width:1100px){
+  body.av-config-focus-v67{display:flex!important;align-items:stretch!important}
+  body.av-config-focus-v67 .sidebar{position:sticky!important;top:0!important;left:0!important;width:72px!important;min-width:72px!important;max-width:72px!important;height:100vh!important;height:100dvh!important;max-height:100dvh!important;overflow:hidden!important;display:flex!important;flex-direction:column!important}
+  body.av-config-focus-v67 .main{margin-left:0!important;flex:1 1 auto!important;width:calc(100% - 72px)!important;min-width:0!important}
+}
+@media (min-width:761px){
+  body.av-config-focus-v67 .sidebar .logo-box{padding:13px 10px!important;margin:0!important;flex:none!important}
+  body.av-config-focus-v67 .sidebar .logo-line{justify-content:center!important;gap:0!important}
+  body.av-config-focus-v67 .sidebar .logo-line>div:not(.logo-icon){display:none!important}
+  body.av-config-focus-v67 .sidebar .logo-icon{width:45px!important;height:43px!important;border-radius:13px!important;font-size:16px!important}
+  body.av-config-focus-v67 .sidebar .user-box{display:none!important}
+  body.av-config-focus-v67 .sidebar #navMenu{display:flex!important;flex-direction:column!important;align-items:center!important;gap:5px!important;flex:1!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;padding:12px 7px!important;width:100%!important;box-shadow:none!important;border:none!important;border-radius:0!important;background:transparent!important}
+  body.av-config-focus-v67 .sidebar #navMenu .nav-btn{display:flex!important;flex:none!important;justify-content:center!important;align-items:center!important;gap:0!important;font-size:0!important;line-height:0!important;min-height:46px!important;height:46px!important;width:54px!important;min-width:54px!important;max-width:54px!important;margin:0!important;padding:0!important;border-radius:12px!important;overflow:hidden!important;text-indent:0!important;transform:none!important;box-shadow:none!important}
+  body.av-config-focus-v67 .sidebar #navMenu .nav-btn .ico{display:inline-grid!important;place-items:center!important;flex:0 0 20px!important;width:20px!important;height:20px!important;font-size:.875rem!important;line-height:1!important;white-space:nowrap!important;visibility:visible!important}
+  body.av-config-focus-v67 .sidebar #navMenu .nav-btn.active{box-shadow:inset 3px 0 0 #aa7b00!important}
+  body.av-config-focus-v67 .sidebar #navMenu .nav-btn:focus-visible{outline:3px solid #744128!important;outline-offset:-3px!important}
+}
+/* Em celulares, a barra existente permanece horizontal, mas usa só ícones. */
+@media(max-width:760px){
+  body.av-config-focus-v67 .sidebar .user-box{display:none!important}
+  body.av-config-focus-v67 .sidebar .logo-box{padding:9px 14px!important}
+  body.av-config-focus-v67 .sidebar .logo-line>div:not(.logo-icon){display:none!important}
+  body.av-config-focus-v67 .sidebar .logo-icon{width:42px!important;height:38px!important;font-size:14px!important;border-radius:10px!important}
+  body.av-config-focus-v67 .sidebar #navMenu{display:flex!important;gap:6px!important;padding:8px 10px!important;overflow-x:auto!important;overflow-y:hidden!important;min-height:60px!important}
+  body.av-config-focus-v67 .sidebar #navMenu .nav-btn{font-size:0!important;min-width:43px!important;width:43px!important;height:42px!important;margin:0!important;padding:0!important;display:flex!important;justify-content:center!important;align-items:center!important}
+  body.av-config-focus-v67 .sidebar #navMenu .nav-btn .ico{width:20px!important;height:20px!important;flex:0 0 20px!important;font-size:.875rem!important;display:grid!important;place-items:center!important}
+}
+/* Identidade clara Avenida: amarelo e branco, vinho apenas em texto de importância. */
+body:not(.dark-mode) #config{--av67-surface:#fff;--av67-base:#fffefa;--av67-muted:#685e52;--av67-ink:#2b2729;--av67-accent:#fbd12a;--av67-wine:#713149;--av67-line:#e9e3ce}
+body:not(.dark-mode) #config #configContent .config-av-header{background:linear-gradient(115deg,#fff 0%,#fffdf3 68%,#fff5ce 100%)!important;color:#30292a!important;border:1px solid #e9e2cc!important;border-bottom:3px solid #f6c726!important;box-shadow:0 7px 24px rgba(69,52,8,.07)!important}
+body:not(.dark-mode) #config #configContent .config-av-header h1{color:#282227!important}
+body:not(.dark-mode) #config #configContent .config-av-header p{color:#6d645c!important}
+body:not(.dark-mode) #config #configContent .config-av-eyebrow{color:#82445a!important}
+body:not(.dark-mode) #config #configContent .config-av-header-emblem{background:#ffcd09!important;color:#392a08!important}
+/* Tema escuro Avenida: grafite + vinho, contraste legível e amarelo pontual. */
+body.dark-mode #config{--av67-surface:#242329;--av67-base:#1d1c21;--av67-muted:#bbb2bb;--av67-ink:#f6f2f4;--av67-accent:#eabf34;--av67-wine:#e8a9bf;--av67-line:#45404a}
+body.dark-mode #config #configContent .config-av-header{background:linear-gradient(120deg,#29242b,#38222e 65%,#422739)!important;color:#f7f2f5!important;border:1px solid #55404b!important;border-bottom:3px solid #e5b92c!important;box-shadow:0 7px 25px rgba(0,0,0,.22)!important}
+body.dark-mode #config #configContent .config-av-header h1{color:#fbf6f8!important}
+body.dark-mode #config #configContent .config-av-header p{color:#e0d3dc!important}
+body.dark-mode #config #configContent .config-av-eyebrow{color:#ffe08b!important}
+body.dark-mode #config #configContent .config-av-header-emblem{background:#e7b925!important;color:#262228!important}
+/* Estrutura menos alta e proporção confortável. */
+#config #configContent .config-av-page{gap:15px!important;max-width:none!important}
+#config #configContent .config-av-header{padding:16px 22px!important;border-radius:16px!important;gap:13px!important;min-height:87px!important}
+#config #configContent .config-av-header-emblem{width:44px!important;height:44px!important;flex:0 0 44px!important;border-radius:12px!important;font-size:24px!important}
+#config #configContent .config-av-header h1{font-size:1.55rem!important;margin:2px 0 2px!important}
+#config #configContent .config-av-header p{font-size:12px!important}
+#config #configContent .config-av-layout{gap:14px!important;grid-template-columns:210px minmax(0,1fr)!important}
+#config #configContent .config-av-sidebar{background:var(--av67-surface)!important;border:1px solid var(--av67-line)!important;box-shadow:0 4px 22px rgba(0,0,0,.035)!important;padding:12px!important;border-radius:15px!important}
+#config #configContent .config-av-sidebar-title{color:var(--av67-muted)!important}
+#config #configContent .config-av-navbtn{color:var(--av67-ink)!important;min-height:42px!important}
+#config #configContent .config-av-navbtn.is-active{background:color-mix(in srgb,var(--av67-accent) 27%,var(--av67-surface))!important;border-color:var(--av67-accent)!important;box-shadow:inset 3px 0 0 #b88d08!important}
+#config #configContent .config-av-profile{border-color:var(--av67-line)!important;color:var(--av67-ink)!important}
+#config #configContent .config-av-profile-role{color:var(--av67-muted)!important}
+#config #configContent .config-av-panel-card,#config #configContent .config-av-stat{background:var(--av67-surface)!important;border-color:var(--av67-line)!important;color:var(--av67-ink)!important}
+#config #configContent .config-av-shortcut{background:var(--av67-surface)!important;color:var(--av67-ink)!important;border-color:var(--av67-line)!important}
+#config #configContent .config-av-kicker{color:var(--av67-wine)!important}
+#config #configContent .config-av-section-head h2{color:var(--av67-ink)!important}
+#config #configContent .config-av-section-head p{color:var(--av67-muted)!important}
+/* Apenas UM menu interno: Permissões = lista de operadores no lugar de navegação administrativa. */
+#config #configContent .config-av-page.is-permissions .config-av-layout{grid-template-columns:minmax(0,1fr)!important}
+#config #configContent .config-av-page.is-permissions .config-av-sidebar{display:none!important}
+#config #configContent .config-av-page.is-permissions .avp66-columns{grid-template-columns:236px minmax(0,1fr)!important;gap:14px!important}
+#config #configContent .config-av-page.is-permissions .avp66-people{position:sticky!important;top:12px!important;min-width:0!important}
+#config #configContent .avp67-return{display:flex;align-items:center;gap:6px;width:100%;padding:9px 10px;margin-bottom:13px;border:1px solid var(--av67-line);border-radius:9px;background:var(--av67-base);color:var(--av67-ink);font-weight:800;font-size:11px;cursor:pointer;text-align:left}
+#config #configContent .avp67-return:hover{background:color-mix(in srgb,var(--av67-accent) 18%,var(--av67-surface));border-color:var(--av67-accent)}
+#config #configContent .avp67-return:focus-visible{outline:3px solid var(--av67-accent);outline-offset:2px}
+/* Traz a área editável para mais perto do topo, sem retirar informações funcionais. */
+#config .avp66{--avp-wine:#79334d;--avp-wine-dark:#5e2237;--avp-yellow:#e6b916;--avp-line:var(--av67-line);--avp-ink:var(--av67-ink);--avp-muted:var(--av67-muted);color:var(--av67-ink)!important}
+#config .avp66-intro{margin-bottom:12px!important}
+#config .avp66-intro h2{font-size:25px!important}
+#config .avp66-intro p{font-size:12px!important}
+#config .avp66-topstats{margin-bottom:13px!important;gap:9px!important}
+#config .avp66-topstats>div{padding:9px 13px!important;min-height:67px!important;box-shadow:none!important;background:var(--av67-surface)!important;border-color:var(--av67-line)!important}
+#config .avp66-topstats b{font-size:19px!important;line-height:1!important}
+#config .avp66-topstats span{font-size:10px!important}
+#config .avp66-people,#config .avp66-workspace{background:var(--av67-surface)!important;border-color:var(--av67-line)!important;color:var(--av67-ink)!important}
+#config .avp66-people{padding:12px 11px!important}
+#config .avp66-people-head h3,#config .avp66-paneltitle h3{color:var(--av67-ink)!important}
+#config .avp66-person-head{padding:16px 18px 10px!important;gap:10px!important}
+#config .avp66-person-mark{height:44px!important;width:44px!important;font-size:20px!important}
+#config .avp66-detailstats{padding:0 18px 10px!important}
+#config .avp66-roleline{padding:11px 18px!important;background:var(--av67-base)!important;border-color:var(--av67-line)!important}
+#config .avp66-tabbody{padding:17px!important}
+#config .avp66-tabs{padding-top:3px!important}
+#config .avp66-user-list{max-height:calc(100vh - 350px)!important;min-height:130px}
+#config .avp66-security{background:var(--av67-surface)!important;color:var(--avp-wine)!important;border-color:var(--av67-line)!important}
+#config .avp66-search,#config .avp66-roleactions select,#config #avp66RoleFilter{background:var(--av67-surface)!important;color:var(--av67-ink)!important;border-color:var(--av67-line)!important}
+#config .avp66-search input{color:var(--av67-ink)!important}
+#config .avp66-user{color:var(--av67-ink)!important}
+#config .avp66-user.selected{background:color-mix(in srgb,var(--av67-accent) 19%,var(--av67-surface))!important;border-color:var(--av67-accent)!important}
+#config .avp66-user:hover{background:color-mix(in srgb,var(--av67-accent) 10%,var(--av67-surface))!important}
+#config .avp66-avatar{background:var(--av67-base)!important;color:var(--av67-ink)!important}
+#config .avp66-user.selected .avp66-avatar{background:var(--av67-accent)!important;color:#2b2522!important}
+#config .avp66-module,#config .avp66-restrict,#config .avp66-docgroup,#config .avp66-matrix,#config .avp66-detailstats span,#config .avp66-minibtn{background:var(--av67-surface)!important;color:var(--av67-ink)!important;border-color:var(--av67-line)!important}
+#config .avp66-module-icon{background:var(--av67-base)!important;color:var(--avp-wine)!important}
+#config .avp66-matrix th,#config .avp66-docgroup summary{background:var(--av67-base)!important;color:var(--av67-ink)!important;border-color:var(--av67-line)!important}
+#config .avp66-matrix td{color:var(--av67-ink)!important;border-color:var(--av67-line)!important}
+#config .avp66-matrix tr.avp66-rowoff{background:var(--av67-base)!important}
+#config .avp66-roleline b{color:var(--av67-ink)!important}
+#config .avp66-roleline small,#config .avp66-matrix td small,#config .avp66-matrix th,#config .avp66-detailstats span{color:var(--av67-muted)!important}
+#config .avp66-savebar{background:var(--av67-surface)!important;border-color:var(--av67-line)!important}
+#config .avp66-identity{background:var(--av67-base)!important;color:var(--av67-ink)!important}
+#config .avp66-note{background:var(--av67-base)!important;color:var(--av67-muted)!important}
+body.dark-mode #config .avp66{--avp-wine:#f2b1c9;--avp-wine-dark:#dfa0b7;--avp-yellow:#eed05f}
+body.dark-mode #config .avp66-primary{background:#5d2b40!important;color:#fff8f9!important;border-color:#815069!important}
+body.dark-mode #config .avp66-userinfo small,body.dark-mode #config .avp66-paneltitle p,body.dark-mode #config .avp66-person-caption p{color:#cfc1cb!important}
+body.dark-mode #config .avp66-module input[type=checkbox]:checked,body.dark-mode #config .avp66-restrict input[type=checkbox]:checked{background:#ad7791!important}
+body:not(.dark-mode) #config .avp66-primary{background:#713149!important;color:#fff!important}
+/* Painel amplo, com fallback responsivo sem terceira coluna. */
+@media(max-width:1180px){
+  #config #configContent .config-av-page.is-permissions .avp66-columns{grid-template-columns:200px minmax(0,1fr)!important}
+  #config .avp66-module-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:875px){
+  #config #configContent .config-av-page.is-permissions .avp66-columns{grid-template-columns:minmax(0,1fr)!important}
+  #config #configContent .config-av-page.is-permissions .avp66-people{position:static!important}
+  #config #configContent .config-av-layout{grid-template-columns:minmax(0,1fr)!important}
+  #config #configContent .config-av-sidebar{position:static!important}
+  #config .avp66-user-list{max-height:195px!important}
+  #config .avp66-module-grid{grid-template-columns:1fr!important}
+}
+@media(max-width:760px){
+  #config #configContent .config-av-header{min-height:72px!important;padding:13px!important}
+  #config #configContent .config-av-header p{display:none!important}
+  #config .avp66-security{display:none!important}
+  #config .avp66-topstats>div{padding:9px!important}
+  #config .avp66-intro h2{font-size:23px!important}
+}
+@media print{
+  body.av-config-focus-v67 .sidebar{display:none!important}
+}
+/* Acabamento V67 — impede cabeçalhos herdados de inverterem a hierarquia. */
+body.av-config-focus-v67{width:100%!important;max-width:100%!important}
+#config #configContent .config-av-header{justify-content:flex-start!important;text-align:left!important}
+#config #configContent .config-av-header>div:last-child{flex:1 1 auto!important;min-width:0!important;text-align:left!important}
+body:not(.dark-mode) #config .avp66-person-head{background:#fff!important;color:#2b2729!important}
+body:not(.dark-mode) #config .avp66-person-caption h3{color:#2b2729!important}
+body:not(.dark-mode) #config .avp66-person-caption p{color:#6d625f!important}
+body.dark-mode #config .avp66-person-head{background:#2e262d!important;color:#f7f1f4!important}
+body.dark-mode #config .avp66-person-caption h3{color:#faf5f6!important}
+#config .avp66-user.selected .avp66-userinfo b,#config .avp66-user.selected .avp66-userinfo small{color:var(--av67-ink)!important}
+#config .avp66-person-caption .avp66-overline{color:var(--avp-wine)!important}
+body.dark-mode #config .avp66-person-caption .avp66-overline{color:#f0b6ca!important}
+
+/* V72 — ícones menores somente no menu principal minimizado de Configurações.
+   Mantém botões de navegação e largura do menu inalterados. */
+body.av-config-focus-v67 .sidebar #navMenu .nav-btn .ico svg{width:16px!important;height:16px!important;max-width:16px!important;max-height:16px!important;flex:none!important;}

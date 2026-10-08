@@ -1,0 +1,26 @@
+/* V81 · Editores ricos dentro das telas AV */
+.av-rte{overflow:hidden;border:1px solid var(--border);border-radius:16px;background:var(--page);box-shadow:0 6px 18px rgba(0,0,0,.04)}
+.av-rte:focus-within{border-color:var(--amarelo-escuro);box-shadow:0 0 0 3px rgba(246,196,38,.16)}
+.av-rte-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px;border-bottom:1px solid var(--border);background:var(--page-2)}
+.av-rte-toolbar button,.av-rte-toolbar select,.av-rte-color-label{font:inherit;font-size:12px;font-weight:800;border:1px solid var(--border);color:var(--text);background:var(--page);border-radius:9px;min-height:32px;padding:5px 9px;cursor:pointer}
+.av-rte-toolbar button:hover{background:var(--soft);border-color:var(--amarelo-escuro)}
+.av-rte-toolbar button:focus-visible,.av-rte-toolbar select:focus-visible{outline:2px solid var(--amarelo-escuro);outline-offset:2px}
+.av-rte-toolbar label{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:11px;font-weight:850;white-space:nowrap}
+.av-rte-toolbar label:not(.av-rte-color-label){padding:0 2px}
+.av-rte-toolbar select{max-width:145px;font-size:12px;min-height:34px;padding:5px 8px}
+.av-rte-toolbar .av-rte-color-label{padding:3px 7px;min-height:33px;gap:7px}
+.av-rte-toolbar input[type="color"]{width:27px;height:25px;min-height:0;border:0;padding:1px;cursor:pointer;background:transparent}
+.av-rte-sep{width:1px;height:24px;background:var(--border);margin:0 2px}
+.av-rte-area{min-height:182px;padding:16px;outline:none;color:var(--text);background:var(--page);font-size:16px;font-weight:400;line-height:1.62;white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal;font-family:Arial,Helvetica,sans-serif}
+.av-rte-area:empty:before{content:attr(data-placeholder);color:var(--muted);opacity:.8;pointer-events:none}
+.av-rte-area ul,.av-rte-area ol,.av-rte-render ul,.av-rte-render ol{padding-left:25px;margin:8px 0}
+.av-rte-area p,.av-rte-area div,.av-rte-render p,.av-rte-render div{max-width:100%;overflow-wrap:anywhere}
+.av-rte-footer{padding:7px 12px;background:var(--page-2);border-top:1px solid var(--border);font-size:11px;font-weight:700;color:var(--muted)}
+textarea.av-rte-fallback-hidden{display:none!important}
+.av-rte-render{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;font-weight:400;font-size:.88rem;color:var(--text)}
+.av-rte-render:empty{display:none}
+.av-rte-render p,.av-rte-render div{margin:0 0 5px}
+.note-details>.av-rte-render,.task-row-details>.av-rte-render{margin-top:9px;padding:9px 0}
+body.dark-mode .av-rte{box-shadow:0 7px 20px rgba(0,0,0,.2)}
+body.dark-mode .av-rte-area{background:var(--page)}
+@media(max-width:660px){.av-rte-toolbar{padding:8px;gap:5px}.av-rte-sep{display:none}.av-rte-toolbar select{max-width:120px}.av-rte-area{min-height:170px;padding:12px}.av-rte-footer{line-height:1.45}}

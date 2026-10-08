@@ -1,0 +1,36 @@
+/* V75.4 — Palavra AVENIDA ao lado da marca circular no login, sem molduras extras. */
+#loginScreen .login-logo-wrap {
+  display: inline-flex;
+  flex-direction: row;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  min-height: 124px;
+  gap: 16px;
+  justify-content: flex-start;
+  align-items: center;
+  vertical-align: top;
+  white-space: nowrap;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+#loginScreen .login-brand-wordmark {
+  display: inline-block;
+  font-family: inherit;
+  font-size: clamp(1.65rem, 2.35vw, 2.15rem);
+  font-weight: 1000;
+  letter-spacing: -.035em;
+  line-height: 1;
+  color: #241F14;
+  white-space: nowrap;
+}
+body.dark-mode #loginScreen .login-brand-wordmark { color: #FFCD09; }
+@media (max-width: 860px) {
+  #loginScreen .login-logo-wrap { min-height: 106px; gap: 14px; }
+  #loginScreen .login-brand-wordmark { font-size: 1.65rem; }
+}
+@media (max-width: 520px) {
+  #loginScreen .login-logo-wrap { min-height: 92px; gap: 12px; }
+  #loginScreen .login-brand-wordmark { font-size: clamp(1.25rem, 6vw, 1.65rem); }
+}

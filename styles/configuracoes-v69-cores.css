@@ -1,0 +1,265 @@
+/* ================================================================
+   V69 — Configurações com a MESMA paleta das demais abas.
+   Fonte única da verdade: tokens do tema principal no index.html.
+   Nenhum seletor fora de #config. Geometria V68 preservada.
+   ================================================================ */
+#config {
+  --av67-surface:var(--page);
+  --av67-base:var(--page-2);
+  --av67-muted:var(--muted);
+  --av67-ink:var(--text);
+  --av67-accent:var(--amarelo);
+  --av67-line:var(--border);
+}
+body:not(.dark-mode) #config {
+  --av67-wine:#866300;
+  --av69-action:#FFCD09;
+  --av69-action-text:#241F14;
+  --av69-action-hover:#D9A900;
+  --av69-selection:color-mix(in srgb,var(--amarelo) 22%,var(--page));
+  --av69-selection-text:var(--text);
+}
+body.dark-mode #config {
+  --av67-wine:#FFCD09;
+  --av69-action:#FFCD09;
+  --av69-action-text:#18191D;
+  --av69-action-hover:#D9A900;
+  --av69-selection:color-mix(in srgb,var(--amarelo) 13%,var(--page));
+  --av69-selection-text:#FFCD09;
+}
+/* Cabeçalho: no claro, amarelo Avenida; no escuro, bordô e grafite do tema. */
+body:not(.dark-mode) #config #configContent .config-av-header {
+  background:linear-gradient(112deg,#FFE15D 0%,#FFCD09 47%,#FFF2B0 100%)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  border-bottom:3px solid var(--amarelo-escuro)!important;
+  box-shadow:0 9px 25px rgba(106,82,0,.1)!important;
+}
+body:not(.dark-mode) #config #configContent .config-av-header h1,
+body:not(.dark-mode) #config #configContent .config-av-header p,
+body:not(.dark-mode) #config #configContent .config-av-eyebrow {
+  color:var(--text)!important;
+}
+body:not(.dark-mode) #config #configContent .config-av-header-emblem {
+  background:#fff!important;color:#241F14!important;
+  border:1px solid rgba(112,85,0,.2)!important;
+}
+body.dark-mode #config #configContent .config-av-header {
+  background:linear-gradient(115deg,#4B0822 0%,#26171F 50%,#1A1C21 100%)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  border-bottom:3px solid var(--amarelo)!important;
+  box-shadow:0 9px 26px rgba(0,0,0,.32)!important;
+}
+body.dark-mode #config #configContent .config-av-header h1 {color:var(--text)!important}
+body.dark-mode #config #configContent .config-av-header p {color:var(--muted)!important}
+body.dark-mode #config #configContent .config-av-eyebrow {color:var(--amarelo)!important}
+body.dark-mode #config #configContent .config-av-header-emblem {
+  background:var(--amarelo)!important;color:#18191D!important;
+}
+/* Superfícies e textos herdam diretamente a identidade do Gerencial. */
+#config #configContent .config-av-sidebar,
+#config #configContent .config-av-panel-card,
+#config #configContent .config-av-stat,
+#config #configContent .config-av-shortcut,
+#config .avp66-people,
+#config .avp66-workspace,
+#config .avp66-topstats>div,
+#config .avp66-module,
+#config .avp66-restrict,
+#config .avp66-docgroup,
+#config .avp66-matrix,
+#config .avp66-detailstats span,
+#config .avp66-minibtn {
+  background:var(--page)!important;
+  border-color:var(--border)!important;
+  color:var(--text)!important;
+}
+#config #configContent .config-av-navbtn,
+#config #configContent .config-av-section-head h2,
+#config .avp66-person-caption h3,
+#config .avp66-userinfo b,
+#config .avp66-paneltitle h3,
+#config .avp66-intro h2,
+#config .avp66-module b,
+#config .avp66-restrict b {
+  color:var(--text)!important;
+}
+#config #configContent .config-av-sidebar-title,
+#config #configContent .config-av-section-head p,
+#config #configContent .config-av-profile-role,
+#config .avp66-intro p,
+#config .avp66-paneltitle p,
+#config .avp66-person-caption p,
+#config .avp66-userinfo small,
+#config .avp66-detailstats span,
+#config .avp66-topstats span,
+#config .avp66-topstats small,
+#config .avp66-roleline small {
+  color:var(--muted)!important;
+}
+#config #configContent .config-av-kicker,
+#config .avp66-overline,
+#config .avp66-topstats b,
+#config .avp66-detailstats b,
+#config .avp66-protected {
+  color:var(--av67-wine)!important;
+}
+/* Sem rosas/bege/vinho herdados do V66 no tema claro. */
+#config #configContent .config-av-navbtn.is-active,
+#config .avp66-user.selected {
+  background:var(--av69-selection)!important;
+  border-color:var(--amarelo-escuro)!important;
+  color:var(--text)!important;
+  box-shadow:inset 3px 0 0 var(--amarelo)!important;
+}
+#config #configContent .config-av-navbtn:hover,
+#config .avp66-user:hover,
+#config .avp66-module:hover,
+#config .avp66-minibtn:hover,
+#config #configContent .avp67-return:hover {
+  background:var(--soft)!important;
+  border-color:var(--border)!important;
+}
+#config .avp66-user.selected .avp66-userinfo b,
+#config .avp66-user.selected .avp66-userinfo small {color:var(--text)!important}
+#config .avp66-avatar,
+#config #configContent .config-av-profile-avatar,
+#config .avp66-module-icon {
+  background:var(--soft)!important;
+  color:var(--text)!important;
+  border-color:var(--border)!important;
+}
+#config .avp66-user.selected .avp66-avatar {
+  background:var(--amarelo)!important;
+  color:#241F14!important;
+}
+body:not(.dark-mode) #config .avp66-person-head {background:var(--page)!important;color:var(--text)!important}
+body.dark-mode #config .avp66-person-head {background:var(--page)!important;color:var(--text)!important}
+body:not(.dark-mode) #config .avp66-person-caption h3,
+body.dark-mode #config .avp66-person-caption h3 {color:var(--text)!important}
+#config .avp66-person-mark {background:var(--amarelo)!important;color:#241F14!important}
+#config .avp66-people-head span,
+#config .avp66-identity,
+#config .avp66-identity.avp66-admin {
+  background:var(--soft)!important;
+  color:var(--text)!important;
+}
+#config .avp66-roleline,
+#config .avp66-savebar,
+#config .avp66-docgroup summary,
+#config .avp66-matrix th,
+#config .avp66-matrix tr.avp66-rowoff,
+#config .avp66-note,
+#config #configContent .avp67-return {
+  background:var(--page-2)!important;
+  color:var(--text)!important;
+  border-color:var(--border)!important;
+}
+#config .avp66-module input[type=checkbox]:checked,
+#config .avp66-restrict input[type=checkbox]:checked {
+  background:var(--amarelo)!important;
+}
+#config .avp66-module input[type=checkbox]:not(:checked),
+#config .avp66-restrict input[type=checkbox]:not(:checked) {
+  background:var(--border)!important;
+}
+#config .avp66-tabs button.active {
+  color:var(--av67-wine)!important;
+  border-bottom-color:var(--amarelo)!important;
+}
+#config .avp66-primary {
+  background:var(--av69-action)!important;
+  color:var(--av69-action-text)!important;
+  border-color:var(--amarelo-escuro)!important;
+}
+#config .avp66-primary:hover {background:var(--av69-action-hover)!important}
+#config .avp66-minibtn {color:var(--text)!important}
+#config .avp66-search,
+#config .avp66-search input,
+#config .avp66-roleactions select,
+#config #avp66RoleFilter,
+#config .avp66-doc-search,
+#config .avp66-doc-search input {
+  background:var(--page)!important;
+  color:var(--text)!important;
+  border-color:var(--border)!important;
+}
+#config .avp66-matrix th,
+#config .avp66-matrix td,
+#config .avp66-matrix td b,
+#config .avp66-matrix td small {color:var(--text)!important}
+#config .avp66-matrix td {border-color:var(--border)!important}
+#config .avp66-check-ui {background:var(--page)!important;border-color:var(--border)!important}
+#config .avp66-check input:checked + .avp66-check-ui {
+  background:var(--amarelo)!important;
+  border-color:var(--amarelo-escuro)!important;
+  color:#241F14!important;
+}
+#config .avp66-check input:checked + .avp66-check-ui::after {color:#241F14!important}
+body.dark-mode #config .avp66-security,
+body:not(.dark-mode) #config .avp66-security {
+  background:var(--page-2)!important;
+  color:var(--av67-wine)!important;
+  border-color:var(--border)!important;
+}
+#config .avp66-note {border-left:3px solid var(--amarelo)!important}
+#config .avp66-roleline b {color:var(--text)!important}
+#config .avp66-userchev {color:var(--muted)!important}
+/* Corrige estados escuros que herdavam input, tabela e badge claros. */
+body.dark-mode #config .avp66-matrix,
+body.dark-mode #config .avp66-docgroup,
+body.dark-mode #config .avp66-restrict,
+body.dark-mode #config .avp66-module {color:var(--text)!important}
+/* Valores oficiais têm precedência sobre os tokens particulares da V67. */
+body:not(.dark-mode) #config,
+body.dark-mode #config {
+  --av67-surface:var(--page);
+  --av67-base:var(--page-2);
+  --av67-muted:var(--muted);
+  --av67-ink:var(--text);
+  --av67-accent:var(--amarelo);
+  --av67-line:var(--border);
+}
+body:not(.dark-mode) #config {--av67-wine:#866300}
+body.dark-mode #config {--av67-wine:var(--amarelo)}
+body:not(.dark-mode) #config .avp66 {
+  --avp-wine:#866300;
+  --avp-wine-dark:#644a00;
+  --avp-yellow:var(--amarelo);
+}
+body.dark-mode #config .avp66 {
+  --avp-wine:var(--amarelo);
+  --avp-wine-dark:var(--amarelo-escuro);
+  --avp-yellow:var(--amarelo);
+}
+body.dark-mode #config .avp66-user.selected,
+body.dark-mode #config .avp66-user.selected:hover {
+  background:#292B30!important;
+  color:var(--text)!important;
+  border-color:var(--amarelo-escuro)!important;
+}
+body:not(.dark-mode) #config .avp66-person-caption .avp66-overline {color:#866300!important}
+body.dark-mode #config .avp66-person-caption .avp66-overline {color:var(--amarelo)!important}
+/* Força contraste do item selecionado no escuro contra temas antigos. */
+body.dark-mode #config .avp66-columns .avp66-people .avp66-user.selected,
+body.dark-mode #config .avp66-columns .avp66-people .avp66-user.selected:hover {
+  background:#292B30!important;
+  background-color:#292B30!important;
+  background-image:none!important;
+  color:#F7F4EE!important;
+  border-color:#D9A900!important;
+}
+/* Botões e interruptores devem usar amarelo também após os overrides V67. */
+body:not(.dark-mode) #config .avp66-primary,
+body.dark-mode #config .avp66-primary {
+  background:#FFCD09!important;
+  border-color:#D9A900!important;
+  color:#241F14!important;
+}
+body:not(.dark-mode) #config .avp66-primary:hover,
+body.dark-mode #config .avp66-primary:hover {background:#D9A900!important;color:#241F14!important}
+body.dark-mode #config .avp66-module input[type=checkbox]:checked,
+body.dark-mode #config .avp66-restrict input[type=checkbox]:checked {
+  background:#FFCD09!important;
+}

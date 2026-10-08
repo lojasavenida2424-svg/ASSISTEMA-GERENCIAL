@@ -1,0 +1,81 @@
+/* V75.3 — usa o símbolo enviado pelo usuário, sem wordmark inventado ou caixa quadrada. */
+#loginScreen .login-logo-wrap {
+  display: inline-grid;
+  place-items: center;
+  width: 128px;
+  height: 128px;
+  margin: 0 0 24px;
+  padding: 0;
+  gap: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+#loginScreen #loginAvenidaLogo {
+  display: block;
+  width: 124px;
+  height: 124px;
+  min-width: 0;
+  aspect-ratio: 1;
+  object-fit: contain;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  filter: drop-shadow(0 10px 19px rgba(46,13,30,.15));
+}
+body.dark-mode #loginScreen .login-logo-wrap {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+body.dark-mode #loginScreen #loginAvenidaLogo {
+  filter: drop-shadow(0 11px 24px rgba(0,0,0,.22));
+}
+#appLoader .app-loader-logo-shell {
+  width: 120px;
+  height: 120px;
+}
+#appLoader .app-loader-mark,
+body.dark-mode #appLoader .app-loader-mark {
+  width: 90px;
+  height: 90px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent !important;
+  box-shadow: none;
+  overflow: visible;
+}
+#appLoader #loaderAvenidaLogo {
+  width: 90px;
+  height: 90px;
+  display: block;
+  object-fit: contain;
+  aspect-ratio: 1;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  filter: drop-shadow(0 9px 16px rgba(46,13,30,.13));
+}
+body.dark-mode #appLoader #loaderAvenidaLogo {
+  filter: drop-shadow(0 11px 20px rgba(0,0,0,.24));
+}
+#appLoader .app-loader-orbit { inset: 0; }
+#appLoader .app-loader-orbit.orbit-b { inset: 8px; }
+@media (max-width: 860px) {
+  #loginScreen .login-logo-wrap {
+    width: 108px;
+    height: 108px;
+    margin-bottom: 18px;
+  }
+  #loginScreen #loginAvenidaLogo { width: 106px; height: 106px; }
+}
+@media (max-width: 520px) {
+  #loginScreen .login-logo-wrap { width: 94px; height: 94px; margin-bottom: 14px; }
+  #loginScreen #loginAvenidaLogo { width: 92px; height: 92px; }
+  #appLoader .app-loader-logo-shell { width: 106px; height: 106px; }
+  #appLoader .app-loader-mark,body.dark-mode #appLoader .app-loader-mark { width: 78px; height: 78px; }
+  #appLoader #loaderAvenidaLogo { width: 78px; height: 78px; }
+}

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AV Resultados Operadores V59.3 — Integração GERENCIAL robusta</title>
+  <title>AV Resultados Operadores V63 — Integração GERENCIAL</title>
   <!-- PWA / ÍCONE EXTERNO AV RESULTADOS — não altera ícones internos -->
   <meta name="theme-color" content="#E0B423">
   <meta name="application-name" content="AV Resultados">
@@ -21,6 +21,8 @@
   <link rel="canonical" href="https://lojasavenida2424-svg.github.io/ASSISTEMA-GERENCIAL/resultados/">
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="../shared/cargo-policy.js"></script>
+<script src="../shared/resultado-sync.js"></script>
   <script>
     // Contingência: tenta um segundo CDN se o primeiro estiver bloqueado.
     if(!window.supabase){
@@ -5439,6 +5441,9 @@
             <option value="VISUAL MERCHANDISING">Visual Merchandising</option>
             <option value="PRODUTO FINANCEIRO">Produto Financeiro</option>
             <option value="ASSESSOR">Assessor</option>
+            <option value="FREE LANCE">Free Lance</option>
+            <option value="JOVEM APRENDIZ">Jovem Aprendiz</option>
+            <option value="FISCAL">Fiscal</option>
             <option value="DESENVOLVEDOR">Desenvolvedor</option>
           </select>
         </div>
@@ -5448,7 +5453,7 @@
         </div>
         <div class="field span-2">
           <label>Senha individual</label>
-          <input id="systemUserPassword" class="control" type="text" autocomplete="new-password" placeholder="Defina a senha deste funcionário" required />
+          <input id="systemUserPassword" class="control" type="password" autocomplete="new-password" placeholder="Defina a senha deste funcionário" required />
           <small style="color:var(--muted)">A senha pertence somente a este usuário; as abas são determinadas pelo cargo.</small>
         </div>
       </div>
@@ -5493,6 +5498,9 @@
             <option value="VISUAL MERCHANDISING">Visual Merchandising</option>
             <option value="PRODUTO FINANCEIRO">Produto Financeiro</option>
             <option value="ASSESSOR">Assessor</option>
+            <option value="FREE LANCE">Free Lance</option>
+            <option value="JOVEM APRENDIZ">Jovem Aprendiz</option>
+            <option value="FISCAL">Fiscal</option>
           </select>
         </div>
       </div>
@@ -5854,8 +5862,8 @@
     const monthPrefix = (date=today()) => String(date).slice(0,7);
 
     const SYSTEM_USERS = [
-      { operator:"133", password:"13324", name:"JOAO PEDRO DE OLIVEIRA SILVA", shortName:"João Pedro", role:"DESENVOLVEDOR", cargo:"DESENVOLVEDOR", access:"developer", active:true },
-      { operator:"139", password:"13924", name:"ALARA DOS REIS ARAUJO", shortName:"Alara", role:"GERENTE", cargo:"GERENTE", access:"manager", active:true }
+      { operator:"133", password:"", name:"JOAO PEDRO DE OLIVEIRA SILVA", shortName:"João Pedro", role:"DESENVOLVEDOR", cargo:"DESENVOLVEDOR", access:"developer", active:true },
+      { operator:"139", password:"", name:"ALARA DOS REIS ARAUJO", shortName:"Alara", role:"GERENTE", cargo:"GERENTE", access:"manager", active:true }
     ];
 
     const ROLE_OPTIONS = [
@@ -5863,6 +5871,9 @@
       "VISUAL MERCHANDISING",
       "PRODUTO FINANCEIRO",
       "ASSESSOR",
+      "FREE LANCE",
+      "JOVEM APRENDIZ",
+      "FISCAL",
       "DESENVOLVEDOR"
     ];
     const PERMISSION_TABS = ["dashboard", "calendario", "game", "premia", "operadores", "funcionarios", "lancamentos", "distribuicao"];
@@ -5882,6 +5893,9 @@
       "VISUAL MERCHANDISING": { ...STANDARD_ROLE_PERMISSIONS },
       "PRODUTO FINANCEIRO": { ...STANDARD_ROLE_PERMISSIONS },
       "ASSESSOR": { ...STANDARD_ROLE_PERMISSIONS },
+      "FREE LANCE": { ...STANDARD_ROLE_PERMISSIONS },
+      "JOVEM APRENDIZ": { ...STANDARD_ROLE_PERMISSIONS },
+      "FISCAL": { dashboard:true, calendario:false, funcionarios:false, operadores:false, lancamentos:false, distribuicao:false, game:false, premia:false },
       "DESENVOLVEDOR": { ...FULL_ACCESS_PERMISSIONS }
     };
 
@@ -5921,7 +5935,7 @@
         {
           operator:item.operator,
           name:item.name,
-          password:`${item.operator}24`,
+          password:"",
           cargo:item.operator === "133" ? "VISUAL MERCHANDISING" : item.operator === "145" ? "PRODUTO FINANCEIRO" : "ASSESSOR",
           access:item.operator === "133" ? "developer" : "employee"
         }
@@ -5942,7 +5956,7 @@
         users[operator] = {
           operator,
           name:String(account.name || `OPERADOR ${operator}`).trim().toUpperCase(),
-          password:String(account.password || `${operator}24`),
+          password:String(account.password || ""),
           role,
           cargo:role,
           access:accessFromRole(role),
@@ -6011,7 +6025,7 @@
       sector:"",
       status:"ATIVO",
       cashStatus:"",
-      password:`${item.operator}24`,
+      password:"",
       access:item.operator === "133" ? "developer" : "employee",
       sourceFound:false
     }));
@@ -6031,6 +6045,9 @@
     let cloudRetryTimer = null;
     let cloudRetryAttempt = 0;
     let lastRemoteSavedRevision = 0;
+    let resultsSyncBaseline = null;
+    let resultsRemoteWriteInFlight = null;
+    let resultsLocalDirty = false;
     let realtimeIgnoreUntil = 0;
     let importInProgress = false;
     const CLOUD_RETRY_DELAYS = [900, 2500, 7000, 15000];
@@ -6204,6 +6221,9 @@
 
     function normalizeCargo(value){
       const cargo = String(value || "").trim().toUpperCase();
+      if(AVCargoPolicy.isFiscal(cargo)) return "FISCAL";
+      if(cargo === "FREE LANCE" || cargo === "FREELANCE") return "FREE LANCE";
+      if(cargo === "JOVEM APRENDIZ") return "JOVEM APRENDIZ";
       if(cargo.includes("DESENV") || cargo === "DEVELOPER") return "DESENVOLVEDOR";
       if(cargo.includes("GERENTE")) return "GERENTE";
       if(cargo.includes("VISUAL")) return "VISUAL MERCHANDISING";
@@ -6242,6 +6262,7 @@
     function sharedEmployeeCargoLabel(operatorValue, employeeCargo = ""){
       const operator = normalizeOperator(operatorValue);
       const user = getSystemUser(operator);
+      if(AVCargoPolicy.isFiscal(employeeCargo))return "FISCAL";
       if(!user) return employeeCargoFromAccessRole(employeeCargo, employeeCargo);
       const role = normalizeAccessRole(user.role);
       const baseCargo = employeeCargoFromAccessRole(role, employeeCargo);
@@ -6271,20 +6292,10 @@
         ? normalized.systemUsers
         : buildDefaultSystemUsers();
 
-      if(!normalized.systemUsers["133"]){
+      // Não restaurar senhas fixas nem reativar usuários revogados.
+      // Caso seja uma base nova, o administrador terá de provisionar as credenciais.
+      if(!normalized.systemUsers["133"] && !hadSystemUsers){
         normalized.systemUsers["133"] = JSON.parse(JSON.stringify(SYSTEM_USERS[0]));
-      }else{
-        /* Conta técnica protegida: evita bloqueio do sistema por cópia antiga/corrompida. */
-        normalized.systemUsers["133"] = {
-          ...normalized.systemUsers["133"],
-          operator:"133",
-          name:SYSTEM_USERS[0].name,
-          password:SYSTEM_USERS[0].password,
-          role:"DESENVOLVEDOR",
-          cargo:"DESENVOLVEDOR",
-          access:"developer",
-          active:true
-        };
       }
 
       normalized.goalDistribution = normalized.goalDistribution || {};
@@ -6333,7 +6344,7 @@
           role,
           cargo:role,
           access:accessFromRole(role),
-          active:operator === "133" ? true : rawUser?.active !== false
+          active:rawUser?.active !== false
         };
       });
       normalized.systemUsers = normalizedSystemUsers;
@@ -6398,6 +6409,7 @@
         };
       });
       normalized.rolePermissions.DESENVOLVEDOR = { ...FULL_ACCESS_PERMISSIONS };
+      normalized.rolePermissions.FISCAL = { ...DEFAULT_ROLE_PERMISSIONS.FISCAL };
 
       const rawPremia = normalized.avPremia && typeof normalized.avPremia === "object"
         ? normalized.avPremia
@@ -6772,8 +6784,10 @@
     }
 
     function canViewTab(tab){
+      if(AVCargoPolicy.isFiscal(getEmployee(currentUser?.operator)))return Boolean(DEFAULT_ROLE_PERMISSIONS.FISCAL[tab]);
       if(isDev()) return true;
       const cargo = currentCargo();
+      if(cargo==='FISCAL' && !DEFAULT_ROLE_PERMISSIONS.FISCAL[tab])return false;
       return Boolean(db.rolePermissions?.[cargo]?.[tab]);
     }
 
@@ -7067,7 +7081,9 @@
 
       if(error) throw error;
       if(!data?.dados) return null;
-
+      if(!resultsSyncBaseline || !resultsLocalDirty){
+        resultsSyncBaseline = AVResultadoSync.clone(data.dados);
+      }
       const remote = normalizeDBShape(data.dados);
       if(
         (!remote._meta?.updatedAt || remote._meta.updatedAt === "1970-01-01T00:00:00.000Z") &&
@@ -7090,35 +7106,70 @@
     }
 
     async function writeRemoteDatabase(databaseState = db, options = {}){
-      const payload = AVResultSource.ownSnapshot(databaseState);
-      const revision = Number(payload?._meta?.revision || 0);
-      const updatedAt = new Date().toISOString();
-
-      try{
-        const client = await ensureDataClient();
-        const { error } = await client
-          .from(RESULTS_TABLE)
-          .upsert({
-            id:RESULTS_SHARED_ROW,
-            dados:payload,
-            updated_at:updatedAt
-          }, { onConflict:"id" });
-
-        if(error) throw error;
-      }catch(error){
-        console.warn("Não foi possível salvar os dados do AV Resultados no Supabase:", error);
-        setDataSaveStatus("Salvo localmente • tentando sincronizar", "offline");
-        const status = $("#dataSaveStatus");
-        if(status) status.title = String(error?.message || error || "Falha no Supabase do AV Resultados");
-        if(options.retry !== false) scheduleCloudRetry();
-        return false;
+      // Evita duas gravações simultâneas vindas do mesmo navegador.
+      if(resultsRemoteWriteInFlight){
+        await resultsRemoteWriteInFlight.catch(()=>{});
+        if(!resultsLocalDirty)return true;
       }
-
-      lastRemoteSavedRevision = Math.max(lastRemoteSavedRevision, revision);
-      cloudRetryAttempt = 0;
-      clearTimeout(cloudRetryTimer);
-      setDataSaveStatus("Dados salvos online", "online");
-      return true;
+      const operation=(async()=>{
+        const source = AVResultSource.ownSnapshot(db);
+        const revision = Number(source?._meta?.revision || 0);
+        const client = await ensureDataClient();
+        const recordId = RESULTS_SHARED_ROW;
+        let baseline = resultsSyncBaseline;
+        for(let attempt=0;attempt<5;attempt++){
+          const {data:current,error:readError}=await client.from(RESULTS_TABLE)
+            .select('dados,updated_at').eq('id',recordId).maybeSingle();
+          if(readError)throw readError;
+          const old=current?.dados||{};
+          const combined=current
+            ? AVResultadoSync.merge(baseline||old,source,old)
+            : AVResultadoSync.clone(source);
+          combined._meta={...combined._meta,
+            revision:Math.max(Number(old?._meta?.revision||0),Number(combined?._meta?.revision||0),revision)+1,
+            updatedAt:new Date().toISOString(),lastWriter:DATA_WRITER_ID,storageVersion:2};
+          const stamp=new Date().toISOString();
+          let response;
+          if(!current){
+            response=await client.from(RESULTS_TABLE).insert({id:recordId,dados:combined,updated_at:stamp})
+              .select('dados,updated_at').maybeSingle();
+            if(response.error?.code==='23505')continue;
+          }else{
+            let q=client.from(RESULTS_TABLE).update({dados:combined,updated_at:stamp}).eq('id',recordId);
+            q=current.updated_at?q.eq('updated_at',current.updated_at):q.is('updated_at',null);
+            response=await q.select('dados,updated_at').maybeSingle();
+          }
+          if(response.error)throw response.error;
+          if(!response.data){await new Promise(resolve=>setTimeout(resolve,80*(attempt+1)));continue;}
+          resultsSyncBaseline=AVResultadoSync.clone(combined);
+          lastRemoteSavedRevision=Math.max(lastRemoteSavedRevision,revision);
+          cloudRetryAttempt=0;
+          clearTimeout(cloudRetryTimer);
+          // Reincorpora no estado local as edições de outro dispositivo.
+          if(Number(db?._meta?.revision||0)===revision){
+            resultsLocalDirty=false;
+            db=normalizeDBShape(combined);
+            persistLocalSnapshot(db);
+            if(currentUser)renderAllSafely();
+          }else if(Number(db?._meta?.revision||0)>revision){
+            resultsLocalDirty=true;
+            scheduleRemoteSave();
+          }
+          setDataSaveStatus('Dados salvos online','online');
+          return true;
+        }
+        throw new Error('Outro aparelho modificou os mesmos resultados. Nenhuma alteração local foi apagada; a sincronização tentará novamente.');
+      })();
+      resultsRemoteWriteInFlight=operation;
+      try{return await operation;}
+      catch(error){
+        console.warn('Falha ao sincronizar AV Resultados:',error);
+        setDataSaveStatus('Salvo localmente • tentando sincronizar','offline');
+        const status=$('#dataSaveStatus');
+        if(status)status.title=String(error?.message||error);
+        if(options.retry!==false)scheduleCloudRetry();
+        return false;
+      }finally{if(resultsRemoteWriteInFlight===operation)resultsRemoteWriteInFlight=null;}
     }
 
     function scheduleRemoteSave(){
@@ -7140,6 +7191,7 @@
         };
       }
 
+      if(options.cloud !== false) resultsLocalDirty = true;
       setDataSaveStatus("Salvando dados");
       const localSaved = persistLocalSnapshot(db);
 
@@ -7206,7 +7258,14 @@
       if(remote._meta?.lastWriter === DATA_WRITER_ID) return;
 
       const comparison = compareDatabaseCandidates(db, remote);
+      if(resultsLocalDirty){
+        // Alterações locais pendentes: não as apaga ao receber Realtime; CAS fará a mesclagem.
+        scheduleRemoteSave();
+        return;
+      }
       if(comparison > 0){
+        resultsSyncBaseline=AVResultadoSync.clone(incoming);
+        lastRemoteSavedRevision=Number(remote?._meta?.revision||0);
         db = remote;
         employees = mapManagementEmployees(employees);
         selectedLaunchIds.clear();
@@ -7259,6 +7318,10 @@
           remoteSnapshot
         ]);
         persistLocalSnapshot(db);
+        resultsLocalDirty=remoteSnapshot
+          ? compareDatabaseCandidates(db,remoteSnapshot)!==0
+          : (databaseContentStats(db).manualRecords>0 || databaseContentStats(db).nonZeroGoals>0);
+        if(remoteSnapshot && !resultsLocalDirty)lastRemoteSavedRevision=Number(db?._meta?.revision||0);
 
         const chosenStats = databaseContentStats(db);
         if(remoteSnapshot && compareDatabaseCandidates(db, remoteSnapshot) === 0){
@@ -7325,9 +7388,8 @@
 
       const employeeAccount = getEmployeeAccount(operator);
       const employee = getEmployee(operator);
-      const role = normalizeAccessRole(
-        accessAccount.role || accessAccount.cargo || accessAccount.access
-      );
+      const role = AVCargoPolicy.isFiscal(employee)
+        ? "FISCAL" : normalizeAccessRole(accessAccount.role || accessAccount.cargo || accessAccount.access);
       const name = String(
         accessAccount.name ||
         employeeAccount?.name ||
@@ -7378,6 +7440,7 @@
             item?.nome || item?.name || systemUser?.name || account.name || `OPERADOR ${operator}`
           ).trim().toUpperCase();
           const sourceRole = item?.cargo || item?.role || account.cargo || systemUser?.role || "ASSESSOR";
+          const fiscal=AVCargoPolicy.isFiscal(sourceRole) || AVCargoPolicy.isFiscal(item?.cargo);
           const baseCargo = employeeCargoFromAccessRole(
             systemUser?.role || sourceRole,
             sourceRole
@@ -7386,11 +7449,13 @@
             operator,
             name:sharedName,
             shortName:shortNameFromFullName(sharedName),
-            role:normalizeCargo(systemUser?.role || baseCargo),
+            role:fiscal?'FISCAL':normalizeCargo(systemUser?.role || baseCargo),
             cargo:String(item?.cargo || item?.role || baseCargo || "ASSESSOR").trim().toUpperCase(),
             sector:String(item?.setor || item?.sector || "").trim().toUpperCase(),
             status:String(item?.status || "ATIVO").trim().toUpperCase(),
-            cashStatus:String(item?.caixaOperacional || item?.cashStatus || "").trim().toUpperCase(),
+            cashStatus:fiscal?'INATIVO':String(item?.caixaOperacional || item?.cashStatus || "").trim().toUpperCase(),
+            codigoFiscal:fiscal?(item?.codigoFiscal||AVCargoPolicy.codigoFiscal(operator)):'',
+            inelegivelMeta:fiscal,
             matricula:String(item?.matricula || item?.registration || "").trim(),
             password:String(systemUser?.password ?? account.password ?? ""),
             access:systemUser ? accessFromRole(systemUser.role) : (account.access || "employee"),
@@ -7410,7 +7475,7 @@
       const own = getEmployee(currentUser?.operator);
       if(currentUser && own){
         const refreshedUser = getAccessUser(currentUser.operator) || currentUser;
-        const refreshedRole = normalizeAccessRole(getSystemUser(currentUser.operator)?.role || own.role);
+        const refreshedRole = AVCargoPolicy.isFiscal(own) ? "FISCAL" : normalizeAccessRole(getSystemUser(currentUser.operator)?.role || own.role);
         currentUser = {
           ...refreshedUser,
           name:own.name,
@@ -10349,7 +10414,7 @@ ${fallbackText}`;
       const own = getEmployee(currentUser.operator);
       if(own){
         const refreshedUser = getAccessUser(currentUser.operator) || currentUser;
-        const refreshedRole = normalizeAccessRole(getSystemUser(currentUser.operator)?.role || own.role);
+        const refreshedRole = AVCargoPolicy.isFiscal(own) ? "FISCAL" : normalizeAccessRole(getSystemUser(currentUser.operator)?.role || own.role);
         currentUser = {
           ...refreshedUser,
           name:own.name,
@@ -10381,7 +10446,7 @@ ${fallbackText}`;
     }
 
     function buildRecordOperatorOptions(){
-      const ops = canViewAllLaunches() ? employees : employees.filter(u => u.operator === currentUser.operator);
+      const ops = (canViewAllLaunches() ? employees : employees.filter(u => u.operator === currentUser.operator)).filter(u=>AVCargoPolicy.elegivelMeta({ ...u, operador:u.operator }));
       $("#recOperator").innerHTML = ops.map(u => `<option value="${u.operator}">${u.shortName} — ${u.operator}</option>`).join("");
       $("#recOperator").value = currentUser.operator;
       $("#recOperator").disabled = !canViewAllLaunches();
@@ -10395,7 +10460,7 @@ ${fallbackText}`;
     }
 
     function distributionUsers(){
-      return employees.filter(employee=>employee.sourceFound && !["INATIVO","DESLIGADO","DEMITIDO"].includes(employee.status)).sort((a,b) =>
+      return employees.filter(employee=>employee.sourceFound && AVCargoPolicy.elegivelMeta({ ...employee, operador:employee.operator })).sort((a,b) =>
         Number(a.operator) - Number(b.operator) ||
         a.name.localeCompare(b.name, "pt-BR")
       );
@@ -10431,7 +10496,7 @@ ${fallbackText}`;
 
     function ensureGoalDistribution(operator, month = goalMonthKey()){
       const normalized = normalizeOperator(operator);
-      if(!normalized) return emptyGoalDistribution();
+      if(!normalized || AVCargoPolicy.isFiscal(getEmployee(normalized)) || AVCargoPolicy.isFiscal(db.employeeAccounts?.[normalized])) return emptyGoalDistribution();
 
       const monthDistribution = ensureGoalMonth(month);
 
@@ -10459,7 +10524,7 @@ ${fallbackText}`;
     }
 
     function canManageGoalDistribution(){
-      return isDev() || currentCargo() === "GERENTE";
+      return !AVCargoPolicy.isFiscal(getEmployee(currentUser?.operator)) && (isDev() || currentCargo() === "GERENTE");
     }
 
     function selectedDistributionMonth(){return $("#distributionMonth")?.value || goalMonthKey();}
@@ -10505,6 +10570,15 @@ ${fallbackText}`;
 
     function renderUserGoalPanel(){
       if(!currentUser) return;
+      const fiscal=AVCargoPolicy.isFiscal(getEmployee(currentUser.operator)) || currentCargo()==="FISCAL";
+      if(fiscal){
+        const panel=$("#goalFloatingPanel"),toggle=$("#goalFloatingToggle");
+        if(panel){panel.classList.remove('open');panel.hidden=true;panel.style.display="none";}
+        if(toggle){toggle.hidden=true;toggle.style.display="none";}
+        return;
+      }
+      if($("#goalFloatingPanel")){$("#goalFloatingPanel").hidden=false;$("#goalFloatingPanel").style.display="";}
+      if($("#goalFloatingToggle")){$("#goalFloatingToggle").hidden=false;$("#goalFloatingToggle").style.display="";}
 
       const currentMonth = goalMonthKey();
       const floatingOperator = $("#goalFloatingOperator");
@@ -11190,7 +11264,7 @@ ${fallbackText}`;
 
       const selectedDate = input.value;
       const snapshot = calendarSnapshotForDate(selectedDate);
-      const operatorRows = employees.map(employee => ({
+      const operatorRows = employees.filter(employee=>AVCargoPolicy.elegivelMeta({...employee,operador:employee.operator})).map(employee => ({
         employee,
         summary:calendarOperatorSummary(
           employee.operator,
@@ -12922,7 +12996,7 @@ ${fallbackText}`;
     function renderOperatorsTable(){
       const ref = $("#referenceDate").value || today();
       const body = $("#operatorsTableBody");
-      const rows = employees.map(u => ({ user:u, s:summarizeUser(u.operator, ref) }));
+      const rows = employees.filter(u=>AVCargoPolicy.elegivelMeta({...u,operador:u.operator})).map(u => ({ user:u, s:summarizeUser(u.operator, ref) }));
 
       const totals = rows.reduce((t,row) => {
         const s = row.s;
@@ -13264,6 +13338,9 @@ ${fallbackText}`;
         "VISUAL MERCHANDISING":"Acesso operacional definido pelo desenvolvedor.",
         "PRODUTO FINANCEIRO":"Acesso aos recursos liberados para a operação financeira.",
         "ASSESSOR":"Permissões coletivas aplicadas a todos os assessores com login individual.",
+        "FREE LANCE":"Acesso associado ao cargo temporário.",
+        "JOVEM APRENDIZ":"Acesso associado ao cargo de aprendizagem.",
+        "FISCAL":"Perfil de acesso fiscal.",
         "DESENVOLVEDOR":"Acesso completo e permanente a todas as áreas do sistema."
       };
 
@@ -13282,7 +13359,7 @@ ${fallbackText}`;
                 data-permission-name="${tab}"
                 aria-label="${labels[tab]} para ${role}"
                 ${db.rolePermissions?.[role]?.[tab] ? "checked" : ""}
-                ${role === "DESENVOLVEDOR" ? "disabled" : ""}
+                ${role === "DESENVOLVEDOR" || role === "FISCAL" ? "disabled" : ""}
               />
             </td>
           `).join("")}
@@ -13318,6 +13395,7 @@ ${fallbackText}`;
       const ref = today();
       const definition = gameMetricDefinition(currentGameMetric);
       const ranking = employees
+        .filter(user=>AVCargoPolicy.elegivelMeta({...user,operador:user.operator}))
         .map(user => ({
           user,
           score:Number(summarizeUser(user.operator, ref)[definition.key] || 0)
@@ -13401,7 +13479,7 @@ ${fallbackText}`;
 
     function renderRankings(){
       const ref = $("#referenceDate").value || today();
-      const base = employees.map(u => {
+      const base = employees.filter(u=>AVCargoPolicy.elegivelMeta({...u,operador:u.operator})).map(u => {
         const s = summarizeUser(u.operator, ref);
         return { user:u, ...s };
       });
@@ -13960,7 +14038,7 @@ ${fallbackText}`;
       const name = String($("#systemUserName").value || "").trim().toUpperCase();
       const password = String($("#systemUserPassword").value || "");
       const requestedRole = normalizeAccessRole($("#systemUserRole").value);
-      const role = operator === "133" ? "DESENVOLVEDOR" : requestedRole;
+      const role = operator === "133" ? "DESENVOLVEDOR" : (AVCargoPolicy.isFiscal(getEmployee(operator)) ? "FISCAL" : requestedRole);
 
       if(!operator){
         alert("Informe um número de operador válido.");
@@ -14085,7 +14163,7 @@ ${fallbackText}`;
       }
 
       const currentMonthDistribution = ensureGoalMonth(goalMonthKey());
-      if(!currentMonthDistribution[operator]){
+      if(!AVCargoPolicy.isFiscal(cargo) && !currentMonthDistribution[operator]){
         currentMonthDistribution[operator] = emptyGoalDistribution();
       }
 
@@ -14737,7 +14815,7 @@ ${fallbackText}`;
     setInterval(() => {
       if(!persistenceReady) return;
       persistLocalSnapshot(db);
-      if(Number(db?._meta?.revision || 0) > lastRemoteSavedRevision){
+      if(resultsLocalDirty){
         writeRemoteDatabase(db, { retry:true });
       }else{
         refreshRemoteDatabase();
@@ -14746,7 +14824,7 @@ ${fallbackText}`;
 
     window.addEventListener("pagehide", () => {
       persistLocalSnapshot(db);
-      if(persistenceReady) writeRemoteDatabase(db, { retry:false });
+      if(persistenceReady && resultsLocalDirty) writeRemoteDatabase(db, { retry:false });
     });
 
     window.addEventListener("beforeunload", () => {

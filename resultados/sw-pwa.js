@@ -1,9 +1,10 @@
-const CACHE_NAME = 'av-resultados-v62-fonte-oficial-exclusiva';
+const CACHE_NAME = 'av-resultados-v63-reparos-20261008';
 const APP_SHELL = [
   './',
   './index.html',
   '../shared/gerencial-resultados.js',
   '../shared/resultado-source.js',
+  '../shared/resultado-sync.js',
   './manifest.webmanifest',
   './favicon.ico',
   './favicon.svg',

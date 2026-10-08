@@ -1,0 +1,126 @@
+/* V71 — Configurações usa a altura da janela com rolagem própria.
+   Escopo estritamente limitado a body.av-config-focus-v67.
+   As demais telas continuam com o fluxo de rolagem original. */
+html:has(body.av-config-focus-v67){
+  height:100%!important;
+  overflow:hidden!important;
+}
+body.av-config-focus-v67{
+  height:100vh!important;
+  height:100dvh!important;
+  min-height:0!important;
+  max-height:100dvh!important;
+  overflow:hidden!important;
+  overscroll-behavior:contain!important;
+}
+/* Cabeçalho fixo na área principal; nenhum scroll na página inteira. */
+body.av-config-focus-v67 > main.main{
+  display:flex!important;
+  flex-direction:column!important;
+  height:100vh!important;
+  height:100dvh!important;
+  max-height:100dvh!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+body.av-config-focus-v67 > main.main > header.topbar{
+  flex:0 0 auto!important;
+  min-height:0!important;
+  position:relative!important;
+  top:auto!important;
+}
+body.av-config-focus-v67 > main.main > .content{
+  display:flex!important;
+  flex-direction:column!important;
+  flex:1 1 0%!important;
+  height:auto!important;
+  max-height:none!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+/* Rolagem vertical explícita somente na página ativa Configurações. */
+body.av-config-focus-v67 #config.page.active{
+  flex:1 1 auto!important;
+  display:block!important;
+  height:100%!important;
+  max-height:100%!important;
+  min-height:0!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  overscroll-behavior-y:contain!important;
+  scrollbar-width:thin;
+  scrollbar-color:var(--amarelo-escuro,#b39816) transparent;
+  scrollbar-gutter:stable;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;
+}
+body.av-config-focus-v67 #config.page.active::-webkit-scrollbar{width:9px}
+body.av-config-focus-v67 #config.page.active::-webkit-scrollbar-track{background:transparent}
+body.av-config-focus-v67 #config.page.active::-webkit-scrollbar-thumb{
+  background:var(--amarelo-escuro,#b39816);
+  border-radius:9px;
+  border:2px solid transparent;
+  background-clip:padding-box;
+}
+body.av-config-focus-v67 #config.page.active #configContent{
+  max-width:100%!important;
+  min-height:0!important;
+  box-sizing:border-box!important;
+}
+/* Conserva a barra de ações ao final da matriz, sem bloquear seu acesso. */
+body.av-config-focus-v67 #config.page.active .avp66-savebar{
+  bottom:0!important;
+  z-index:5!important;
+}
+/* Na largura móvel, a navegação horizontal antiga permanece no topo. */
+@media(max-width:760px){
+  body.av-config-focus-v67{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+  }
+  body.av-config-focus-v67 > aside.sidebar{
+    display:flex!important;
+    flex-direction:column!important;
+    flex:0 0 auto!important;
+    position:relative!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:45dvh!important;
+    overflow:hidden!important;
+  }
+  body.av-config-focus-v67 > aside.sidebar #navMenu{
+    flex:none!important;
+    min-height:50px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+  }
+  body.av-config-focus-v67 > main.main{
+    flex:1 1 0%!important;
+    width:100%!important;
+    margin-left:0!important;
+    height:auto!important;
+    max-height:none!important;
+    min-height:0!important;
+    overflow:hidden!important;
+  }
+  body.av-config-focus-v67 > main.main > .content{min-height:0!important;overflow:hidden!important}
+  body.av-config-focus-v67 #config.page.active{
+    height:100%!important;
+    max-height:100%!important;
+    min-height:0!important;
+    overflow-y:auto!important;
+  }
+}
+@media print{
+  html:has(body.av-config-focus-v67){height:auto!important;overflow:visible!important}
+  body.av-config-focus-v67,body.av-config-focus-v67 > main.main,
+  body.av-config-focus-v67 > main.main > .content,
+  body.av-config-focus-v67 #config.page.active{
+    height:auto!important;
+    max-height:none!important;
+    min-height:0!important;
+    overflow:visible!important;
+    display:block!important;
+  }
+}

@@ -1,0 +1,112 @@
+/* Assistência Gerencial AV — V80. Identidade coesa para as 3 abas, sem alterar outros módulos. */
+#anotacoes,#tarefas,#funcionarios{--av80-yellow:#ffcd09;--av80-ink:#242424;--av80-line:var(--border);min-width:0}
+#anotacoes .section-card,#tarefas .section-card,#funcionarios .section-card{min-width:0;overflow:visible;border-radius:23px!important;border:1px solid var(--border);box-shadow:0 12px 35px rgba(0,0,0,.045)}
+#anotacoes .section-title,#funcionarios .section-title{align-items:center;gap:18px;margin-bottom:20px!important}
+#anotacoes .section-title h1,#funcionarios .section-title h1,#tarefas .av80-module-head h1{font-size:clamp(1.55rem,2.1vw,2.05rem)!important;line-height:1.1!important;letter-spacing:-.045em;font-weight:1000;margin:5px 0 9px}
+#anotacoes .section-title p,#funcionarios .section-title p,#tarefas .av80-module-head p{font-size:.86rem;line-height:1.55;max-width:68ch;color:var(--muted);font-weight:730}
+.av80-eyebrow{display:block;width:fit-content;color:#856600;font-size:.66rem;font-weight:1000;letter-spacing:.11em;line-height:1.4}
+body.dark-mode .av80-eyebrow{color:var(--av80-yellow)}
+#anotacoes .section-title .actions,#funcionarios .section-title .actions,.av80-module-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+#anotacoes .section-title .btn,#funcionarios .section-title .btn,#tarefas .av80-module-actions .btn{min-height:40px;border-radius:11px!important;padding:10px 14px!important;font-size:.78rem;font-weight:900;white-space:nowrap}
+#anotacoes .section-title .actions>.btn:first-child,#funcionarios .section-title .actions>.btn:first-child,#tarefas .av80-module-actions>.btn:first-child{background:var(--av80-yellow)!important;color:#26231c!important;border:1px solid #e3ac00!important;box-shadow:0 5px 15px rgba(234,175,0,.15)}
+#anotacoes .section-title .actions>.btn:first-child:hover,#funcionarios .section-title .actions>.btn:first-child:hover,#tarefas .av80-module-actions>.btn:first-child:hover{filter:brightness(.97);transform:translateY(-1px)}
+#anotacoes .central-notes-tabs{width:fit-content;max-width:100%;padding:5px;border-radius:13px;background:var(--page-2);border:1px solid var(--border);gap:5px;margin-bottom:18px}
+#anotacoes .central-notes-tab{border-radius:9px;padding:10px 18px;font-size:.81rem;min-height:42px}
+#anotacoes .central-notes-tab.active{background:var(--av80-yellow);color:#242424;box-shadow:0 3px 12px rgba(0,0,0,.09)}
+#anotacoes .central-notes-pane>.section-card:first-child{position:relative;padding-top:25px!important}
+#anotacoes .central-notes-pane>.section-card:first-child:before,#funcionarios>.section-card:before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#ffcd09,#d99e02 46%,transparent 90%);border-radius:23px 23px 0 0}
+#anotacoes .av80-note-overview,#funcionarios .av80-employee-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:4px 0 15px}
+#anotacoes .av80-overview-cell,#funcionarios .av80-employee-overview>div{background:var(--page-2);border:1px solid var(--border);border-radius:15px;padding:17px 18px;min-width:0;position:relative;overflow:hidden}
+#anotacoes .av80-overview-cell:before,#funcionarios .av80-employee-overview>div:before{content:"";position:absolute;width:4px;background:var(--av80-yellow);left:0;top:20%;bottom:20%;border-radius:0 4px 4px 0}
+#anotacoes .av80-overview-cell>span,#funcionarios .av80-employee-overview span{display:block;color:var(--muted);font-size:.73rem;font-weight:950}
+#anotacoes .av80-overview-cell>strong,#funcionarios .av80-employee-overview strong{display:block;color:var(--text);font-size:1.7rem;line-height:1.25;font-weight:1000;letter-spacing:-.04em;margin-top:4px}
+#anotacoes .av80-overview-cell>small,#funcionarios .av80-employee-overview small{color:var(--muted);font-size:.67rem;font-weight:700}
+#anotacoes .av80-list-head,#tarefas .av80-list-head,#funcionarios .av80-list-head{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:16px}
+#anotacoes .av80-list-head h2,#tarefas .av80-list-head h2,#funcionarios .av80-list-head h2{font-size:1.13rem;color:var(--text);margin:4px 0 4px;letter-spacing:-.035em}
+#anotacoes .av80-list-head p,#tarefas .av80-list-head p,#funcionarios .av80-list-head p{font-size:.78rem;color:var(--muted);margin:0;font-weight:740;line-height:1.45}
+#anotacoes .av80-notes-list-card{padding-top:20px!important}
+#anotacoes .av80-notes-list-card .filter-row,#tarefas #taskStatusView .filter-row,#funcionarios .filter-row{display:flex;align-items:center;flex-wrap:wrap;gap:9px!important;background:var(--page-2);padding:13px;border:1px solid var(--border);border-radius:16px;margin-bottom:20px!important}
+#anotacoes .filter-row select,#anotacoes .filter-row input,#tarefas .filter-row select,#tarefas .filter-row input,#funcionarios .filter-row select,#funcionarios .filter-row input{height:42px;min-height:42px;border-radius:10px!important;background:var(--page);border:1px solid var(--border);color:var(--text);font-size:.75rem;font-weight:760;padding:8px 10px!important;min-width:136px;flex:1 1 145px;max-width:none!important}
+#anotacoes .filter-row input,#tarefas .filter-row input,#funcionarios .filter-row input{flex:2 1 220px}
+#anotacoes .filter-row :is(input,select):focus,#tarefas .filter-row :is(input,select):focus,#funcionarios .filter-row :is(input,select):focus{outline:2px solid rgba(255,205,9,.3);border-color:#d6aa05}
+#anotacoes .notes-timeline{padding-left:23px!important;gap:14px!important}
+#anotacoes .notes-timeline:before{background:linear-gradient(var(--av80-yellow),var(--border));left:7px}
+#anotacoes .note-item{background:var(--page);border:1px solid var(--border);border-radius:17px!important;padding:17px 18px!important;box-shadow:0 7px 22px rgba(0,0,0,.035)}
+#anotacoes .note-item:before{background:var(--av80-yellow);width:11px;height:11px;left:-22px}
+#anotacoes .note-head h3{font-size:1.03rem;margin-bottom:10px;font-weight:950}
+#anotacoes .note-date{background:var(--page-2);border-radius:10px;white-space:nowrap;min-width:80px}
+#anotacoes .note-summary{font-size:.86rem!important;line-height:1.55}
+#anotacoes .note-actions{border-top:1px solid var(--border);padding-top:11px;margin-top:15px!important;display:flex;flex-wrap:wrap;gap:7px}
+#anotacoes .note-actions .btn{border-radius:9px!important}
+#anotacoes .nota-create-panel.active{margin:18px 0 0}
+#anotacoes .nota-create-card,#anotacoes .obs-func-create-card{border:1px solid var(--border);border-radius:20px;padding:20px;background:var(--page-2)}
+#anotacoes .nota-create-toolbar,#anotacoes .obs-func-create-head{padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:17px}
+#anotacoes .nota-mode-switch{background:var(--page);border-radius:12px}
+#anotacoes .nota-mode-btn.active{background:var(--av80-yellow);color:#242424}
+#anotacoes #notaDescricaoEscrita,#anotacoes #notaVozRascunho,#anotacoes #notaDescricao{min-height:140px!important}
+#anotacoes .nota-attachments-panel{border:1px dashed color-mix(in srgb,var(--border) 75%,#b9a64a);border-radius:16px;padding:14px;background:var(--page)}
+#anotacoes .obs-func-summary-card{border-radius:15px;background:var(--page-2);padding:18px}
+#anotacoes .obs-func-group{border-radius:17px;box-shadow:0 5px 20px rgba(0,0,0,.035)}
+#anotacoes .obs-func-group-head{padding:17px 18px}
+/* Tarefas: cabeçalho dedicado + status e área operacional legíveis */
+#tarefas .av80-module-head{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:23px 25px;border:1px solid var(--border);border-radius:22px;background:var(--page);box-shadow:0 12px 35px rgba(0,0,0,.045);margin-bottom:16px;position:relative;overflow:hidden}
+#tarefas .av80-module-head:before{content:"";position:absolute;top:0;left:0;bottom:0;width:5px;background:var(--av80-yellow)}
+#tarefas .av80-module-head h1{margin-bottom:6px!important}
+#tarefas .task-view-switch{display:inline-flex;width:fit-content;max-width:100%;gap:5px;padding:5px!important;margin-bottom:16px!important;background:var(--page-2);border:1px solid var(--border);border-radius:13px}
+#tarefas .task-view-btn{border-radius:9px;padding:10px 16px;min-height:40px;font-size:.8rem;font-weight:900}
+#tarefas .task-view-btn.active{background:var(--av80-yellow)!important;color:#242424!important;border-color:transparent!important;box-shadow:0 4px 13px rgba(0,0,0,.10)}
+#tarefas .task-summary{margin:14px 0 23px!important;gap:12px!important;grid-template-columns:repeat(4,minmax(0,1fr))}
+#tarefas .status-card{position:relative;background:var(--page-2);border:1px solid var(--border);border-radius:17px!important;padding:18px!important;min-height:98px;overflow:hidden}
+#tarefas .status-card:before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:#a5a5a5}
+#tarefas .status-card.pendente:before{background:#c55243}
+#tarefas .status-card.andamento:before{background:#dda900}
+#tarefas .status-card.aguardando:before{background:#a3a3a3}
+#tarefas .status-card.concluida:before{background:#3f9270}
+#tarefas .status-card small{font-size:.7rem;line-height:1.3;letter-spacing:.045em}
+#tarefas .status-card b{font-size:2rem;line-height:1.3;letter-spacing:-.04em}
+#tarefas .av80-filter-title{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px;margin:0 0 9px}
+#tarefas .av80-filter-title strong{font-weight:980;font-size:.85rem}
+#tarefas .av80-filter-title span{color:var(--muted);font-weight:700;font-size:.72rem}
+#tarefas .task-list-groups{gap:14px!important}
+#tarefas .task-group{background:var(--page-2);border:1px solid var(--border);border-radius:17px!important;overflow:hidden}
+#tarefas .task-group-head{padding:14px 17px!important;border-bottom:1px solid var(--border);background:var(--page)}
+#tarefas .task-group-head h3{font-size:.92rem;letter-spacing:0}
+#tarefas .task-group-body{gap:10px!important;padding:12px!important}
+#tarefas .task-row{border-radius:13px!important;padding:14px 15px!important;grid-template-columns:minmax(210px,1.5fr) minmax(150px,1fr) auto;box-shadow:0 4px 14px rgba(0,0,0,.035)}
+#tarefas .task-row-main h4{font-size:.95rem}
+#tarefas .task-row-details{border-top:1px solid var(--border)}
+#tarefas #taskCronogramaView .task-timeline-shell{border-radius:19px;overflow:hidden}
+#modalTarefa .modal{border:1px solid var(--border);border-radius:23px;box-shadow:0 28px 90px rgba(0,0,0,.32)}
+#modalTarefa .modal-head{padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:20px}
+#modalTarefa .modal-head h2{letter-spacing:-.025em}
+/* Funcionários: painel gerencial + cartões, tabela sob demanda */
+#funcionarios>.section-card{position:relative;padding-top:25px!important}
+#funcionarios .av80-employee-overview{margin:5px 0 20px}
+#funcionarios .av80-employee-controls{margin:0 0 12px}
+#funcionarios .av80-view-switch{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--border);background:var(--page-2);border-radius:12px;flex-shrink:0}
+#funcionarios .av80-view-switch button{border:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer;border-radius:9px;padding:10px 15px;font:inherit;font-size:.77rem;font-weight:950}
+#funcionarios .av80-view-switch button.active{color:#242424;background:var(--av80-yellow);box-shadow:0 4px 12px rgba(0,0,0,.11)}
+#funcionarios .employee-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:13px!important;margin:18px 0!important}
+#funcionarios .employee-card{position:relative;border-radius:17px!important;padding:18px!important;background:var(--page)!important;box-shadow:0 7px 22px rgba(0,0,0,.045);border:1px solid var(--border);overflow:hidden;min-width:0}
+#funcionarios .employee-card:before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--av80-yellow)}
+#funcionarios .employee-card h3{font-size:1.02rem;margin-bottom:7px;line-height:1.3;overflow-wrap:anywhere}
+#funcionarios .employee-card .role{margin:5px 0 9px;font-size:.69rem;background:color-mix(in srgb,var(--av80-yellow) 75%,var(--page));color:#25221b!important}
+#funcionarios .employee-card>small{display:block;color:var(--muted);font-size:.62rem;font-weight:950;letter-spacing:.05em;text-transform:uppercase}
+#funcionarios .employee-card p{color:var(--muted);font-size:.76rem!important;line-height:1.75!important;font-weight:700;overflow-wrap:anywhere;margin:10px 0 0}
+#funcionarios .employee-card p b{color:var(--text)}
+#funcionarios .av80-employee-table{margin-top:17px;overflow:auto;border:1px solid var(--border);border-radius:15px;background:var(--page)}
+#funcionarios #av80FuncionariosTabela[hidden],#funcionarios #funcCards[hidden]{display:none!important}
+#funcionarios .av80-employee-table table{width:max-content;min-width:100%;border-collapse:separate;border-spacing:0}
+#funcionarios .av80-employee-table th{position:sticky;top:0;z-index:1;padding:13px 12px!important;background:#333!important;color:#ffcd09!important;font-size:.71rem!important;white-space:nowrap}
+#funcionarios .av80-employee-table td{padding:11px 12px!important;font-size:.75rem!important;vertical-align:middle;max-width:250px;overflow-wrap:anywhere}
+#funcionarios .av80-employee-table tbody tr:hover td{background:color-mix(in srgb,var(--av80-yellow) 9%,var(--page))}
+#funcionarios .av80-employee-table .btn{font-size:.68rem;border-radius:8px}
+#funcionarios .av80-privacy-details{margin-top:18px;border:1px solid var(--border);border-radius:12px;padding:13px 16px;background:var(--page-2);color:var(--muted)}
+#funcionarios .av80-privacy-details summary{cursor:pointer;font-size:.75rem;font-weight:900;color:var(--text)}
+#funcionarios .av80-privacy-details p{font-size:.75rem;line-height:1.6;font-weight:700;margin:10px 0 0}
+body.dark-mode #anotacoes .section-card,body.dark-mode #tarefas .section-card,body.dark-mode #funcionarios .section-card,body.dark-mode #tarefas .av80-module-head{box-shadow:0 13px 32px rgba(0,0,0,.15)}
+body.dark-mode #funcionarios .av80-employee-table th{background:#282828!important}
+@media(max-width:1150px){#tarefas .task-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#funcionarios .employee-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:850px){#anotacoes .section-title,#funcionarios .section-title,#tarefas .av80-module-head{align-items:flex-start;flex-direction:column}#anotacoes .section-title .actions,#funcionarios .section-title .actions,.av80-module-actions{width:100%}#tarefas .task-row{grid-template-columns:1fr 1fr}#tarefas .task-row-actions{grid-column:1/-1;justify-content:flex-start}#anotacoes .note-head{flex-wrap:wrap}#anotacoes .note-date{min-width:0}}
+@media(max-width:620px){#anotacoes .section-card,#tarefas .section-card,#funcionarios .section-card{padding:15px!important;border-radius:17px!important}#tarefas .av80-module-head{padding:17px 18px;border-radius:17px}#anotacoes .av80-note-overview,#funcionarios .av80-employee-overview{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}#anotacoes .av80-overview-cell,#funcionarios .av80-employee-overview>div{padding:12px 10px}#anotacoes .av80-overview-cell>span,#funcionarios .av80-employee-overview span{font-size:.6rem}#anotacoes .av80-overview-cell>strong,#funcionarios .av80-employee-overview strong{font-size:1.4rem}#anotacoes .av80-overview-cell>small,#funcionarios .av80-employee-overview small{font-size:.57rem}#tarefas .task-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}#tarefas .status-card{min-height:83px;padding:12px!important}#tarefas .status-card b{font-size:1.55rem}#tarefas .task-row{grid-template-columns:1fr;gap:8px!important}#tarefas .task-row-actions{grid-column:1}#funcionarios .employee-grid{grid-template-columns:1fr!important}#funcionarios .av80-employee-controls{align-items:flex-start;flex-direction:column}#funcionarios .av80-view-switch{width:100%;display:flex}#funcionarios .av80-view-switch button{flex:1}#anotacoes .filter-row select,#tarefas .filter-row select,#funcionarios .filter-row select{flex:1 1 140px;min-width:0}#anotacoes .section-title .actions .btn,#funcionarios .section-title .actions .btn,.av80-module-actions .btn{flex:1;justify-content:center}#anotacoes .notes-timeline{padding-left:19px!important}#anotacoes .note-item{padding:12px!important}}
+@media print{#funcionarios #funcCards[hidden]{display:none!important}#funcionarios #av80FuncionariosTabela[hidden]{display:block!important}#anotacoes .av80-note-overview,#funcionarios .av80-employee-overview,.av80-view-switch{display:none!important}}

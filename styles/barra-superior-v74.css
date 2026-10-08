@@ -1,0 +1,256 @@
+/* ================================================================
+   ASSISTÊNCIA GERENCIAL AV — V74
+   Barra superior: redesign scoped ao header principal (V73 preservada).
+   DOM/IDs/onclick de notificações, tema e sair intactos.
+   ================================================================ */
+body .main > .av74-topbar{
+  --av74-text:#302C28;--av74-muted:#716D65;
+  --av74-surface:#FFFFFF;--av74-border:#E9E2CD;
+  --av74-chip:#FFF9E7;--av74-chip-border:#EDE2BE;
+  --av74-action:#FFF8E0;--av74-accent:#FFCD09;
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  grid-template-areas:"heading actions" "session session"!important;
+  align-items:center!important;
+  gap:8px 18px!important;
+  width:auto!important;min-width:0!important;
+  margin:14px 17px 14px!important;
+  padding:13px 17px!important;
+  min-height:0!important;height:auto!important;
+  background:var(--av74-surface)!important;
+  background-image:linear-gradient(112deg,rgba(255,205,9,.065),rgba(255,255,255,0) 52%)!important;
+  border:1px solid var(--av74-border)!important;
+  border-top:3px solid var(--av74-accent)!important;
+  border-radius:17px!important;
+  color:var(--av74-text)!important;
+  box-shadow:0 7px 22px rgba(87,67,17,.075)!important;
+  overflow:visible!important;
+  box-sizing:border-box!important;
+}
+body .main > .av74-topbar::before,
+body .main > .av74-topbar::after{content:none!important;display:none!important}
+body .main > .av74-topbar .av74-heading{
+  grid-area:heading!important;
+  display:flex!important;flex-direction:column!important;align-items:flex-start!important;
+  width:auto!important;min-width:0!important;max-width:100%!important;
+  padding:0!important;margin:0!important;overflow:hidden!important;
+}
+body .main > .av74-topbar .av74-overline{
+  display:block!important;max-width:100%!important;
+  color:#8D6F17!important;font-size:9px!important;font-weight:900!important;
+  line-height:1.5!important;letter-spacing:.13em!important;text-transform:uppercase!important;
+  white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+}
+body .main > .av74-topbar .av74-overline span{color:#BBAB78!important;padding:0 4px!important}
+body .main > .av74-topbar #pageTitle{
+  margin:2px 0 0!important;color:var(--av74-text)!important;
+  font-size:clamp(17px,1.6vw,22px)!important;line-height:1.22!important;
+  font-weight:900!important;letter-spacing:-.025em!important;
+  white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+  max-width:100%!important;
+}
+body .main > .av74-topbar #pageSubtitle{
+  margin:3px 0 0!important;color:var(--av74-muted)!important;
+  font-size:11px!important;font-weight:500!important;line-height:1.32!important;
+  max-width:100%!important;white-space:nowrap!important;overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+body .main > .av74-topbar .av74-store-meta{display:contents!important}
+body .main > .av74-topbar .av74-session{
+  grid-area:session!important;
+  display:flex!important;flex-wrap:nowrap!important;
+  align-items:center!important;justify-content:flex-start!important;
+  gap:7px!important;min-width:0!important;max-width:100%!important;
+  width:auto!important;overflow-x:auto!important;overflow-y:hidden!important;
+  padding:1px 1px 3px!important;
+  scrollbar-width:thin!important;
+  scrollbar-color:rgba(176,138,24,.35) transparent!important;
+}
+body .main > .av74-topbar .av74-session .info-tile{
+  display:flex!important;align-items:center!important;flex:0 0 auto!important;
+  width:auto!important;min-width:0!important;max-width:195px!important;
+  height:41px!important;min-height:41px!important;
+  padding:5px 10px!important;gap:8px!important;
+  border:1px solid var(--av74-chip-border)!important;
+  background:var(--av74-chip)!important;
+  border-radius:11px!important;
+  box-shadow:none!important;transform:none!important;box-sizing:border-box!important;
+  color:var(--av74-text)!important;
+}
+body .main > .av74-topbar .av74-session .info-tile .info-icon{
+  display:grid!important;place-items:center!important;flex:0 0 24px!important;
+  width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important;
+  border-radius:7px!important;
+  background:rgba(255,205,9,.20)!important;color:#76611F!important;
+  padding:0!important;margin:0!important;
+}
+body .main > .av74-topbar .av74-session .info-tile .info-icon svg{
+  width:15px!important;height:15px!important;
+  stroke:currentColor!important;stroke-width:1.8!important;fill:none!important;
+}
+body .main > .av74-topbar .av74-session .info-tile .info-copy{
+  display:flex!important;flex-direction:column!important;justify-content:center!important;
+  gap:0!important;min-width:0!important;max-width:155px!important;
+}
+body .main > .av74-topbar .av74-session .info-copy small{
+  color:var(--av74-muted)!important;font-size:9px!important;font-weight:650!important;
+  letter-spacing:.015em!important;line-height:1.25!important;
+}
+body .main > .av74-topbar .av74-session .info-copy b{
+  max-width:100%!important;min-width:0!important;display:block!important;
+  color:var(--av74-text)!important;font-size:11px!important;font-weight:850!important;
+  line-height:1.2!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+}
+body .main > .av74-topbar .av74-session .info-store{min-width:69px!important}
+body .main > .av74-topbar .av74-session .info-month{max-width:125px!important}
+body .main > .av74-topbar .av74-session .info-user{max-width:190px!important}
+body .main > .av74-topbar .av74-session .info-operator{max-width:112px!important}
+body .main > .av74-topbar .av74-session .info-manager{max-width:125px!important}
+body .main > .av74-topbar .av74-actions{
+  grid-area:actions!important;
+  display:flex!important;align-items:center!important;justify-content:flex-end!important;
+  flex-wrap:nowrap!important;gap:5px!important;
+  width:max-content!important;max-width:100%!important;
+  padding:5px!important;border:1px solid var(--av74-chip-border)!important;
+  border-radius:13px!important;background:var(--av74-action)!important;
+  box-shadow:none!important;box-sizing:border-box!important;
+}
+body .main > .av74-topbar .av74-actions .header-notification,
+body .main > .av74-topbar .av74-actions .header-theme,
+body .main > .av74-topbar .av74-actions .header-logout{
+  position:relative!important;top:auto!important;right:auto!important;left:auto!important;bottom:auto!important;
+  inset:auto!important;display:grid!important;place-items:center!important;
+  flex:0 0 36px!important;width:36px!important;min-width:36px!important;max-width:36px!important;
+  height:36px!important;min-height:36px!important;max-height:36px!important;
+  padding:0!important;margin:0!important;overflow:visible!important;
+  border-radius:9px!important;border:1px solid transparent!important;
+  background:transparent!important;color:var(--av74-text)!important;
+  box-shadow:none!important;transform:none!important;
+  font-size:0!important;line-height:1!important;cursor:pointer!important;
+  transition:background .18s ease,border-color .18s ease,transform .18s ease!important;
+}
+body .main > .av74-topbar .av74-actions .header-notification:hover,
+body .main > .av74-topbar .av74-actions .header-theme:hover,
+body .main > .av74-topbar .av74-actions .header-logout:hover{
+  background:rgba(255,205,9,.22)!important;border-color:rgba(131,103,0,.17)!important;
+  transform:translateY(-1px)!important;
+}
+body .main > .av74-topbar .av74-actions :is(button):focus-visible{
+  outline:3px solid #E6B700!important;outline-offset:2px!important;
+}
+body .main > .av74-topbar .av74-actions .header-logout{
+  color:#8C2639!important;border-left:1px solid rgba(126,104,53,.20)!important;
+}
+body .main > .av74-topbar .av74-actions .header-notification svg,
+body .main > .av74-topbar .av74-actions .header-logout svg,
+body .main > .av74-topbar .av74-actions .header-logout .ui-svg-icon{
+  display:block!important;width:19px!important;height:19px!important;margin:0!important;
+  stroke:currentColor!important;stroke-width:1.8!important;fill:none!important;
+}
+/* Theme emoji original continua sendo atualizado pela função toggleTheme,
+   porém o ícone visual é um SVG uniforme com o menu V73. */
+body .main > .av74-topbar .av74-actions #themeBtn::before{
+  content:''!important;display:block!important;
+  width:19px!important;height:19px!important;background-repeat:no-repeat!important;
+  background-position:center!important;background-size:contain!important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23302C28' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.5 14A8.5 8.5 0 0 1 10 3.5a8.5 8.5 0 1 0 10.5 10.5Z'/%3E%3C/svg%3E")!important;
+}
+body .main > .av74-topbar .av74-actions .notification-badge{font-size:10px!important;line-height:1!important;z-index:2!important}
+/* V84 — Barra superior no MESMO grafite neutro do menu lateral (V79).
+   Preserva os detalhes amarelos e elimina qualquer transparência bordô. */
+body.dark-mode .main > .av74-topbar{
+  --av74-text:#F5F5F5;--av74-muted:#CECECE;
+  --av74-surface:#303030;--av74-border:#505050;
+  --av74-chip:#373737;--av74-chip-border:#515151;
+  --av74-action:#2B2B2B;--av74-accent:#FFCD09;
+  background:radial-gradient(circle at 16% 0%,rgba(255,205,9,.055),transparent 35%),linear-gradient(165deg,#393939 0%,#303030 50%,#242424 100%)!important;
+  border-color:rgba(255,205,9,.22)!important;
+  box-shadow:0 8px 22px rgba(0,0,0,.25)!important;
+}
+body.dark-mode .main > .av74-topbar .av74-overline{color:#FFCF4B!important}
+body.dark-mode .main > .av74-topbar .av74-overline span{color:#C7C7C7!important}
+body.dark-mode .main > .av74-topbar .av74-session .info-icon{background:rgba(255,205,9,.12)!important;color:#FFCE4B!important}
+body.dark-mode .main > .av74-topbar .av74-actions .header-logout{color:#FFCD09!important}
+body.dark-mode .main > .av74-topbar .av74-actions .header-notification:hover,
+body.dark-mode .main > .av74-topbar .av74-actions .header-theme:hover,
+body.dark-mode .main > .av74-topbar .av74-actions .header-logout:hover{
+  background:rgba(255,205,9,.13)!important;border-color:rgba(255,205,9,.24)!important;
+}
+body.dark-mode .main > .av74-topbar .av74-actions #themeBtn::before{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23FFCF4B' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Cpath d='M12 2v2M12 20v2M4.9 4.9l1.5 1.5M17.6 17.6l1.5 1.5M2 12h2M20 12h2M4.9 19.1l1.5-1.5M17.6 6.4l1.5-1.5'/%3E%3C/svg%3E")!important;
+}
+/* Em telas amplas, o cabeçalho vira uma linha só. */
+@media(min-width:1500px){
+ body .main > .av74-topbar{
+   grid-template-columns:minmax(200px,1fr) auto auto!important;
+   grid-template-areas:"heading session actions"!important;
+   column-gap:12px!important;padding:12px 18px!important;
+ }
+ body .main > .av74-topbar .av74-session{justify-content:flex-end!important;overflow:hidden!important}
+}
+/* No desktop intermediário, mantém duas linhas equilibradas. */
+@media(min-width:761px) and (max-width:1499px){
+ body .main > .av74-topbar .av74-session{justify-content:flex-end!important}
+}
+/* Tablet e celular: não comprime controles nem cria overflow da janela. */
+@media(max-width:760px){
+ body .main > .av74-topbar{
+   display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
+   grid-template-areas:"heading actions" "session session"!important;
+   margin:11px 12px 13px!important;padding:11px 12px!important;
+   gap:10px 7px!important;border-radius:14px!important;
+ }
+ body .main > .av74-topbar .av74-session{justify-content:flex-start!important}
+ body .main > .av74-topbar #pageTitle{font-size:17px!important}
+ body .main > .av74-topbar #pageSubtitle{font-size:10px!important}
+ body .main > .av74-topbar .av74-actions{padding:3px!important;gap:2px!important}
+ body .main > .av74-topbar .av74-actions :is(.header-notification,.header-theme,.header-logout){
+   width:34px!important;min-width:34px!important;max-width:34px!important;
+   height:34px!important;min-height:34px!important;max-height:34px!important;
+   flex-basis:34px!important;
+ }
+}
+@media(max-width:410px){
+ body .main > .av74-topbar{grid-template-columns:minmax(0,1fr) auto!important;gap:10px 5px!important;padding:10px!important}
+ body .main > .av74-topbar .av74-overline{font-size:8px!important;letter-spacing:.09em!important}
+ body .main > .av74-topbar #pageTitle{font-size:15px!important}
+ body .main > .av74-topbar #pageSubtitle{font-size:9px!important}
+ body .main > .av74-topbar .av74-actions :is(.header-notification,.header-theme,.header-logout){
+   width:31px!important;min-width:31px!important;max-width:31px!important;
+   height:33px!important;min-height:33px!important;max-height:33px!important;flex-basis:31px!important;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ body .main > .av74-topbar .av74-actions :is(button){transition:none!important}
+}
+@media print{body .main > .av74-topbar{display:none!important}}
+/* Corrige a especificidade do botão de notificações das versões V47/V51.
+   Os três controles devem conservar dimensões idênticas. */
+body .main > header.av74-topbar .av74-actions #notificationBtn.av47-notification-btn,
+body .main > header.av74-topbar .av74-actions #notificationBtn{
+  position:relative!important;inset:auto!important;
+  width:36px!important;min-width:36px!important;max-width:36px!important;
+  height:36px!important;min-height:36px!important;max-height:36px!important;
+  flex:0 0 36px!important;padding:0!important;margin:0!important;
+  border-radius:9px!important;border:1px solid transparent!important;
+  background:transparent!important;color:var(--av74-text)!important;
+  box-shadow:none!important;transform:none!important;
+  display:grid!important;place-items:center!important;box-sizing:border-box!important;
+}
+@media(max-width:760px){
+ body .main > header.av74-topbar .av74-actions #notificationBtn.av47-notification-btn,
+ body .main > header.av74-topbar .av74-actions #notificationBtn{
+   width:34px!important;min-width:34px!important;max-width:34px!important;
+   height:34px!important;min-height:34px!important;max-height:34px!important;
+   flex:0 0 34px!important;
+ }
+}
+@media(max-width:410px){
+ body .main > header.av74-topbar .av74-actions #notificationBtn.av47-notification-btn,
+ body .main > header.av74-topbar .av74-actions #notificationBtn{
+   width:31px!important;min-width:31px!important;max-width:31px!important;
+   height:33px!important;min-height:33px!important;max-height:33px!important;
+   flex:0 0 31px!important;
+ }
+}

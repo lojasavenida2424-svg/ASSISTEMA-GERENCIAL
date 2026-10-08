@@ -2,14 +2,27 @@
   "name": "AV Resultados",
   "short_name": "Resultados AV",
   "description": "Sistema de Resultados integrado ao Assistência Gerencial Avenida",
-  "start_url": "/ASSISTEMA-GERENCIAL/resultados/",
-  "scope": "/ASSISTEMA-GERENCIAL/resultados/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#FFFDF5",
   "theme_color": "#E0B423",
   "icons": [
-    {"src":"./icons/icon-192.png","sizes":"192x192","type":"image/png"},
-    {"src":"./icons/icon-512.png","sizes":"512x512","type":"image/png"},
-    {"src":"./icons/icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
