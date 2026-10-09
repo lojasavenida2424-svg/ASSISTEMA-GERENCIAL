@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AV Resultados Operadores V63 — Integração GERENCIAL</title>
+  <title>AV RESULTADO — Inteligência Comercial</title>
   <!-- PWA / ÍCONE EXTERNO AV RESULTADOS — não altera ícones internos -->
   <meta name="theme-color" content="#E0B423">
   <meta name="application-name" content="AV Resultados">
@@ -22,7 +22,9 @@
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="../shared/cargo-policy.js"></script>
-<script src="../shared/resultado-sync.js"></script>
+  <script src="../shared/gerencial-resultados.js"></script>
+  <script src="../shared/resultado-source.js"></script>
+  <script src="../shared/resultado-sync.js"></script>
   <script>
     // Contingência: tenta um segundo CDN se o primeiro estiver bloqueado.
     if(!window.supabase){
@@ -3664,16 +3666,100 @@
     }
 
   </style>
+  <style id="av-resultados-v100-premium">
+    /* V100 — REDESENHO INTEGRAL | Sistema AV Resultado */
+    :root{
+      --bg:#f4f4f1;
+      --surface:#ffffff;
+      --surface-2:#f8f8f5;
+      --text:#171717;
+      --muted:#6b6b65;
+      --line:#e4e4de;
+      --brand:#f4c400;
+      --brand-2:#dcae00;
+      --brand-soft:#fff5bd;
+      --brand-rgb:244,196,0;
+      --brand-2-rgb:220,174,0;
+      --sidebar-end:#111111;
+      --sidebar-end-rgb:17,17,17;
+      --ok:#17815b;
+      --ok-soft:#e5f6ed;
+      --bad:#c33d4b;
+      --bad-soft:#ffebed;
+      --warn:#b97500;
+      --shadow:0 18px 50px rgba(23,23,23,.08);
+      --radius:20px;
+    }
+    body.dark{
+      --bg:#111211;
+      --surface:#1a1b19;
+      --surface-2:#242521;
+      --text:#f7f7f2;
+      --muted:#b6b6ae;
+      --line:#363732;
+      --brand:#ffd52e;
+      --brand-2:#e7bb00;
+      --brand-soft:#39310a;
+      --brand-rgb:255,213,46;
+      --brand-2-rgb:231,187,0;
+      --sidebar-end:#0b0b0b;
+      --sidebar-end-rgb:11,11,11;
+      --ok:#63c89a;
+      --ok-soft:#133a2b;
+      --bad:#ff8290;
+      --bad-soft:#421e23;
+      --warn:#ffd05c;
+      --shadow:0 18px 50px rgba(0,0,0,.3);
+    }
+    body{background:var(--bg);letter-spacing:.005em}
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 78% -8%,rgba(var(--brand-rgb),.17),transparent 27%);z-index:-1}
+    .login{background:var(--bg);grid-template-columns:minmax(0,1.15fr) minmax(380px,.85fr);padding:22px;gap:22px}
+    .login-left{border-radius:28px;padding:clamp(34px,6vw,88px);background:#151515;color:#fff;overflow:hidden;box-shadow:var(--shadow)}
+    .login-left:before{content:"";position:absolute;width:520px;height:520px;border:1px solid rgba(255,255,255,.14);border-radius:50%;right:-230px;top:-230px;box-shadow:0 0 0 56px rgba(244,196,0,.13),0 0 0 112px rgba(244,196,0,.06)}
+    .login-left h1{max-width:600px;font-size:clamp(42px,5.4vw,78px);letter-spacing:-.07em}
+    .login-left h1 strong{color:var(--brand)}
+    .login-left p{max-width:560px;font-size:17px}.login-left p strong{color:var(--brand)}
+    .login-right{padding:24px}.login-card{border:0;border-radius:26px;padding:38px;box-shadow:var(--shadow)}
+    .app{grid-template-columns:276px minmax(0,1fr);min-height:100vh}
+    .sidebar{background:#151515;padding:22px 14px 18px;border:0;box-shadow:none;position:sticky;top:0;height:100vh}
+    .sidebar:before{content:"";height:4px;border-radius:99px;background:var(--brand);position:absolute;top:0;left:22px;right:22px}
+    .sidebar .brand{padding:10px 12px 26px;color:#fff;font-size:16px;letter-spacing:.06em}.sidebar .brand-icon{background:var(--brand);border:0;color:#151515;border-radius:12px;font-weight:1000}
+    .mini{margin:0 8px 18px;padding:14px 12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:16px;color:#fff}.mini span{color:rgba(255,255,255,.6)}
+    .avatar{background:var(--brand);color:#151515;border:0;box-shadow:none}
+    .nav{gap:5px;padding:0 4px}.nav button{min-height:48px;border-radius:12px;color:rgba(255,255,255,.67);font-size:13px;font-weight:800;padding:0 12px;letter-spacing:.01em}.nav button:hover{background:rgba(255,255,255,.08);color:#fff}.nav button.active{background:var(--brand);color:#171717;box-shadow:none}.nav button.active .menu-icon{color:#171717}.menu-icon{color:inherit}.nav button:before{display:none}
+    .footer{padding:14px 8px 0;border-color:rgba(255,255,255,.1)}.sidebar-control-btn{width:100%;justify-content:flex-start;background:transparent!important;border-color:rgba(255,255,255,.16)!important;color:#fff!important}
+    .main{padding:0 34px 42px;max-width:1640px;width:100%;margin:0 auto}
+    .topbar{position:sticky;top:0;z-index:30;margin:0 -34px 28px;padding:26px 34px 20px;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(15px);border:0;box-shadow:0 1px 0 rgba(23,23,23,.06)}
+    body.dark .topbar{box-shadow:0 1px 0 rgba(255,255,255,.08)}
+    .topbar h1{font-size:clamp(28px,3vw,40px);letter-spacing:-.055em;line-height:1;margin:5px 0 7px}.topbar p{font-size:13px;max-width:660px}.eyebrow{color:var(--brand-2);font-size:10px;letter-spacing:.15em}
+    .actions{gap:14px}.action-badges{gap:7px}.sync-status,.tag{border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:10px;font-weight:900;letter-spacing:.06em}.sync-status.online{background:var(--ok-soft);color:var(--ok);border-color:transparent}.brand-soft{background:var(--brand-soft)!important;color:#5d4700!important;border-color:transparent!important}body.dark .brand-soft{color:#ffe88b!important}
+    .btn{border-radius:12px;padding:11px 15px;font-size:12px;font-weight:900;letter-spacing:.01em;box-shadow:none}.btn-primary{background:var(--brand);color:#171717}.btn-primary:hover{background:var(--brand-2);color:#171717}.btn-secondary{background:var(--surface);border-color:var(--line);color:var(--text)}.btn-danger{border-radius:12px}
+    .btn-logout-minimal{width:39px;height:39px;border-radius:12px;background:var(--surface);border:1px solid var(--line);color:var(--text)}.top-action-icon{width:18px;height:18px}
+    .section{gap:20px}.card,.section-card{border:1px solid var(--line);box-shadow:none;border-radius:18px;background:var(--surface)}.section-card{padding:22px}
+    .source-note{padding:14px 16px;border-radius:14px;border:1px solid rgba(var(--brand-rgb),.45);background:var(--brand-soft);color:var(--text);font-weight:700}.source-note a{color:inherit;font-weight:1000}
+    .dashboard-period-block{padding:0;background:transparent;border:0}.dashboard-period-heading{padding:4px 0 14px;border:0}.dashboard-period-heading h3{font-size:18px;letter-spacing:-.025em;margin:4px 0}.dashboard-period-heading p{font-size:12px;color:var(--muted)}
+    .dashboard-metric-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.dashboard-metric-card{min-height:218px;padding:20px;border-radius:18px;position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--line);box-shadow:none}.dashboard-metric-card:after{content:"";position:absolute;width:110px;height:110px;border-radius:50%;right:-53px;top:-53px;background:rgba(var(--brand-rgb),.18)}.dashboard-metric-card:hover{transform:translateY(-2px);border-color:rgba(var(--brand-rgb),.7);box-shadow:0 14px 26px rgba(23,23,23,.08)}
+    .dashboard-metric-head{align-items:flex-start}.dashboard-metric-head h4{font-size:15px;letter-spacing:-.02em}.dashboard-metric-icon{position:relative;z-index:1;width:38px;height:38px;border-radius:12px;background:#171717;color:var(--brand);font-size:11px;font-weight:1000}.dashboard-metric-values{display:block;margin-top:20px}.dashboard-metric-value{margin:0}.dashboard-metric-value small{font-size:10px}.dashboard-metric-value strong{font-size:23px;letter-spacing:-.04em}.dashboard-metric-value.goal{display:flex;align-items:center;gap:7px;margin-top:6px}.dashboard-metric-value.goal small{font-size:10px}.dashboard-metric-value.goal strong{font-size:12px;letter-spacing:0}.dashboard-metric-track{height:7px;border-radius:99px;background:var(--surface-2);margin:17px 0 10px}.dashboard-metric-track i{background:var(--brand);border-radius:99px}.dashboard-metric-footer{font-size:10px}.dashboard-metric-percent{font-size:15px;color:var(--text)}
+    .dashboard-evolution-card,.quick-ranking-card{padding:24px}.dashboard-section-header{padding-bottom:15px;border-bottom:1px solid var(--line)}.dashboard-section-header h3{font-size:18px;letter-spacing:-.025em}.chart-box{height:310px;margin-top:12px}.quick-ranking-grid{gap:0;border-radius:14px;overflow:hidden;border:1px solid var(--line)}.quick-ranking-column{padding:18px;border:0;border-right:1px solid var(--line)}.quick-ranking-column:last-child{border-right:0}.rank-item{border-radius:10px}
+    .control{border-radius:11px;padding:11px 12px;background:var(--surface-2);border-color:var(--line);color:var(--text)}.control:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(var(--brand-rgb),.22)}.field label{font-size:10px;letter-spacing:.08em}.table-wrap{border:1px solid var(--line);border-radius:14px}.table-wrap table{border-collapse:separate;border-spacing:0}th{background:#171717!important;color:#fff!important;font-size:10px!important;letter-spacing:.06em}td{font-size:12px;border-color:var(--line)!important}tbody tr:hover td{background:rgba(var(--brand-rgb),.08)}
+    .employee-summary,.store-pf-summary{gap:12px}.employee-summary-card,.store-pf-summary-item{border-radius:14px;border-color:var(--line);box-shadow:none}.employee-summary-card strong{color:var(--text)}.launch-toolbar{border:1px solid var(--line);border-radius:13px;background:var(--surface-2);padding:10px 12px}
+    .game-hero{border:0;background:#171717;color:#fff;border-radius:20px;padding:34px;position:relative;overflow:hidden}.game-hero:after{content:"";position:absolute;right:-80px;top:-100px;width:300px;height:300px;border-radius:50%;background:var(--brand);opacity:.9}.game-hero h3,.game-hero p{position:relative;z-index:1}.game-hero .eyebrow{color:var(--brand)}.game-tabs{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px}.game-tab{border-radius:9px}.game-tab.active{background:var(--brand);color:#171717}
+    .premia-hero,.distribution-hero{border-radius:20px}.podium-card,.game-ranking-item,.premia-card{border-radius:16px}.modal-backdrop{backdrop-filter:blur(7px);background:rgba(15,15,15,.52)}.modal-card,.modal{border-radius:22px;border:1px solid var(--line);box-shadow:0 28px 80px rgba(0,0,0,.32)}
+    .goal-floating-toggle{background:#171717;border:0;color:var(--brand);box-shadow:0 12px 30px rgba(0,0,0,.2)}
+    @media(max-width:1180px){.dashboard-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.app{grid-template-columns:240px minmax(0,1fr)}.main{padding-left:24px;padding-right:24px}.topbar{margin-left:-24px;margin-right:-24px;padding-left:24px;padding-right:24px}}
+    @media(max-width:820px){.login{grid-template-columns:1fr;padding:12px}.login-left{min-height:320px;padding:36px}.app{display:block}.sidebar{position:fixed;width:276px;left:-290px;top:0;z-index:100;transition:left .25s ease}.sidebar.open{left:0}.main{padding:0 16px 28px}.topbar{position:relative;margin:0 -16px 20px;padding:20px 16px;align-items:flex-start}.topbar .actions{align-items:flex-end}.action-badges{display:none}.quick-ranking-grid{grid-template-columns:1fr}.quick-ranking-column{border-right:0;border-bottom:1px solid var(--line)}.quick-ranking-column:last-child{border-bottom:0}}
+    @media(max-width:560px){.login-left{display:none}.login-right{padding:10px}.login-card{padding:26px}.topbar{display:block}.topbar .actions{margin-top:16px;justify-content:space-between}.dashboard-metric-grid{grid-template-columns:1fr}.dashboard-metric-card{min-height:190px}.dashboard-evolution-card,.quick-ranking-card,.section-card{padding:16px}.chart-box{height:250px}.dashboard-period-heading{display:block}.dashboard-period-heading .tag{display:inline-flex;margin-top:8px}}
+  </style>
 </head>
 <body>
   <section id="loginView" class="login">
     <div class="login-left">
-      <div class="brand"><div class="brand-icon">AV</div><span>Resultados Operadores</span></div>
+      <div class="brand"><div class="brand-icon">AV</div><span>RESULTADO</span></div>
       <div>
-        <h1>Monitoramento focado no que importa.</h1>
-        <p>Modelo de teste integrado ao Assistência Gerencial para acompanhar <strong>Ativados</strong>, <strong>PF por tipo</strong> e <strong>PCJ%</strong> por operador, além do cabeçalho principal com os indicadores da loja.</p>
+        <h1>Performance que orienta decisões.</h1>
+        <p>Uma visão clara da operação: <strong>venda</strong>, <strong>ativados</strong>, <strong>produtos financeiros</strong> e <strong>PCJ</strong>, integrados ao Gerencial.</p>
       </div>
-      <small>Funcionários sincronizados do Assistência Gerencial • resultados salvos localmente e sincronizados online quando disponível</small>
+      <small>Dados oficiais sincronizados com o Assistência Gerencial</small>
     </div>
     <div class="login-right">
       <form id="loginForm" class="card login-card">
@@ -3697,8 +3783,8 @@
   <section id="loadingView" class="loading hidden">
     <div class="card loading-card">
       <div class="eyebrow">Inicialização</div>
-      <h2>Carregando AV Resultados Operadores</h2>
-      <p style="color:var(--muted);margin:8px 0 0">Validando o sistema e sincronizando a equipe cadastrada no Assistência Gerencial.</p>
+      <h2>Preparando sua visão de resultados</h2>
+      <p style="color:var(--muted);margin:8px 0 0">Sincronizando a equipe e os indicadores cadastrados no Assistência Gerencial.</p>
       <div class="checks">
         <div class="check" data-check><span class="dot"></span>Conexão local</div>
         <div class="check" data-check><span class="dot"></span>Funcionários do Gerencial</div>
@@ -3723,15 +3809,15 @@
         <nav id="sidebarNav" class="nav" aria-label="Navegação principal">
           <button class="active" data-section="dashboard" data-permission-tab="dashboard">
             <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
-            <span class="menu-label">Painel principal</span>
+            <span class="menu-label">Visão geral</span>
           </button>
           <button data-section="game" data-permission-tab="game">
             <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 4h8v4a4 4 0 0 1-8 0V4Z"/><path d="M8 6H5v1a4 4 0 0 0 4 4"/><path d="M16 6h3v1a4 4 0 0 1-4 4"/><path d="M12 12v5"/><path d="M8 21h8"/><path d="M9 17h6v4H9z"/></svg></span>
-            <span class="menu-label">GAME</span>
+            <span class="menu-label">Ranking da equipe</span>
           </button>
           <button data-section="premia" data-permission-tab="premia">
             <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13"/><path d="M3 12h18"/><path d="M12 8H7.5A2.5 2.5 0 1 1 10 5.5L12 8Z"/><path d="M12 8h4.5A2.5 2.5 0 1 0 14 5.5L12 8Z"/></svg></span>
-            <span class="menu-label">AV Premia</span>
+            <span class="menu-label">Reconhecimento</span>
           </button>
           <button data-section="operadores" data-permission-tab="operadores">
             <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20V7"/><path d="M2 20h22"/></svg></span>
@@ -3739,7 +3825,7 @@
           </button>
           <button data-section="funcionarios" data-permission-tab="funcionarios">
             <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M14 15.5a5 5 0 0 1 7 4.5"/></svg></span>
-            <span class="menu-label">Funcionários</span>
+            <span class="menu-label">Equipe</span>
           </button>
           <button data-section="lancamentos" data-permission-tab="lancamentos">
             <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 7v10"/><path d="M7 12h10"/></svg></span>
@@ -3747,7 +3833,7 @@
           </button>
           <button data-section="distribuicao" data-permission-tab="distribuicao">
             <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg></span>
-            <span class="menu-label">Distribuição de Metas</span>
+            <span class="menu-label">Metas</span>
           </button>
         </nav>
       </div>
@@ -3762,9 +3848,9 @@
     <main class="main">
       <header class="topbar">
         <div>
-          <div class="eyebrow">AV Resultados Operadores</div>
-          <h1 id="pageTitle">Painel principal</h1>
-          <p id="pageSubtitle">Resultados do último dia lançado e acumulado do mês, recebidos do GERENCIAL.</p>
+          <div class="eyebrow">AVENIDA • PERFORMANCE DA LOJA</div>
+          <h1 id="pageTitle">Visão geral</h1>
+          <p id="pageSubtitle">Pulso diário, evolução mensal e indicadores recebidos do GERENCIAL.</p>
         </div>
         <div class="actions">
           <div class="action-badges">
@@ -3805,9 +3891,9 @@
         <div class="dashboard-period-block">
           <div class="dashboard-period-heading">
             <div>
-              <div class="eyebrow">Resultado diário</div>
-              <h3>ÚLTIMO DIA LANÇADO</h3>
-              <p>Resultado oficial do Gerencial. Confira a data de referência ao lado.</p>
+              <div class="eyebrow">Pulso da operação</div>
+              <h3>RESULTADO DO DIA</h3>
+              <p>Leitura rápida do último resultado recebido do Gerencial.</p>
             </div>
             <span id="dashboardTodayDate" class="tag brand-soft">HOJE</span>
           </div>
@@ -3906,9 +3992,9 @@
         <div class="dashboard-period-block">
           <div class="dashboard-period-heading">
             <div>
-              <div class="eyebrow">Resultado mensal</div>
-              <h3>ACUMULADO</h3>
-              <p>Compare o total realizado no mês com a meta final de cada indicador.</p>
+              <div class="eyebrow">Ritmo mensal</div>
+              <h3>PROGRESSO DO MÊS</h3>
+              <p>Compare o realizado acumulado com a meta final de cada indicador.</p>
             </div>
             <span id="dashboardAccumulatedMonth" class="tag brand-soft">MÊS ATUAL</span>
           </div>
@@ -5908,6 +5994,7 @@
     const RESULTS_SUPABASE_ANON_KEY = "sb_publishable_hKsbyZUlgKg0sW5TgZKQwA_MdXPJRAq";
     const MANAGEMENT_TABLE = "assistencia_gerencial";
     const MANAGEMENT_SHARED_ROW = "gerencial_compartilhados_v1";
+    const MANAGEMENT_CONFIG_ROW = "config_global_v1";
     const MANAGEMENT_UPDATED_COLUMN = "atualizado_em";
     const MANAGEMENT_LOCAL_CACHE_KEYS = Object.freeze([
       "adminGerencialLojaV7_gerencial_compartilhados_v1_cache",
@@ -7696,6 +7783,66 @@
         errors.push(`Supabase JS: ${error?.message || error}`);
       }
       throw new Error(errors.join(" | ") || "Não foi possível consultar o GERENCIAL");
+    }
+
+    async function readManagementAccessConfig(){
+      const errors=[];
+      try{
+        const url = new URL(`${MANAGEMENT_SUPABASE_URL}/rest/v1/${MANAGEMENT_TABLE}`);
+        url.searchParams.set("select","dados");
+        url.searchParams.set("id",`eq.${MANAGEMENT_CONFIG_ROW}`);
+        url.searchParams.set("limit","1");
+        const response = await withTimeout(fetch(url.toString(),{
+          method:"GET",mode:"cors",cache:"no-store",credentials:"omit",
+          headers:{apikey:MANAGEMENT_SUPABASE_ANON_KEY,Authorization:`Bearer ${MANAGEMENT_SUPABASE_ANON_KEY}`,Accept:"application/json"}
+        }),EMPLOYEE_SYNC_TIMEOUT,null,"Consulta de acesso ao GERENCIAL");
+        if(response?.ok){
+          const rows=await response.json();
+          const row=Array.isArray(rows)?rows[0]:rows;
+          if(row?.dados && typeof row.dados==="object") return row.dados;
+        }else if(response){
+          errors.push(`REST ${response.status}`);
+        }
+      }catch(error){ errors.push(`REST: ${error?.message || error}`); }
+
+      try{
+        if(!window.supabase) throw new Error("Biblioteca Supabase indisponível");
+        managementClient=managementClient || window.supabase.createClient(
+          MANAGEMENT_SUPABASE_URL,MANAGEMENT_SUPABASE_ANON_KEY,{auth:{persistSession:false}}
+        );
+        const response=await withTimeout(
+          managementClient.from(MANAGEMENT_TABLE).select("dados").eq("id",MANAGEMENT_CONFIG_ROW).maybeSingle(),
+          EMPLOYEE_SYNC_TIMEOUT,null,"Consulta de acesso ao GERENCIAL"
+        );
+        if(response?.data?.dados && typeof response.data.dados==="object") return response.data.dados;
+        if(response?.error) errors.push(`Supabase: ${response.error.message || response.error.code || "erro"}`);
+      }catch(error){ errors.push(`Supabase: ${error?.message || error}`); }
+      throw new Error(errors.join(" | ") || "Configuração de acesso do GERENCIAL indisponível");
+    }
+
+    function userFromManagementCredentials(config,operator,password){
+      const op=normalizeOperator(operator);
+      const users=Array.isArray(config?.usuarios)?config.usuarios:[];
+      const account=users.find(item=>normalizeOperator(item?.operador ?? item?.operator)===op);
+      const configuredPassword=String(account?.senha ?? account?.password ?? "");
+      if(!account || !configuredPassword || configuredPassword!==String(password ?? "")) return null;
+      const employee=getEmployee(op);
+      const role=AVCargoPolicy.isFiscal(employee)
+        ? "FISCAL"
+        : normalizeAccessRole(account?.cargo || account?.role || employee?.cargo || "ASSESSOR");
+      const name=String(account?.nome || account?.name || employee?.name || `OPERADOR ${op}`).trim().toUpperCase();
+      return {
+        operator:op,name,shortName:shortNameFromFullName(name),role,cargo:role,
+        access:accessFromRole(role),active:true,password:configuredPassword,
+        managementCredential:true
+      };
+    }
+
+    async function authenticateResultUser(operator,password){
+      const localUser=getAccessUser(operator);
+      if(localUser && String(localUser.password || "") && String(localUser.password)===String(password ?? "")) return localUser;
+      const managementConfig=await readManagementAccessConfig();
+      return userFromManagementCredentials(managementConfig,operator,password);
     }
 
     function normalizeManagementProjectionFromOfficialResults(gerencial, projection, limitDate = today()){
@@ -10366,8 +10513,8 @@ ${fallbackText}`;
 
         const op = $("#loginOperator").value.trim();
         const pass = $("#loginPassword").value;
-        const user = getAccessUser(op);
-        if(!user || String(user.password) !== pass){
+        const user = await authenticateResultUser(op,pass);
+        if(!user){
           $("#loginError").textContent = "Operador ou senha inválidos.";
           return;
         }
@@ -10390,6 +10537,9 @@ ${fallbackText}`;
         await withTimeout(initApp(), 6500, false, "Montagem da interface");
       }catch(error){
         console.error("Falha no fluxo de login:", error);
+        if(!currentUser){
+          $("#loginError").textContent = "Não foi possível validar seu acesso no Gerencial. Verifique a conexão e tente novamente.";
+        }
         setDataSaveStatus("Dados locais carregados com modo de segurança", "offline");
         try{ renderAllSafely(); }catch(_){ }
       }finally{
@@ -14399,14 +14549,14 @@ ${fallbackText}`;
       currentSection = sectionName;
 
       const labels = {
-        dashboard:["Painel principal","Resultados do último dia lançado e acumulado do mês, recebidos do GERENCIAL."],
+        dashboard:["Visão geral","Pulso diário, evolução mensal e indicadores recebidos do GERENCIAL."],
         calendario:["Calendário de Vendas","Consulte os resultados completos da loja e dos operadores por data."],
         operadores:["Operadores","Consulta comparativa dos resultados da equipe, sem inclusão de dados."],
-        funcionarios:["Funcionários","Cadastre operador, nome, senha e cargo para aplicar as permissões definidas pelo desenvolvedor."],
+        funcionarios:["Equipe","Pessoas, acessos e funções que formam a operação da loja."],
         lancamentos:["Lançamentos","Registre os resultados do dia; na virada, eles passam automaticamente ao acumulado."],
-        distribuicao:["Distribuição de Metas","Administre as metas individuais dos assessores e os objetivos gerais da loja."],
-        game:["GAME","Pódio e classificação completa atualizados em tempo real."],
-        premia:["AV Premia","Roleta, cartas e controle individual de tentativas e prêmios."],
+        distribuicao:["Metas","Administre metas individuais dos assessores e objetivos gerais da loja."],
+        game:["Ranking da equipe","Pódio e classificação completa atualizados em tempo real."],
+        premia:["Reconhecimento","Roleta, cartas e controle individual de tentativas e prêmios."],
         config:["Configurações","Gerencie usuários, permissões e persistência dos dados."]
       };
 

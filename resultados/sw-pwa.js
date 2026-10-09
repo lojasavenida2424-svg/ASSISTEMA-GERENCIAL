@@ -1,4 +1,4 @@
-const CACHE_NAME = 'av-resultados-v63-reparos-20261008';
+const CACHE_NAME = 'av-resultados-v100-redesign-premium-20261009';
 const APP_SHELL = [
   './',
   './index.html',

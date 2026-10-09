@@ -25,13 +25,14 @@ function render(asAdmin){
     db:{funcionarios:[{nome:'OPERADOR TESTE'},{nome:'OUTRO'}]},
     renderSelectNovoUsuarioLogin(){return '<option>200</option>'},
     renderUsuariosLoginRows(){return '<tr><td>OPERADOR TESTE</td></tr>'},
+    renderCentralPermissoesAV(){return '<section class="avp66-people">Permissões</section>'},
   };
   vm.runInNewContext(script+'\nrenderConfig();',context);
   return el.innerHTML;
 }
 test('administrador vê navegação com todos os módulos de Configurações',()=>{
  const html=render(true);
- for(const field of ['Visão geral','Usuários','Permissões','Dados e backup','configNovoUsuarioLogin','configUsuarioPermissoes','configAvBuscaUsuarios','baixarBackupCompletoSistema()','baixarBackup()','importarBackup(event)','limparTudo()']){
+ for(const field of ['Visão geral','Usuários','Permissões','Dados e backup','configNovoUsuarioLogin','avp66-people','configAvBuscaUsuarios','baixarBackupCompletoSistema()','baixarBackup()','importarBackup(event)','limparTudo()']){
    assert.ok(html.includes(field),field);
  }
  assert.match(html, /data-config-target="inicio"/);

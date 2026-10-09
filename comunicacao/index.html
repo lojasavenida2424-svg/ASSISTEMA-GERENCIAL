@@ -15093,7 +15093,7 @@ function escapeHTML(s){ return String(s||'').replace(/[&<>'"]/g, m => ({'&':'&am
 function num(v){ return Number(v||0); }
 
 const SISTEMA_ESTOQUE_URL = 'https://lojasavenida2424-svg.github.io/avenida-estoque/';
-const SISTEMA_RESULTADOS_URL = new URL('../resultados/', document.baseURI).href;
+const SISTEMA_RESULTADOS_URL = new URL('../resultados/index.html', document.baseURI).href;
 const SISTEMA_GERENCIAL_URL = (() => {
   try{
     if(location.protocol === 'http:' || location.protocol === 'https:'){
