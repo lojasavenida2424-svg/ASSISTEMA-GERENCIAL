@@ -10,11 +10,14 @@ function oneLineFunction(name){
   const re=new RegExp(`function ${name}\\([^\\n]*`);
   const m=operational.match(re);assert.ok(m,`missing ${name}`);return m[0];
 }
-test('Sessão manipulável no navegador não autentica automaticamente',()=>{
+test('reload restaura somente sessão temporária validada no servidor',()=>{
   const p=operational.slice(operational.indexOf('async function restaurarSessaoOperacional()'),operational.indexOf('function initials('));
-  assert.match(p,/sessionStorage\.removeItem\('operacionalSessaoV1'\)/);
-  assert.match(p,/confirme sua senha/);
-  assert.doesNotMatch(p,/startApp\(/);
+  assert.match(p,/operacionalSessionId\(sess\.token\)/);
+  assert.match(p,/serverSession\?\.tipo!=='SESSAO_OPERACIONAL'/);
+  assert.match(p,/serverSession\.credencialVersao/);
+  assert.match(p,/cfg\.operacionalAcessos/);
+  assert.match(p,/startApp\(\)/);
+  assert.match(p,/sessionStorage\.removeItem\('operacionalSessaoV2'\)/);
 });
 test('Checklist bloqueado na interface e validado novamente antes da gravação',()=>{
   assert.match(operational,/statusAberto\(t\)\?'':'disabled title=/);

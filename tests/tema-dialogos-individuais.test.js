@@ -62,3 +62,37 @@ test('confirmação interna cancela sem executar a ação e aceita apenas após 
   body.children[0].children[0].children.at(-1).children.at(-1).onclick();
   assert.equal(await second,true);
 });
+
+test('tema do Operacional é gravado online e reaplicado em outro dispositivo',async()=>{
+  const begin=operacional.indexOf("const UI_PREFS_KEY='operacionalPreferenciasUIV3Operador'");
+  const end=operacional.indexOf('function passwordRequestId',begin);
+  const rows=new Map(),cache=new Map();
+  class Query{
+    constructor(){this.id='';this.row=null}
+    select(){return this}eq(_field,id){this.id=id;return this}
+    upsert(row){this.row=row;return this}
+    async maybeSingle(){if(this.row){rows.set(this.row.id,this.row);return {data:{id:this.row.id},error:null}}return {data:rows.get(this.id)||null,error:null}}
+  }
+  const elements={app:{classList:{toggle(){}}},settingsDefaultPeriod:{value:'TODAS'},settingsDensity:{value:'COMPACTA'},settingsTheme:{value:'ESCURO'},settingsAccent:{value:'ROXO'}};
+  const rootElement={dataset:{}},context={state:{employee:{operador:'133'},mode:'online'},opnorm:v=>String(v||''),operacionalPreferencesId:op=>'operacional_preferencias_'+op,client:{from:()=>new Query()},ONLINE_TABLE:'assistencia_gerencial',REQUEST_TIMEOUT_MS:1000,withTimeout:async p=>p,navigator:{onLine:true},localStorage:{getItem:k=>cache.get(k)||null,setItem:(k,v)=>cache.set(k,v)},document:{documentElement:rootElement,querySelector:()=>({content:''})},$:id=>elements[id],toast(){},console};
+  vm.runInNewContext(operacional.slice(begin,end),context);
+  await context.saveUiPreferences();
+  assert.equal(rows.get('operacional_preferencias_133').dados.theme,'ESCURO');
+  assert.equal(rows.get('operacional_preferencias_133').dados.accent,'ROXO');
+  cache.clear();rootElement.dataset={};
+  await context.loadUiPreferencesOnline('133');context.applyUiPreferences();
+  assert.equal(rootElement.dataset.theme,'dark');assert.equal(rootElement.dataset.accent,'roxo');
+});
+
+test('Home separa os blocos e recarrega a cada cinco minutos preservando a sessão',()=>{
+  assert.match(operacional,/#app\.view-home \.hero\.overview-only\{margin-bottom:20px\}/);
+  assert.match(operacional,/const AUTO_REFRESH_TEST_MS=5\*60\*1000/);
+  const reload=operacional.slice(operacional.indexOf('async function executarAutoAtualizacaoOperacional()'),operacional.indexOf('function iniciarAutoAtualizacaoOperacional'));
+  assert.match(reload,/salvarEstadoOperacionalAntesReload\(\)/);
+  assert.match(reload,/sessionStorage\.setItem\(AUTO_REFRESH_PENDING_KEY,'1'\)/);
+  assert.match(reload,/location\.reload\(\)/);
+  const restore=operacional.slice(operacional.indexOf('async function restaurarSessaoOperacional()'),operacional.indexOf('function initials('));
+  assert.match(restore,/serverSession\?\.tipo!=='SESSAO_OPERACIONAL'/);
+  assert.match(restore,/loadUiPreferencesOnline\(op\)/);
+  assert.match(restore,/startApp\(\)/);
+});

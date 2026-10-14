@@ -218,11 +218,13 @@ test('login do Operacional migra uma vez e depois ignora a senha do Gerencial', 
   }
   const fields={loginOperador:{value:'144'},loginSenha:{value:'gerencial'},loginError:{textContent:''}};
   let onSubmit,starts=0;
-  const context={client:{from:()=>new Query()},ONLINE_TABLE:'assistencia_gerencial',SHARED_ROW_ID:'gerencial_compartilhados_v1',GLOBAL_ROW_ID:'config_global_v1',REQUEST_TIMEOUT_MS:1000,withTimeout:async p=>p,opnorm:v=>String(v||''),norm:v=>String(v||'').toUpperCase(),state:{},$:id=>id==='loginForm'?{addEventListener(_type,cb){onSubmit=cb}}:fields[id],loginStatus(){},erroConexao:()=>false,startApp(){starts++},subscribeRealtime(){},iniciarMonitorSincronizacao(){}};
-  vm.runInNewContext("const OPERACIONAL_CREDENTIAL_PREFIX='operacional_credencial_';\n"+operacional.slice(helperStart,helperEnd)+'\n'+operacional.slice(loginStart,loginEnd),context);
+  const session=new Map();
+  const context={client:{from:()=>new Query()},ONLINE_TABLE:'assistencia_gerencial',SHARED_ROW_ID:'gerencial_compartilhados_v1',GLOBAL_ROW_ID:'config_global_v1',REQUEST_TIMEOUT_MS:1000,SESSION_MAX_AGE_MS:12*60*60*1000,withTimeout:async p=>p,opnorm:v=>String(v||''),norm:v=>String(v||'').toUpperCase(),state:{},$:id=>id==='loginForm'?{addEventListener(_type,cb){onSubmit=cb}}:fields[id],loginStatus(){},erroConexao:()=>false,startApp(){starts++},subscribeRealtime(){},iniciarMonitorSincronizacao(){},loadUiPreferencesOnline:async()=>{},sessionStorage:{setItem:(k,v)=>session.set(k,v),removeItem:k=>session.delete(k)},crypto:{randomUUID:()=>`token${rows.size}abcdefghij`}};
+  vm.runInNewContext("const OPERACIONAL_CREDENTIAL_PREFIX='operacional_credencial_';const OPERACIONAL_SESSION_PREFIX='operacional_sessao_';const OPERACIONAL_PREFERENCES_PREFIX='operacional_preferencias_';\n"+operacional.slice(helperStart,helperEnd)+'\n'+operacional.slice(loginStart,loginEnd),context);
   await onSubmit({preventDefault(){}});
   assert.equal(starts,1);
   assert.equal(rows.get('operacional_credencial_144').dados.senha,'gerencial');
+  assert.ok(session.has('operacionalSessaoV2'));
   rows.get('operacional_credencial_144').dados.senha='opNova';
   fields.loginSenha.value='opNova';
   await onSubmit({preventDefault(){}});

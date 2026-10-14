@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#F3F5F4">
 <title>Operacional AV • Loja 24</title>
-<script>try{if(sessionStorage.getItem('operacionalAutoRefreshPending')==='1')document.documentElement.classList.add('auto-refresh-restoring')}catch(_){}</script>
+<script>try{if(sessionStorage.getItem('operacionalAutoRefreshPending')==='1'||sessionStorage.getItem('operacionalSessaoV2'))document.documentElement.classList.add('auto-refresh-restoring')}catch(_){}</script>
 <script>document.documentElement.dataset.theme='light';document.documentElement.dataset.accent='padrao';</script>
 <script src="https://unpkg.com/@supabase/supabase-js@2.112.3"></script>
 <script>if(!window.supabase){document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3"><\/script>')}</script>
@@ -359,6 +359,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .operational-dialog textarea[hidden],.operational-dialog [hidden]{display:none!important}
 .operational-dialog textarea{margin-top:15px;min-height:115px;resize:vertical}
 .operational-dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;flex-wrap:wrap}
+#app.view-home .hero.overview-only{margin-bottom:20px}
 .evidence-viewer{background:rgba(12,15,18,.68);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .evidence-viewer-card{position:relative;width:min(900px,100%);max-height:calc(100dvh - 36px);overflow:auto;padding:18px;border:1px solid var(--border);border-radius:18px;background:var(--surface);color:var(--text);box-shadow:0 24px 70px rgba(0,0,0,.28)}
 .evidence-viewer .evidence-viewer-card img{display:block;max-width:100%;max-height:calc(100dvh - 132px);margin:0 auto;object-fit:contain}
@@ -447,7 +448,11 @@ const SUPABASE_URL='https://euyrhkusnasgiueefldg.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1eXJoa3VzbmFzZ2l1ZWVmbGRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzY0MTksImV4cCI6MjA5ODk1MjQxOX0.woI5Il3ObKrj8BJfdYz8DcUW08Jl5c458ykh1SrHYr4';
 const ONLINE_TABLE='assistencia_gerencial', SHARED_ROW_ID='gerencial_compartilhados_v1', GLOBAL_ROW_ID='config_global_v1';
 const OPERACIONAL_CREDENTIAL_PREFIX='operacional_credencial_';
+const OPERACIONAL_SESSION_PREFIX='operacional_sessao_';
+const OPERACIONAL_PREFERENCES_PREFIX='operacional_preferencias_';
 function operacionalCredentialId(op){return OPERACIONAL_CREDENTIAL_PREFIX+opnorm(op)}
+function operacionalSessionId(token){return OPERACIONAL_SESSION_PREFIX+String(token||'').replace(/[^a-zA-Z0-9_-]/g,'')}
+function operacionalPreferencesId(op){return OPERACIONAL_PREFERENCES_PREFIX+opnorm(op)}
 async function criarCredencialOperacionalInicial(op,senha){
   const id=operacionalCredentialId(op),now=new Date().toISOString();
   const dados={tipo:'CREDENCIAL_OPERACIONAL',operador:op,senha,versao:1,criadoEmISO:now,origem:'PRIMEIRO_ACESSO'};
@@ -458,6 +463,29 @@ async function criarCredencialOperacionalInicial(op,senha){
   const {data:existing,error:readError}=await withTimeout(client.from(ONLINE_TABLE).select('dados').eq('id',id).maybeSingle(),REQUEST_TIMEOUT_MS);
   if(readError)throw readError;
   if(existing?.dados?.tipo!=='CREDENCIAL_OPERACIONAL'||opnorm(existing.dados.operador)!==op||String(existing.dados.senha||'').trim()!==senha)throw new Error('O cadastro operacional mudou. Entre novamente com a senha do Operacional.');
+}
+function novoTokenSessaoOperacional(){
+  if(globalThis.crypto?.randomUUID)return crypto.randomUUID().replace(/-/g,'')+crypto.randomUUID().replace(/-/g,'');
+  const bytes=new Uint8Array(32);globalThis.crypto?.getRandomValues?.(bytes);return Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('')||uid('sessao').replace(/[^a-zA-Z0-9]/g,'');
+}
+function lerSessaoOperacionalLocal(){try{const value=JSON.parse(sessionStorage.getItem('operacionalSessaoV2')||'null');return value&&typeof value==='object'?value:null}catch(_){return null}}
+async function criarSessaoOperacionalServidor(op,credencialVersao=1){
+  if(!client)throw new Error('Conexão indisponível para iniciar a sessão.');
+  const token=novoTokenSessaoOperacional(),now=Date.now(),expiresAt=now+SESSION_MAX_AGE_MS,id=operacionalSessionId(token);
+  const dados={tipo:'SESSAO_OPERACIONAL',operador:opnorm(op),credencialVersao:Math.max(1,Number(credencialVersao)||1),criadoEmISO:new Date(now).toISOString(),expiraEmISO:new Date(expiresAt).toISOString()};
+  const {data,error}=await withTimeout(client.from(ONLINE_TABLE).insert({id,dados,updated_at:new Date(now).toISOString()}).select('id').maybeSingle(),REQUEST_TIMEOUT_MS);
+  if(error||!data)throw error||new Error('O servidor não confirmou a sessão do Operacional.');
+  sessionStorage.setItem('operacionalSessaoV2',JSON.stringify({operator:opnorm(op),token,expiresAt}));
+  sessionStorage.removeItem('operacionalSessaoV1');
+  return {operator:opnorm(op),token,expiresAt};
+}
+async function atualizarVersaoSessaoOperacional(credencialVersao){
+  const sess=lerSessaoOperacionalLocal();if(!sess?.token||!client)return;
+  try{
+    const id=operacionalSessionId(sess.token),{data,error}=await withTimeout(client.from(ONLINE_TABLE).select('dados').eq('id',id).maybeSingle(),REQUEST_TIMEOUT_MS);
+    if(error||data?.dados?.tipo!=='SESSAO_OPERACIONAL')return;
+    await withTimeout(client.from(ONLINE_TABLE).update({dados:{...data.dados,credencialVersao:Math.max(1,Number(credencialVersao)||1)},updated_at:new Date().toISOString()}).eq('id',id),REQUEST_TIMEOUT_MS);
+  }catch(_){ }
 }
 const client=window.supabase?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:false},realtime:{params:{eventsPerSecond:5}}}):null;
 let state={mode:'online',employee:null,data:null,view:'HOME',tab:'TODAS',selected:null,channel:null,saving:false,lastSharedUpdatedAt:null,realtimeReady:false,realtimeEventSeen:false,refreshPromise:null,pollTimer:null,accessTimer:null,realtimeRetryTimer:null};
@@ -477,7 +505,7 @@ function erroConexao(err){const m=String(err?.message||err||'').toLowerCase();re
 function erroAcessoDefinitivo(err){const m=String(err?.message||err||'');return /Funcionário não encontrado|Acesso operacional não liberado|acesso.*não.*liberado|acesso revogado/i.test(m)}
 function tamanhoJsonBytes(obj){try{return new Blob([JSON.stringify(obj)]).size}catch(_){return 0}}
 
-const AUTO_REFRESH_TEST_MS=5*60*1000; // Health-check leve, sem recarregar a página.
+const AUTO_REFRESH_TEST_MS=5*60*1000; // Recarregamento completo com restauração segura da sessão.
 const SYNC_POLL_MS=30000; // Fallback quando Realtime estiver indisponível ou não publicado.
 const ACCESS_CHECK_MS=120000;
 const REQUEST_TIMEOUT_MS=18000;
@@ -494,7 +522,7 @@ function salvarEstadoOperacionalAntesReload(){
 function restaurarEstadoOperacionalAposReload(){
   let st=null;try{st=JSON.parse(sessionStorage.getItem(AUTO_REFRESH_UI_KEY)||'null')}catch(_){ }
   // A tela permanece persistida ao longo da sessão; não salvar credenciais junto aos filtros.
-  document.documentElement.classList.remove('auto-refresh-restoring');$('autoRefreshLoader')?.classList.remove('active');
+  document.documentElement.classList.remove('auto-refresh-restoring');$('autoRefreshLoader')?.classList.remove('active');sessionStorage.removeItem(AUTO_REFRESH_PENDING_KEY);
   if(!st)return;
   if($('filterDate'))$('filterDate').value=st.filterDate==='HOJE'?'HOJE':'TODAS';
   if($('filterSearch'))$('filterSearch').value=st.filterSearch||'';
@@ -512,24 +540,41 @@ function interfaceOperacionalEmAcaoCritica(){
 async function executarAutoAtualizacaoOperacional(){
   if(!state.employee)return;
   if(interfaceOperacionalEmAcaoCritica()||state.saving){autoRefreshTimerOperacional=setTimeout(executarAutoAtualizacaoOperacional,15000);return}
-  await refreshOnline({silent:true});
-  await validarAcessoOperacionalAtual({silent:true});
-  autoRefreshTimerOperacional=setTimeout(executarAutoAtualizacaoOperacional,AUTO_REFRESH_TEST_MS);
+  salvarEstadoOperacionalAntesReload();
+  try{sessionStorage.setItem(AUTO_REFRESH_PENDING_KEY,'1')}catch(_){ }
+  document.documentElement.classList.add('auto-refresh-restoring');$('autoRefreshLoader')?.classList.add('active');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>location.reload()));
 }
 function iniciarAutoAtualizacaoOperacional(){if(autoRefreshTimerOperacional)clearTimeout(autoRefreshTimerOperacional);autoRefreshTimerOperacional=setTimeout(executarAutoAtualizacaoOperacional,AUTO_REFRESH_TEST_MS)}
 async function restaurarSessaoOperacional(){
-  let sess=null;try{sess=JSON.parse(sessionStorage.getItem('operacionalSessaoV1')||'null')}catch(_){ }
-  if(!sess?.operator)return false;
-  if(sess.issuedAt && Date.now()-Number(sess.issuedAt)>SESSION_MAX_AGE_MS){sessionStorage.removeItem('operacionalSessaoV1');return false}
-  // SessionStorage is client-writable; never treat its operator ID as proof of authentication.
-  // A new page load requires a fresh password, even when the browser remembers the operator.
-  if($('loginOperador'))$('loginOperador').value=opnorm(sess.operator);
-  sessionStorage.removeItem('operacionalSessaoV1');
-  document.documentElement.classList.remove('auto-refresh-restoring');
-  $('autoRefreshLoader')?.classList.remove('active');
-  loginStatus('Por segurança, confirme sua senha para continuar','warn');
-  return false;
-
+  const sess=lerSessaoOperacionalLocal();
+  if(!sess?.operator||!sess?.token||!client)return false;
+  if(!Number.isFinite(Number(sess.expiresAt))||Date.now()>=Number(sess.expiresAt)){sessionStorage.removeItem('operacionalSessaoV2');return false}
+  try{
+    const op=opnorm(sess.operator),sessionId=operacionalSessionId(sess.token);
+    const [sessionRes,sharedRes,globalRes,credentialRes]=await Promise.all([
+      withTimeout(client.from(ONLINE_TABLE).select('dados').eq('id',sessionId).maybeSingle()),
+      withTimeout(client.from(ONLINE_TABLE).select('dados,updated_at').eq('id',SHARED_ROW_ID).maybeSingle()),
+      withTimeout(client.from(ONLINE_TABLE).select('dados').eq('id',GLOBAL_ROW_ID).maybeSingle()),
+      withTimeout(client.from(ONLINE_TABLE).select('dados').eq('id',operacionalCredentialId(op)).maybeSingle())
+    ]);
+    for(const result of [sessionRes,sharedRes,globalRes,credentialRes])if(result.error)throw result.error;
+    const serverSession=sessionRes.data?.dados,credential=credentialRes.data?.dados,cfg=globalRes.data?.dados||{},data=sharedRes.data?.dados||{};
+    if(serverSession?.tipo!=='SESSAO_OPERACIONAL'||opnorm(serverSession.operador)!==op)throw new Error('Sessão operacional inválida.');
+    if(Date.parse(serverSession.expiraEmISO||'')<=Date.now())throw new Error('Sessão operacional expirada.');
+    if(credential?.tipo!=='CREDENCIAL_OPERACIONAL'||opnorm(credential.operador)!==op||Math.max(1,Number(serverSession.credencialVersao)||1)!==Math.max(1,Number(credential.versao)||1))throw new Error('A credencial operacional foi alterada.');
+    if(cfg.operacionalAcessos?.[op]!==true)throw new Error('Acesso operacional não liberado.');
+    const emp=(data.funcionarios||[]).find(f=>opnorm(f.operador)===op&&!['DESLIGADO','INATIVO'].includes(norm(f.status||'ATIVO')));
+    if(!emp)throw new Error('Funcionário não encontrado entre os cadastros ativos.');
+    state.mode='online';state.employee=emp;state.data=data;state.lastSharedUpdatedAt=sharedRes.data?.updated_at||null;
+    await loadUiPreferencesOnline(op);
+    startApp();subscribeRealtime();iniciarMonitorSincronizacao();
+    return true;
+  }catch(err){
+    console.warn('Não foi possível restaurar a sessão do Operacional:',err);sessionStorage.removeItem('operacionalSessaoV2');
+    if($('loginOperador'))$('loginOperador').value=opnorm(sess.operator);
+    loginStatus('Sessão encerrada • confirme sua senha','warn');return false;
+  }
 }
 
 function initials(n){let p=String(n||'').trim().split(/\s+/).filter(Boolean);return p.length?((p[0][0]||'')+(p.length>1?(p[p.length-1][0]||''):'')).toUpperCase():'AV'}
@@ -635,14 +680,14 @@ $('loginForm').addEventListener('submit',async e=>{
       if(!gu||String(gu.senha||'').trim()!==passTrim)throw new Error('Senha anterior não reconhecida. Procure o Gerencial para recuperar o acesso.');
       await criarCredencialOperacionalInicial(op,passTrim);
     }
+    await criarSessaoOperacionalServidor(op,Math.max(1,Number(credencial?.versao)||1));
     state.mode='online';state.employee=emp;state.data=data;state.lastSharedUpdatedAt=sharedRes.data?.updated_at||null;
+    await loadUiPreferencesOnline(op);
     startApp();subscribeRealtime();iniciarMonitorSincronizacao();
   }catch(err){$('loginError').textContent=err.message||'Não foi possível entrar.';loginStatus(erroConexao(err)?'Conexão instável • tente novamente':'Falha no acesso conectado','offline')}
 });
 function demoData(){let n=new Date(),h=x=>{let d=new Date(n.getTime()+x*3600000);return d.toISOString().slice(0,16)};return{funcionarios:[state.employee],diario:[{id:'dia_demo',dataISO:today(),responsavel:state.employee.nome,departamento:'FEMININO',obs:'Priorizar organização antes do pico de movimento.',tarefas:[{id:'t1',descricao:'Organizar parede de jeans',familia:'CONFECÇÃO',subfamilia:'JEANS',prioridade:'ALTA',status:'PENDENTE',prazo:h(2),observacao:'Completar grade e alinhar exposição.',responsavel:state.employee.nome,criadoPor:'LÍDER TESTE',criadoPorOperador:'133',exigirFotoConclusao:true,tempoEstimadoMin:30,criterioConclusao:'Parede organizada por tamanho, sem cabides vazios.',checklist:[{id:'c1',texto:'Conferir grade de tamanhos',concluido:false},{id:'c2',texto:'Alinhar cabides e peças',concluido:false}],exigirAprovacaoLider:true,historico:[{id:'h1',emISO:new Date().toISOString(),em:nowBR(),por:'LÍDER TESTE',evento:'CRIADA',detalhes:'Tarefa designada para execução.'}]},{id:'t2',descricao:'Revisar araras promocionais',familia:'CONFECÇÃO',subfamilia:'PROMOÇÃO',prioridade:'MÉDIA',status:'EM ANDAMENTO',prazo:h(4),observacao:'Separar peças sem etiqueta.',responsavel:state.employee.nome,criadoPor:'LÍDER TESTE',criadoPorOperador:'133',exigirFotoConclusao:false,historico:[]},{id:'t3',descricao:'Conferir provador feminino',familia:'OPERAÇÃO',subfamilia:'PROVADOR',prioridade:'CRÍTICA',status:'PENDENTE',prazo:h(-1),observacao:'Retirar peças acumuladas e devolver ao salão.',responsavel:state.employee.nome,criadoPor:'LÍDER TESTE',criadoPorOperador:'133',historico:[]}]}]}}
 function startApp(){
-  // Apenas o operador é lembrado como conveniência, nunca como credencial de acesso.
-  sessionStorage.setItem('operacionalSessaoV1',JSON.stringify({operator:opnorm(state.employee.operador),issuedAt:Date.now()}));
   applyUiPreferences();
   $('login').classList.add('hidden');$('app').classList.remove('hidden');
   $('todayLabel').textContent=new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'2-digit',month:'long'}).format(new Date());
@@ -838,6 +883,7 @@ function addObservation(did,tid){openObservationEditor(did,tid)}
 function closeModal(){state.selected=null;$('modalBack').classList.remove('active');salvarEstadoOperacionalAntesReload()}
 const UI_PREFS_KEY='operacionalPreferenciasUIV3Operador';
 function uiPreferencesKey(){const operador=opnorm(state.employee?.operador||'');return operador?`${UI_PREFS_KEY}_${operador}`:null}
+let uiPreferencesWriteQueue=Promise.resolve();
 const PASSWORD_REQUEST_PREFIX='operacional_senha_';
 const PROFILE_PHOTO_PREFIX='operacional_foto_';
 let profilePhotoRequest=0,profilePhotoDataUrl='';
@@ -917,6 +963,16 @@ function readUiPreferences(){
   try{const key=uiPreferencesKey();const p=key?JSON.parse(localStorage.getItem(key)||'{}'):{};return {period:p.period==='TODAS'?'TODAS':'HOJE',density:p.density==='COMPACTA'?'COMPACTA':'NORMAL',theme:p.theme==='ESCURO'?'ESCURO':'CLARO',accent:UI_ACCENTS.includes(p.accent)?p.accent:'PADRAO'}}
   catch(_){return {period:'HOJE',density:'NORMAL',theme:'CLARO',accent:'PADRAO'}}
 }
+function normalizeUiPreferences(p={}){return {period:p.period==='TODAS'?'TODAS':'HOJE',density:p.density==='COMPACTA'?'COMPACTA':'NORMAL',theme:p.theme==='ESCURO'?'ESCURO':'CLARO',accent:UI_ACCENTS.includes(p.accent)?p.accent:'PADRAO'}}
+async function loadUiPreferencesOnline(operator=state.employee?.operador){
+  const op=opnorm(operator),key=op?`${UI_PREFS_KEY}_${op}`:null;if(!op||!key||typeof client==='undefined'||!client)return readUiPreferences();
+  try{
+    const {data,error}=await withTimeout(client.from(ONLINE_TABLE).select('dados').eq('id',operacionalPreferencesId(op)).maybeSingle(),REQUEST_TIMEOUT_MS);if(error)throw error;
+    const remote=data?.dados;
+    if(remote?.tipo==='PREFERENCIAS_OPERACIONAL'&&opnorm(remote.operador)===op){const prefs=normalizeUiPreferences(remote);localStorage.setItem(key,JSON.stringify(prefs));return prefs}
+  }catch(err){console.warn('Preferências online indisponíveis; usando cache do dispositivo:',err)}
+  return readUiPreferences();
+}
 function applyUiPreferences(){
   const p=readUiPreferences();$('app').classList.toggle('compact-tasks',p.density==='COMPACTA');
   document.documentElement.dataset.theme=p.theme==='ESCURO'?'dark':'light';
@@ -924,10 +980,15 @@ function applyUiPreferences(){
   const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=p.theme==='ESCURO'?'#121212':'#F3F5F4';
   return p;
 }
-function saveUiPreferences(){
+async function saveUiPreferences(){
   const p={period:$('settingsDefaultPeriod').value,density:$('settingsDensity').value,theme:$('settingsTheme').value,accent:$('settingsAccent').value};
-  try{const key=uiPreferencesKey();if(!key)throw new Error('Sessão não identificada');localStorage.setItem(key,JSON.stringify(p));applyUiPreferences();toast('Preferências salvas para seu operador')}
-  catch(_){toast('Não foi possível salvar as preferências neste dispositivo')}
+  const key=uiPreferencesKey(),op=opnorm(state.employee?.operador);if(!key||!op){toast('Sessão não identificada');return false}
+  try{localStorage.setItem(key,JSON.stringify(normalizeUiPreferences(p)));applyUiPreferences()}
+  catch(_){toast('Não foi possível salvar as preferências neste dispositivo');return false}
+  if(state.mode==='demo'||typeof client==='undefined'||!client||typeof navigator==='undefined'||!navigator.onLine){toast('Preferências salvas neste dispositivo');return true}
+  const save=async()=>{const now=new Date().toISOString(),dados={tipo:'PREFERENCIAS_OPERACIONAL',operador:op,...normalizeUiPreferences(p),atualizadoEmISO:now};const {data,error}=await withTimeout(client.from(ONLINE_TABLE).upsert({id:operacionalPreferencesId(op),dados,updated_at:now},{onConflict:'id'}).select('id').maybeSingle(),REQUEST_TIMEOUT_MS);if(error||!data)throw error||new Error('Preferências não confirmadas pelo servidor.');return true};
+  const job=uiPreferencesWriteQueue.then(save,save);uiPreferencesWriteQueue=job.catch(()=>{});
+  try{await job;toast('Tema sincronizado com seu perfil');return true}catch(err){console.warn('Falha ao sincronizar preferências:',err);toast('Tema aplicado. A sincronização será tentada novamente.');return false}
 }
 function passwordRequestId(){return PASSWORD_REQUEST_PREFIX+opnorm(state.employee?.operador||'')}
 function passwordRequestMessage(message,pending=false,approved=false){
@@ -980,7 +1041,7 @@ async function submitOwnPasswordChange(event){
     const {data:request,error:requestError}=await withTimeout(client.from(ONLINE_TABLE).select('dados,updated_at').eq('id',id).maybeSingle(),REQUEST_TIMEOUT_MS);
     if(requestError)throw requestError;
     if(request?.dados?.tipo!=='SOLICITACAO_ALTERACAO_SENHA'||opnorm(request.dados.operador)!==op||request.dados.status!=='AUTORIZADA')throw new Error('A autorização não está mais disponível. Verifique o pedido.');
-    let savedPassword=false;
+    let savedPassword=false,newCredentialVersion=1;
     for(let attempt=0;attempt<3&&!savedPassword;attempt++){
       const credentialId=operacionalCredentialId(op);
       const {data:credential,error:readError}=await withTimeout(client.from(ONLINE_TABLE).select('dados,updated_at').eq('id',credentialId).maybeSingle(),REQUEST_TIMEOUT_MS);
@@ -988,7 +1049,7 @@ async function submitOwnPasswordChange(event){
       const existing=credential?.dados;
       if(credential&&(existing?.tipo!=='CREDENCIAL_OPERACIONAL'||opnorm(existing.operador)!==op))throw new Error('Cadastro operacional inválido. Procure o Gerencial.');
       if(existing&&String(existing.senha||'').trim()===next)throw new Error('Escolha uma senha diferente da senha atual do Operacional.');
-      const now=new Date().toISOString(),dados={...existing,tipo:'CREDENCIAL_OPERACIONAL',operador:op,senha:next,versao:Math.max(0,Number(existing?.versao)||0)+1,alteradoEmISO:now};
+      const now=new Date().toISOString(),dados={...existing,tipo:'CREDENCIAL_OPERACIONAL',operador:op,senha:next,versao:Math.max(0,Number(existing?.versao)||0)+1,alteradoEmISO:now};newCredentialVersion=dados.versao;
       let write=credential?client.from(ONLINE_TABLE).update({dados,updated_at:now}).eq('id',credentialId):client.from(ONLINE_TABLE).insert({id:credentialId,dados,updated_at:now});
       if(credential)write=credential.updated_at?write.eq('updated_at',credential.updated_at):write.is('updated_at',null);
       const {data:saved,error:saveError}=await withTimeout(write.select('id').maybeSingle(),REQUEST_TIMEOUT_MS);
@@ -996,6 +1057,7 @@ async function submitOwnPasswordChange(event){
       savedPassword=Boolean(saved);
     }
     if(!savedPassword)throw new Error('A credencial operacional foi atualizada em outra sessão. Aguarde e tente novamente.');
+    if(typeof atualizarVersaoSessaoOperacional==='function')await atualizarVersaoSessaoOperacional(newCredentialVersion);
     // A senha está apenas na credencial operacional, nunca na configuração do Gerencial nem no pedido.
     try{
       let mark=client.from(ONLINE_TABLE).update({dados:{...request.dados,status:'ATENDIDA',atendidoEmISO:new Date().toISOString(),atendidoPor:state.employee.nome||op},updated_at:new Date().toISOString()}).eq('id',id);
@@ -1074,6 +1136,7 @@ function subscribeRealtime(){
   state.channel=client.channel('operacional_'+opnorm(state.employee.operador)+'_'+Date.now())
     .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${SHARED_ROW_ID}`},()=>agendarRefreshRealtime())
     .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${GLOBAL_ROW_ID}`},()=>validarAcessoOperacionalAtual({silent:true}))
+    .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${operacionalPreferencesId(state.employee.operador)}`},()=>loadUiPreferencesOnline().then(()=>{applyUiPreferences();render()}))
     .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${passwordRequestId()}`},()=>{if(state.view==='CONFIGURACOES')loadPasswordRequestStatus()})
     .subscribe(status=>{
       if(status==='SUBSCRIBED'){state.realtimeReady=true;syncStatus('Online • canal conectado + verificação','online');return}
@@ -1112,13 +1175,18 @@ function iniciarMonitorSincronizacao(){
 window.addEventListener('online',()=>{if(state.employee&&state.mode!=='demo'){syncStatus('Reconectando...','warn');refreshOnline({silent:true,force:true});subscribeRealtime();iniciarMonitorSincronizacao()}});
 window.addEventListener('offline',()=>{if(state.employee&&state.mode!=='demo')syncStatus('Offline • consulta apenas (edições exigem internet)','offline')});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.employee&&state.mode!=='demo'){refreshOnline({silent:true});validarAcessoOperacionalAtual({silent:true})}});
-function logout(){if(autoRefreshTimerOperacional)clearTimeout(autoRefreshTimerOperacional);if(executionClockTimer)clearInterval(executionClockTimer);pararMonitorSincronizacao();clearTimeout(realtimeRefreshTimer);if(state.channel)try{client.removeChannel(state.channel)}catch{}sessionStorage.removeItem('operacionalSessaoV1');sessionStorage.removeItem(AUTO_REFRESH_UI_KEY);sessionStorage.removeItem(AUTO_REFRESH_PENDING_KEY);location.reload()}
+async function logout(){
+  if(autoRefreshTimerOperacional)clearTimeout(autoRefreshTimerOperacional);if(executionClockTimer)clearInterval(executionClockTimer);pararMonitorSincronizacao();clearTimeout(realtimeRefreshTimer);if(state.channel)try{client.removeChannel(state.channel)}catch{}
+  const sess=lerSessaoOperacionalLocal();sessionStorage.removeItem('operacionalSessaoV1');sessionStorage.removeItem('operacionalSessaoV2');sessionStorage.removeItem(AUTO_REFRESH_UI_KEY);sessionStorage.removeItem(AUTO_REFRESH_PENDING_KEY);
+  if(sess?.token&&client)try{await withTimeout(client.from(ONLINE_TABLE).delete().eq('id',operacionalSessionId(sess.token)),5000)}catch(_){ }
+  location.reload();
+}
 ['filterDate','filterSearch'].forEach(id=>$(id)?.addEventListener(id==='filterDate'?'change':'input',salvarEstadoOperacionalAntesReload));
 window.addEventListener('pagehide',()=>{if(state.employee)salvarEstadoOperacionalAntesReload()});
-// Restaurar preferências após um login autenticado (não restaurar login apenas com sessionStorage).
+// Restaura tela, preferências e sessão validada pelo registro temporário no servidor.
 const iniciarAppComPreferencias= startApp;
 startApp=function(){iniciarAppComPreferencias();restaurarEstadoOperacionalAposReload();};
-setTimeout(()=>{restaurarSessaoOperacional().then(restaurada=>{if(!restaurada){document.documentElement.classList.remove('auto-refresh-restoring');$('autoRefreshLoader')?.classList.remove('active')}})},0);
+setTimeout(()=>{restaurarSessaoOperacional().then(restaurada=>{if(!restaurada){sessionStorage.removeItem(AUTO_REFRESH_PENDING_KEY);document.documentElement.classList.remove('auto-refresh-restoring');$('autoRefreshLoader')?.classList.remove('active')}})},0);
 </script>
 
 
