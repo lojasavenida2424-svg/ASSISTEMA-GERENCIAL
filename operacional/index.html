@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#291A1E">
-<title>Sistema Operacional V1.5 • Loja 24 • Meu Dia Inteligente</title>
+<meta name="theme-color" content="#F3F5F4">
+<title>Operacional AV • Loja 24</title>
 <script>try{if(sessionStorage.getItem('operacionalAutoRefreshPending')==='1')document.documentElement.classList.add('auto-refresh-restoring')}catch(_){}</script>
+<script>document.documentElement.dataset.theme='light';document.documentElement.dataset.accent='padrao';</script>
 <script src="https://unpkg.com/@supabase/supabase-js@2.112.3"></script>
 <script>if(!window.supabase){document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3"><\/script>')}</script>
 <style>
@@ -41,6 +42,330 @@
 .evidence-viewer{position:fixed;inset:0;z-index:160;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:18px}.evidence-viewer.active{display:flex}.evidence-viewer img{max-width:96vw;max-height:88vh;object-fit:contain;border-radius:14px}.evidence-viewer-close{position:absolute;right:16px;top:16px;width:44px;height:44px;border:0;border-radius:50%;background:#fff;color:#111;font-size:1.25rem;font-weight:1000;cursor:pointer}.evidence-viewer-info{position:absolute;left:16px;right:70px;bottom:16px;color:#fff;font-size:.75rem;font-weight:800;text-shadow:0 1px 4px #000}
 @media(max-width:560px){.focus-top{align-items:flex-start}.focus-progress{width:118px}.focus-actions{display:grid;grid-template-columns:1fr 1fr}.focus-actions .btn:first-child{grid-column:1/-1}.focus-body{padding:14px}.focus-title{font-size:1.08rem}}
 </style>
+<style id="operacional-redesign-2026">
+/* Redesenho visual isolado do Operacional. Os IDs e ações existentes continuam ativos. */
+:root{--yellow:#F5C629;--yellow2:#E5AD0C;--ink:#211C19;--bg:#F6F5F1;--card:#FFF;--soft:#F7F6F2;--text:#292722;--muted:#756F67;--border:#E8E5DD;--green:#247451;--greenbg:#E7F4EC;--red:#B3413B;--redbg:#FCEDEB;--orange:#9C6416;--orangebg:#FFF1D8;--blue:#425F8D;--bluebg:#EBF1FB;--shadow:0 16px 40px rgba(36,30,22,.08)}
+body{background:var(--bg);font-family:Inter,"Segoe UI",Arial,sans-serif;letter-spacing:-.012em}
+button{transition:background .18s,transform .18s,border-color .18s,box-shadow .18s}button:not(:disabled):hover{transform:translateY(-1px)}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #B08512;outline-offset:2px}
+.login{background:radial-gradient(circle at 82% 16%,rgba(245,198,41,.20),transparent 30%),linear-gradient(130deg,#241F1B,#383028);padding:28px}
+.login-card{width:min(460px,100%);border-radius:22px;box-shadow:0 35px 90px rgba(0,0,0,.24)}
+.login-brand{background:#fff;border-bottom:1px solid var(--border);padding:30px 34px 23px}.login-brand .brand-row{gap:17px}.brand-mark{width:57px;height:57px;border-radius:17px;background:var(--yellow);color:var(--ink);font-size:1.3rem}.login-brand h1{font-size:1.08rem;letter-spacing:.035em;line-height:1.2}.login-brand h1:before{content:"AVENIDA / LOJA 24";display:block;font-size:.65rem;color:var(--muted);letter-spacing:.13em;margin-bottom:7px}.login-body{padding:26px 34px 34px}.login-body label{color:var(--muted);letter-spacing:.065em}.login-body input{border-radius:10px;min-height:49px;background:#FBFAF8}.login-actions{margin-top:22px}.login-actions .btn{min-height:50px;background:var(--yellow);color:var(--ink);border-radius:10px}
+.app{display:grid;grid-template-columns:232px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
+.topbar{grid-column:1/-1;background:#fff;border-bottom:1px solid var(--border);backdrop-filter:none;position:sticky;top:0;z-index:45}.topbar-inner{max-width:none;padding:14px clamp(18px,2.2vw,36px)}.app-mark{width:44px;height:44px;background:var(--yellow);color:var(--ink);border-radius:13px;font-size:1rem}.app-brand strong{font-size:.95rem;letter-spacing:-.025em}.app-brand small{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em}.avatar{width:41px;height:41px;border-radius:50%;background:#F5F1E4;border:1px solid #EBDFB9}.icon-btn{border-radius:11px}.icon-btn:hover{background:#FBF1E8}
+.desk-rail{grid-column:1;grid-row:2;background:#28231F;color:#F7F3E9;min-height:calc(100vh - 73px);padding:30px 14px 24px;display:flex;flex-direction:column;gap:5px;position:sticky;top:73px;height:calc(100vh - 73px)}
+.rail-eyebrow{color:#AFA79A;font-size:.62rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase;padding:0 13px 15px}.desk-rail .tab{border:0;background:transparent;color:#C8C0B3;width:100%;border-radius:11px;text-align:left;padding:13px 14px;font-size:.82rem;display:flex;align-items:center;gap:11px}.desk-rail .tab .ui-svg-icon{width:18px;height:18px}.desk-rail .tab.active{background:var(--yellow);color:var(--ink);box-shadow:none}.desk-rail .tab:not(.active):hover{background:#3D3630;color:#fff}.rail-note{margin-top:auto;border-top:1px solid #4A4239;padding:18px 13px 4px;color:#BEB6A9;font-size:.73rem;line-height:1.5}.rail-note b{display:block;color:#F4EACC;font-size:.78rem;margin-bottom:6px}
+.shell{grid-column:2;grid-row:2;width:100%;max-width:1260px;margin:0 auto;padding:32px clamp(20px,3.5vw,56px) 90px}
+.page-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:19px}.page-heading .eyebrow{color:#9B7412;letter-spacing:.14em}.page-heading h1{font-size:clamp(1.45rem,2.3vw,2.15rem);line-height:1.1;margin:7px 0 0;letter-spacing:-.055em}.page-date{color:var(--muted);font-weight:750;font-size:.75rem;white-space:nowrap;margin-top:7px;text-transform:capitalize}
+.hero{background:#2D2823;border-radius:20px;box-shadow:none;padding:27px 30px 28px;border-left:5px solid var(--yellow)}.hero:after{content:"";width:260px;height:260px;border:1px solid rgba(245,198,41,.15);border-radius:50%;right:-95px;top:-90px;bottom:auto;font-size:0;box-shadow:0 0 0 35px rgba(245,198,41,.025),0 0 0 80px rgba(245,198,41,.02)}.hero .eyebrow{color:var(--yellow);letter-spacing:.15em}.hero h2{font-size:clamp(1.5rem,2.5vw,2.35rem);letter-spacing:-.06em;margin:12px 0 7px}.hero p{font-size:.83rem;color:#CBC5B9}.sync-pill{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);border-radius:8px;padding:7px 10px;color:#E7E0D2;margin-top:18px}
+.page-heading .sync-pill{margin-top:11px;background:#fff;border:1px solid var(--border);color:#5D574D;font-size:.69rem}
+.summary{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:15px 0 22px}.metric{min-height:106px;border:1px solid var(--border);border-radius:14px;box-shadow:none;padding:17px 18px;position:relative;overflow:hidden}.metric:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:#CFC7B6}.metric:nth-child(1):before{background:#D5A527}.metric:nth-child(2):before{background:#526F9C}.metric:nth-child(3):before{background:#4E9970}.metric:nth-child(4):before{background:#C76256}.metric small{font-size:.65rem;letter-spacing:.075em}.metric b{font-size:1.85rem;line-height:1.1;margin-top:11px;letter-spacing:-.065em}.metric-icon{background:#F7F5F0;color:#756F65;border-radius:10px;width:38px;height:38px;font-size:1rem}.metric-svg-deco{right:18px;opacity:.12}
+.focus-panel{margin:0 0 22px;border-radius:17px;box-shadow:none;border:1px solid #E6DBB7}.focus-top{background:#FFF8E5;border-bottom:1px solid #EEE1B8;padding:15px 20px}.focus-top strong{font-size:.7rem;letter-spacing:.13em;color:#6E530F}.focus-top small{font-size:.72rem}.focus-progress-line{height:7px;background:#E8DFC8}.focus-body{padding:22px 22px 23px}.focus-kicker{color:#9C6A10;letter-spacing:.12em}.focus-title{font-size:1.3rem;letter-spacing:-.04em;margin:8px 0 4px}.focus-route{font-weight:650}.focus-meta{margin:15px 0}.focus-actions{margin-top:18px}.focus-actions .btn{min-height:41px}
+.list-panel{background:#fff;border:1px solid var(--border);border-radius:18px;padding:21px;box-shadow:0 10px 35px rgba(36,30,22,.035)}.list-panel .section-head{margin:0 0 17px;align-items:center}.section-head h3{font-size:1.12rem;letter-spacing:-.035em}.section-head p{font-size:.76rem}.section-head .btn{font-size:.76rem}.tabs{gap:6px;padding:0 0 17px}.tab{border:1px solid transparent;background:#F5F4F0;color:#716B61;border-radius:9px;padding:9px 13px;font-size:.76rem}.tab.active{background:var(--ink);border-color:var(--ink);color:#fff}.toolbar{border:0;background:#FAF9F6;border-radius:11px;padding:12px;margin:0 0 17px;gap:12px}.toolbar label{font-size:.65rem;letter-spacing:.06em}.toolbar input,.toolbar select{background:#fff;border:1px solid #E5E2D9;border-radius:8px;min-height:42px}
+.tasks{gap:10px}.task{border-radius:13px;box-shadow:none;border:1px solid var(--border);border-left:3px solid #D4CBBB;transition:border-color .2s,box-shadow .2s}.task:hover{border-color:#D6C99E;box-shadow:0 10px 26px rgba(36,30,22,.07)}.task.prio-CRITICA{border-left:4px solid var(--red)}.task.prio-ALTA{border-left:4px solid #D38D32}.task-head{padding:18px 19px 14px}.task-title{font-size:.98rem;letter-spacing:-.025em}.route{font-size:.72rem;font-weight:650}.chips{gap:5px;margin-top:13px}.chip{border:0;background:#F4F3F0;color:#675F54;border-radius:6px;font-size:.62rem;letter-spacing:.025em;padding:5px 7px}.chip.green{background:var(--greenbg);color:var(--green)}.chip.red{background:var(--redbg);color:var(--red)}.chip.orange{background:var(--orangebg);color:var(--orange)}.chip.blue{background:var(--bluebg);color:var(--blue)}.deadline{text-align:right;font-size:.72rem;line-height:1.5;min-width:115px}.deadline b{font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.task-note,.task-blocked-note{border-radius:8px}.task-actions{padding:12px 18px;background:#FCFBF8;border-color:var(--border)}.task-actions .btn{font-size:.73rem;border-radius:8px;min-height:36px}.btn{border-radius:9px;font-size:.8rem;letter-spacing:-.01em}.btn.good{background:var(--green)}.btn.warn{background:#A96F1F}.btn.danger{background:#B3413B}.btn.secondary{background:#fff;color:#4E4940;border-color:#DDD9D0}.btn.secondary:hover{background:#F5F2EA}.empty{border-radius:11px;background:#FAF9F6;font-size:.82rem}
+.modal-back{background:rgba(27,23,19,.64);backdrop-filter:blur(3px)}.modal{border-radius:16px;padding:25px}.modal-head h3{letter-spacing:-.04em}.modal-close{border-radius:9px}.info,.detail-block,.exec-check,.impediment-option{border-radius:9px}.info{background:#FAF9F6}.history .hist{background:#FAF9F6}.completion-page{background:var(--bg)}.completion-top{background:#fff}.completion-hero{background:#2D2823;border-left:5px solid var(--yellow);border-radius:15px}.completion-card{border-radius:13px;box-shadow:none}.photo-drop{border-radius:10px}.completion-back{border-radius:9px}
+#app:not(.view-home) .overview-only,#app:not(.view-home) .home-actions{display:none!important}
+#app:not(.view-tasks) .list-panel{display:none}
+.profile-panel,.settings-panel{display:none}
+#app.view-profile .profile-panel,#app.view-settings .settings-panel{display:block}
+.home-actions{display:flex;justify-content:flex-end;margin-top:4px}.home-actions .btn{background:var(--yellow);color:var(--ink)}
+.account-panel{background:#fff;border:1px solid var(--border);border-radius:17px;padding:25px;max-width:760px}.account-intro{display:flex;align-items:center;gap:16px;padding-bottom:22px;border-bottom:1px solid var(--border);margin-bottom:22px}.account-avatar{width:64px;height:64px;border-radius:18px;background:var(--yellow);display:grid;place-items:center;font-size:1.35rem;font-weight:950}.account-intro h2{margin:0;font-size:1.25rem}.account-intro p{margin:5px 0 0;color:var(--muted);font-size:.8rem}.account-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.account-field{padding:15px;background:#FAF9F6;border:1px solid var(--border);border-radius:10px}.account-field small{display:block;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-size:.65rem;font-weight:850}.account-field b{display:block;margin-top:7px;font-size:.9rem;overflow-wrap:anywhere}.settings-row{padding:15px 0;border-bottom:1px solid var(--border)}.settings-row:first-of-type{padding-top:0}.settings-row:last-of-type{border-bottom:0}.settings-row label{margin:0 0 8px}.settings-row p{color:var(--muted);font-size:.77rem;line-height:1.45;margin:0 0 11px}.settings-row select{max-width:320px;border-radius:9px}.settings-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:24px}
+.compact-tasks .task-head{padding:11px 14px 8px}.compact-tasks .task-actions{padding:8px 14px}.compact-tasks .task-note{margin-bottom:7px}.compact-tasks .tasks{gap:7px}
+@media(max-width:1050px){.app{grid-template-columns:196px minmax(0,1fr)}.desk-rail{padding-left:9px;padding-right:9px}.shell{padding:24px 22px 80px}}
+@media(max-width:800px){.app{display:block}.desk-rail{display:none}.shell{max-width:760px;padding:22px 18px 92px}.summary{grid-template-columns:repeat(2,minmax(0,1fr))}.bottom-nav{position:fixed;display:grid;grid-template-columns:repeat(4,1fr);left:0;right:0;bottom:0;z-index:40;background:#fff;border-top:1px solid var(--border);padding:7px 8px max(7px,env(safe-area-inset-bottom));box-shadow:0 -8px 24px rgba(36,30,22,.06)}.bottom-nav button{border:0;background:transparent;padding:6px 2px;font-size:.65rem;font-weight:850;color:var(--muted)}.bottom-nav button span{display:block;font-size:1.05rem;margin-bottom:2px}.bottom-nav button.active{color:#8B6500}.bottom-nav button.active:after{content:"";display:block;width:22px;height:3px;background:var(--yellow);border-radius:5px;margin:5px auto -5px}.toolbar{display:grid;grid-template-columns:1fr 1.5fr}.toolbar .field.search{grid-column:auto}}
+@media(max-width:560px){.topbar-inner{padding:11px 14px}.app-brand strong{font-size:.82rem}.app-brand small{font-size:.62rem}.app-mark{width:39px;height:39px}.avatar{width:37px;height:37px}.icon-btn{width:37px;height:37px}.shell{padding:21px 13px 100px}.page-heading{margin:0 3px 17px}.page-heading h1{font-size:1.45rem}.page-date{font-size:.68rem;max-width:120px;white-space:normal;text-align:right}.hero{border-radius:13px;padding:22px 20px}.hero h2{font-size:1.55rem}.hero p{font-size:.77rem}.summary{gap:8px;margin:11px 0 17px}.metric{min-height:88px;padding:13px;border-radius:10px}.metric b{font-size:1.55rem;margin-top:8px}.metric small{font-size:.58rem}.metric-icon{width:29px;height:29px}.focus-panel{border-radius:12px;margin-bottom:17px}.focus-top{padding:13px 14px}.focus-body{padding:17px 15px}.focus-title{font-size:1.13rem}.list-panel{padding:15px 12px;border-radius:12px}.list-panel .section-head{align-items:flex-start}.section-head .btn{padding:9px}.tabs{overflow-x:auto;scrollbar-width:none}.toolbar{grid-template-columns:1fr;padding:11px}.toolbar .field.search{grid-column:auto}.task-head{padding:15px 14px 12px}.task-actions{padding:11px 13px}.task{border-radius:10px}.deadline{text-align:left}.modal{border-radius:18px 18px 0 0;padding:19px}.login-brand,.login-body{padding-left:24px;padding-right:24px}}
+</style>
+<style id="operacional-nav-v2-mobile">@media(max-width:560px){.bottom-nav button{font-size:.56rem;letter-spacing:-.015em}.account-panel{padding:17px;border-radius:12px}.account-grid{grid-template-columns:1fr}.account-intro{gap:11px}.account-avatar{width:50px;height:50px;flex:0 0 50px}}</style>
+<style id="operacional-themes-v3">
+:root{--accent:#F5C629;--accent-contrast:#211C19;--accent-label:#896300}
+:root[data-accent="azul"]{--accent:#3479D2;--accent-contrast:#fff;--accent-label:#245998}
+:root[data-accent="roxo"]{--accent:#8659C8;--accent-contrast:#fff;--accent-label:#67409A}
+:root[data-accent="rosa"]{--accent:#CF518A;--accent-contrast:#fff;--accent-label:#9F2D62}
+:root[data-accent="vermelho"]{--accent:#C84F4D;--accent-contrast:#fff;--accent-label:#9E3B3A}
+:root[data-accent="verde"]{--accent:#25855D;--accent-contrast:#fff;--accent-label:#176445}
+:root[data-accent="cinza"]{--accent:#727985;--accent-contrast:#fff;--accent-label:#4D545D}
+:root[data-accent="laranja"]{--accent:#D87728;--accent-contrast:#211C19;--accent-label:#A94E0C}
+.app-mark,.brand-mark,.account-avatar{background:var(--accent);color:var(--accent-contrast)}
+.desk-rail .tab.active,.home-actions .btn,.login-actions .btn{background:var(--accent);color:var(--accent-contrast)}
+.bottom-nav button.active:after,.focus-progress-line span{background:var(--accent)}
+.metric:first-child:before,.hero,.completion-hero{border-left-color:var(--accent)}
+.hero .eyebrow{color:var(--accent)}.focus-top{background:color-mix(in srgb,var(--accent) 13%,var(--card));border-bottom-color:color-mix(in srgb,var(--accent) 28%,var(--border))}.focus-panel{border-color:color-mix(in srgb,var(--accent) 32%,var(--border))}
+.page-heading .eyebrow,.focus-kicker,.bottom-nav button.active{color:var(--accent-label)}
+.accent-preview{display:inline-block;width:34px;height:34px;border-radius:10px;background:var(--accent);border:1px solid rgba(0,0,0,.16);flex:0 0 34px}
+.theme-color-control{display:flex;align-items:center;gap:10px;max-width:370px}.theme-color-control select{min-width:0}
+.settings-heading{font-size:.84rem;text-transform:uppercase;letter-spacing:.09em;margin:27px 0 7px;color:var(--muted)}
+.settings-heading:first-of-type{margin-top:0}.request-status{min-height:18px;margin-top:12px!important}.settings-row .btn{margin-top:3px}
+:root[data-theme="dark"]{--bg:#17191D;--card:#252930;--soft:#2C3037;--text:#F3F2EE;--muted:#AFB4BC;--border:#3B414A;--green:#69C898;--greenbg:#203C30;--red:#F18C85;--redbg:#472B2B;--orange:#E9B667;--orangebg:#493924;--blue:#9CBDEA;--bluebg:#293A56;--accent-label:var(--accent);color-scheme:dark}
+</style>
+<style id="operacional-theme-completo-v4">
+:root{
+  --surface:#fff;--surface-soft:#FAF9F6;--surface-hover:#F1EFE9;
+  --nav-surface:#fff;--nav-text:#514D46;--nav-hover:#F4F2EB;--nav-divider:#E6E2DA;
+  --hero-surface:#2D2823;--hero-text:#fff;--hero-muted:#D3CCC0;
+  --accent-soft:color-mix(in srgb,var(--accent) 12%,var(--surface));
+  --accent-border:color-mix(in srgb,var(--accent) 30%,var(--border));
+}
+:root[data-theme="dark"]{
+  --surface:#252930;--surface-soft:#2C3037;--surface-hover:#353B44;
+  --nav-surface:#1D2025;--nav-text:#D0D2D5;--nav-hover:#30353D;--nav-divider:#3B414A;
+  --hero-surface:#30343D;--hero-text:#fff;--hero-muted:#D0D5DC;
+}
+body,.completion-page,.auto-refresh-loader{background:var(--bg);color:var(--text)}
+.topbar,.list-panel,.metric,.focus-panel,.task,.account-panel,.modal,.completion-card,.completion-top,.login-card,.auto-refresh-loader-card,.detail-block,.exec-check,.impediment-option{background:var(--surface);color:var(--text);border-color:var(--border)}
+.login{background:radial-gradient(circle at 85% 12%,color-mix(in srgb,var(--accent) 20%,transparent),transparent 35%),var(--bg)}
+.login-brand,.login-note,.focus-top,.toolbar,.task-actions,.account-field,.info,.detail-block-head,.history .hist,.empty,.photo-drop,.bottom-nav{background:var(--surface-soft);color:var(--text);border-color:var(--border)}
+.login-brand,.bottom-nav,.topbar{background:var(--surface)}
+.login-body input,input,select,textarea,.toolbar input,.toolbar select{background:var(--surface);color:var(--text);border-color:var(--border)}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:1}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 22%,transparent)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline-color:var(--accent-label)}
+.desk-rail{background:var(--nav-surface);color:var(--nav-text);border-right:1px solid var(--nav-divider)}
+.rail-eyebrow,.rail-note{color:var(--muted)}.rail-note{border-top-color:var(--nav-divider)}.rail-note b{color:var(--text)}
+.desk-rail .tab,.desk-rail .tab:where(:not(.active)){color:var(--nav-text)}
+.desk-rail .tab:not(.active):hover{background:var(--nav-hover);color:var(--text)}
+.desk-rail .tab.active{background:var(--accent);color:var(--accent-contrast)}
+.bottom-nav{background:var(--surface);border-color:var(--border)}
+.bottom-nav button{color:var(--muted)}.bottom-nav button.active{color:var(--accent-label)}
+.avatar,.metric-icon{background:var(--accent-soft);color:var(--accent-label);border-color:var(--accent-border)}
+.icon-btn,.modal-close,.completion-back,.btn.secondary,.reference-action{background:var(--surface);color:var(--text);border-color:var(--border)}
+.icon-btn:hover,.btn.secondary:hover,.reference-action:hover{background:var(--surface-hover)}
+.btn:not(.secondary):not(.danger):not(.warn),.btn.good,.login-actions .btn,.home-actions .btn{background:var(--accent);color:var(--accent-contrast)}
+.btn:not(.secondary):not(.danger):not(.warn):hover,.btn.good:hover{background:color-mix(in srgb,var(--accent) 88%,#000)}
+.hero,.completion-hero{background:linear-gradient(135deg,var(--hero-surface),color-mix(in srgb,var(--accent) 11%,var(--hero-surface)));color:var(--hero-text);border-left-color:var(--accent)}
+.hero p,.completion-date,.completion-hero small{color:var(--hero-muted)}
+.hero:after{border-color:color-mix(in srgb,var(--accent) 38%,transparent);box-shadow:0 0 0 35px color-mix(in srgb,var(--accent) 5%,transparent),0 0 0 80px color-mix(in srgb,var(--accent) 3%,transparent)}
+.page-heading .sync-pill{background:var(--surface);color:var(--text);border-color:var(--border)}
+.focus-panel{border-color:var(--accent-border)}.focus-top{background:var(--accent-soft);border-bottom-color:var(--accent-border)}
+.focus-top strong,.focus-title,.deadline b,.task-title,.section-head h3,.account-intro h2,.account-field b,.settings-heading,.detail-block-head b,.hist b{color:var(--text)}
+.focus-progress-line{background:var(--surface-hover)}.focus-progress-line span{background:var(--accent)}
+.metric:first-child:before{background:var(--accent)}.metric-icon{border:0}.metric-svg-deco{color:var(--accent-label);opacity:.23}
+.toolbar{background:var(--surface-soft)}.tab{background:var(--surface-soft);color:var(--text)}.tab.active{background:var(--accent);border-color:var(--accent);color:var(--accent-contrast)}
+.task{border-color:var(--border)}.task:hover{border-color:var(--accent-border);box-shadow:var(--shadow)}
+.task-actions,.task-note,.task-blocked-note,.chip,.history .hist,.detail-block-head,.info,.account-field{border-color:var(--border)}
+.task-actions,.info,.account-field,.empty,.history .hist{background:var(--surface-soft)}
+.chip{background:var(--surface-hover);color:var(--text)}
+.chip.green{background:var(--greenbg);color:var(--green)}.chip.red{background:var(--redbg);color:var(--red)}.chip.orange{background:var(--orangebg);color:var(--orange)}.chip.blue{background:var(--bluebg);color:var(--blue)}
+.task-note{background:var(--surface-soft);color:var(--text)}.task-blocked-note{background:var(--redbg);color:var(--red)}
+.hist{border-left-color:var(--accent)}.exec-check input{accent-color:var(--accent)}.exec-check{background:var(--surface)}
+.validation-banner.waiting{background:var(--bluebg);color:var(--blue)}
+.modal-back{background:rgba(10,13,17,.68)}.modal,.completion-card{background:var(--surface)}
+.toast{background:var(--hero-surface);color:var(--hero-text);border:1px solid var(--accent-border)}
+.demo-badge{background:var(--accent-soft);color:var(--accent-label);border-color:var(--accent-border)}
+.photo-drop{background:var(--surface-soft);border-color:var(--border)}
+.photo-drop:hover{background:var(--accent-soft);border-color:var(--accent)}
+.photo-drop.required{background:var(--orangebg);border-color:var(--orange)}
+.auto-refresh-loader-card{box-shadow:var(--shadow)}.auto-refresh-loader-spinner,.auto-refresh-spinner{border-color:var(--border);border-top-color:var(--accent)}
+.auto-refresh-loader small{color:var(--muted)}
+:root[data-theme="dark"] .login-brand,:root[data-theme="dark"] .login-body input,:root[data-theme="dark"] .toolbar input,:root[data-theme="dark"] .toolbar select{background:var(--surface)}
+:root[data-theme="dark"] .focus-top strong,:root[data-theme="dark"] .deadline b,:root[data-theme="dark"] .task-title{color:var(--text)}
+:root[data-theme="dark"] .reference-action,:root[data-theme="dark"] .detail-block,:root[data-theme="dark"] .exec-check,:root[data-theme="dark"] .impediment-option{background:var(--surface);color:var(--text);border-color:var(--border)}
+</style>
+<style id="operacional-profile-mobile-v5">
+.avatar,.account-avatar{overflow:hidden;flex:none}.avatar img,.account-avatar img{display:block;width:100%;height:100%;object-fit:cover}
+.account-avatar{width:86px;height:86px;border-radius:50%;border:3px solid var(--accent-border);background:var(--accent-soft);color:var(--accent-label)}
+.account-identity{min-width:0;flex:1}.account-identity h2{overflow-wrap:anywhere}
+.profile-photo-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:14px}
+.profile-photo-button{margin:0;text-transform:none;letter-spacing:normal;min-height:44px;cursor:pointer}
+.profile-photo-input{position:absolute;width:1px;height:1px;padding:0;opacity:0;overflow:hidden;clip-path:inset(50%)}
+.profile-photo-actions:has(.profile-photo-input:focus-visible) .profile-photo-button{outline:3px solid var(--accent);outline-offset:2px}
+.profile-photo-status{margin:8px 0 0!important;min-height:1.3em;overflow-wrap:anywhere}
+.bottom-nav button{min-width:0;min-height:50px;overflow-wrap:anywhere}
+@media(max-width:800px){
+  .shell{width:100%;min-width:0;padding-bottom:calc(106px + env(safe-area-inset-bottom))}
+  .bottom-nav{grid-template-columns:repeat(4,minmax(0,1fr));padding-bottom:max(7px,env(safe-area-inset-bottom))}
+  .bottom-nav button.active{color:var(--accent-label)}
+  .toast{bottom:calc(80px + env(safe-area-inset-bottom));left:12px;right:12px;text-align:center}
+  .modal{max-height:calc(100dvh - 20px);padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+  .completion-main{width:100%;min-width:0;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+}
+@media(max-width:560px){
+  .topbar-inner{gap:8px}.app-brand{min-width:0}.app-brand>div:last-child{min-width:0}.app-brand strong{font-size:.78rem;line-height:1.2}.app-brand small{font-size:.6rem}
+  .user-mini{gap:7px;flex:none}.shell{padding:16px 12px calc(106px + env(safe-area-inset-bottom))}
+  .page-heading{display:block;margin:0 2px 14px}.page-heading h1{font-size:clamp(1.4rem,6vw,1.75rem)}
+  .page-date{display:block;max-width:none;text-align:left;margin-top:9px;white-space:normal}
+  .page-heading .sync-pill{max-width:100%;overflow-wrap:anywhere}
+  .hero{padding:20px 18px}.hero:after{pointer-events:none}
+  .summary{grid-template-columns:repeat(2,minmax(0,1fr))}.metric{min-width:0;gap:5px;padding:12px}.metric small{font-size:.61rem;line-height:1.25}.metric b{font-size:1.5rem}.metric-icon{width:30px;height:30px;flex:none}
+  .focus-top{gap:8px}.focus-top>div:first-child{min-width:0}.focus-progress{width:92px;flex:none}.focus-body{padding:16px}
+  .focus-actions,.task-actions{display:flex;flex-wrap:wrap;gap:8px}.focus-actions .btn,.task-actions .btn{flex:1 1 calc(50% - 8px);min-height:44px;white-space:normal;text-align:center}.focus-actions .btn:first-child,.task-actions .btn:first-child{flex-basis:100%}
+  .list-panel{padding:15px 12px}.list-panel .section-head{align-items:stretch;flex-wrap:wrap}.list-panel .section-head .btn{min-height:44px}
+  .toolbar{grid-template-columns:minmax(0,1fr);gap:11px}.toolbar .field,.toolbar .field.search{min-width:0}.toolbar input,.toolbar select{min-height:44px}
+  .task-head>div:first-child{min-width:0}.task-title,.route,.task-note{overflow-wrap:anywhere}.chips{gap:6px}.chip{line-height:1.3}
+  .account-panel{padding:18px 15px}.account-intro{gap:14px;align-items:flex-start}.account-avatar{width:66px;height:66px;flex-basis:66px}
+  .account-grid{grid-template-columns:minmax(0,1fr);gap:8px}.account-field{padding:12px}.profile-photo-actions{align-items:stretch}
+  .profile-photo-actions .btn{font-size:.72rem;padding:10px;min-height:44px}.profile-photo-button{text-align:center}
+  .settings-actions{display:grid;grid-template-columns:minmax(0,1fr)}.settings-actions .btn{min-height:44px}.theme-color-control{max-width:100%}
+  .bottom-nav{padding-inline:4px}.bottom-nav button{font-size:clamp(.52rem,2.3vw,.67rem);line-height:1.15;padding:6px 2px}.bottom-nav button span{font-size:1.2rem;margin-bottom:4px}
+  .modal-info{grid-template-columns:minmax(0,1fr)}.modal-actions .btn{min-height:44px;flex:1 1 100%}
+}
+@media(max-width:360px){.app-brand small{display:none}.app-mark{width:35px;height:35px}.account-intro{flex-wrap:wrap}.account-identity{flex-basis:100%}.focus-actions .btn,.task-actions .btn{flex-basis:100%}}
+</style>
+<style id="operacional-cores-icones-v6">
+:root[data-accent="azul"]{--accent:#2368BC}
+:root[data-accent="roxo"]{--accent:#7446B6}
+:root[data-accent="rosa"]{--accent:#B73770}
+:root[data-accent="vermelho"]{--accent:#B83F42}
+:root[data-accent="verde"]{--accent:#19764F}
+:root[data-accent="cinza"]{--accent:#626B75}
+:root{
+  --bg:#F3F5F4;--card:#fff;--soft:#F5F7F6;--text:#252B2D;--muted:#586369;--border:#DCE2E1;
+  --surface:#fff;--surface-soft:#F5F7F6;--surface-hover:#EAF0EE;
+  --nav-surface:#fff;--nav-text:#465256;--nav-hover:#EDF3F0;--nav-divider:#DFE5E3;
+  --hero-surface:#263138;--hero-text:#fff;--hero-muted:#D5DEDF;
+  --accent-soft:color-mix(in srgb,var(--accent) 14%,var(--surface));
+  --accent-border:color-mix(in srgb,var(--accent) 36%,var(--border));
+}
+:root[data-theme="dark"]{
+  --bg:#151A20;--card:#232A31;--soft:#2A323A;--text:#F2F5F4;--muted:#BDC7CA;--border:#3B4850;
+  --surface:#232A31;--surface-soft:#2B343D;--surface-hover:#36434B;
+  --nav-surface:#1C242B;--nav-text:#DBE4E5;--nav-hover:#303B43;--nav-divider:#39464D;
+  --hero-surface:#242E36;--hero-text:#F9FBFA;--hero-muted:#CFDADD;
+  --accent-label:color-mix(in srgb,var(--accent) 67%,#fff);
+}
+.login{
+  min-height:100dvh;
+  background:
+    radial-gradient(circle at 13% 10%,color-mix(in srgb,var(--accent) 36%,transparent) 0%,transparent 43%),
+    linear-gradient(137deg,color-mix(in srgb,var(--accent) 60%,#fff) 0%,color-mix(in srgb,var(--accent) 17%,#F3F5F4) 47%,#DBE3E3 100%);
+}
+:root[data-theme="dark"] .login{
+  background:
+    radial-gradient(circle at 16% 12%,color-mix(in srgb,var(--accent) 35%,transparent) 0%,transparent 45%),
+    linear-gradient(137deg,color-mix(in srgb,var(--accent) 36%,#25232A) 0%,#242B33 50%,#111820 100%);
+}
+.login-card{border:1px solid var(--accent-border);box-shadow:0 28px 80px rgba(12,24,30,.19)}
+.login-brand{background:color-mix(in srgb,var(--accent) 8%,var(--surface));border-bottom-color:var(--accent-border)}
+:root[data-theme="dark"] .login-brand{background:color-mix(in srgb,var(--accent) 11%,var(--surface))}
+.login-actions .btn,.home-actions .btn,.desk-rail .tab.active{box-shadow:0 8px 20px color-mix(in srgb,var(--accent) 23%,transparent)}
+.hero,.completion-hero{background:linear-gradient(126deg,var(--hero-surface),color-mix(in srgb,var(--accent) 20%,var(--hero-surface)) 100%)}
+.focus-panel{border-color:var(--accent-border);box-shadow:0 8px 32px rgba(20,32,38,.06)}
+.focus-top{background:linear-gradient(110deg,var(--accent-soft),var(--surface));border-color:var(--accent-border)}
+.focus-kicker,.page-heading .eyebrow{color:var(--accent-label)}
+.focus-clock,.task .exec-time,.modal .exec-time{
+  color:var(--accent-label)!important;background:var(--accent-soft);border:1px solid var(--accent-border);
+  border-radius:7px;padding:2px 6px;display:inline-block;line-height:1.35;font-weight:950;
+}
+.chip:has(.exec-time){background:var(--surface-soft);color:var(--text);border:1px solid var(--accent-border)}
+.live-clock{color:color-mix(in srgb,var(--accent) 76%,#fff);text-shadow:0 4px 20px color-mix(in srgb,var(--accent) 22%,transparent)}
+.metric:nth-child(1) .metric-icon{background:var(--accent-soft);color:var(--accent-label)}
+.metric:nth-child(2) .metric-icon{background:var(--bluebg);color:var(--blue)}
+.metric:nth-child(3) .metric-icon{background:var(--greenbg);color:var(--green)}
+.metric:nth-child(4) .metric-icon{background:var(--redbg);color:var(--red)}
+.metric-icon .ui-svg-icon{width:20px;height:20px;margin:0;stroke-width:2}
+.desk-rail .tab>.ui-svg-icon{width:20px;height:20px;stroke-width:1.9}
+.bottom-nav button span{width:34px;height:30px;display:grid;place-items:center;margin:0 auto 3px;border-radius:10px}
+.bottom-nav button span .ui-svg-icon{width:19px;height:19px;stroke-width:1.9}
+.bottom-nav button.active span{background:var(--accent-soft);color:var(--accent-label)}
+.bottom-nav button.active:after{background:var(--accent)}
+.account-avatar,.avatar{border-color:var(--accent-border)}
+.task:hover{border-color:var(--accent-border)}
+@media(max-width:800px){.bottom-nav{box-shadow:0 -8px 28px rgba(16,30,38,.09)}}
+</style>
+<style id="operacional-gerencial-gray-rail-v8">
+:root[data-theme="dark"]{
+  --bg:#121212;--card:#1E1E1E;--soft:#292929;--text:#F8FAFC;--muted:#C4C4C4;--border:#454545;
+  --surface:#1E1E1E;--surface-soft:#292929;--surface-hover:#353535;
+  --nav-text:#FFDE6A;--nav-hover:rgba(255,205,9,.13);--nav-divider:rgba(255,205,9,.28);
+  --hero-surface:#242424;--hero-text:#F8FAFC;--hero-muted:#C4C4C4;
+}
+:root[data-theme="dark"] .login{
+  background:radial-gradient(circle at 16% 12%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 43%),
+    linear-gradient(137deg,#1E1E1E 0%,#121212 53%,#24141B 100%);
+}
+.desk-rail{
+  background:
+    radial-gradient(circle at 18% 0%,color-mix(in srgb,var(--accent) 15%,transparent),transparent 48%),
+    linear-gradient(180deg,#FCFCFB 0%,#F1F3F2 100%);
+  color:#263038;border-right:1px solid color-mix(in srgb,var(--accent) 22%,#E0E4E3);
+  box-shadow:10px 0 28px rgba(20,28,30,.07);
+}
+.desk-rail .rail-eyebrow{color:var(--accent-label)}
+.desk-rail .rail-note{color:#667075;border-top-color:var(--border)}
+.desk-rail .rail-note b{color:#263038}
+.desk-rail .tab,.desk-rail .tab:where(:not(.active)){color:#374149;border:1px solid transparent}
+.desk-rail .tab .ui-svg-icon{color:var(--accent-label)}
+.desk-rail .tab:not(.active):hover{background:color-mix(in srgb,var(--accent) 7%,#fff);color:#263038}
+.desk-rail .tab.active{
+  background:color-mix(in srgb,var(--accent) 12%,#fff);color:#20272A;
+  border-color:color-mix(in srgb,var(--accent) 24%,#E4E7E6);
+  box-shadow:inset 4px 0 0 var(--accent),0 5px 15px rgba(20,28,30,.055);
+}
+:root[data-theme="dark"] .desk-rail{
+  background:
+    radial-gradient(circle at 18% 0%,color-mix(in srgb,var(--accent) 12%,transparent),transparent 48%),
+    linear-gradient(180deg,#282828 0%,#191919 100%);
+  color:#F1F1F1;border-right-color:color-mix(in srgb,var(--accent) 19%,#454545);
+  box-shadow:10px 0 30px rgba(0,0,0,.26);
+}
+:root[data-theme="dark"] .desk-rail .rail-eyebrow{color:var(--accent-label)}
+:root[data-theme="dark"] .desk-rail .rail-note{color:#B8B8B8;border-top-color:#454545}
+:root[data-theme="dark"] .desk-rail .rail-note b{color:#F1F1F1}
+:root[data-theme="dark"] .desk-rail .tab,:root[data-theme="dark"] .desk-rail .tab:where(:not(.active)){color:#E4E4E4}
+:root[data-theme="dark"] .desk-rail .tab .ui-svg-icon{color:var(--accent-label)}
+:root[data-theme="dark"] .desk-rail .tab:not(.active):hover{background:color-mix(in srgb,var(--accent) 9%,#2B2B2B);color:#fff}
+:root[data-theme="dark"] .desk-rail .tab.active{
+  background:color-mix(in srgb,var(--accent) 15%,#292929);color:#fff;
+  border-color:color-mix(in srgb,var(--accent) 29%,#454545);
+  box-shadow:inset 4px 0 0 var(--accent),0 5px 18px rgba(0,0,0,.14);
+}
+</style>
+<style id="operacional-account-cards-v9">
+/* Perfil e Configurações seguem a mesma superfície e largura dos cartões de Home e Tarefas. */
+#app .account-panel{max-width:none;width:100%;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none}
+#app .account-intro{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;margin:0 0 14px;box-shadow:0 10px 35px rgba(20,28,30,.035)}
+#app .account-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#app .account-field{min-width:0;min-height:98px;padding:17px 18px;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:none}
+#app .account-field small{color:var(--muted)}
+#app.view-settings .settings-panel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:stretch}
+#app .settings-panel .account-intro,#app .settings-panel .settings-heading,#app .settings-panel>.settings-actions{grid-column:1/-1}
+#app .settings-panel .account-intro{margin-bottom:5px}
+#app .settings-heading{margin:13px 0 0;color:var(--muted)}
+#app .settings-panel .settings-row{min-width:0;margin:0;padding:18px;border:1px solid var(--border);border-radius:14px;background:var(--surface)}
+#app .settings-panel .settings-row:first-of-type{padding-top:18px}
+#app .settings-panel .settings-row:last-of-type{border-bottom:1px solid var(--border)}
+#app .settings-panel .settings-login-row{grid-column:1/-1}
+#app .settings-panel .settings-row select{max-width:none}
+#app .settings-panel>.settings-actions{margin-top:7px}
+:root[data-theme="dark"] #app .account-intro,:root[data-theme="dark"] #app .account-field,:root[data-theme="dark"] #app .settings-panel .settings-row{background:var(--surface);border-color:var(--border);box-shadow:none}
+@media(max-width:1000px){#app .account-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){
+  #app .account-grid,#app.view-settings .settings-panel{grid-template-columns:minmax(0,1fr)}
+  #app .account-intro{padding:17px;margin-bottom:11px;border-radius:14px}
+  #app .account-field{min-height:0;padding:14px 15px;border-radius:12px}
+  #app .settings-heading{margin-top:12px}
+  #app .settings-panel .settings-row{padding:15px;border-radius:12px}
+  #app .settings-panel .settings-row:first-of-type{padding-top:15px}
+}
+</style>
+<style id="operacional-internal-actions-v10">
+.resolution-page{position:fixed;inset:0;z-index:125;display:none;overflow-y:auto;background:var(--bg);color:var(--text)}
+.resolution-page.active{display:block}
+.resolution-top{position:sticky;top:0;z-index:1;background:var(--surface);border-bottom:1px solid var(--border)}
+.resolution-top-inner{max-width:820px;margin:auto;padding:15px 20px;display:flex;align-items:center;gap:14px}
+.resolution-top-inner h2{font-size:1.12rem;margin:0}.resolution-top-inner p{color:var(--muted);font-size:.78rem;margin:4px 0 0}
+.resolution-main{max-width:820px;margin:0 auto;padding:24px 20px calc(30px + env(safe-area-inset-bottom))}
+.resolution-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;margin-bottom:14px}
+.resolution-card h3{margin:0 0 7px;font-size:1.18rem}.resolution-card p{color:var(--muted);line-height:1.5;margin:0}
+.resolution-kicker{display:block;color:var(--accent-label);font-size:.7rem;font-weight:950;letter-spacing:.08em;margin-bottom:9px}
+.resolution-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:18px}
+.resolution-facts div{padding:13px;border-radius:11px;border:1px solid var(--border);background:var(--surface-soft);min-width:0;overflow-wrap:anywhere}
+.resolution-facts small{display:block;color:var(--muted);font-size:.67rem;font-weight:850;text-transform:uppercase;margin-bottom:5px}
+.resolution-facts b{font-size:.84rem}.resolution-detail{margin-top:12px!important;overflow-wrap:anywhere}
+.resolution-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.resolution-actions .btn{min-height:46px}
+.resolution-error{min-height:20px;margin:12px 0 0;color:var(--red);font-weight:750;font-size:.82rem}
+.operational-dialog-back{position:fixed;inset:0;z-index:170;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(12,15,18,.68);backdrop-filter:blur(6px)}
+.operational-dialog-back.active{display:flex}
+.operational-dialog{width:min(480px,100%);max-height:calc(100dvh - 36px);overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:19px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.24)}
+.operational-dialog h2{margin:0 0 8px;font-size:1.16rem}.operational-dialog p{margin:0;color:var(--muted);line-height:1.5;white-space:pre-line}
+.operational-dialog textarea[hidden],.operational-dialog [hidden]{display:none!important}
+.operational-dialog textarea{margin-top:15px;min-height:115px;resize:vertical}
+.operational-dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;flex-wrap:wrap}
+.evidence-viewer{background:rgba(12,15,18,.68);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.evidence-viewer-card{position:relative;width:min(900px,100%);max-height:calc(100dvh - 36px);overflow:auto;padding:18px;border:1px solid var(--border);border-radius:18px;background:var(--surface);color:var(--text);box-shadow:0 24px 70px rgba(0,0,0,.28)}
+.evidence-viewer .evidence-viewer-card img{display:block;max-width:100%;max-height:calc(100dvh - 132px);margin:0 auto;object-fit:contain}
+.evidence-viewer .evidence-viewer-close{position:sticky;display:block;top:0;left:100%;margin:0 0 8px;background:var(--surface-soft);color:var(--text);border:1px solid var(--border)}
+.evidence-viewer .evidence-viewer-info{position:static;margin-top:12px;color:var(--muted);text-shadow:none;overflow-wrap:anywhere}
+@media(max-width:600px){.resolution-main{padding:16px 13px calc(24px + env(safe-area-inset-bottom))}.resolution-top-inner{padding:12px 13px}.resolution-card{padding:18px;border-radius:13px}.resolution-facts{grid-template-columns:1fr}.resolution-actions{display:grid}.resolution-actions .btn,.operational-dialog-actions .btn{width:100%}.operational-dialog-actions{display:grid;grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <div id="autoRefreshLoader" class="auto-refresh-loader"><div class="auto-refresh-loader-card"><div class="auto-refresh-spinner"></div><b>Atualizando Sistema Operacional</b><small>Restaurando sua sessão e a tela em que você estava...</small></div></div>
@@ -63,23 +388,35 @@
   <div class="app-brand"><div class="app-mark">AV</div><div><strong>Sistema Operacional</strong><small>Loja 24 • Meu Dia</small></div></div>
   <div class="user-mini"><div class="user-mini-text"><b id="userNameTop">Funcionário</b><small id="userRoleTop">Operador</small></div><div id="avatarTop" class="avatar">AV</div><button class="icon-btn" onclick="logout()" title="Sair" aria-label="Sair do sistema"><svg class="ui-svg-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/><path d="M14 8l4 4-4 4M18 12H8"/></svg></button></div>
 </div></header>
+<aside class="desk-rail" aria-label="Menu do Sistema Operacional">
+  <div class="rail-eyebrow">Área de trabalho</div>
+  <button type="button" class="tab active" data-view="HOME" onclick="openView('HOME')"><svg class="ui-svg-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8M5 10v10h14V10M9 20v-6h6v6"/></svg> HOME</button>
+  <button type="button" class="tab" data-view="TAREFAS" onclick="openView('TAREFAS')"><svg class="ui-svg-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M9 9h6M9 13h6M9 17h4"/></svg> TAREFAS</button>
+  <button type="button" class="tab" data-view="PERFIL" onclick="openView('PERFIL')"><svg class="ui-svg-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> PERFIL</button>
+  <button type="button" class="tab" data-view="CONFIGURACOES" onclick="openView('CONFIGURACOES')"><svg class="ui-svg-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M10 2h4l.5 2.2 1.9 1.1 2.2-.6 2 3.4-1.6 1.6v2.2l1.6 1.6-2 3.4-2.2-.6-1.9 1.1L14 20h-4l-.5-2.2-1.9-1.1-2.2.6-2-3.4L5 12.3v-2.2L3.4 8.5l2-3.4 2.2.6 1.9-1.1Z"/></svg> CONFIGURAÇÕES</button>
+  <div class="rail-note"><b>Operacional AV</b>Suas tarefas e atualizações em um só lugar.</div>
+</aside>
 <main class="shell">
-  <section class="hero"><div class="eyebrow">Minha operação hoje</div><h2 id="helloName">Olá</h2><p id="heroCopy">Acompanhe suas demandas e mantenha o líder atualizado.</p><div id="syncPill" class="sync-pill"><span class="dot"></span><span>Sincronizando...</span></div></section>
-  <section id="focusPanel" class="focus-panel" aria-live="polite"></section>
-  <section class="summary">
-    <div class="metric"><div><small>PENDENTES</small><b id="mPend">0</b></div><div class="metric-icon">📋</div></div>
-    <div class="metric"><div><small>EM ANDAMENTO</small><b id="mAnd">0</b></div><div class="metric-icon">▶</div></div>
-    <div class="metric"><div><small>CONCLUÍDA</small><b id="mConcl">0</b></div><div class="metric-icon">✓</div></div>
-    <div class="metric"><div><small>ATRASADA</small><b id="mAtr">0</b></div><div class="metric-icon">!</div></div>
+  <div class="page-heading"><div><div class="eyebrow">OPERACIONAL / LOJA 24</div><h1 id="viewTitle">Meu dia de trabalho</h1><div id="syncPill" class="sync-pill"><span class="dot"></span><span>Sincronizando...</span></div></div><span class="page-date" id="todayLabel"></span></div>
+  <section class="hero overview-only"><div class="eyebrow">Minha operação hoje</div><h2 id="helloName">Olá</h2><p id="heroCopy">Acompanhe suas demandas e mantenha o líder atualizado.</p></section>
+  <section id="focusPanel" class="focus-panel overview-only" aria-live="polite"></section>
+  <section class="summary overview-only">
+    <div class="metric"><div><small>PENDENTES</small><b id="mPend">0</b></div><div class="metric-icon"><svg class="ui-svg-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M9 9h6M9 13h6M9 17h4"/></svg></div></div>
+    <div class="metric"><div><small>EM ANDAMENTO</small><b id="mAnd">0</b></div><div class="metric-icon"><svg class="ui-svg-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4V8Z"/></svg></div></div>
+    <div class="metric"><div><small>CONCLUÍDA</small><b id="mConcl">0</b></div><div class="metric-icon"><svg class="ui-svg-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg></div></div>
+    <div class="metric"><div><small>ATRASADA</small><b id="mAtr">0</b></div><div class="metric-icon"><svg class="ui-svg-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/></svg></div></div>
   </section>
-  <div class="tabs" id="tabs">
-    <button class="tab active" data-tab="TODAS" onclick="setTab('TODAS',this)">Todas</button><button class="tab" data-tab="PENDENTE" onclick="setTab('PENDENTE',this)">Pendentes</button><button class="tab" data-tab="EM ANDAMENTO" onclick="setTab('EM ANDAMENTO',this)">Em andamento</button><button class="tab" data-tab="CONCLUÍDA" onclick="setTab('CONCLUÍDA',this)">Concluídas</button>
-  </div>
-  <div class="toolbar"><div class="field"><label>Período</label><select id="filterDate" onchange="render()"><option value="HOJE">Hoje</option><option value="ABERTAS">Todas abertas</option><option value="TODAS">Todas as datas</option></select></div><div class="field search"><label>Buscar tarefa</label><input id="filterSearch" type="search" placeholder="Descrição, família ou departamento..." oninput="render()"></div></div>
+  <div class="home-actions"><button type="button" class="btn" onclick="openView('TAREFAS')">Ver todas as tarefas →</button></div>
+  <section class="list-panel" aria-label="Lista de tarefas">
   <div class="section-head"><div><h3 id="sectionTitle">Minhas tarefas</h3><p id="sectionSub">Demandas destinadas ao seu operador.</p></div><button class="btn secondary" onclick="refreshOnline()">↻ Atualizar</button></div>
+  <div class="toolbar"><div class="field"><label for="filterStatus">Status</label><select id="filterStatus" onchange="setTab(this.value)"><option value="TODAS">Todas</option><option value="PENDENTE">Pendentes</option><option value="EM ANDAMENTO">Em andamento</option><option value="CONCLUÍDA">Concluídas</option></select></div><div class="field"><label for="filterDate">Período</label><select id="filterDate" onchange="render()"><option value="HOJE">Hoje</option><option value="TODAS">Todas as datas</option></select></div><div class="field search"><label for="filterSearch">Buscar tarefa</label><input id="filterSearch" type="search" placeholder="Descrição, família ou departamento..." oninput="render()"></div></div>
   <div id="taskList" class="tasks"></div>
+  </section>
+  <section class="profile-panel account-panel" aria-label="Perfil do operador"><div class="account-intro"><div class="account-avatar" id="profileAvatar">AV</div><div class="account-identity"><h2 id="profileName">Operador</h2><p>Dados do seu cadastro no Gerencial</p><div class="profile-photo-actions"><label for="profilePhotoInput" class="btn secondary profile-photo-button">📷 Adicionar ou trocar foto</label><input id="profilePhotoInput" class="profile-photo-input" type="file" accept="image/jpeg,image/png,image/webp" onchange="handleProfilePhoto(this)"><button id="removeProfilePhotoButton" type="button" class="btn secondary hidden" onclick="removeProfilePhoto()">Remover foto</button></div><p id="profilePhotoStatus" class="profile-photo-status" role="status" aria-live="polite">JPG, PNG ou WebP, até 10 MB.</p></div></div><div class="account-grid"><div class="account-field"><small>Operador</small><b id="profileOperator">—</b></div><div class="account-field"><small>Cargo</small><b id="profileRole">—</b></div><div class="account-field"><small>Tempo de loja</small><b id="profileTenure">—</b></div><div class="account-field"><small>Matrícula</small><b id="profileRegistration">—</b></div><div class="account-field"><small>Loja</small><b>Loja 24</b></div><div class="account-field"><small>Data de entrada</small><b id="profileEntry">—</b></div><div class="account-field"><small>Setor</small><b id="profileSector">—</b></div><div class="account-field"><small>Departamento</small><b id="profileDepartment">—</b></div><div class="account-field"><small>Situação cadastral</small><b id="profileStatus">—</b></div></div><div class="settings-actions"><button type="button" class="btn secondary" onclick="refreshOnline()">↻ Atualizar dados</button></div></section>
+  <section class="settings-panel account-panel" aria-label="Configurações do operador"><div class="account-intro"><div class="account-avatar">⚙</div><div><h2>Configurações</h2><p>Personalize o Operacional e solicite suporte para seu login.</p></div></div><h3 class="settings-heading">Tema</h3><div class="settings-row"><label for="settingsTheme">Aparência</label><select id="settingsTheme" onchange="saveUiPreferences()"><option value="CLARO">Claro</option><option value="ESCURO">Escuro</option></select></div><div class="settings-row"><label for="settingsAccent">Cor principal</label><div class="theme-color-control"><span id="accentPreview" class="accent-preview" aria-hidden="true"></span><select id="settingsAccent" onchange="saveUiPreferences()"><option value="PADRAO">Padrão (amarelo)</option><option value="AZUL">Azul</option><option value="ROXO">Roxo</option><option value="ROSA">Rosa</option><option value="VERMELHO">Vermelho</option><option value="VERDE">Verde</option><option value="CINZA">Cinza</option><option value="LARANJA">Laranja</option></select></div></div><h3 class="settings-heading">Login</h3><div class="settings-row settings-login-row"><b>Alteração de senha</b><p>Solicite autorização ao Gerencial. Depois da aprovação, você escolhe sua própria senha aqui.</p><div class="settings-actions"><button type="button" class="btn" id="requestPasswordButton" onclick="requestPasswordChange()">Solicitar alteração de senha</button><button type="button" class="btn secondary" onclick="loadPasswordRequestStatus()">↻ Verificar pedido</button></div><p id="requestPasswordStatus" class="request-status" role="status" aria-live="polite"></p><form id="passwordChangeForm" class="password-change-form" hidden onsubmit="submitOwnPasswordChange(event)"><label for="passwordNew">Nova senha</label><input id="passwordNew" type="password" autocomplete="new-password" minlength="4" required><label for="passwordConfirm">Confirmar nova senha</label><input id="passwordConfirm" type="password" autocomplete="new-password" minlength="4" required><button type="submit" class="btn" id="saveOwnPasswordButton">Salvar minha nova senha</button></form></div><h3 class="settings-heading">Tarefas</h3><div class="settings-row"><label for="settingsDefaultPeriod">Período inicial em Tarefas</label><p>Escolha o filtro exibido ao abrir a área de tarefas.</p><select id="settingsDefaultPeriod" onchange="saveUiPreferences()"><option value="HOJE">Hoje</option><option value="TODAS">Todas as datas</option></select></div><div class="settings-row"><label for="settingsDensity">Exibição das tarefas</label><p>Altere o espaçamento dos cartões na lista.</p><select id="settingsDensity" onchange="saveUiPreferences()"><option value="NORMAL">Confortável</option><option value="COMPACTA">Compacta</option></select></div><div class="settings-actions"><button type="button" class="btn secondary" onclick="refreshOnline()">↻ Atualizar dados</button><button type="button" class="btn secondary" onclick="logout()">Sair do sistema</button></div></section>
+<style id="operacional-password-request-v7">.password-change-form[hidden]{display:none!important}.password-change-form{display:grid;gap:9px;max-width:440px;margin-top:14px;padding:16px;border:1px solid var(--border);border-radius:14px;background:var(--surface, var(--panel, transparent))}.password-change-form label{font-weight:750;color:var(--text)}.password-change-form input{width:100%;min-height:44px;border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--input-bg,var(--surface,transparent));color:var(--text)}.password-change-form .btn{margin-top:7px;justify-self:start}@media(max-width:600px){.password-change-form{max-width:100%}.password-change-form .btn{width:100%}}</style>
 </main>
-<nav class="bottom-nav"><button class="active" onclick="quickTab('TODAS',this)"><span>⌂</span>Meu dia</button><button onclick="quickTab('PENDENTE',this)"><span>📋</span>Pendentes</button><button onclick="quickTab('EM ANDAMENTO',this)"><span>▶</span>Andamento</button><button onclick="quickTab('CONCLUÍDA',this)"><span>✓</span>Concluídas</button></nav>
+<nav class="bottom-nav" aria-label="Menu do Sistema Operacional"><button type="button" data-view="HOME" class="active" onclick="openView('HOME')"><span><svg class="ui-svg-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8M5 10v10h14V10M9 20v-6h6v6"/></svg></span>HOME</button><button type="button" data-view="TAREFAS" onclick="openView('TAREFAS')"><span><svg class="ui-svg-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M9 9h6M9 13h6M9 17h4"/></svg></span>TAREFAS</button><button type="button" data-view="PERFIL" onclick="openView('PERFIL')"><span><svg class="ui-svg-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>PERFIL</button><button type="button" data-view="CONFIGURACOES" onclick="openView('CONFIGURACOES')"><span><svg class="ui-svg-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M10 2h4l.5 2.2 1.9 1.1 2.2-.6 2 3.4-1.6 1.6v2.2l1.6 1.6-2 3.4-2.2-.6-1.9 1.1L14 20h-4l-.5-2.2-1.9-1.1-2.2.6-2-3.4L5 12.3v-2.2L3.4 8.5l2-3.4 2.2.6 1.9-1.1Z"/></svg></span>CONFIGURAÇÕES</button></nav>
 </div>
 
 <div id="modalBack" class="modal-back" onclick="closeModal()"><div class="modal" onclick="event.stopPropagation()"><div class="modal-head"><div><h3 id="modalTitle">Tarefa</h3><p id="modalRoute"></p></div><button class="modal-close" onclick="closeModal()">✕</button></div><div id="modalBody"></div></div></div>
@@ -87,7 +424,7 @@
 
 
 <div id="impedimentBack" class="modal-back" onclick="closeImpediment()"><div class="modal" onclick="event.stopPropagation()"><div class="modal-head"><div><h3>⚠️ Informar impedimento</h3><p id="impedimentTaskName">Explique o que está impedindo a execução.</p></div><button class="modal-close" onclick="closeImpediment()">✕</button></div><div class="impediment-grid"><label class="impediment-option"><input type="radio" name="impedimentReason" value="PRODUTO NÃO DISPONÍVEL"><span>Produto não disponível</span></label><label class="impediment-option"><input type="radio" name="impedimentReason" value="AGUARDANDO OUTRO FUNCIONÁRIO"><span>Aguardando outro funcionário</span></label><label class="impediment-option"><input type="radio" name="impedimentReason" value="FLUXO DE CLIENTES"><span>Fluxo de clientes impediu a execução</span></label><label class="impediment-option"><input type="radio" name="impedimentReason" value="EQUIPAMENTO / SISTEMA"><span>Equipamento ou sistema com problema</span></label><label class="impediment-option"><input type="radio" name="impedimentReason" value="ORIENTAÇÃO INSUFICIENTE"><span>Preciso de orientação do líder</span></label><label class="impediment-option"><input type="radio" name="impedimentReason" value="OUTRO"><span>Outro motivo</span></label></div><label for="impedimentDetail">Detalhes</label><textarea id="impedimentDetail" rows="4" placeholder="Descreva brevemente o impedimento..."></textarea><div id="impedimentError" class="login-error"></div><div class="modal-actions"><button class="btn danger" type="button" onclick="submitImpediment()">⚠️ Registrar impedimento</button><button class="btn secondary" type="button" onclick="closeImpediment()">Cancelar</button></div></div></div>
-<div id="evidenceViewer" class="evidence-viewer" onclick="closeEvidenceViewer()"><button class="evidence-viewer-close" onclick="event.stopPropagation();closeEvidenceViewer()">✕</button><img id="evidenceViewerImg" alt="Evidência fotográfica" onclick="event.stopPropagation()"><div id="evidenceViewerInfo" class="evidence-viewer-info"></div></div>
+<div id="evidenceViewer" class="evidence-viewer" role="dialog" aria-modal="true" aria-label="Evidência fotográfica" onclick="closeEvidenceViewer()"><div class="evidence-viewer-card" onclick="event.stopPropagation()"><button class="evidence-viewer-close" type="button" onclick="closeEvidenceViewer()" aria-label="Fechar imagem">✕</button><img id="evidenceViewerImg" alt="Evidência fotográfica"><div id="evidenceViewerInfo" class="evidence-viewer-info"></div></div></div>
 
 <section id="completionPage" class="completion-page" aria-hidden="true">
   <div class="completion-top"><div class="completion-top-inner"><button class="completion-back" type="button" onclick="closeCompletionPage()">←</button><div><strong>Concluir tarefa</strong><div id="completionTopTask" style="font-size:.72rem;color:var(--muted);font-weight:750;margin-top:2px"></div></div></div></div>
@@ -98,14 +435,32 @@
     <div class="completion-card"><label for="completionNote" style="margin-top:0">Observação da conclusão</label><textarea id="completionNote" rows="4" placeholder="Descreva rapidamente o que foi realizado (opcional)."></textarea><div id="completionError" class="completion-error"></div><div class="completion-submit"><button id="completionSubmit" class="btn good full" type="button" onclick="submitCompletion()">✓ Confirmar conclusão</button><button class="btn secondary full" type="button" onclick="closeCompletionPage()">Cancelar</button></div></div>
   </main>
 </section>
+<section id="resolutionPage" class="resolution-page" role="dialog" aria-modal="true" aria-labelledby="resolutionTitle" aria-hidden="true">
+  <div class="resolution-top"><div class="resolution-top-inner"><button type="button" class="btn secondary" onclick="closeResolutionPage()" aria-label="Voltar à tarefa">← Voltar</button><div><h2 id="resolutionTitle">Resolver impedimento</h2><p>Confirme quando a tarefa puder ser retomada.</p></div></div></div>
+  <main class="resolution-main"><div class="resolution-card"><span class="resolution-kicker">TAREFA BLOQUEADA</span><h3 id="resolutionTaskName">Tarefa</h3><p>Confira o motivo registrado antes de liberar a execução.</p><div class="resolution-facts"><div><small>Motivo</small><b id="resolutionReason">—</b></div><div><small>Retorna para</small><b id="resolutionNextStatus">—</b></div></div><p id="resolutionDetail" class="resolution-detail" hidden></p></div><div class="resolution-card"><h3>Impedimento resolvido?</h3><p>Ao confirmar, o impedimento ficará registrado no histórico e a tarefa voltará a ficar disponível.</p><p id="resolutionError" class="resolution-error" role="alert" aria-live="assertive"></p><div class="resolution-actions"><button id="resolutionSubmit" class="btn" type="button" onclick="submitResolution()">✓ Confirmar resolução</button><button class="btn secondary" type="button" onclick="closeResolutionPage()">Cancelar</button></div></div></main>
+</section>
+<div id="operationalDialogBack" class="operational-dialog-back" role="dialog" aria-modal="true" aria-labelledby="operationalDialogTitle" aria-hidden="true"><div class="operational-dialog"><h2 id="operationalDialogTitle">Aviso</h2><p id="operationalDialogMessage"></p><label id="operationalDialogInputLabel" for="operationalDialogInput" hidden>Observação</label><textarea id="operationalDialogInput" rows="4" maxlength="1200" placeholder="Escreva sua observação..." hidden></textarea><p id="operationalDialogError" class="resolution-error" role="alert" hidden></p><div class="operational-dialog-actions"><button id="operationalDialogCancel" type="button" class="btn secondary" onclick="closeOperationalDialog()" hidden>Cancelar</button><button id="operationalDialogSubmit" type="button" class="btn" onclick="submitOperationalDialog()">Entendi</button></div></div></div>
 <div id="toast" class="toast"></div>
 <script>
 /* V1.5 — Meu Dia inteligente + cronômetro + impedimentos + evidência ampliada. Base de sincronização V1.4.1 preservada. */
 const SUPABASE_URL='https://euyrhkusnasgiueefldg.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1eXJoa3VzbmFzZ2l1ZWVmbGRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzY0MTksImV4cCI6MjA5ODk1MjQxOX0.woI5Il3ObKrj8BJfdYz8DcUW08Jl5c458ykh1SrHYr4';
 const ONLINE_TABLE='assistencia_gerencial', SHARED_ROW_ID='gerencial_compartilhados_v1', GLOBAL_ROW_ID='config_global_v1';
+const OPERACIONAL_CREDENTIAL_PREFIX='operacional_credencial_';
+function operacionalCredentialId(op){return OPERACIONAL_CREDENTIAL_PREFIX+opnorm(op)}
+async function criarCredencialOperacionalInicial(op,senha){
+  const id=operacionalCredentialId(op),now=new Date().toISOString();
+  const dados={tipo:'CREDENCIAL_OPERACIONAL',operador:op,senha,versao:1,criadoEmISO:now,origem:'PRIMEIRO_ACESSO'};
+  const {data:created,error}=await withTimeout(client.from(ONLINE_TABLE).insert({id,dados,updated_at:now}).select('id').maybeSingle(),REQUEST_TIMEOUT_MS);
+  if(!error&&created)return;
+  if(!error)throw new Error('Não foi possível iniciar a credencial do Operacional.');
+  if(error.code!=='23505')throw error;
+  const {data:existing,error:readError}=await withTimeout(client.from(ONLINE_TABLE).select('dados').eq('id',id).maybeSingle(),REQUEST_TIMEOUT_MS);
+  if(readError)throw readError;
+  if(existing?.dados?.tipo!=='CREDENCIAL_OPERACIONAL'||opnorm(existing.dados.operador)!==op||String(existing.dados.senha||'').trim()!==senha)throw new Error('O cadastro operacional mudou. Entre novamente com a senha do Operacional.');
+}
 const client=window.supabase?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:false},realtime:{params:{eventsPerSecond:5}}}):null;
-let state={mode:'online',employee:null,data:null,tab:'TODAS',selected:null,channel:null,saving:false,lastSharedUpdatedAt:null,realtimeReady:false,realtimeEventSeen:false,refreshPromise:null,pollTimer:null,accessTimer:null,realtimeRetryTimer:null};
+let state={mode:'online',employee:null,data:null,view:'HOME',tab:'TODAS',selected:null,channel:null,saving:false,lastSharedUpdatedAt:null,realtimeReady:false,realtimeEventSeen:false,refreshPromise:null,pollTimer:null,accessTimer:null,realtimeRetryTimer:null};
 let mutationQueue=Promise.resolve();
 let realtimeRefreshTimer=null;
 let executionClockTimer=null;
@@ -133,25 +488,26 @@ const SESSION_MAX_AGE_MS=12*60*60*1000;
 const AUTO_REFRESH_UI_KEY='operacionalAutoRefreshStateV1',AUTO_REFRESH_PENDING_KEY='operacionalAutoRefreshPending';
 let autoRefreshTimerOperacional=null;
 function salvarEstadoOperacionalAntesReload(){
-  const st={tab:state.tab||'TODAS',filterDate:$('filterDate')?.value||'HOJE',filterSearch:$('filterSearch')?.value||'',scrollX:window.scrollX||0,scrollY:window.scrollY||0,selected:state.selected||null,salvoEm:Date.now()};
-  try{sessionStorage.setItem(AUTO_REFRESH_UI_KEY,JSON.stringify(st));sessionStorage.setItem(AUTO_REFRESH_PENDING_KEY,'1')}catch(_){ }
+  const st={view:state.view||'HOME',tab:state.tab||'TODAS',filterDate:$('filterDate')?.value||'HOJE',filterSearch:$('filterSearch')?.value||'',scrollX:window.scrollX||0,scrollY:window.scrollY||0,selected:state.selected||null,salvoEm:Date.now()};
+  try{sessionStorage.setItem(AUTO_REFRESH_UI_KEY,JSON.stringify(st))}catch(_){ }
 }
 function restaurarEstadoOperacionalAposReload(){
   let st=null;try{st=JSON.parse(sessionStorage.getItem(AUTO_REFRESH_UI_KEY)||'null')}catch(_){ }
-  try{sessionStorage.removeItem(AUTO_REFRESH_UI_KEY);sessionStorage.removeItem(AUTO_REFRESH_PENDING_KEY)}catch(_){ }
+  // A tela permanece persistida ao longo da sessão; não salvar credenciais junto aos filtros.
   document.documentElement.classList.remove('auto-refresh-restoring');$('autoRefreshLoader')?.classList.remove('active');
   if(!st)return;
-  if($('filterDate'))$('filterDate').value=st.filterDate||'HOJE';
+  if($('filterDate'))$('filterDate').value=st.filterDate==='HOJE'?'HOJE':'TODAS';
   if($('filterSearch'))$('filterSearch').value=st.filterSearch||'';
-  state.tab=st.tab||'TODAS';
-  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===state.tab));
-  document.querySelectorAll('.bottom-nav button').forEach((b,i)=>{const tabs=['TODAS','PENDENTE','EM ANDAMENTO','CONCLUÍDA'];b.classList.toggle('active',tabs[i]===state.tab)});
+  state.tab=['TODAS','PENDENTE','EM ANDAMENTO','CONCLUÍDA'].includes(st.tab)?st.tab:'TODAS';
+  state.view=['HOME','TAREFAS','PERFIL','CONFIGURACOES'].includes(st.view)?st.view:(state.tab==='TODAS'?'HOME':'TAREFAS');
+  if(state.view==='HOME'){$('filterDate').value='HOJE';$('filterSearch').value=''}
+  syncNavigation();
   render();
   if(st.selected?.did&&st.selected?.tid){try{openTask(st.selected.did,st.selected.tid)}catch(_){ }}
   requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo(st.scrollX||0,st.scrollY||0)));
 }
 function interfaceOperacionalEmAcaoCritica(){
-  return $('completionPage')?.classList.contains('active')||$('rescheduleBack')?.classList.contains('active')||document.activeElement&&['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName);
+  return $('completionPage')?.classList.contains('active')||$('rescheduleBack')?.classList.contains('active')||$('resolutionPage')?.classList.contains('active')||$('operationalDialogBack')?.classList.contains('active')||$('evidenceViewer')?.classList.contains('active')||document.activeElement&&['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName);
 }
 async function executarAutoAtualizacaoOperacional(){
   if(!state.employee)return;
@@ -165,41 +521,90 @@ async function restaurarSessaoOperacional(){
   let sess=null;try{sess=JSON.parse(sessionStorage.getItem('operacionalSessaoV1')||'null')}catch(_){ }
   if(!sess?.operator)return false;
   if(sess.issuedAt && Date.now()-Number(sess.issuedAt)>SESSION_MAX_AGE_MS){sessionStorage.removeItem('operacionalSessaoV1');return false}
-  $('autoRefreshLoader')?.classList.add('active');
-  const op=opnorm(sess.operator);
-  if(sess.mode==='demo'){
-    state.mode='demo';state.employee={id:'demo1',nome:sess.name||'FUNCIONÁRIO TESTE',operador:op||'245',matricula:`AV24-${String(Number(op||245)).padStart(4,'0')}`,cargo:'ASSESSOR DE LOJA',departamento:'FEMININO',status:'ATIVO'};state.data=demoData();startApp();restaurarEstadoOperacionalAposReload();return true;
-  }
-  if(!client){loginStatus('Biblioteca de conexão indisponível','offline');return false}
-  let ultimoErro=null;
-  for(let tentativa=1;tentativa<=3;tentativa++){
-    try{
-      const [sharedRes,globalRes]=await Promise.all([
-        withTimeout(client.from(ONLINE_TABLE).select('dados,updated_at').eq('id',SHARED_ROW_ID).maybeSingle()),
-        withTimeout(client.from(ONLINE_TABLE).select('dados').eq('id',GLOBAL_ROW_ID).maybeSingle())
-      ]);
-      if(sharedRes.error)throw sharedRes.error;if(globalRes.error)throw globalRes.error;
-      const data=sharedRes.data?.dados||{},cfg=globalRes.data?.dados||{};
-      const emp=(data.funcionarios||[]).find(f=>opnorm(f.operador)===op&&!['DESLIGADO','INATIVO'].includes(norm(f.status||'ATIVO')));
-      if(!emp)throw new Error('Funcionário não encontrado');
-      const acessos=cfg.operacionalAcessos&&typeof cfg.operacionalAcessos==='object'?cfg.operacionalAcessos:{};
-      if(acessos[op]!==true)throw new Error('Acesso operacional não liberado');
-      state.mode='online';state.employee=emp;state.data=data;state.lastSharedUpdatedAt=sharedRes.data?.updated_at||null;
-      startApp();subscribeRealtime();iniciarMonitorSincronizacao();restaurarEstadoOperacionalAposReload();return true;
-    }catch(err){
-      ultimoErro=err;console.warn(`Falha ao restaurar sessão (tentativa ${tentativa}/3):`,err);
-      if(erroAcessoDefinitivo(err)){sessionStorage.removeItem('operacionalSessaoV1');break}
-      if(tentativa<3)await sleep(700*tentativa);
-    }
-  }
-  document.documentElement.classList.remove('auto-refresh-restoring');$('autoRefreshLoader')?.classList.remove('active');
-  if(erroAcessoDefinitivo(ultimoErro))loginStatus('Sessão encerrada pelo Gerencial','offline');
-  else loginStatus('Conexão instável • sua sessão foi preservada','warn');
+  // SessionStorage is client-writable; never treat its operator ID as proof of authentication.
+  // A new page load requires a fresh password, even when the browser remembers the operator.
+  if($('loginOperador'))$('loginOperador').value=opnorm(sess.operator);
+  sessionStorage.removeItem('operacionalSessaoV1');
+  document.documentElement.classList.remove('auto-refresh-restoring');
+  $('autoRefreshLoader')?.classList.remove('active');
+  loginStatus('Por segurança, confirme sua senha para continuar','warn');
   return false;
+
 }
 
 function initials(n){let p=String(n||'').trim().split(/\s+/).filter(Boolean);return p.length?((p[0][0]||'')+(p.length>1?(p[p.length-1][0]||''):'')).toUpperCase():'AV'}
 function toast(t){let e=$('toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)}
+let resolutionState={did:'',tid:'',busy:false,previousOverflow:'',returnFocus:null};
+let operationalDialogState={mode:'notice',did:'',tid:'',busy:false,returnFocus:null};
+function showOperationalNotice(message,title='Aviso do Operacional'){
+  operationalDialogState={mode:'notice',did:'',tid:'',busy:false,returnFocus:document.activeElement};
+  $('operationalDialogTitle').textContent=title;$('operationalDialogMessage').textContent=String(message||'Não foi possível concluir a ação.');
+  $('operationalDialogInputLabel').hidden=true;$('operationalDialogInput').hidden=true;$('operationalDialogCancel').hidden=true;
+  $('operationalDialogError').hidden=true;$('operationalDialogSubmit').textContent='Entendi';
+  $('operationalDialogBack').classList.add('active');$('operationalDialogBack').setAttribute('aria-hidden','false');$('operationalDialogSubmit').focus();
+}
+function openObservationEditor(did,tid){
+  const {t}=findTask(did,tid);if(!t)return;
+  operationalDialogState={mode:'observation',did,tid,busy:false,returnFocus:document.activeElement};
+  $('operationalDialogTitle').textContent='Adicionar observação';$('operationalDialogMessage').textContent=t.descricao||'Tarefa';
+  $('operationalDialogInputLabel').hidden=false;$('operationalDialogInput').hidden=false;$('operationalDialogInput').value='';
+  $('operationalDialogCancel').hidden=false;$('operationalDialogError').hidden=true;$('operationalDialogSubmit').textContent='Salvar observação';
+  $('operationalDialogBack').classList.add('active');$('operationalDialogBack').setAttribute('aria-hidden','false');$('operationalDialogInput').focus();
+}
+function closeOperationalDialog(){
+  if(operationalDialogState.busy)return;
+  $('operationalDialogBack').classList.remove('active');$('operationalDialogBack').setAttribute('aria-hidden','true');
+  operationalDialogState.returnFocus?.focus?.();operationalDialogState={mode:'notice',did:'',tid:'',busy:false,returnFocus:null};
+}
+async function submitOperationalDialog(){
+  if(operationalDialogState.mode!=='observation')return closeOperationalDialog();
+  if(operationalDialogState.busy)return;
+  const text=String($('operationalDialogInput').value||'').trim(),error=$('operationalDialogError');
+  if(!text){error.textContent='Escreva uma observação antes de salvar.';error.hidden=false;return}
+  const {did,tid}=operationalDialogState,button=$('operationalDialogSubmit');operationalDialogState.busy=true;button.disabled=true;
+  try{
+    await mutateTask(did,tid,(d,t)=>addHist(t,'OBSERVAÇÃO',`${text} • via Sistema Operacional`));
+    operationalDialogState.busy=false;closeOperationalDialog();
+    if(state.selected?.did===did&&state.selected?.tid===tid)openTaskMaybe(did,tid);
+    toast('Observação salva');
+  }catch(err){error.textContent=err.message||'Não foi possível salvar a observação.';error.hidden=false}
+  finally{operationalDialogState.busy=false;button.disabled=false}
+}
+function resolveImpediment(did,tid){
+  const {t}=findTask(did,tid);
+  if(!t||norm(t.status)!=='BLOQUEADA'||t.impedimento?.status!=='ATIVO')return showOperationalNotice('Este impedimento não está mais ativo. Atualize a tarefa.');
+  const imp=t.impedimento,prev=norm(imp.statusAnterior||'PENDENTE');
+  resolutionState={did,tid,busy:false,previousOverflow:document.body.style.overflow,returnFocus:document.activeElement};
+  $('resolutionTaskName').textContent=t.descricao||'Tarefa';$('resolutionReason').textContent=imp.motivo||'Não informado';
+  $('resolutionNextStatus').textContent=prev==='EM ANDAMENTO'?'Em andamento':'Pendente';
+  const detail=$('resolutionDetail');detail.textContent=imp.detalhes||'';detail.hidden=!imp.detalhes;
+  $('resolutionError').textContent='';$('resolutionPage').classList.add('active');$('resolutionPage').setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden';$('resolutionPage').scrollTop=0;$('resolutionSubmit').focus();
+}
+function closeResolutionPage(){
+  if(resolutionState.busy)return;
+  $('resolutionPage').classList.remove('active');$('resolutionPage').setAttribute('aria-hidden','true');
+  document.body.style.overflow=resolutionState.previousOverflow;
+  resolutionState.returnFocus?.focus?.();resolutionState={did:'',tid:'',busy:false,previousOverflow:'',returnFocus:null};
+}
+async function submitResolution(){
+  if(resolutionState.busy||!resolutionState.did)return;
+  const {did,tid}=resolutionState,button=$('resolutionSubmit');resolutionState.busy=true;button.disabled=true;$('resolutionError').textContent='';
+  try{
+    await mutateTask(did,tid,(d,t)=>{
+      const imp=t.impedimento||{};
+      if(norm(t.status)!=='BLOQUEADA'||imp.status!=='ATIVO')throw new Error('Este impedimento já foi resolvido ou a tarefa mudou. Atualize a página.');
+      const prev=norm(imp.statusAnterior||'PENDENTE');
+      if(t.execucao?.pausadoEmISO&&prev==='EM ANDAMENTO')prepararExecucaoInicio(t);
+      t.status=prev==='EM ANDAMENTO'?'EM ANDAMENTO':'PENDENTE';
+      t.impedimento={...imp,status:'RESOLVIDO',resolvidoEmISO:new Date().toISOString(),resolvidoEm:nowBR(),resolvidoPor:state.employee.nome};
+      addHist(t,'IMPEDIMENTO RESOLVIDO',`${imp.motivo||'Impedimento'} • tarefa liberada para execução.`);
+    });
+    resolutionState.busy=false;closeResolutionPage();toast('Impedimento resolvido. Tarefa liberada.');
+  }catch(err){$('resolutionError').textContent=err.message||'Não foi possível liberar a tarefa.'}
+  finally{resolutionState.busy=false;button.disabled=false}
+}
+document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if($('operationalDialogBack')?.classList.contains('active'))closeOperationalDialog();else if($('evidenceViewer')?.classList.contains('active'))closeEvidenceViewer();else if($('resolutionPage')?.classList.contains('active'))closeResolutionPage()});
 function syncStatus(text,type='online'){let p=$('syncPill');if(!p)return;p.innerHTML=`<span class="dot ${type}"></span><span>${esc(text)}</span>`}
 function loginStatus(text,type=''){const s=$('loginStatus'),d=$('loginDot');if(s)s.textContent=text;if(d)d.className='dot '+type;}
 async function ping(){if(!client){loginStatus('Biblioteca de conexão indisponível','offline');return}try{let {error}=await withTimeout(client.from(ONLINE_TABLE).select('id').eq('id',SHARED_ROW_ID).maybeSingle(),8000);if(error)throw error;loginStatus('Banco gerencial conectado','online')}catch(e){loginStatus('Conexão com o banco instável','warn')}}
@@ -210,31 +615,41 @@ $('loginForm').addEventListener('submit',async e=>{
   if(!client){$('loginError').textContent='Conexão com o banco indisponível.';return}
   try{
     loginStatus('Validando funcionário...','warn');
-    const [sharedRes,globalRes]=await Promise.all([
+    const [sharedRes,globalRes,credentialRes]=await Promise.all([
       withTimeout(client.from(ONLINE_TABLE).select('dados,updated_at').eq('id',SHARED_ROW_ID).maybeSingle()),
-      withTimeout(client.from(ONLINE_TABLE).select('dados').eq('id',GLOBAL_ROW_ID).maybeSingle())
+      withTimeout(client.from(ONLINE_TABLE).select('dados').eq('id',GLOBAL_ROW_ID).maybeSingle()),
+      withTimeout(client.from(ONLINE_TABLE).select('dados').eq('id',operacionalCredentialId(op)).maybeSingle())
     ]);
-    if(sharedRes.error)throw sharedRes.error;if(globalRes.error)throw globalRes.error;
+    if(sharedRes.error)throw sharedRes.error;if(globalRes.error)throw globalRes.error;if(credentialRes.error)throw credentialRes.error;
     const data=sharedRes.data?.dados||{},cfg=globalRes.data?.dados||{};
     const emp=(data.funcionarios||[]).find(f=>opnorm(f.operador)===op&&!['DESLIGADO','INATIVO'].includes(norm(f.status||'ATIVO')));
     if(!emp)throw new Error('Operador não encontrado entre os funcionários ativos.');
     const acessos=cfg.operacionalAcessos&&typeof cfg.operacionalAcessos==='object'?cfg.operacionalAcessos:{};
     if(acessos[op]!==true)throw new Error('Seu acesso ao Sistema Operacional não está liberado. Procure o líder responsável.');
     const gu=(cfg.usuarios||[]).find(u=>opnorm(u.operador)===op);
-    const passTrim=String(pass||'').trim(),senhaGerencial=String(gu?.senha||'').trim();
-    // Se há senha gerencial cadastrada, a senha previsível operador+24 deixa de funcionar.
-    const ok=Boolean(gu && senhaGerencial && senhaGerencial===passTrim);
-    if(!ok)throw new Error('Senha não reconhecida ou não cadastrada. Solicite uma senha individual no Gerencial.');
+    const passTrim=String(pass||'').trim(),credencial=credentialRes.data?.dados;
+    if(credentialRes.data){
+      if(credencial?.tipo!=='CREDENCIAL_OPERACIONAL'||opnorm(credencial.operador)!==op||String(credencial.senha||'').trim()!==passTrim)throw new Error('Senha do Operacional não reconhecida.');
+    }else{
+      // Primeiro acesso após a separação: a senha anterior inicia um cadastro próprio.
+      if(!gu||String(gu.senha||'').trim()!==passTrim)throw new Error('Senha anterior não reconhecida. Procure o Gerencial para recuperar o acesso.');
+      await criarCredencialOperacionalInicial(op,passTrim);
+    }
     state.mode='online';state.employee=emp;state.data=data;state.lastSharedUpdatedAt=sharedRes.data?.updated_at||null;
     startApp();subscribeRealtime();iniciarMonitorSincronizacao();
   }catch(err){$('loginError').textContent=err.message||'Não foi possível entrar.';loginStatus(erroConexao(err)?'Conexão instável • tente novamente':'Falha no acesso conectado','offline')}
 });
 function demoData(){let n=new Date(),h=x=>{let d=new Date(n.getTime()+x*3600000);return d.toISOString().slice(0,16)};return{funcionarios:[state.employee],diario:[{id:'dia_demo',dataISO:today(),responsavel:state.employee.nome,departamento:'FEMININO',obs:'Priorizar organização antes do pico de movimento.',tarefas:[{id:'t1',descricao:'Organizar parede de jeans',familia:'CONFECÇÃO',subfamilia:'JEANS',prioridade:'ALTA',status:'PENDENTE',prazo:h(2),observacao:'Completar grade e alinhar exposição.',responsavel:state.employee.nome,criadoPor:'LÍDER TESTE',criadoPorOperador:'133',exigirFotoConclusao:true,tempoEstimadoMin:30,criterioConclusao:'Parede organizada por tamanho, sem cabides vazios.',checklist:[{id:'c1',texto:'Conferir grade de tamanhos',concluido:false},{id:'c2',texto:'Alinhar cabides e peças',concluido:false}],exigirAprovacaoLider:true,historico:[{id:'h1',emISO:new Date().toISOString(),em:nowBR(),por:'LÍDER TESTE',evento:'CRIADA',detalhes:'Tarefa designada para execução.'}]},{id:'t2',descricao:'Revisar araras promocionais',familia:'CONFECÇÃO',subfamilia:'PROMOÇÃO',prioridade:'MÉDIA',status:'EM ANDAMENTO',prazo:h(4),observacao:'Separar peças sem etiqueta.',responsavel:state.employee.nome,criadoPor:'LÍDER TESTE',criadoPorOperador:'133',exigirFotoConclusao:false,historico:[]},{id:'t3',descricao:'Conferir provador feminino',familia:'OPERAÇÃO',subfamilia:'PROVADOR',prioridade:'CRÍTICA',status:'PENDENTE',prazo:h(-1),observacao:'Retirar peças acumuladas e devolver ao salão.',responsavel:state.employee.nome,criadoPor:'LÍDER TESTE',criadoPorOperador:'133',historico:[]}]}]}}
 function startApp(){
-  sessionStorage.setItem('operacionalSessaoV1',JSON.stringify({mode:state.mode,operator:state.employee.operador,name:state.employee.nome,issuedAt:Date.now()}));
+  // Apenas o operador é lembrado como conveniência, nunca como credencial de acesso.
+  sessionStorage.setItem('operacionalSessaoV1',JSON.stringify({operator:opnorm(state.employee.operador),issuedAt:Date.now()}));
+  applyUiPreferences();
   $('login').classList.add('hidden');$('app').classList.remove('hidden');
+  $('todayLabel').textContent=new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'2-digit',month:'long'}).format(new Date());
   $('userNameTop').textContent=state.employee.nome;$('userRoleTop').textContent=`OP. ${opnorm(state.employee.operador)} • ${state.employee.cargo||'Equipe'}`;$('avatarTop').textContent=initials(state.employee.nome);
+  applyProfilePhoto('');loadProfilePhoto();
   $('helloName').textContent=`Olá, ${String(state.employee.nome||'').split(' ')[0]||'Funcionário'} 👋`;$('heroCopy').textContent=`${state.employee.cargo||'Equipe'} • OP. ${opnorm(state.employee.operador)} • ${state.employee.matricula||'Loja 24'}`;
+  syncNavigation();
   syncStatus(state.mode==='demo'?'Modo demonstração — alterações locais':'Online • sincronização protegida',state.mode==='demo'?'warn':'online');render();iniciarAutoAtualizacaoOperacional();
 }
 function taskBelongsToLoggedUser(d,t){
@@ -263,14 +678,13 @@ function late(t){if(!t.prazo||['CONCLUIDA','CANCELADA','AGUARDANDO VALIDACAO'].i
 function statusOf(t){return late(t)?'ATRASADA':norm(t.status||'PENDENTE')}
 function fmtDate(v){if(!v)return'Não informado';let d=new Date(v);if(isNaN(d))return String(v);return d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
 function chipClass(s){s=norm(s);return s==='CRITICA'||s==='ATRASADA'?'red':s==='ALTA'||s==='BLOQUEADA'?'orange':s==='CONCLUIDA'?'green':'blue'}
-function visibleTasks(){let search=norm($('filterSearch').value),date=$('filterDate').value,tab=norm(state.tab);return ownTasks().filter(({d,t})=>{let st=norm(t.status||'PENDENTE');if(tab==='PENDENTE'&&!['PENDENTE','PAUSADA','BLOQUEADA'].includes(st))return false;if(tab!=='TODAS'&&tab!=='PENDENTE'&&st!==tab)return false;if(date==='HOJE'&&d.dataISO!==today())return false;if(date==='ABERTAS'&&['CONCLUIDA','CANCELADA'].includes(st))return false;if(search&&!norm(`${t.descricao} ${t.familia} ${t.subfamilia} ${d.departamento} ${t.observacao} ${t.criterioConclusao||''} ${(Array.isArray(t.checklist)?t.checklist:[]).map(i=>i.texto||'').join(' ')}`).includes(search))return false;return true}).sort((a,b)=>{let la=late(a.t),lb=late(b.t);if(la!==lb)return la?-1:1;return String(a.t.prazo||'9999').localeCompare(String(b.t.prazo||'9999'))})}
+function visibleTasks(){let search=norm($('filterSearch').value),date=$('filterDate').value,tab=norm(state.tab);return ownTasks().filter(({d,t})=>{let st=norm(t.status||'PENDENTE');if(tab==='PENDENTE'&&!['PENDENTE','PAUSADA','BLOQUEADA'].includes(st))return false;if(tab!=='TODAS'&&tab!=='PENDENTE'&&st!==tab)return false;if(date==='HOJE'&&d.dataISO!==today())return false;if(search&&!norm(`${t.descricao} ${t.familia} ${t.subfamilia} ${d.departamento} ${t.observacao} ${t.criterioConclusao||''} ${(Array.isArray(t.checklist)?t.checklist:[]).map(i=>i.texto||'').join(' ')}`).includes(search))return false;return true}).sort((a,b)=>{let la=late(a.t),lb=late(b.t);if(la!==lb)return la?-1:1;return String(a.t.prazo||'9999').localeCompare(String(b.t.prazo||'9999'))})}
 function tarefasDoUsuarioLogado(){return ownTasks()}
 function tarefasDoUsuarioNoFiltroAtual(){
   const search=norm($('filterSearch')?.value||'');
   const date=$('filterDate')?.value||'HOJE';
   return tarefasDoUsuarioLogado().filter(({d,t})=>{
     if(date==='HOJE'&&d.dataISO!==today())return false;
-    if(date==='ABERTAS'&&['CONCLUIDA','CANCELADA'].includes(norm(t.status||'PENDENTE')))return false;
     if(search&&!norm(`${t.descricao||''} ${t.familia||''} ${t.subfamilia||''} ${d.departamento||''} ${t.observacao||''} ${t.criterioConclusao||''} ${(Array.isArray(t.checklist)?t.checklist:[]).map(i=>i.texto||'').join(' ')}`).includes(search))return false;
     return true;
   });
@@ -282,22 +696,57 @@ function tempoExecucaoMs(t){const ex=t?.execucao&&typeof t.execucao==='object'?t
 function rotuloStatus(v){const n=norm(v);return ({CONCLUIDA:'CONCLUÍDA',CRITICA:'CRÍTICA',MEDIA:'MÉDIA',AGUARDANDO_VALIDACAO:'AGUARDANDO VALIDAÇÃO'}[n.replace(/ /g,'_')]||n)}
 function rotuloPrioridade(v){const n=norm(v);return n==='CRITICA'?'CRÍTICA':n==='MEDIA'?'MÉDIA':n}
 function fmtDuracao(ms){ms=Math.max(0,Number(ms)||0);const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`}
-function proximaTarefa(){const abertas=ownTasks().filter(({t})=>statusAberto(t)&&norm(t.status)!=='BLOQUEADA');if(!abertas.length){const bloqueadas=ownTasks().filter(({t})=>norm(t.status)==='BLOQUEADA');return bloqueadas[0]||null}return abertas.sort((a,b)=>{const sa=norm(a.t.status),sb=norm(b.t.status);const rank=s=>s==='EM ANDAMENTO'?0:s==='PAUSADA'?1:2;if(rank(sa)!==rank(sb))return rank(sa)-rank(sb);const la=late(a.t),lb=late(b.t);if(la!==lb)return la?-1:1;const pa=prioridadePeso(a.t.prioridade),pb=prioridadePeso(b.t.prioridade);if(pa!==pb)return pa-pb;return String(a.t.prazo||'9999').localeCompare(String(b.t.prazo||'9999'))})[0]}
+function proximaTarefa(){const disponiveis=ownTasks().filter(({d})=>String(d.dataISO||'')<=today());const abertas=disponiveis.filter(({t})=>statusAberto(t)&&norm(t.status)!=='BLOQUEADA');if(!abertas.length){const bloqueadas=disponiveis.filter(({t})=>norm(t.status)==='BLOQUEADA');return bloqueadas[0]||null}return abertas.sort((a,b)=>{const sa=norm(a.t.status),sb=norm(b.t.status);const rank=s=>s==='EM ANDAMENTO'?0:s==='PAUSADA'?1:2;if(rank(sa)!==rank(sb))return rank(sa)-rank(sb);const la=late(a.t),lb=late(b.t);if(la!==lb)return la?-1:1;const pa=prioridadePeso(a.t.prioridade),pb=prioridadePeso(b.t.prioridade);if(pa!==pb)return pa-pb;return String(a.t.prazo||'9999').localeCompare(String(b.t.prazo||'9999'))})[0]}
 function focusPrimaryButton(d,t){const st=norm(t.status||'PENDENTE');if(st==='PENDENTE')return `<button class="btn good" onclick="changeStatus('${d.id}','${t.id}','EM ANDAMENTO')">▶ Iniciar agora</button>`;if(st==='EM ANDAMENTO')return `<button class="btn good" onclick="completeTask('${d.id}','${t.id}')">✓ Concluir tarefa</button>`;if(st==='PAUSADA')return `<button class="btn good" onclick="resumeTask('${d.id}','${t.id}')">▶ Retomar tarefa</button>`;if(st==='BLOQUEADA')return `<button class="btn warn" onclick="resolveImpediment('${d.id}','${t.id}')">↻ Resolver impedimento</button>`;return `<button class="btn secondary" onclick="openTask('${d.id}','${t.id}')">Ver tarefa</button>`}
-function renderFocusPanel(){const el=$('focusPanel');if(!el||!state.employee)return;const hoje=ownTasks().filter(({d})=>d.dataISO===today()),concl=hoje.filter(({t})=>['CONCLUIDA','AGUARDANDO VALIDACAO'].includes(norm(t.status))).length,total=hoje.length,pct=total?Math.round(concl*100/total):0,next=proximaTarefa();if(!next){el.innerHTML=`<div class="focus-top"><div><strong>Meu Dia</strong><small>${total?`${concl} de ${total} concluídas`:'Nenhuma tarefa programada para hoje'}</small></div><div class="focus-progress"><div style="font-size:.68rem;font-weight:900;text-align:right">${pct}%</div><div class="focus-progress-line"><span style="width:${pct}%"></span></div></div></div><div class="focus-body"><div class="focus-kicker">Tudo em dia</div><div class="focus-title">Nenhuma tarefa aberta no momento.</div><div class="focus-route">Aguarde novas demandas do líder.</div></div>`;return}const {d,t}=next,st=norm(t.status||'PENDENTE'),blocked=st==='BLOQUEADA',route=[d.departamento,t.familia,t.subfamilia].filter(Boolean).join(' › ');el.innerHTML=`<div class="focus-top"><div><strong>Meu Dia</strong><small>${concl} de ${total} concluída(s) hoje</small></div><div class="focus-progress"><div style="font-size:.68rem;font-weight:900;text-align:right">${pct}%</div><div class="focus-progress-line"><span style="width:${pct}%"></span></div></div></div><div class="focus-body"><div class="focus-kicker">${blocked?'Precisa de atenção':'🔥 Faça agora'}</div><div class="focus-title">${esc(t.descricao||'Tarefa')}</div><div class="focus-route">${esc(route||'Loja 24')}</div><div class="focus-meta"><span class="chip ${chipClass(t.prioridade)}">${esc(rotuloPrioridade(t.prioridade||'MÉDIA'))}</span><span class="chip ${chipClass(st)}">${esc(rotuloStatus(st))}</span>${late(t)?'<span class="chip red">ATRASADA</span>':''}${t.prazo?`<span class="chip blue">Prazo ${esc(fmtDate(t.prazo))}</span>`:''}${t.execucao?.inicioEmISO?`<span class="chip blue">⏱ <b class="focus-clock exec-time" data-exec-did="${esc(d.id)}" data-exec-tid="${esc(t.id)}">${fmtDuracao(tempoExecucaoMs(t))}</b></span>`:''}</div>${blocked&&t.impedimento?`<div class="task-blocked-note"><b>${esc(t.impedimento.motivo||'Impedimento')}</b>${t.impedimento.detalhes?`<br>${esc(t.impedimento.detalhes)}`:''}</div>`:''}<div class="focus-actions">${focusPrimaryButton(d,t)}<button class="btn secondary" onclick="openTask('${d.id}','${t.id}')">Detalhes</button>${!['CONCLUIDA','CANCELADA','AGUARDANDO VALIDACAO','BLOQUEADA'].includes(st)?`<button class="btn danger" onclick="reportImpediment('${d.id}','${t.id}')">⚠️ Impedimento</button>`:''}</div></div>`}
+function renderFocusPanel(){const el=$('focusPanel');if(!el||!state.employee)return;const hoje=ownTasks().filter(({d})=>d.dataISO===today()),concl=hoje.filter(({t})=>norm(t.status)==='CONCLUIDA').length,aguardando=hoje.filter(({t})=>norm(t.status)==='AGUARDANDO VALIDACAO').length,total=hoje.length,pct=total?Math.round(concl*100/total):0,next=proximaTarefa();if(!next){el.innerHTML=`<div class="focus-top"><div><strong>Meu Dia</strong><small>${total?`${concl} de ${total} concluídas${aguardando?` • ${aguardando} aguardando validação`:``}`:'Nenhuma tarefa programada para hoje'}</small></div><div class="focus-progress"><div style="font-size:.68rem;font-weight:900;text-align:right">${pct}%</div><div class="focus-progress-line"><span style="width:${pct}%"></span></div></div></div><div class="focus-body"><div class="focus-kicker">Tudo em dia</div><div class="focus-title">Nenhuma tarefa aberta no momento.</div><div class="focus-route">Aguarde novas demandas do líder.</div></div>`;return}const {d,t}=next,st=norm(t.status||'PENDENTE'),blocked=st==='BLOQUEADA',route=[d.departamento,t.familia,t.subfamilia].filter(Boolean).join(' › ');el.innerHTML=`<div class="focus-top"><div><strong>Meu Dia</strong><small>${concl} de ${total} concluída(s) hoje${aguardando?` • ${aguardando} aguardando validação`:``}</small></div><div class="focus-progress"><div style="font-size:.68rem;font-weight:900;text-align:right">${pct}%</div><div class="focus-progress-line"><span style="width:${pct}%"></span></div></div></div><div class="focus-body"><div class="focus-kicker">${blocked?'Precisa de atenção':'🔥 Faça agora'}</div><div class="focus-title">${esc(t.descricao||'Tarefa')}</div><div class="focus-route">${esc(route||'Loja 24')}</div><div class="focus-meta"><span class="chip ${chipClass(t.prioridade)}">${esc(rotuloPrioridade(t.prioridade||'MÉDIA'))}</span><span class="chip ${chipClass(st)}">${esc(rotuloStatus(st))}</span>${late(t)?'<span class="chip red">ATRASADA</span>':''}${t.prazo?`<span class="chip blue">Prazo ${esc(fmtDate(t.prazo))}</span>`:''}${t.execucao?.inicioEmISO?`<span class="chip blue">⏱ <b class="focus-clock exec-time" data-exec-did="${esc(d.id)}" data-exec-tid="${esc(t.id)}">${fmtDuracao(tempoExecucaoMs(t))}</b></span>`:''}</div>${blocked&&t.impedimento?`<div class="task-blocked-note"><b>${esc(t.impedimento.motivo||'Impedimento')}</b>${t.impedimento.detalhes?`<br>${esc(t.impedimento.detalhes)}`:''}</div>`:''}<div class="focus-actions">${focusPrimaryButton(d,t)}<button class="btn secondary" onclick="openTask('${d.id}','${t.id}')">Detalhes</button>${!['CONCLUIDA','CANCELADA','AGUARDANDO VALIDACAO','BLOQUEADA'].includes(st)?`<button class="btn danger" onclick="reportImpediment('${d.id}','${t.id}')">⚠️ Impedimento</button>`:''}</div></div>`}
 function atualizarRelogiosExecucao(){document.querySelectorAll('[data-exec-did][data-exec-tid]').forEach(el=>{const {t}=findTask(el.dataset.execDid,el.dataset.execTid);if(t)el.textContent=fmtDuracao(tempoExecucaoMs(t))})}
 function prepararExecucaoInicio(t){const now=new Date().toISOString();t.execucao=t.execucao&&typeof t.execucao==='object'?t.execucao:{};if(!t.execucao.inicioEmISO){t.execucao.inicioEmISO=now;t.execucao.inicioEm=nowBR();t.execucao.iniciadoPor=state.employee.nome;t.execucao.totalPausadoMs=0}if(t.execucao.pausadoEmISO){const p=Date.parse(t.execucao.pausadoEmISO);if(Number.isFinite(p))t.execucao.totalPausadoMs=Number(t.execucao.totalPausadoMs||0)+(Date.now()-p);delete t.execucao.pausadoEmISO;delete t.execucao.pausadoEm}delete t.execucao.fimEmISO}
-async function pauseTask(did,tid){try{await mutateTask(did,tid,(d,t)=>{if(norm(t.status)!=='EM ANDAMENTO')return;prepararExecucaoInicio(t);t.status='PAUSADA';t.execucao.pausadoEmISO=new Date().toISOString();t.execucao.pausadoEm=nowBR();addHist(t,'TAREFA PAUSADA','Execução pausada pelo funcionário.')})}catch(e){alert(e.message||'Não foi possível pausar a tarefa.')}}
-async function resumeTask(did,tid){try{await mutateTask(did,tid,(d,t)=>{prepararExecucaoInicio(t);const old=norm(t.status||'PAUSADA');t.status='EM ANDAMENTO';addHist(t,'TAREFA RETOMADA',`${old} → EM ANDAMENTO • cronômetro retomado.`)})}catch(e){alert(e.message||'Não foi possível retomar a tarefa.')}}
-function reportImpediment(did,tid){const {t}=findTask(did,tid);if(!t)return;impedimentState={did,tid};$('impedimentTaskName').textContent=t.descricao||'Tarefa';document.querySelectorAll('input[name="impedimentReason"]').forEach(i=>i.checked=false);$('impedimentDetail').value='';$('impedimentError').textContent='';$('impedimentBack').classList.add('active')}
+async function pauseTask(did,tid){try{await mutateTask(did,tid,exigeTarefaAberta((d,t)=>{if(norm(t.status)!=='EM ANDAMENTO')return;prepararExecucaoInicio(t);t.status='PAUSADA';t.execucao.pausadoEmISO=new Date().toISOString();t.execucao.pausadoEm=nowBR();addHist(t,'TAREFA PAUSADA','Execução pausada pelo funcionário.')}))}catch(e){showOperationalNotice(e.message||'Não foi possível pausar a tarefa.')}}
+async function resumeTask(did,tid){try{await mutateTask(did,tid,exigeTarefaAberta((d,t)=>{if(norm(t.status)!=='PAUSADA')throw new Error('Esta tarefa não está pausada.');prepararExecucaoInicio(t);const old=norm(t.status||'PAUSADA');t.status='EM ANDAMENTO';addHist(t,'TAREFA RETOMADA',`${old} → EM ANDAMENTO • cronômetro retomado.`)}))}catch(e){showOperationalNotice(e.message||'Não foi possível retomar a tarefa.')}}
+function reportImpediment(did,tid){const {t}=findTask(did,tid);if(!t||!statusAberto(t))return;impedimentState={did,tid};$('impedimentTaskName').textContent=t.descricao||'Tarefa';document.querySelectorAll('input[name="impedimentReason"]').forEach(i=>i.checked=false);$('impedimentDetail').value='';$('impedimentError').textContent='';$('impedimentBack').classList.add('active')}
 function closeImpediment(){$('impedimentBack')?.classList.remove('active');impedimentState={did:'',tid:''}}
 async function submitImpediment(){const did=impedimentState.did,tid=impedimentState.tid,reason=document.querySelector('input[name="impedimentReason"]:checked')?.value||'',detail=String($('impedimentDetail')?.value||'').trim();if(!reason){$('impedimentError').textContent='Selecione o motivo do impedimento.';return}try{await mutateTask(did,tid,(d,t)=>{const old=norm(t.status||'PENDENTE');t.execucao=t.execucao&&typeof t.execucao==='object'?t.execucao:{};if(old==='EM ANDAMENTO'){prepararExecucaoInicio(t);t.execucao.pausadoEmISO=new Date().toISOString();t.execucao.pausadoEm=nowBR()}t.impedimento={status:'ATIVO',motivo:reason,detalhes:detail,statusAnterior:old,registradoEmISO:new Date().toISOString(),registradoEm:nowBR(),registradoPor:state.employee.nome,registradoPorOperador:opnorm(state.employee.operador)};t.status='BLOQUEADA';addHist(t,'IMPEDIMENTO REGISTRADO',`${reason}${detail?' • '+detail:''}`);addHist(t,'STATUS ALTERADO',`${old} → BLOQUEADA • via Sistema Operacional`) });closeImpediment();toast('Impedimento informado ao líder')}catch(e){$('impedimentError').textContent=e.message||'Não foi possível registrar o impedimento.'}}
-async function resolveImpediment(did,tid){if(!confirm('O impedimento foi resolvido e a tarefa pode continuar?'))return;try{await mutateTask(did,tid,(d,t)=>{const imp=t.impedimento||{},prev=norm(imp.statusAnterior||'PENDENTE');if(t.execucao?.pausadoEmISO&&prev==='EM ANDAMENTO')prepararExecucaoInicio(t);t.status=prev==='EM ANDAMENTO'?'EM ANDAMENTO':'PENDENTE';t.impedimento={...imp,status:'RESOLVIDO',resolvidoEmISO:new Date().toISOString(),resolvidoEm:nowBR(),resolvidoPor:state.employee.nome};addHist(t,'IMPEDIMENTO RESOLVIDO',`${imp.motivo||'Impedimento'} • tarefa liberada para execução.`)})}catch(e){alert(e.message||'Não foi possível liberar a tarefa.')}}
-async function abrirEvidenciaOriginal(registroId){if(!registroId||!client)return;try{syncStatus('Carregando evidência...','warn');const {data,error}=await withTimeout(client.from(ONLINE_TABLE).select('dados').eq('id',registroId).maybeSingle(),30000);if(error)throw error;const foto=data?.dados?.fotoDataUrl;if(!foto)throw new Error('Evidência original não encontrada.');$('evidenceViewerImg').src=foto;$('evidenceViewerInfo').textContent=`${data.dados.nomeArquivo||'Evidência'} • ${data.dados.criadoEm||''}`;$('evidenceViewer').classList.add('active');syncStatus('Online • evidência carregada','online')}catch(e){syncStatus('Falha ao carregar evidência','offline');alert(e.message||'Não foi possível abrir a evidência.')}}
+async function abrirEvidenciaOriginal(registroId){if(!registroId||!client)return;try{syncStatus('Carregando evidência...','warn');const {data,error}=await withTimeout(client.from(ONLINE_TABLE).select('dados').eq('id',registroId).maybeSingle(),30000);if(error)throw error;const foto=data?.dados?.fotoDataUrl;if(!foto)throw new Error('Evidência original não encontrada.');$('evidenceViewerImg').src=foto;$('evidenceViewerInfo').textContent=`${data.dados.nomeArquivo||'Evidência'} • ${data.dados.criadoEm||''}`;$('evidenceViewer').classList.add('active');syncStatus('Online • evidência carregada','online')}catch(e){syncStatus('Falha ao carregar evidência','offline');showOperationalNotice(e.message||'Não foi possível abrir a evidência.')}}
 function closeEvidenceViewer(){$('evidenceViewer')?.classList.remove('active');if($('evidenceViewerImg'))$('evidenceViewerImg').removeAttribute('src')}
 
 executionClockTimer=setInterval(atualizarRelogiosExecucao,1000);
-function render(){let all=tarefasDoUsuarioNoFiltroAtual(),pend=all.filter(x=>['PENDENTE','PAUSADA','BLOQUEADA'].includes(norm(x.t.status||'PENDENTE'))).length,and=all.filter(x=>norm(x.t.status||'PENDENTE')==='EM ANDAMENTO').length,con=all.filter(x=>norm(x.t.status||'PENDENTE')==='CONCLUIDA').length,atr=all.filter(x=>late(x.t)).length;$('mPend').textContent=pend;$('mAnd').textContent=and;$('mConcl').textContent=con;$('mAtr').textContent=atr;renderFocusPanel();let vis=visibleTasks(),list=$('taskList');$('sectionTitle').textContent=state.tab==='TODAS'?'Minhas tarefas':state.tab[0]+state.tab.slice(1).toLowerCase();$('sectionSub').textContent=`${vis.length} tarefa(s) no filtro atual.`;if(!vis.length){list.innerHTML='<div class="empty">Nenhuma tarefa encontrada neste filtro.</div>';return}list.innerHTML=vis.map(({d,t})=>taskHTML(d,t)).join('');atualizarRelogiosExecucao()}
+function render(){
+  const home=state.view==='HOME';
+  $('app').classList.remove('view-home','view-tasks','view-profile','view-settings');
+  $('app').classList.add(({HOME:'view-home',TAREFAS:'view-tasks',PERFIL:'view-profile',CONFIGURACOES:'view-settings'})[state.view]||'view-home');
+  const titles={HOME:'Meu dia de trabalho',TAREFAS:'Tarefas',PERFIL:'Meu perfil',CONFIGURACOES:'Configurações'};
+  $('viewTitle').textContent=titles[state.view]||titles.HOME;
+  let all=tarefasDoUsuarioNoFiltroAtual(),pend=all.filter(x=>['PENDENTE','PAUSADA','BLOQUEADA'].includes(norm(x.t.status||'PENDENTE'))).length,and=all.filter(x=>norm(x.t.status||'PENDENTE')==='EM ANDAMENTO').length,con=all.filter(x=>norm(x.t.status||'PENDENTE')==='CONCLUIDA').length,atr=all.filter(x=>late(x.t)).length;
+  $('mPend').textContent=pend;$('mAnd').textContent=and;$('mConcl').textContent=con;$('mAtr').textContent=atr;
+  if(home)renderFocusPanel();
+  if(state.view==='PERFIL'){
+    const emp=state.employee||{};
+    applyProfilePhoto(profilePhotoDataUrl);
+    $('profileName').textContent=emp.nome||'Operador';
+    $('profileOperator').textContent=opnorm(emp.operador)||'—';
+    $('profileRole').textContent=emp.cargo||'Equipe';
+    $('profileRegistration').textContent=emp.matricula||'Não informada';
+    $('profileTenure').textContent=tenureText(emp.entrada);
+    $('profileEntry').textContent=formatEmployeeDate(emp.entrada);
+    $('profileSector').textContent=emp.setor||'Não informado';
+    $('profileDepartment').textContent=emp.departamento||'Não informado';
+    $('profileStatus').textContent=emp.status||'ATIVO';
+  }
+  if(state.view==='CONFIGURACOES'){
+    const prefs=readUiPreferences();
+    $('settingsDefaultPeriod').value=prefs.period;
+    $('settingsDensity').value=prefs.density;
+    $('settingsTheme').value=prefs.theme;
+    $('settingsAccent').value=prefs.accent;
+    loadPasswordRequestStatus();
+  }
+  let vis=visibleTasks(),list=$('taskList');
+  $('filterStatus').value=state.tab;
+  $('sectionTitle').textContent=({TODAS:'Todas as tarefas',PENDENTE:'Tarefas pendentes','EM ANDAMENTO':'Em andamento','CONCLUÍDA':'Concluídas'})[state.tab]||'Todas as tarefas';
+  $('sectionSub').textContent=`${vis.length} tarefa(s) no filtro atual.`;
+  if(!vis.length){list.innerHTML='<div class="empty">Nenhuma tarefa encontrada neste filtro.</div>';return}
+  list.innerHTML=vis.map(({d,t})=>taskHTML(d,t)).join('');atualizarRelogiosExecucao();
+}
 function taskHTML(d,t){let st=norm(t.status||'PENDENTE'),isLate=late(t),route=[d.departamento,t.familia,t.subfamilia].filter(Boolean).join(' › '),reag=t.reagendamento&&typeof t.reagendamento==='object'?t.reagendamento:null,pending=reag?.status==='PENDENTE';let primary=st==='PENDENTE'?`<button class="btn good" onclick="changeStatus('${d.id}','${t.id}','EM ANDAMENTO')">▶ Iniciar tarefa</button>`:st==='EM ANDAMENTO'?`<button class="btn good" onclick="completeTask('${d.id}','${t.id}')">✓ Concluir tarefa</button>`:st==='PAUSADA'?`<button class="btn good" onclick="resumeTask('${d.id}','${t.id}')">▶ Retomar tarefa</button>`:st==='BLOQUEADA'?`<button class="btn warn" onclick="resolveImpediment('${d.id}','${t.id}')">↻ Resolver impedimento</button>`:'';let checks=Array.isArray(t.checklist)?t.checklist.filter(i=>i?.texto):[],done=checks.filter(i=>i.concluido).length;return `<article class="task prio-${esc(rotuloPrioridade(t.prioridade||'MÉDIA'))}"><div class="task-head"><div><div class="task-title">${esc(t.descricao||'Tarefa')}</div><div class="route">${esc(route||'Loja 24')}</div><div class="chips"><span class="chip ${chipClass(t.prioridade)}">${esc(rotuloPrioridade(t.prioridade||'MÉDIA'))}</span><span class="chip ${chipClass(st)}">${esc(rotuloStatus(st))}</span>${isLate?'<span class="chip red">ATRASADA</span>':''}${pending?'<span class="chip orange">📅 REAGENDAMENTO PENDENTE</span>':''}${t.exigirFotoConclusao?'<span class="chip orange">📷 FOTO OBRIGATÓRIA</span>':(t.fotoConclusaoDataUrl?'<span class="chip green">📷 FOTO ANEXADA</span>':'')}${t.tempoEstimadoMin?`<span class="chip blue">⏱ ${esc(t.tempoEstimadoMin)} MIN</span>`:''}${t.execucao?.inicioEmISO?`<span class="chip blue">⏱ <b class="exec-time" data-exec-did="${esc(d.id)}" data-exec-tid="${esc(t.id)}">${fmtDuracao(tempoExecucaoMs(t))}</b></span>`:''}${checks.length?`<span class="chip ${done===checks.length?'green':'blue'}">☑ ${done}/${checks.length}</span>`:''}${t.exigirAprovacaoLider?'<span class="chip blue">✓ VALIDAÇÃO DO LÍDER</span>':''}${t.referenciaArquivo?.dataUrl?'<span class="chip blue">📎 REFERÊNCIA</span>':''}</div></div><div class="deadline ${isLate?'late':''}"><b>Prazo</b><br>${esc(fmtDate(t.prazo))}</div></div>${t.observacao?`<div class="task-note"><b>Orientação:</b> ${esc(t.observacao)}</div>`:''}${st==='BLOQUEADA'&&t.impedimento?`<div class="task-blocked-note"><b>⚠️ ${esc(t.impedimento.motivo||'Impedimento')}</b>${t.impedimento.detalhes?`<br>${esc(t.impedimento.detalhes)}`:''}</div>`:''}${st==='AGUARDANDO VALIDACAO'?'<div class="task-note" style="background:var(--bluebg);color:var(--blue)"><b>✓ Conclusão enviada.</b> Aguardando validação do líder responsável.</div>':''}${t.validacaoConclusao?.status==='RECUSADA'?`<div class="task-note" style="background:var(--orangebg);color:var(--orange)"><b>↩ Conclusão devolvida.</b>${t.validacaoConclusao.motivoRecusa?` ${esc(t.validacaoConclusao.motivoRecusa)}`:''}</div>`:''}${pending?`<div class="task-note" style="background:var(--orangebg);color:var(--orange)"><b>📅 Reagendamento solicitado:</b> ${esc(fmtOnlyDate(reag.dataSolicitada))}<br><small>Aguardando aprovação de ${esc(t.criadoPor||d.criadoPor||'líder responsável')}.</small></div>`:''}<div class="task-actions">${primary}${st==='EM ANDAMENTO'?`<button class="btn secondary" onclick="pauseTask('${d.id}','${t.id}')">Ⅱ Pausar</button>`:''}<button class="btn secondary" onclick="openTask('${d.id}','${t.id}')">Ver detalhes</button>${!['CONCLUIDA','CANCELADA','AGUARDANDO VALIDACAO','BLOQUEADA'].includes(st)?`<button class="btn danger" onclick="reportImpediment('${d.id}','${t.id}')">⚠️ Impedimento</button>`:''}${!['CONCLUIDA','CANCELADA','AGUARDANDO VALIDACAO'].includes(st)&&!pending?`<button class="btn warn" onclick="rescheduleTask('${d.id}','${t.id}')">📅 Reagendar</button>`:''}</div></article>`}
 function findTask(did,tid,data=state.data){let d=(data?.diario||[]).find(x=>String(x.id)===String(did));let t=d?.tarefas?.find(x=>String(x.id)===String(tid));return{d,t}}
 function addHist(t,event,details){t.historico=Array.isArray(t.historico)?t.historico:[];t.historico.push({id:uid('hist_op'),emISO:new Date().toISOString(),em:nowBR(),por:state.employee.nome,evento:event,detalhes:details})}
@@ -307,6 +756,10 @@ async function mutateTask(did,tid,fn){
   mutationQueue=job.catch(()=>{});
   return job;
 }
+function statusEdicaoPermitida(t,fn){
+  return !fn._exigeTarefaAberta || !['CONCLUIDA','CANCELADA','AGUARDANDO VALIDACAO'].includes(norm(t?.status||''));
+}
+function exigeTarefaAberta(fn){fn._exigeTarefaAberta=true;return fn}
 async function mutateTaskCore(did,tid,fn){
   if(state.mode==='demo'){let {d,t}=findTask(did,tid);if(!t)return;fn(d,t);render();openTaskMaybe(did,tid);toast('Alteração registrada no modo demonstração');return}
   if(state.mode!=='online'||!client)throw new Error('Sem conexão com o Gerencial. A alteração não foi enviada.');
@@ -318,6 +771,7 @@ async function mutateTaskCore(did,tid,fn){
       const payload=cloneSeguro(row.dados),found=findTask(did,tid,payload);
       if(!found.t)throw new Error('A tarefa não existe mais no Gerencial.');
       if(!taskBelongsToLoggedUser(found.d,found.t))throw new Error('Esta tarefa não pertence mais ao seu usuário.');
+      if(!statusEdicaoPermitida(found.t,fn))throw new Error('Esta tarefa já está concluída, cancelada ou aguardando validação. Atualize os dados.');
       fn(found.d,found.t);found.d.atualizadoPor=state.employee.nome;found.d.atualizadoEm=nowBR();
       const bytes=tamanhoJsonBytes(payload);
       if(bytes>8*1024*1024)console.warn('Base compartilhada acima de 8 MB. Considere mover evidências para Storage.',bytes);
@@ -331,18 +785,20 @@ async function mutateTaskCore(did,tid,fn){
     throw new Error('Conflito de sincronização. Outra alteração ocorreu ao mesmo tempo. Tente novamente.');
   }finally{state.saving=false}
 }
-async function changeStatus(did,tid,status){try{await mutateTask(did,tid,(d,t)=>{let old=norm(t.status||'PENDENTE');if(status==='EM ANDAMENTO')prepararExecucaoInicio(t);t.status=status;addHist(t,'STATUS ALTERADO',`${old} → ${status} • via Sistema Operacional`);if(status!=='CONCLUÍDA'){delete t.concluidaEmISO;delete t.concluidaPor}})}catch(e){syncStatus('Falha ao sincronizar','offline');alert(e.message)}}
+async function changeStatus(did,tid,status){try{await mutateTask(did,tid,exigeTarefaAberta((d,t)=>{let old=norm(t.status||'PENDENTE');if(status==='EM ANDAMENTO'&&old!=='PENDENTE')throw new Error('A tarefa não está pendente.');if(status==='EM ANDAMENTO')prepararExecucaoInicio(t);t.status=status;addHist(t,'STATUS ALTERADO',`${old} → ${status} • via Sistema Operacional`);if(status!=='CONCLUÍDA'){delete t.concluidaEmISO;delete t.concluidaPor}}))}catch(e){syncStatus('Falha ao sincronizar','offline');showOperationalNotice(e.message)}}
 function fmtOnlyDate(v){let p=String(v||'').slice(0,10).split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:(v||'-')}
 let rescheduleState={did:'',tid:''};
-function rescheduleTask(did,tid){let {d,t}=findTask(did,tid);if(!t)return;rescheduleState={did,tid};let current=String(t.prazo||d.dataISO||today()).slice(0,10);$('rescheduleTaskName').textContent=t.descricao||'Tarefa';$('rescheduleCurrent').textContent=fmtOnlyDate(current);$('rescheduleLeader').textContent=t.criadoPor||d.criadoPor||'Líder responsável';$('rescheduleDate').min=today();$('rescheduleDate').value='';$('rescheduleReason').value='';$('rescheduleError').textContent='';$('rescheduleBack').classList.add('active');}
+function rescheduleTask(did,tid){let {d,t}=findTask(did,tid);if(!t||!statusAberto(t))return;rescheduleState={did,tid};let current=String(t.prazo||d.dataISO||today()).slice(0,10);$('rescheduleTaskName').textContent=t.descricao||'Tarefa';$('rescheduleCurrent').textContent=fmtOnlyDate(current);$('rescheduleLeader').textContent=t.criadoPor||d.criadoPor||'Líder responsável';$('rescheduleDate').min=today();$('rescheduleDate').value='';$('rescheduleReason').value='';$('rescheduleError').textContent='';$('rescheduleBack').classList.add('active');}
 function closeReschedule(){$('rescheduleBack')?.classList.remove('active');rescheduleState={did:'',tid:''};}
-async function submitReschedule(){let did=rescheduleState.did,tid=rescheduleState.tid,{d,t}=findTask(did,tid);if(!t)return closeReschedule();let requested=String($('rescheduleDate')?.value||'').trim(),reason=String($('rescheduleReason')?.value||'').trim();if(!requested){$('rescheduleError').textContent='Escolha a nova data desejada.';return}if(requested<=today()){$('rescheduleError').textContent='Escolha uma data futura para o reagendamento.';return}try{await mutateTask(did,tid,(d,t)=>{t.reagendamento={status:'PENDENTE',dataSolicitada:requested,prazoOriginal:t.prazo||'',motivo:reason,solicitadoEmISO:new Date().toISOString(),solicitadoEm:nowBR(),solicitadoPor:state.employee.nome,solicitadoPorOperador:String(state.employee.operador||'')};addHist(t,'REAGENDAMENTO SOLICITADO',`${fmtOnlyDate(String(t.prazo||'').slice(0,10))} → ${fmtOnlyDate(requested)}${reason?' • Motivo: '+reason:''} • aguardando aprovação de ${t.criadoPor||d.criadoPor||'líder responsável'}.`)});closeReschedule();toast('Reagendamento enviado para aprovação')}catch(e){$('rescheduleError').textContent=e.message||'Não foi possível enviar a solicitação.';}}
+async function submitReschedule(){let did=rescheduleState.did,tid=rescheduleState.tid,{d,t}=findTask(did,tid);if(!t)return closeReschedule();let requested=String($('rescheduleDate')?.value||'').trim(),reason=String($('rescheduleReason')?.value||'').trim();if(!requested){$('rescheduleError').textContent='Escolha a nova data desejada.';return}if(requested<=today()){$('rescheduleError').textContent='Escolha uma data futura para o reagendamento.';return}try{await mutateTask(did,tid,exigeTarefaAberta((d,t)=>{if(t.reagendamento?.status==='PENDENTE')throw new Error('Já existe solicitação pendente.');t.reagendamento={status:'PENDENTE',dataSolicitada:requested,prazoOriginal:t.prazo||'',motivo:reason,solicitadoEmISO:new Date().toISOString(),solicitadoEm:nowBR(),solicitadoPor:state.employee.nome,solicitadoPorOperador:String(state.employee.operador||'')};addHist(t,'REAGENDAMENTO SOLICITADO',`${fmtOnlyDate(String(t.prazo||'').slice(0,10))} → ${fmtOnlyDate(requested)}${reason?' • Motivo: '+reason:''} • aguardando aprovação de ${t.criadoPor||d.criadoPor||'líder responsável'}.`)}));closeReschedule();toast('Reagendamento enviado para aprovação')}catch(e){$('rescheduleError').textContent=e.message||'Não foi possível enviar a solicitação.';}}
 
 
 function checklistTarefa(t){return (Array.isArray(t?.checklist)?t.checklist:[]).filter(i=>String(i?.texto||'').trim())}
 function checklistCompleto(t){const c=checklistTarefa(t);return !c.length||c.every(i=>!!i.concluido)}
 async function toggleChecklistItem(did,tid,itemId,checked){
-  try{await mutateTask(did,tid,(d,t)=>{const item=(Array.isArray(t.checklist)?t.checklist:[]).find(i=>String(i.id)===String(itemId));if(!item)return;item.concluido=!!checked;if(checked){item.concluidoEmISO=new Date().toISOString();item.concluidoPor=state.employee.nome;addHist(t,'CHECKLIST',`Concluído: ${item.texto}`)}else{item.concluidoEmISO='';item.concluidoPor='';addHist(t,'CHECKLIST',`Reaberto: ${item.texto}`)}});if(state.selected?.did===did&&state.selected?.tid===tid)openTaskMaybe(did,tid)}catch(e){alert(e.message||'Não foi possível atualizar o checklist.');}
+  const atual=findTask(did,tid).t;
+  if(!atual||!statusAberto(atual)){toast('Checklist bloqueado: conclusão já enviada ou encerrada.');openTaskMaybe(did,tid);return}
+  try{await mutateTask(did,tid,exigeTarefaAberta((d,t)=>{const item=(Array.isArray(t.checklist)?t.checklist:[]).find(i=>String(i.id)===String(itemId));if(!item)return;item.concluido=!!checked;if(checked){item.concluidoEmISO=new Date().toISOString();item.concluidoPor=state.employee.nome;addHist(t,'CHECKLIST',`Concluído: ${item.texto}`)}else{item.concluidoEmISO='';item.concluidoPor='';addHist(t,'CHECKLIST',`Reaberto: ${item.texto}`)}}));if(state.selected?.did===did&&state.selected?.tid===tid)openTaskMaybe(did,tid)}catch(e){showOperationalNotice(e.message||'Não foi possível atualizar o checklist.');}
 }
 function renderReferenciaOperacional(t){const r=t?.referenciaArquivo;if(!r?.dataUrl)return '';if(String(r.tipo||'').startsWith('image/'))return `<div class="detail-block"><div class="detail-block-head"><b>📎 Referência do líder</b><small>${esc(r.nome||'Imagem')}</small></div><div class="detail-block-body reference-preview"><img src="${r.dataUrl}" alt="Referência da tarefa"><a class="reference-action" href="${r.dataUrl}" target="_blank" rel="noopener">Abrir imagem em tela cheia</a></div></div>`;return `<div class="detail-block"><div class="detail-block-head"><b>📎 Referência do líder</b><small>${esc(r.nome||'PDF')}</small></div><div class="detail-block-body"><a class="reference-action" href="${r.dataUrl}" target="_blank" rel="noopener">📄 Abrir arquivo de referência</a></div></div>`}
 function atualizarEstadoConclusao(){
@@ -354,14 +810,14 @@ function atualizarEstadoConclusao(){
 
 let completionState={did:'',tid:'',photoDataUrl:'',photoFullDataUrl:'',photoName:'',photoOriginalBytes:0,photoFullBytes:0,photoThumbBytes:0,clockTimer:null};
 function updateCompletionClock(){let d=new Date();let c=$('completionClock'),dt=$('completionDate');if(c)c.textContent=d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});if(dt)dt.textContent=d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});}
-function completeTask(did,tid){let {d,t}=findTask(did,tid);if(!t)return;completionState.did=did;completionState.tid=tid;completionState.photoDataUrl='';completionState.photoFullDataUrl='';completionState.photoName='';completionState.photoOriginalBytes=0;completionState.photoFullBytes=0;completionState.photoThumbBytes=0;$('completionTopTask').textContent=t.descricao||'Tarefa';$('completionTaskTitle').textContent=t.descricao||'Tarefa';$('completionTaskRoute').textContent=[d.departamento,t.familia,t.subfamilia].filter(Boolean).join(' › ');$('completionNote').value='';$('completionError').textContent='';clearCompletionPhoto(false);let required=!!t.exigirFotoConclusao,checks=checklistTarefa(t),done=checks.filter(i=>i.concluido).length;let banners=required?'<div class="require-banner"><span>⚠️</span><span><b>Foto obrigatória.</b> Esta tarefa só poderá ser concluída depois que uma imagem for anexada.</span></div>':'<div class="require-banner optional-banner"><span>ℹ️</span><span>A foto é opcional para esta tarefa. Você pode concluir sem imagem.</span></div>';if(t.criterioConclusao)banners+=`<div class="validation-banner"><b>Critério de conclusão:</b><br>${esc(t.criterioConclusao)}</div>`;if(checks.length)banners+=`<div class="validation-banner ${done===checks.length?'':'rejected'}"><b>Checklist:</b> ${done}/${checks.length} concluído(s).${done<checks.length?' Abra “Ver detalhes” e conclua as etapas restantes antes de finalizar.':''}</div>`;if(t.exigirAprovacaoLider)banners+='<div class="validation-banner waiting"><b>Validação do líder:</b> ao confirmar, a tarefa será enviada para aprovação antes de ser considerada concluída.</div>';$('completionRequirement').innerHTML=banners;$('completionPhotoDrop').classList.toggle('required',required);updateCompletionClock();clearInterval(completionState.clockTimer);completionState.clockTimer=setInterval(updateCompletionClock,1000);$('completionPage').classList.add('active');$('completionPage').setAttribute('aria-hidden','false');document.body.style.overflow='hidden';atualizarEstadoConclusao()}
+function completeTask(did,tid){let {d,t}=findTask(did,tid);if(!t)return;if(norm(t.status)!=='EM ANDAMENTO'){toast('Inicie ou retome a tarefa antes de concluir.');return;}completionState.did=did;completionState.tid=tid;completionState.photoDataUrl='';completionState.photoFullDataUrl='';completionState.photoName='';completionState.photoOriginalBytes=0;completionState.photoFullBytes=0;completionState.photoThumbBytes=0;$('completionTopTask').textContent=t.descricao||'Tarefa';$('completionTaskTitle').textContent=t.descricao||'Tarefa';$('completionTaskRoute').textContent=[d.departamento,t.familia,t.subfamilia].filter(Boolean).join(' › ');$('completionNote').value='';$('completionError').textContent='';clearCompletionPhoto(true);let required=!!t.exigirFotoConclusao,checks=checklistTarefa(t),done=checks.filter(i=>i.concluido).length;let banners=required?'<div class="require-banner"><span>⚠️</span><span><b>Foto obrigatória.</b> Esta tarefa só poderá ser concluída depois que uma imagem for anexada.</span></div>':'<div class="require-banner optional-banner"><span>ℹ️</span><span>A foto é opcional para esta tarefa. Você pode concluir sem imagem.</span></div>';if(t.criterioConclusao)banners+=`<div class="validation-banner"><b>Critério de conclusão:</b><br>${esc(t.criterioConclusao)}</div>`;if(checks.length)banners+=`<div class="validation-banner ${done===checks.length?'':'rejected'}"><b>Checklist:</b> ${done}/${checks.length} concluído(s).${done<checks.length?' Abra “Ver detalhes” e conclua as etapas restantes antes de finalizar.':''}</div>`;if(t.exigirAprovacaoLider)banners+='<div class="validation-banner waiting"><b>Validação do líder:</b> ao confirmar, a tarefa será enviada para aprovação antes de ser considerada concluída.</div>';$('completionRequirement').innerHTML=banners;$('completionPhotoDrop').classList.toggle('required',required);updateCompletionClock();clearInterval(completionState.clockTimer);completionState.clockTimer=setInterval(updateCompletionClock,1000);$('completionPage').classList.add('active');$('completionPage').setAttribute('aria-hidden','false');document.body.style.overflow='hidden';atualizarEstadoConclusao()}
 function closeCompletionPage(){clearInterval(completionState.clockTimer);completionState.clockTimer=null;$('completionPage')?.classList.remove('active');$('completionPage')?.setAttribute('aria-hidden','true');document.body.style.overflow='';completionState.did='';completionState.tid='';completionState.photoDataUrl='';completionState.photoFullDataUrl='';completionState.photoName='';completionState.photoFullBytes=0;completionState.photoThumbBytes=0;}
 function clearCompletionPhoto(clearInput=true){completionState.photoDataUrl='';completionState.photoFullDataUrl='';completionState.photoName='';completionState.photoOriginalBytes=0;completionState.photoFullBytes=0;completionState.photoThumbBytes=0;let input=$('completionPhoto');if(clearInput&&input)input.value='';$('completionPreviewWrap')?.classList.remove('active');if($('completionPreview'))$('completionPreview').removeAttribute('src');if($('completionPhotoMeta'))$('completionPhotoMeta').textContent='';atualizarEstadoConclusao();}
 function dataUrlSize(dataUrl){let b64=String(dataUrl||'').split(',')[1]||'';return Math.ceil(b64.length*3/4)}
 function carregarImagemArquivo(file){return new Promise((resolve,reject)=>{const url=URL.createObjectURL(file),img=new Image();img.onload=()=>{URL.revokeObjectURL(url);resolve(img)};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Não foi possível abrir esta imagem. Se ela estiver em HEIC/HEIF, salve ou compartilhe como JPG e tente novamente.'))};img.src=url})}
 function comprimirCanvas(img,maxDim,targetBytes){let scale=Math.min(1,maxDim/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height)),w=Math.max(1,Math.round((img.naturalWidth||img.width)*scale)),h=Math.max(1,Math.round((img.naturalHeight||img.height)*scale));let best='';for(let rodada=0;rodada<5;rodada++){let canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;let ctx=canvas.getContext('2d',{alpha:false});ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);let quality=.78;for(let i=0;i<8;i++){let data=canvas.toDataURL('image/jpeg',quality);best=data;if(dataUrlSize(data)<=targetBytes)return{dataUrl:data,width:w,height:h,bytes:dataUrlSize(data)};quality-=.08}w=Math.max(320,Math.round(w*.82));h=Math.max(240,Math.round(h*.82))}return{dataUrl:best,width:w,height:h,bytes:dataUrlSize(best)}}
 async function optimizeImageFile(file){if(!file)throw new Error('Nenhuma imagem selecionada.');if(file.size>25*1024*1024)throw new Error('A imagem é muito grande. Escolha uma foto de até 25 MB.');const img=await carregarImagemArquivo(file);const full=comprimirCanvas(img,1280,PHOTO_FULL_MAX_BYTES);const thumb=comprimirCanvas(img,640,PHOTO_THUMB_MAX_BYTES);return{fullDataUrl:full.dataUrl,thumbDataUrl:thumb.dataUrl,width:full.width,height:full.height,fullBytes:full.bytes,thumbBytes:thumb.bytes}}
-async function handleCompletionPhoto(input){let file=input?.files?.[0];if(!file)return;if(!String(file.type||'').startsWith('image/')){input.value='';return alert('Selecione um arquivo de imagem.')}let err=$('completionError');err.textContent='Preparando a foto...';try{let opt=await optimizeImageFile(file);completionState.photoDataUrl=opt.thumbDataUrl;completionState.photoFullDataUrl=opt.fullDataUrl;completionState.photoName=file.name||'evidencia.jpg';completionState.photoOriginalBytes=file.size||0;completionState.photoFullBytes=opt.fullBytes;completionState.photoThumbBytes=opt.thumbBytes;$('completionPreview').src=opt.fullDataUrl;$('completionPreviewWrap').classList.add('active');$('completionPhotoMeta').textContent=`Imagem pronta • ${opt.width}×${opt.height} • evidência ${(opt.fullBytes/1024).toFixed(0)} KB • miniatura ${(opt.thumbBytes/1024).toFixed(0)} KB`;err.textContent='';atualizarEstadoConclusao()}catch(e){clearCompletionPhoto();err.textContent=e.message||'Não foi possível preparar a imagem.'}}
+async function handleCompletionPhoto(input){let file=input?.files?.[0];if(!file)return;if(!String(file.type||'').startsWith('image/')){input.value='';return showOperationalNotice('Selecione um arquivo de imagem.')}let err=$('completionError');err.textContent='Preparando a foto...';try{let opt=await optimizeImageFile(file);completionState.photoDataUrl=opt.thumbDataUrl;completionState.photoFullDataUrl=opt.fullDataUrl;completionState.photoName=file.name||'evidencia.jpg';completionState.photoOriginalBytes=file.size||0;completionState.photoFullBytes=opt.fullBytes;completionState.photoThumbBytes=opt.thumbBytes;$('completionPreview').src=opt.fullDataUrl;$('completionPreviewWrap').classList.add('active');$('completionPhotoMeta').textContent=`Imagem pronta • ${opt.width}×${opt.height} • evidência ${(opt.fullBytes/1024).toFixed(0)} KB • miniatura ${(opt.thumbBytes/1024).toFixed(0)} KB`;err.textContent='';atualizarEstadoConclusao()}catch(e){clearCompletionPhoto();err.textContent=e.message||'Não foi possível preparar a imagem.'}}
 function idSeguro(v){return String(v||'x').replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,80)}
 async function salvarEvidenciaFotograficaSeparada(did,tid,dataUrl,nome){
   if(!dataUrl)return null;
@@ -374,14 +830,206 @@ async function salvarEvidenciaFotograficaSeparada(did,tid,dataUrl,nome){
 async function removerEvidenciaOrfa(id){if(!id||!client)return;try{await withTimeout(client.from(ONLINE_TABLE).delete().eq('id',id),10000)}catch(_){}}
 async function submitCompletion(){let did=completionState.did,tid=completionState.tid,{t}=findTask(did,tid);if(!t)return;let required=!!t.exigirFotoConclusao;if(required&&!completionState.photoDataUrl){$('completionError').textContent='Esta tarefa exige uma foto antes da conclusão.';return}if(!checklistCompleto(t)){$('completionError').textContent='Conclua todos os itens do checklist antes de finalizar a tarefa.';return}let note=String($('completionNote')?.value||'').trim(),photoThumb=completionState.photoDataUrl,photoFull=completionState.photoFullDataUrl,name=completionState.photoName,completedAt=new Date().toISOString(),needsApproval=!!t.exigirAprovacaoLider,evidenceId=null;$('completionSubmit').disabled=true;try{
     if(photoFull){$('completionError').textContent='Enviando evidência fotográfica...';evidenceId=await salvarEvidenciaFotograficaSeparada(did,tid,photoFull,name);$('completionError').textContent=needsApproval?'Foto enviada. Enviando conclusão para validação...':'Foto enviada. Finalizando tarefa...'}
-    await mutateTask(did,tid,(d,t)=>{let old=norm(t.status||'PENDENTE');t.execucao=t.execucao&&typeof t.execucao==='object'?t.execucao:{};if(t.execucao.inicioEmISO){if(t.execucao.pausadoEmISO){const p=Date.parse(t.execucao.pausadoEmISO);if(Number.isFinite(p))t.execucao.totalPausadoMs=Number(t.execucao.totalPausadoMs||0)+(Date.now()-p);delete t.execucao.pausadoEmISO;delete t.execucao.pausadoEm}t.execucao.fimEmISO=completedAt;t.execucao.fimEm=nowBR();t.execucao.tempoExecutadoSeg=Math.round(tempoExecucaoMs({...t,execucao:{...t.execucao,fimEmISO:completedAt}})/1000)}if(note){t.observacaoConclusao=note;addHist(t,'OBSERVAÇÃO',`Conclusão: ${note}`)}if(photoThumb){t.fotoConclusaoDataUrl=photoThumb;t.fotoConclusaoRegistroId=evidenceId||'';t.fotoConclusaoNome=name||'evidencia.jpg';t.fotoConclusaoEmISO=completedAt;t.fotoConclusaoPor=state.employee.nome;t.fotoConclusaoTamanhoBytes=completionState.photoFullBytes||dataUrlSize(photoFull);addHist(t,'EVIDÊNCIA FOTOGRÁFICA','Foto enviada em registro separado; miniatura anexada à tarefa via Sistema Operacional.')}if(needsApproval){t.status='AGUARDANDO VALIDAÇÃO';t.validacaoConclusao={status:'PENDENTE',solicitadoEmISO:completedAt,solicitadoEm:nowBR(),solicitadoPor:state.employee.nome,solicitadoPorOperador:opnorm(state.employee.operador),statusAnterior:old};addHist(t,'CONCLUSÃO ENVIADA PARA VALIDAÇÃO',`Enviada por ${state.employee.nome} para aprovação do líder.`);addHist(t,'STATUS ALTERADO',`${old} → AGUARDANDO VALIDAÇÃO • via Sistema Operacional`)}else{t.status='CONCLUÍDA';t.concluidaEmISO=completedAt;t.concluidaPor=state.employee.nome;addHist(t,'STATUS ALTERADO',`${old} → CONCLUÍDA • via Sistema Operacional`);addHist(t,'CONCLUÍDA',`Concluída por ${state.employee.nome} no Sistema Operacional às ${new Date(completedAt).toLocaleTimeString('pt-BR')}.`)}});closeCompletionPage();toast(needsApproval?'Conclusão enviada para validação do líder':'Tarefa concluída com sucesso')
+    await mutateTask(did,tid,exigeTarefaAberta((d,t)=>{let old=norm(t.status||'PENDENTE');if(old!=='EM ANDAMENTO')throw new Error('Tarefa não está mais em execução. Atualize a página.');if(!checklistCompleto(t))throw new Error('Checklist foi alterado. Conclua todos os itens antes de finalizar.');t.execucao=t.execucao&&typeof t.execucao==='object'?t.execucao:{};if(t.execucao.inicioEmISO){if(t.execucao.pausadoEmISO){const p=Date.parse(t.execucao.pausadoEmISO);if(Number.isFinite(p))t.execucao.totalPausadoMs=Number(t.execucao.totalPausadoMs||0)+(Date.now()-p);delete t.execucao.pausadoEmISO;delete t.execucao.pausadoEm}t.execucao.fimEmISO=completedAt;t.execucao.fimEm=nowBR();t.execucao.tempoExecutadoSeg=Math.round(tempoExecucaoMs({...t,execucao:{...t.execucao,fimEmISO:completedAt}})/1000)}if(note){t.observacaoConclusao=note;addHist(t,'OBSERVAÇÃO',`Conclusão: ${note}`)}if(photoThumb){t.fotoConclusaoDataUrl=photoThumb;t.fotoConclusaoRegistroId=evidenceId||'';t.fotoConclusaoNome=name||'evidencia.jpg';t.fotoConclusaoEmISO=completedAt;t.fotoConclusaoPor=state.employee.nome;t.fotoConclusaoTamanhoBytes=completionState.photoFullBytes||dataUrlSize(photoFull);addHist(t,'EVIDÊNCIA FOTOGRÁFICA','Foto enviada em registro separado; miniatura anexada à tarefa via Sistema Operacional.')}if(needsApproval){t.status='AGUARDANDO VALIDAÇÃO';t.validacaoConclusao={status:'PENDENTE',solicitadoEmISO:completedAt,solicitadoEm:nowBR(),solicitadoPor:state.employee.nome,solicitadoPorOperador:opnorm(state.employee.operador),statusAnterior:old};addHist(t,'CONCLUSÃO ENVIADA PARA VALIDAÇÃO',`Enviada por ${state.employee.nome} para aprovação do líder.`);addHist(t,'STATUS ALTERADO',`${old} → AGUARDANDO VALIDAÇÃO • via Sistema Operacional`)}else{t.status='CONCLUÍDA';t.concluidaEmISO=completedAt;t.concluidaPor=state.employee.nome;addHist(t,'STATUS ALTERADO',`${old} → CONCLUÍDA • via Sistema Operacional`);addHist(t,'CONCLUÍDA',`Concluída por ${state.employee.nome} no Sistema Operacional às ${new Date(completedAt).toLocaleTimeString('pt-BR')}.`)}}));closeCompletionPage();toast(needsApproval?'Conclusão enviada para validação do líder':'Tarefa concluída com sucesso')
   }catch(e){if(evidenceId)await removerEvidenciaOrfa(evidenceId);$('completionError').textContent=e.message||'Não foi possível concluir a tarefa.';atualizarEstadoConclusao()}}
-function openTask(did,tid){state.selected={did,tid};openTaskMaybe(did,tid)}
-function openTaskMaybe(did,tid){if(!state.selected||state.selected.did!==did||state.selected.tid!==tid)return;let {d,t}=findTask(did,tid);if(!t){closeModal();return}let route=[d.departamento,t.familia,t.subfamilia].filter(Boolean).join(' › ');$('modalTitle').textContent=t.descricao||'Tarefa';$('modalRoute').textContent=route;let hist=[...(t.historico||[])].reverse(),checks=checklistTarefa(t),done=checks.filter(i=>i.concluido).length;let checklistHTML=checks.length?`<div class="detail-block"><div class="detail-block-head"><b>☑ Checklist da execução</b><small>${done}/${checks.length} concluído(s)</small></div><div class="detail-block-body exec-checklist">${checks.map(i=>`<label class="exec-check ${i.concluido?'done':''}"><input type="checkbox" ${i.concluido?'checked':''} onchange="toggleChecklistItem('${d.id}','${t.id}','${i.id}',this.checked)"><span>${esc(i.texto)}</span></label>`).join('')}</div></div>`:'';$('modalBody').innerHTML=`<div class="modal-info"><div class="info"><small>Status</small><b>${esc(rotuloStatus(t.status||'PENDENTE'))}</b></div><div class="info"><small>Prioridade</small><b>${esc(rotuloPrioridade(t.prioridade||'MÉDIA'))}</b></div><div class="info"><small>Prazo</small><b>${esc(fmtDate(t.prazo))}</b></div><div class="info"><small>Tempo estimado</small><b>${t.tempoEstimadoMin?esc(t.tempoEstimadoMin)+' min':'Não informado'}</b></div><div class="info"><small>Tempo executado</small><b class="exec-time" data-exec-did="${esc(d.id)}" data-exec-tid="${esc(t.id)}">${t.execucao?.inicioEmISO?fmtDuracao(tempoExecucaoMs(t)):'Não iniciado'}</b></div></div>${d.obs?`<div class="task-note" style="margin:0 0 14px;background:var(--bluebg);color:var(--blue)"><b>Observações Gerais:</b><br>${esc(d.obs)}</div>`:''}${t.observacao?`<div class="task-note" style="margin:0 0 14px"><b>Orientação do líder:</b><br>${esc(t.observacao)}</div>`:''}${t.criterioConclusao?`<div class="task-note" style="margin:0 0 14px;background:var(--greenbg);color:var(--green)"><b>Critério de conclusão:</b><br>${esc(t.criterioConclusao)}</div>`:''}${checklistHTML}${renderReferenciaOperacional(t)}${t.exigirAprovacaoLider?'<div class="validation-banner waiting"><b>✓ Aprovação do líder obrigatória.</b> Depois de concluir, a execução ficará aguardando validação.</div>':''}${t.validacaoConclusao?.status==='PENDENTE'?'<div class="validation-banner waiting"><b>Conclusão enviada.</b> Aguardando validação do líder responsável.</div>':''}${t.validacaoConclusao?.status==='RECUSADA'?`<div class="validation-banner rejected"><b>↩ Conclusão devolvida para ajuste.</b>${t.validacaoConclusao.motivoRecusa?`<br>${esc(t.validacaoConclusao.motivoRecusa)}`:''}</div>`:''}${t.reagendamento?.status==='PENDENTE'?`<div class="task-note" style="margin:14px 0;background:var(--orangebg);color:var(--orange)"><b>📅 Reagendamento solicitado:</b><br>${esc(fmtOnlyDate(t.reagendamento.dataSolicitada))}${t.reagendamento.motivo?`<br>Motivo: ${esc(t.reagendamento.motivo)}`:''}<br><small>Aguardando aprovação de ${esc(t.criadoPor||d.criadoPor||'líder responsável')}.</small></div>`:''}${t.reagendamento?.status==='APROVADO'?`<div class="task-note" style="margin:14px 0;background:var(--greenbg);color:var(--green)"><b>✓ Reagendamento aprovado:</b> ${esc(fmtOnlyDate(t.reagendamento.dataSolicitada))}</div>`:''}${t.reagendamento?.status==='RECUSADO'?`<div class="task-note" style="margin:14px 0;background:var(--orangebg);color:var(--orange)"><b>Reagendamento recusado.</b> O prazo original foi mantido.</div>`:''}${t.exigirFotoConclusao?'<div class="task-note" style="margin:0 0 14px;background:var(--orangebg);color:var(--orange)"><b>📷 Comprovação:</b> foto obrigatória na conclusão.</div>':''}${t.observacaoConclusao?`<div class="task-note" style="margin:0 0 14px;background:var(--greenbg);color:var(--green)"><b>Conclusão:</b><br>${esc(t.observacaoConclusao)}</div>`:''}${t.impedimento?.status==='ATIVO'?`<div class="task-blocked-note" style="margin:0 0 14px"><b>⚠️ Impedimento ativo: ${esc(t.impedimento.motivo||'')}</b>${t.impedimento.detalhes?`<br>${esc(t.impedimento.detalhes)}`:''}</div>`:''}${t.fotoConclusaoDataUrl?`<div style="margin:0 0 14px"><label>Evidência da conclusão</label><img src="${t.fotoConclusaoDataUrl}" alt="Evidência fotográfica" style="display:block;width:100%;max-height:360px;object-fit:contain;border-radius:14px;background:#111">${t.fotoConclusaoRegistroId?`<button class="btn secondary" style="margin-top:9px" onclick="abrirEvidenciaOriginal('${t.fotoConclusaoRegistroId}')">🔎 Abrir evidência original</button>`:''}</div>`:''}<label>Histórico da tarefa</label><div class="history">${hist.length?hist.map(h=>`<div class="hist"><b>${esc(h.evento||'ATUALIZAÇÃO')}</b><small>${esc(h.em||h.emISO||'')} • ${esc(h.por||'Sistema')}</small>${h.detalhes?`<small>${esc(h.detalhes)}</small>`:''}</div>`).join(''):'<div class="empty">Ainda não há histórico.</div>'}</div><div class="modal-actions"><button class="btn secondary" onclick="addObservation('${d.id}','${t.id}')">📝 Adicionar observação</button></div>`;$('modalBack').classList.add('active')}
-async function addObservation(did,tid){let text=prompt('Escreva a observação:');if(text===null)return;text=text.trim();if(!text)return;try{await mutateTask(did,tid,(d,t)=>addHist(t,'OBSERVAÇÃO',`${text} • via Sistema Operacional`))}catch(e){alert(e.message)}}
-function closeModal(){state.selected=null;$('modalBack').classList.remove('active')}
-function setTab(tab,btn){state.tab=tab;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));render()}
-function quickTab(tab,btn){document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');let top=[...document.querySelectorAll('.tab')].find(b=>b.dataset.tab===tab);setTab(tab,top);window.scrollTo({top:250,behavior:'smooth'})}
+function openTask(did,tid){state.selected={did,tid};openTaskMaybe(did,tid);salvarEstadoOperacionalAntesReload()}
+function openTaskMaybe(did,tid){if(!state.selected||state.selected.did!==did||state.selected.tid!==tid)return;let {d,t}=findTask(did,tid);if(!t){closeModal();return}let route=[d.departamento,t.familia,t.subfamilia].filter(Boolean).join(' › ');$('modalTitle').textContent=t.descricao||'Tarefa';$('modalRoute').textContent=route;let hist=[...(t.historico||[])].reverse(),checks=checklistTarefa(t),done=checks.filter(i=>i.concluido).length;let checklistHTML=checks.length?`<div class="detail-block"><div class="detail-block-head"><b>☑ Checklist da execução</b><small>${done}/${checks.length} concluído(s)</small></div><div class="detail-block-body exec-checklist">${checks.map(i=>`<label class="exec-check ${i.concluido?'done':''}"><input type="checkbox" ${i.concluido?'checked':''} ${statusAberto(t)?'':'disabled title="Checklist bloqueado até reabertura pelo líder"'} onchange="toggleChecklistItem('${d.id}','${t.id}','${i.id}',this.checked)"><span>${esc(i.texto)}</span></label>`).join('')}</div></div>`:'';$('modalBody').innerHTML=`<div class="modal-info"><div class="info"><small>Status</small><b>${esc(rotuloStatus(t.status||'PENDENTE'))}</b></div><div class="info"><small>Prioridade</small><b>${esc(rotuloPrioridade(t.prioridade||'MÉDIA'))}</b></div><div class="info"><small>Prazo</small><b>${esc(fmtDate(t.prazo))}</b></div><div class="info"><small>Tempo estimado</small><b>${t.tempoEstimadoMin?esc(t.tempoEstimadoMin)+' min':'Não informado'}</b></div><div class="info"><small>Tempo executado</small><b class="exec-time" data-exec-did="${esc(d.id)}" data-exec-tid="${esc(t.id)}">${t.execucao?.inicioEmISO?fmtDuracao(tempoExecucaoMs(t)):'Não iniciado'}</b></div></div>${d.obs?`<div class="task-note" style="margin:0 0 14px;background:var(--bluebg);color:var(--blue)"><b>Observações Gerais:</b><br>${esc(d.obs)}</div>`:''}${t.observacao?`<div class="task-note" style="margin:0 0 14px"><b>Orientação do líder:</b><br>${esc(t.observacao)}</div>`:''}${t.criterioConclusao?`<div class="task-note" style="margin:0 0 14px;background:var(--greenbg);color:var(--green)"><b>Critério de conclusão:</b><br>${esc(t.criterioConclusao)}</div>`:''}${checklistHTML}${renderReferenciaOperacional(t)}${t.exigirAprovacaoLider?'<div class="validation-banner waiting"><b>✓ Aprovação do líder obrigatória.</b> Depois de concluir, a execução ficará aguardando validação.</div>':''}${t.validacaoConclusao?.status==='PENDENTE'?'<div class="validation-banner waiting"><b>Conclusão enviada.</b> Aguardando validação do líder responsável.</div>':''}${t.validacaoConclusao?.status==='RECUSADA'?`<div class="validation-banner rejected"><b>↩ Conclusão devolvida para ajuste.</b>${t.validacaoConclusao.motivoRecusa?`<br>${esc(t.validacaoConclusao.motivoRecusa)}`:''}</div>`:''}${t.reagendamento?.status==='PENDENTE'?`<div class="task-note" style="margin:14px 0;background:var(--orangebg);color:var(--orange)"><b>📅 Reagendamento solicitado:</b><br>${esc(fmtOnlyDate(t.reagendamento.dataSolicitada))}${t.reagendamento.motivo?`<br>Motivo: ${esc(t.reagendamento.motivo)}`:''}<br><small>Aguardando aprovação de ${esc(t.criadoPor||d.criadoPor||'líder responsável')}.</small></div>`:''}${t.reagendamento?.status==='APROVADO'?`<div class="task-note" style="margin:14px 0;background:var(--greenbg);color:var(--green)"><b>✓ Reagendamento aprovado:</b> ${esc(fmtOnlyDate(t.reagendamento.dataSolicitada))}</div>`:''}${t.reagendamento?.status==='RECUSADO'?`<div class="task-note" style="margin:14px 0;background:var(--orangebg);color:var(--orange)"><b>Reagendamento recusado.</b> O prazo original foi mantido.</div>`:''}${t.exigirFotoConclusao?'<div class="task-note" style="margin:0 0 14px;background:var(--orangebg);color:var(--orange)"><b>📷 Comprovação:</b> foto obrigatória na conclusão.</div>':''}${t.observacaoConclusao?`<div class="task-note" style="margin:0 0 14px;background:var(--greenbg);color:var(--green)"><b>Conclusão:</b><br>${esc(t.observacaoConclusao)}</div>`:''}${t.impedimento?.status==='ATIVO'?`<div class="task-blocked-note" style="margin:0 0 14px"><b>⚠️ Impedimento ativo: ${esc(t.impedimento.motivo||'')}</b>${t.impedimento.detalhes?`<br>${esc(t.impedimento.detalhes)}`:''}</div>`:''}${t.fotoConclusaoDataUrl?`<div style="margin:0 0 14px"><label>Evidência da conclusão</label><img src="${t.fotoConclusaoDataUrl}" alt="Evidência fotográfica" style="display:block;width:100%;max-height:360px;object-fit:contain;border-radius:14px;background:#111">${t.fotoConclusaoRegistroId?`<button class="btn secondary" style="margin-top:9px" onclick="abrirEvidenciaOriginal('${t.fotoConclusaoRegistroId}')">🔎 Abrir evidência original</button>`:''}</div>`:''}<label>Histórico da tarefa</label><div class="history">${hist.length?hist.map(h=>`<div class="hist"><b>${esc(h.evento||'ATUALIZAÇÃO')}</b><small>${esc(h.em||h.emISO||'')} • ${esc(h.por||'Sistema')}</small>${h.detalhes?`<small>${esc(h.detalhes)}</small>`:''}</div>`).join(''):'<div class="empty">Ainda não há histórico.</div>'}</div><div class="modal-actions"><button class="btn secondary" onclick="addObservation('${d.id}','${t.id}')">📝 Adicionar observação</button></div>`;$('modalBack').classList.add('active')}
+function addObservation(did,tid){openObservationEditor(did,tid)}
+function closeModal(){state.selected=null;$('modalBack').classList.remove('active');salvarEstadoOperacionalAntesReload()}
+const UI_PREFS_KEY='operacionalPreferenciasUIV3Operador';
+function uiPreferencesKey(){const operador=opnorm(state.employee?.operador||'');return operador?`${UI_PREFS_KEY}_${operador}`:null}
+const PASSWORD_REQUEST_PREFIX='operacional_senha_';
+const PROFILE_PHOTO_PREFIX='operacional_foto_';
+let profilePhotoRequest=0,profilePhotoDataUrl='';
+function profilePhotoId(){return PROFILE_PHOTO_PREFIX+opnorm(state.employee?.operador)}
+function validProfilePhoto(value){return /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(value||'')&&value.length<155000}
+function applyProfilePhoto(value){
+  profilePhotoDataUrl=validProfilePhoto(value)?value:'';
+  for(const id of ['profileAvatar','avatarTop']){
+    const holder=$(id);if(!holder)continue;
+    holder.replaceChildren();
+    if(profilePhotoDataUrl){const img=document.createElement('img');img.src=profilePhotoDataUrl;img.alt='Foto de perfil';holder.appendChild(img)}
+    else holder.textContent=initials(state.employee?.nome);
+  }
+  $('removeProfilePhotoButton')?.classList.toggle('hidden',!profilePhotoDataUrl);
+}
+function profilePhotoMessage(text){const status=$('profilePhotoStatus');if(status)status.textContent=text}
+function setProfilePhotoBusy(busy){
+  if($('profilePhotoInput'))$('profilePhotoInput').disabled=busy;
+  if($('removeProfilePhotoButton'))$('removeProfilePhotoButton').disabled=busy;
+}
+async function loadProfilePhoto(){
+  if(!state.employee)return;
+  const op=opnorm(state.employee.operador),request=++profilePhotoRequest;
+  try{
+    let photo='';
+    if(state.mode==='demo')photo=localStorage.getItem('operacionalFotoPerfilDemoV1_'+op)||'';
+    else if(client){const {data,error}=await withTimeout(client.from(ONLINE_TABLE).select('dados').eq('id',profilePhotoId()).maybeSingle(),REQUEST_TIMEOUT_MS);if(error)throw error;photo=data?.dados?.operador===op?data.dados.fotoDataUrl||'':''}
+    if(request===profilePhotoRequest&&opnorm(state.employee?.operador)===op)applyProfilePhoto(photo);
+  }catch(_){if(request===profilePhotoRequest)profilePhotoMessage('Não foi possível carregar a foto. Tente novamente ao abrir o Perfil.')}
+}
+async function handleProfilePhoto(input){
+  const file=input?.files?.[0];if(!file||!state.employee)return;
+  input.value='';
+  if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>10*1024*1024){profilePhotoMessage('Escolha JPG, PNG ou WebP com até 10 MB.');return}
+  if(state.mode!=='demo'&&(!client||!navigator.onLine)){profilePhotoMessage('Conecte-se à internet para salvar a foto.');return}
+  const op=opnorm(state.employee.operador);++profilePhotoRequest;setProfilePhotoBusy(true);profilePhotoMessage('Preparando a foto...');
+  try{
+    const image=await carregarImagemArquivo(file),result=comprimirCanvas(image,400,75000);
+    if(!validProfilePhoto(result.dataUrl))throw new Error('Não foi possível reduzir a foto. Escolha outra imagem.');
+    if(state.mode==='demo')localStorage.setItem('operacionalFotoPerfilDemoV1_'+op,result.dataUrl);
+    else{
+      const now=new Date().toISOString(),dados={tipo:'FOTO_PERFIL_OPERACIONAL',operador:op,fotoDataUrl:result.dataUrl,atualizadoEmISO:now};
+      const {data,error}=await withTimeout(client.from(ONLINE_TABLE).upsert({id:profilePhotoId(),dados,updated_at:now},{onConflict:'id'}).select('id').maybeSingle(),PHOTO_UPLOAD_TIMEOUT_MS);
+      if(error)throw error;if(!data)throw new Error('A foto não foi confirmada pelo servidor.');
+    }
+    if(opnorm(state.employee?.operador)===op){applyProfilePhoto(result.dataUrl);profilePhotoMessage('Foto salva no seu perfil.');toast('Foto de perfil atualizada')}
+  }catch(e){profilePhotoMessage(e.message||'Não foi possível salvar a foto.')}
+  finally{setProfilePhotoBusy(false)}
+}
+async function removeProfilePhoto(){
+  if(!state.employee||!profilePhotoDataUrl)return;
+  if(state.mode!=='demo'&&(!client||!navigator.onLine)){profilePhotoMessage('Conecte-se à internet para remover a foto.');return}
+  const op=opnorm(state.employee.operador);++profilePhotoRequest;setProfilePhotoBusy(true);profilePhotoMessage('Removendo a foto...');
+  try{
+    if(state.mode==='demo')localStorage.removeItem('operacionalFotoPerfilDemoV1_'+op);
+    else{const {error}=await withTimeout(client.from(ONLINE_TABLE).delete().eq('id',profilePhotoId()),REQUEST_TIMEOUT_MS);if(error)throw error}
+    if(opnorm(state.employee?.operador)===op){applyProfilePhoto('');profilePhotoMessage('Foto removida.');toast('Foto de perfil removida')}
+  }catch(e){profilePhotoMessage(e.message||'Não foi possível remover a foto.')}
+  finally{setProfilePhotoBusy(false)}
+}
+const UI_ACCENTS=['PADRAO','AZUL','ROXO','ROSA','VERMELHO','VERDE','CINZA','LARANJA'];
+function employeeEntryDate(value){
+  const s=String(value||'').trim();if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return null;
+  const [y,m,d]=s.split('-').map(Number),date=new Date(y,m-1,d);
+  return date.getFullYear()===y&&date.getMonth()===m-1&&date.getDate()===d?date:null;
+}
+function formatEmployeeDate(value){const d=employeeEntryDate(value);return d?d.toLocaleDateString('pt-BR'):'Não informada'}
+function tenureText(value){
+  const start=employeeEntryDate(value);if(!start)return 'Não informado';
+  const now=new Date();let months=(now.getFullYear()-start.getFullYear())*12+now.getMonth()-start.getMonth();
+  if(now.getDate()<start.getDate())months--;months=Math.max(0,months);
+  if(months<1)return 'Menos de 1 mês';if(months<12)return `${months} ${months===1?'mês':'meses'}`;
+  const years=Math.floor(months/12),rest=months%12;
+  return `${years} ${years===1?'ano':'anos'}${rest?` e ${rest} ${rest===1?'mês':'meses'}`:''}`;
+}
+function readUiPreferences(){
+  try{const key=uiPreferencesKey();const p=key?JSON.parse(localStorage.getItem(key)||'{}'):{};return {period:p.period==='TODAS'?'TODAS':'HOJE',density:p.density==='COMPACTA'?'COMPACTA':'NORMAL',theme:p.theme==='ESCURO'?'ESCURO':'CLARO',accent:UI_ACCENTS.includes(p.accent)?p.accent:'PADRAO'}}
+  catch(_){return {period:'HOJE',density:'NORMAL',theme:'CLARO',accent:'PADRAO'}}
+}
+function applyUiPreferences(){
+  const p=readUiPreferences();$('app').classList.toggle('compact-tasks',p.density==='COMPACTA');
+  document.documentElement.dataset.theme=p.theme==='ESCURO'?'dark':'light';
+  document.documentElement.dataset.accent=p.accent.toLowerCase();
+  const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=p.theme==='ESCURO'?'#121212':'#F3F5F4';
+  return p;
+}
+function saveUiPreferences(){
+  const p={period:$('settingsDefaultPeriod').value,density:$('settingsDensity').value,theme:$('settingsTheme').value,accent:$('settingsAccent').value};
+  try{const key=uiPreferencesKey();if(!key)throw new Error('Sessão não identificada');localStorage.setItem(key,JSON.stringify(p));applyUiPreferences();toast('Preferências salvas para seu operador')}
+  catch(_){toast('Não foi possível salvar as preferências neste dispositivo')}
+}
+function passwordRequestId(){return PASSWORD_REQUEST_PREFIX+opnorm(state.employee?.operador||'')}
+function passwordRequestMessage(message,pending=false,approved=false){
+  const status=$('requestPasswordStatus'),button=$('requestPasswordButton'),form=$('passwordChangeForm');
+  if(status)status.textContent=message;
+  if(button){button.disabled=pending||approved;button.textContent=approved?'Pedido autorizado':pending?'Solicitação pendente':'Solicitar alteração de senha'}
+  if(form)form.hidden=!approved;
+}
+async function loadPasswordRequestStatus(){
+  if(state.view!=='CONFIGURACOES'||!state.employee)return;
+  if(!client){passwordRequestMessage('Conexão indisponível. Tente novamente quando estiver online.');return}
+  try{
+    const {data,error}=await withTimeout(client.from(ONLINE_TABLE).select('dados').eq('id',passwordRequestId()).maybeSingle(),REQUEST_TIMEOUT_MS);
+    if(error)throw error;
+    const status=data?.dados?.tipo==='SOLICITACAO_ALTERACAO_SENHA'&&opnorm(data.dados.operador)===opnorm(state.employee.operador)?data.dados.status:'';
+    if(status==='AUTORIZADA')passwordRequestMessage('Pedido autorizado. Escolha sua nova senha com pelo menos 4 caracteres.',false,true);
+    else if(status==='PENDENTE')passwordRequestMessage('Sua solicitação aguarda aprovação do Gerencial.',true);
+    else passwordRequestMessage(status==='RECUSADA'?'O pedido foi recusado. Você pode enviar uma nova solicitação.':status==='ATENDIDA'?'Senha alterada. Você pode fazer outro pedido quando precisar.':'Nenhuma solicitação pendente.');
+  }catch(_){passwordRequestMessage('Não foi possível consultar o pedido agora. Tente verificar novamente.',false,!$('passwordChangeForm')?.hidden);}
+}
+async function requestPasswordChange(){
+  if(!client||!navigator.onLine){passwordRequestMessage('Conecte-se à internet para enviar a solicitação.');return}
+  const button=$('requestPasswordButton');if(button)button.disabled=true;
+  passwordRequestMessage('Enviando solicitação ao Gerencial...');
+  if(button)button.disabled=true;
+  try{
+    const id=passwordRequestId(),{data:existing,error:readError}=await withTimeout(client.from(ONLINE_TABLE).select('dados,updated_at').eq('id',id).maybeSingle(),REQUEST_TIMEOUT_MS);
+    if(readError)throw readError;
+    if(existing?.dados?.status==='PENDENTE'){passwordRequestMessage('Já existe uma solicitação aguardando aprovação.',true);return}
+    if(existing?.dados?.status==='AUTORIZADA'){passwordRequestMessage('Pedido autorizado. Escolha sua nova senha abaixo.',false,true);return}
+    const now=new Date().toISOString(),request={tipo:'SOLICITACAO_ALTERACAO_SENHA',origem:'OPERACIONAL',operador:opnorm(state.employee.operador),nome:state.employee.nome||'',matricula:state.employee.matricula||'',status:'PENDENTE',solicitadoEmISO:now};
+    let query=existing?client.from(ONLINE_TABLE).update({dados:request,updated_at:now}).eq('id',id):client.from(ONLINE_TABLE).insert({id,dados:request,updated_at:now});
+    if(existing)query=existing.updated_at?query.eq('updated_at',existing.updated_at):query.is('updated_at',null);
+    const {data:saved,error:writeError}=await withTimeout(query.select('id').maybeSingle(),REQUEST_TIMEOUT_MS);
+    if(writeError)throw writeError;
+    if(!saved)throw new Error('A solicitação foi alterada por outra sessão. Atualize e tente novamente.');
+    passwordRequestMessage('Solicitação enviada ao Gerencial. Aguarde a aprovação para escolher sua nova senha.',true);
+  }catch(err){passwordRequestMessage(err?.message||'Falha ao enviar. Tente novamente.');if(button)button.disabled=false}
+}
+let ownPasswordSaving=false;
+async function submitOwnPasswordChange(event){
+  event?.preventDefault();
+  if(ownPasswordSaving)return;
+  if(!client||!navigator.onLine||!state.employee){passwordRequestMessage('Conecte-se para alterar a senha.');return}
+  const next=String($('passwordNew')?.value||'').trim(),confirm=String($('passwordConfirm')?.value||'').trim();
+  if(next.length<4||next!==confirm){passwordRequestMessage('Use pelo menos 4 caracteres e confirme a nova senha.',false,true);return}
+  const button=$('saveOwnPasswordButton');ownPasswordSaving=true;if(button)button.disabled=true;
+  try{
+    const op=opnorm(state.employee.operador),id=passwordRequestId();
+    const {data:request,error:requestError}=await withTimeout(client.from(ONLINE_TABLE).select('dados,updated_at').eq('id',id).maybeSingle(),REQUEST_TIMEOUT_MS);
+    if(requestError)throw requestError;
+    if(request?.dados?.tipo!=='SOLICITACAO_ALTERACAO_SENHA'||opnorm(request.dados.operador)!==op||request.dados.status!=='AUTORIZADA')throw new Error('A autorização não está mais disponível. Verifique o pedido.');
+    let savedPassword=false;
+    for(let attempt=0;attempt<3&&!savedPassword;attempt++){
+      const credentialId=operacionalCredentialId(op);
+      const {data:credential,error:readError}=await withTimeout(client.from(ONLINE_TABLE).select('dados,updated_at').eq('id',credentialId).maybeSingle(),REQUEST_TIMEOUT_MS);
+      if(readError)throw readError;
+      const existing=credential?.dados;
+      if(credential&&(existing?.tipo!=='CREDENCIAL_OPERACIONAL'||opnorm(existing.operador)!==op))throw new Error('Cadastro operacional inválido. Procure o Gerencial.');
+      if(existing&&String(existing.senha||'').trim()===next)throw new Error('Escolha uma senha diferente da senha atual do Operacional.');
+      const now=new Date().toISOString(),dados={...existing,tipo:'CREDENCIAL_OPERACIONAL',operador:op,senha:next,versao:Math.max(0,Number(existing?.versao)||0)+1,alteradoEmISO:now};
+      let write=credential?client.from(ONLINE_TABLE).update({dados,updated_at:now}).eq('id',credentialId):client.from(ONLINE_TABLE).insert({id:credentialId,dados,updated_at:now});
+      if(credential)write=credential.updated_at?write.eq('updated_at',credential.updated_at):write.is('updated_at',null);
+      const {data:saved,error:saveError}=await withTimeout(write.select('id').maybeSingle(),REQUEST_TIMEOUT_MS);
+      if(saveError){if(saveError.code==='23505')continue;throw saveError}
+      savedPassword=Boolean(saved);
+    }
+    if(!savedPassword)throw new Error('A credencial operacional foi atualizada em outra sessão. Aguarde e tente novamente.');
+    // A senha está apenas na credencial operacional, nunca na configuração do Gerencial nem no pedido.
+    try{
+      let mark=client.from(ONLINE_TABLE).update({dados:{...request.dados,status:'ATENDIDA',atendidoEmISO:new Date().toISOString(),atendidoPor:state.employee.nome||op},updated_at:new Date().toISOString()}).eq('id',id);
+      mark=request.updated_at?mark.eq('updated_at',request.updated_at):mark.is('updated_at',null);
+      const {data:done,error:markError}=await withTimeout(mark.select('id').maybeSingle(),REQUEST_TIMEOUT_MS);
+      if(markError||!done)throw markError||new Error('Pedido atualizado em outra sessão');
+      passwordRequestMessage('Senha alterada com sucesso. Use a nova senha no próximo acesso.');
+    }catch(err){console.warn('Senha gravada, mas pedido não foi encerrado:',err);passwordRequestMessage('Sua senha foi alterada. O status do pedido não pôde ser atualizado; avise o Gerencial se ele continuar aberto.');}
+    $('passwordChangeForm')?.reset();toast('Senha alterada com sucesso');
+  }catch(err){passwordRequestMessage(err?.message||'Não foi possível alterar sua senha. Tente novamente.',false,true)}
+  finally{ownPasswordSaving=false;if(button)button.disabled=false}
+}
+function syncNavigation(){
+  document.querySelectorAll('.desk-rail [data-view],.bottom-nav [data-view]').forEach(b=>{
+    const active=b.dataset.view===state.view;
+    b.classList.toggle('active',active);
+    if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
+  });
+}
+function setTab(tab){
+  if(!['TODAS','PENDENTE','EM ANDAMENTO','CONCLUÍDA'].includes(tab))return;
+  state.tab=tab;
+  render();salvarEstadoOperacionalAntesReload();
+}
+function openView(view,status){
+  if(!['HOME','TAREFAS','PERFIL','CONFIGURACOES'].includes(view))return;
+  const changed=state.view!==view;
+  state.view=view;
+  if(view==='PERFIL'&&changed)loadProfilePhoto();
+  if(view==='HOME'){$('filterDate').value='HOJE';$('filterSearch').value=''}
+  if(view==='TAREFAS'&&changed)$('filterDate').value=readUiPreferences().period;
+  if(view==='TAREFAS'&&status&&['TODAS','PENDENTE','EM ANDAMENTO','CONCLUÍDA'].includes(status))state.tab=status;
+  syncNavigation();render();salvarEstadoOperacionalAntesReload();window.scrollTo({top:0,behavior:'smooth'});
+}
 async function refreshOnline(options={}){
   const silent=!!options.silent,force=!!options.force;
   if(state.mode==='demo'){if(!silent){render();toast('Dados de demonstração atualizados')}return true}
@@ -402,7 +1050,7 @@ async function refreshOnline(options={}){
     }catch(e){
       console.warn('Falha ao atualizar dados operacionais:',e);
       syncStatus(navigator.onLine?'Conexão instável • mantendo dados atuais':'Offline • mantendo dados atuais',navigator.onLine?'warn':'offline');
-      if(!silent)alert(e.message||'Não foi possível atualizar agora. Os dados atuais foram mantidos.');
+      if(!silent)showOperationalNotice(e.message||'Não foi possível atualizar agora. Os dados atuais foram mantidos.');
       return false;
     }finally{state.refreshPromise=null}
   })();
@@ -426,6 +1074,7 @@ function subscribeRealtime(){
   state.channel=client.channel('operacional_'+opnorm(state.employee.operador)+'_'+Date.now())
     .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${SHARED_ROW_ID}`},()=>agendarRefreshRealtime())
     .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${GLOBAL_ROW_ID}`},()=>validarAcessoOperacionalAtual({silent:true}))
+    .on('postgres_changes',{event:'*',schema:'public',table:ONLINE_TABLE,filter:`id=eq.${passwordRequestId()}`},()=>{if(state.view==='CONFIGURACOES')loadPasswordRequestStatus()})
     .subscribe(status=>{
       if(status==='SUBSCRIBED'){state.realtimeReady=true;syncStatus('Online • canal conectado + verificação','online');return}
       if(['CHANNEL_ERROR','TIMED_OUT','CLOSED'].includes(status)){
@@ -437,6 +1086,7 @@ function subscribeRealtime(){
 async function verificarMudancaRemota(){
   if(state.mode==='demo'||!client||!state.employee||state.saving||document.hidden)return false;
   try{
+    if(state.view==='CONFIGURACOES'&&!ownPasswordSaving)await loadPasswordRequestStatus();
     const {data,error}=await withTimeout(client.from(ONLINE_TABLE).select('updated_at').eq('id',SHARED_ROW_ID).maybeSingle(),8000);
     if(error)throw error;
     const remoto=data?.updated_at||null;
@@ -444,7 +1094,7 @@ async function verificarMudancaRemota(){
     return true;
   }catch(err){
     console.warn('Falha na verificação leve de sincronização:',err);
-    if(!navigator.onLine)syncStatus('Offline • mantendo dados atuais','offline');
+    if(!navigator.onLine)syncStatus('Offline • consulta apenas (edições exigem internet)','offline');
     return false;
   }
 }
@@ -460,9 +1110,14 @@ function iniciarMonitorSincronizacao(){
   state.accessTimer=setInterval(()=>validarAcessoOperacionalAtual({silent:true}),ACCESS_CHECK_MS);
 }
 window.addEventListener('online',()=>{if(state.employee&&state.mode!=='demo'){syncStatus('Reconectando...','warn');refreshOnline({silent:true,force:true});subscribeRealtime();iniciarMonitorSincronizacao()}});
-window.addEventListener('offline',()=>{if(state.employee&&state.mode!=='demo')syncStatus('Offline • mantendo dados atuais','offline')});
+window.addEventListener('offline',()=>{if(state.employee&&state.mode!=='demo')syncStatus('Offline • consulta apenas (edições exigem internet)','offline')});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.employee&&state.mode!=='demo'){refreshOnline({silent:true});validarAcessoOperacionalAtual({silent:true})}});
 function logout(){if(autoRefreshTimerOperacional)clearTimeout(autoRefreshTimerOperacional);if(executionClockTimer)clearInterval(executionClockTimer);pararMonitorSincronizacao();clearTimeout(realtimeRefreshTimer);if(state.channel)try{client.removeChannel(state.channel)}catch{}sessionStorage.removeItem('operacionalSessaoV1');sessionStorage.removeItem(AUTO_REFRESH_UI_KEY);sessionStorage.removeItem(AUTO_REFRESH_PENDING_KEY);location.reload()}
+['filterDate','filterSearch'].forEach(id=>$(id)?.addEventListener(id==='filterDate'?'change':'input',salvarEstadoOperacionalAntesReload));
+window.addEventListener('pagehide',()=>{if(state.employee)salvarEstadoOperacionalAntesReload()});
+// Restaurar preferências após um login autenticado (não restaurar login apenas com sessionStorage).
+const iniciarAppComPreferencias= startApp;
+startApp=function(){iniciarAppComPreferencias();restaurarEstadoOperacionalAposReload();};
 setTimeout(()=>{restaurarSessaoOperacional().then(restaurada=>{if(!restaurada){document.documentElement.classList.remove('auto-refresh-restoring');$('autoRefreshLoader')?.classList.remove('active')}})},0);
 </script>
 
@@ -488,7 +1143,7 @@ h1>.ui-svg-icon,h2>.ui-svg-icon,h3>.ui-svg-icon{margin-right:.3em;vertical-align
     message:'<path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z"/>',
     link:'<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
     refresh:'<path d="M20 6v6h-6"/><path d="M4 18v-6h6"/><path d="M18.5 9a7 7 0 0 0-11.9-2.6L4 9"/><path d="M5.5 15a7 7 0 0 0 11.9 2.6L20 15"/>',
-    play:'<path d="m8 5 11 7-11 7V5Z"/>', calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
+    play:'<path d="m8 5 11 7-11 7V5Z"/>', pause:'<rect x="5" y="4" width="5" height="16" rx="1"/><rect x="14" y="4" width="5" height="16" rx="1"/>', calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
     clipboard:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M9 9h6M9 13h6M9 17h4"/>',
     home:'<path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/>',
     paperclip:'<path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>',
@@ -520,12 +1175,14 @@ h1>.ui-svg-icon,h2>.ui-svg-icon,h3>.ui-svg-icon{margin-right:.3em;vertical-align
     briefcase:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V4h8v3M3 12h18"/>',
     handshake:'<path d="m8 12 2 2c1 1 2 1 3 0l3-3"/><path d="M2 11l5-5 4 2 2-2 5 5M4 17l3 3 3-3M20 17l-3 3-2-2"/>',
     spark:'<path d="m12 2 1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5L12 2Z"/>',
+    flame:'<path d="M12 22c4 0 7-3 7-7 0-3-2-5-3-6 0 3-1 4-2 5-1-3-1-7-4-11 0 4-1 6-3 8-1 1-2 3-2 5 0 4 3 6 7 6Z"/><path d="M12 22c2 0 3-2 3-4 0-1-1-2-2-3 0 2-1 3-2 3 0-1-.5-2-1-3-1 2-1 3-1 4 0 2 1 3 3 3Z"/>',
+    info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/>',
     arrowRight:'<path d="m9 18 6-6-6-6"/>',
     circle:'<circle cx="12" cy="12" r="8"/>', blocked:'<circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/>'
   };
   const tokenMap=new Map([
-    ['🖨️','print'],['🖨','print'],['⚙️','settings'],['⚙','settings'],['👥','users'],['👤','user'],['✅','checkSquare'],['☑','checkSquare'],['☐','checkSquare'],['✓','check'],['➕','plus'],['✕','x'],['📷','camera'],['📲','message'],['💬','message'],['🔗','link'],['↻','refresh'],['🔄','refresh'],['🔁','refresh'],['▶','play'],['📅','calendar'],['🗓️','calendar'],['📋','clipboard'],['⌂','home'],['📎','paperclip'],['📝','note'],['📄','file'],['📁','folder'],['⏱','clock'],['🕑','clock'],['🕗','clock'],['🕘','clock'],['⌛','clock'],['↩','undo'],['←','arrowLeft'],['➤','arrowRight'],
-    ['🌙','moon'],['☀️','sun'],['☀','sun'],['🌞','sun'],['📊','chart'],['📈','chart'],['🚪','door'],['🔎','search'],['💾','save'],['🔒','lock'],['🔐','lock'],['🔑','key'],['🛡️','shield'],['⚠️','alert'],['⚡','alert'],['🎙️','mic'],['✍️','edit'],['✏️','edit'],['📤','upload'],['📥','download'],['🗑️','trash'],['📦','package'],['🚚','truck'],['🏬','store'],['🏢','store'],['💳','card'],['🎨','palette'],['🎯','target'],['🔧','tool'],['🛠️','tool'],['🧰','tool'],['🧹','broom'],['🧾','tag'],['📚','book'],['📕','book'],['📗','book'],['📘','book'],['📙','book'],['🎓','book'],['🤝','handshake'],['🧩','settings'],['👋','user'],['✦','spark'],['🎉','spark'],['🌐','link'],['🖼️','camera'],['🗄️','folder'],['🗜️','package'],['👕','store'],['🛒','store'],['🏖️','calendar'],['🎲','circle'],['🔴','circle'],['🟢','circle'],['◇','target'],['◆','target'],['◷','clock'],['▤','clipboard'],['▦','calendar'],['⊘','blocked']
+    ['🖨️','print'],['🖨','print'],['⚙️','settings'],['⚙','settings'],['👥','users'],['👤','user'],['✅','checkSquare'],['☑','checkSquare'],['☐','checkSquare'],['✓','check'],['➕','plus'],['✕','x'],['📷','camera'],['📲','message'],['💬','message'],['🔗','link'],['↻','refresh'],['🔄','refresh'],['🔁','refresh'],['▶','play'],['Ⅱ','pause'],['⏸️','pause'],['📅','calendar'],['🗓️','calendar'],['📋','clipboard'],['⌂','home'],['📎','paperclip'],['📝','note'],['📄','file'],['📁','folder'],['⏱','clock'],['🕑','clock'],['🕗','clock'],['🕘','clock'],['⌛','clock'],['↩','undo'],['←','arrowLeft'],['➤','arrowRight'],['→','arrowRight'],
+    ['🌙','moon'],['☀️','sun'],['☀','sun'],['🌞','sun'],['📊','chart'],['📈','chart'],['🚪','door'],['🔎','search'],['💾','save'],['🔒','lock'],['🔐','lock'],['🔑','key'],['🛡️','shield'],['⚠️','alert'],['⚠','alert'],['ℹ️','info'],['ℹ','info'],['🔥','flame'],['⚡','alert'],['🎙️','mic'],['✍️','edit'],['✏️','edit'],['📤','upload'],['📥','download'],['🗑️','trash'],['📦','package'],['🚚','truck'],['🏬','store'],['🏢','store'],['💳','card'],['🎨','palette'],['🎯','target'],['🔧','tool'],['🛠️','tool'],['🧰','tool'],['🧹','broom'],['🧾','tag'],['📚','book'],['📕','book'],['📗','book'],['📘','book'],['📙','book'],['🎓','book'],['🤝','handshake'],['🧩','settings'],['👋','user'],['✦','spark'],['🎉','spark'],['🌐','link'],['🖼️','camera'],['🗄️','folder'],['🗜️','package'],['👕','store'],['🛒','store'],['🏖️','calendar'],['🎲','circle'],['🔴','circle'],['🟢','circle'],['◇','target'],['◆','target'],['◷','clock'],['▤','clipboard'],['▦','calendar'],['⊘','blocked']
   ]);
   const sortedTokens=[...tokenMap.keys()].sort((a,b)=>b.length-a.length);
   function svg(name){return `<svg class="ui-svg-icon" aria-hidden="true" viewBox="0 0 24 24">${paths[name]||paths.circle}</svg>`}

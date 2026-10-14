@@ -26,7 +26,7 @@
       const root = document.documentElement;
       root.classList.add('theme-booting');
       try {
-        root.dataset.theme = localStorage.getItem('adminGerencialDark') === '1' ? 'dark' : 'light';
+        root.dataset.theme = 'light';
         // V51.30 — detecta F5/atualização com sessão existente antes da primeira pintura.
         if(sessionStorage.getItem('adminGerencialSessaoV21Individual')){
           root.classList.add('session-restoring');
@@ -12944,6 +12944,46 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
 <link rel="stylesheet" href="styles/tema-neutro-v78.css">
 <link rel="stylesheet" href="styles/tres-abas-v80.css">
 <link rel="stylesheet" href="shared/editor-texto-v81.css">
+<style id="av-dialog-system-v82">
+.av-dialog-back{position:fixed;inset:0;z-index:999999;display:grid;place-items:center;padding:16px;background:rgba(10,13,18,.68);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.av-dialog-back[hidden]{display:none!important}.av-dialog-card{width:min(470px,100%);max-height:calc(100dvh - 32px);overflow:auto;padding:24px;border:1px solid var(--border,#d8d8d8);border-radius:18px;background:var(--page,#fff);color:var(--text,#202124);box-shadow:0 28px 90px rgba(0,0,0,.3)}
+.av-dialog-card h2{font-size:1.15rem;margin:0 0 12px}.av-dialog-card p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;margin:0;color:var(--text,#202124)}
+.av-dialog-card textarea,.av-dialog-card select{display:block;width:100%;min-height:42px;margin:16px 0 0;padding:11px;border:1px solid var(--border,#ccc);border-radius:10px;background:var(--page-2,var(--page,#fff));color:var(--text,#202124);font:inherit}.av-dialog-card textarea{min-height:100px;resize:vertical}
+.av-dialog-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:22px}.av-dialog-actions button{min-width:95px}
+.av-dialog-card.image{width:min(980px,100%);padding:18px}.av-dialog-image{display:block;max-width:100%;max-height:calc(100dvh - 180px);object-fit:contain;margin:12px auto;border-radius:10px}.av-dialog-frame{width:100%;height:min(70dvh,700px);border:0;margin-top:12px;background:#fff}
+@media(max-width:550px){.av-dialog-card{padding:18px}.av-dialog-actions{flex-direction:column-reverse}.av-dialog-actions button{width:100%}}
+</style>
+<script id="av-dialog-system-script-v82">
+let avDialogQueue=Promise.resolve();
+function avDialog(message,{kind='notice',title='',value='',options=null,src='',mime=''}={}){
+  const action=()=>new Promise(resolve=>{
+    const back=document.createElement('div');back.className='av-dialog-back';back.setAttribute('role','presentation');
+    const card=document.createElement('div');card.className='av-dialog-card'+(kind==='image'?' image':'');card.setAttribute('role','dialog');card.setAttribute('aria-modal','true');card.tabIndex=-1;
+    const heading=document.createElement('h2');heading.textContent=title||(kind==='confirm'?'Confirmar ação':kind==='prompt'?'Preencher informação':kind==='image'?'Visualizador':'Aviso do sistema');card.append(heading);
+    if(message){const info=document.createElement('p');info.textContent=String(message);card.append(info)}
+    let input=null;
+    if(kind==='prompt'){
+      input=document.createElement(Array.isArray(options)?'select':'textarea');
+      if(Array.isArray(options)){for(const opt of options){const item=document.createElement('option');item.value=opt;item.textContent=opt;input.append(item)}input.value=value||''}
+      else input.value=String(value||'');
+      input.setAttribute('aria-label',title||'Informação');card.append(input);
+    }
+    if(kind==='image'&&src){const media=document.createElement(mime.startsWith('image/')?'img':'iframe');media.className=mime.startsWith('image/')?'av-dialog-image':'av-dialog-frame';media.src=src;media.setAttribute('alt',title||'Imagem');card.append(media)}
+    const actions=document.createElement('div');actions.className='av-dialog-actions';
+    const focused=document.activeElement;let settled=false;
+    const done=result=>{if(settled)return;settled=true;document.removeEventListener('keydown',onKey,true);back.remove();focused?.focus?.();resolve(result)};
+    const onKey=event=>{if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();done(kind==='confirm'?false:null)}else if(event.key==='Enter'&&kind!=='prompt'){event.preventDefault();event.stopImmediatePropagation();done(kind==='confirm'?true:null)}};
+    if(kind==='confirm'||kind==='prompt'){const cancel=document.createElement('button');cancel.className='btn secondary';cancel.type='button';cancel.textContent='Cancelar';cancel.onclick=()=>done(kind==='confirm'?false:null);actions.append(cancel)}
+    const accept=document.createElement('button');accept.className='btn';accept.type='button';accept.textContent=kind==='confirm'?'Confirmar':kind==='prompt'?'Salvar':kind==='image'?'Fechar':'Entendi';accept.onclick=()=>done(kind==='confirm'?true:kind==='prompt'?input.value:null);actions.append(accept);
+    card.append(actions);back.append(card);document.body.append(back);document.addEventListener('keydown',onKey,true);(input||accept).focus();
+  });
+  const result=avDialogQueue.then(action,action);avDialogQueue=result.catch(()=>{});return result;
+}
+function avNotice(message,title){return avDialog(message,{kind:'notice',title})}
+function avConfirm(message){return avDialog(message,{kind:'confirm'})}
+function avPrompt(message,value='',options){return avDialog(message,{kind:'prompt',value,options})}
+function avImage(src,title='',description='',mime='image/jpeg'){return avDialog(description,{kind:'image',src,title,mime})}
+</script>
 </head>
 <body>
 <div id="impressaoAcompanhamentoRelatorio" aria-hidden="true"></div>
@@ -14293,22 +14333,21 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
           <div class="section-title">
             <div>
               <h1>Acompanhamento do Dia</h1>
-              <p>Gerencie tarefas, acompanhe prioridades e visualize o dia por funcionário, tarefa ou departamento.</p>
+              <p>Organize as tarefas do dia e acompanhe os pedidos enviados pelo Sistema Operacional.</p>
             </div>
             <div class="acomp-page-actions no-print">
               <button class="btn acomp-new-task-btn" type="button" onclick="novaTarefaAcompanhamento()">＋ NOVA TAREFA</button>
               <button id="acompRefreshBtn" class="btn secondary" type="button" onclick="atualizarAcompanhamentoDia(this)" title="Buscar agora as últimas alterações do Sistema Operacional sem recarregar a página">↻ Atualizar</button>
               <button class="btn secondary" type="button" onclick="abrirOpcoesImpressaoAcompanhamento()">🖨️ Imprimir</button>
-              <button class="btn secondary" type="button" onclick="abrirConfiguracaoAcessoOperacional()" title="Definir quem pode entrar no Sistema Operacional">⚙ Configuração</button>
             </div>
           </div>
-          <div class="v82-hero-strip no-print">
-            <div class="v82-hero-pill"><strong>Nova tarefa</strong><span>designe uma ou várias ações</span></div>
-            <div class="v82-hero-pill"><strong>Filtros rápidos</strong><span>data, funcionário, status e prioridade</span></div>
-            <div class="v82-hero-pill"><strong>Visões dinâmicas</strong><span>funcionários, tarefas e departamentos</span></div>
-          </div>
         </div>
-
+        <div class="acomp-area-tabs no-print" role="tablist" aria-label="Áreas do Acompanhamento do Dia">
+          <button id="acompTabTarefas" type="button" role="tab" aria-controls="acompAreaTarefas" aria-selected="true" class="acomp-area-tab active" onclick="selecionarAreaAcompanhamento('TAREFAS')">📋 Tarefas do dia</button>
+          <button id="acompTabSolicitacao" type="button" role="tab" aria-controls="acompAreaSolicitacao" aria-selected="false" class="acomp-area-tab" onclick="selecionarAreaAcompanhamento('SOLICITACAO')">✉ Solicitação <span id="acompSolicitacoesBadge" class="acomp-request-badge" hidden>0</span></button>
+        </div>
+        <div id="acompAreaSolicitacao" class="acomp-area-pane" role="tabpanel" aria-labelledby="acompTabSolicitacao" hidden>
+          <div class="acomp-operation-header section-card"><div><span class="acomp-operation-kicker">PEDIDOS DO OPERACIONAL</span><h2>Central de solicitações</h2><p>Analise pedidos de alteração de senha e de data de entrega enviados pela equipe.</p></div><button class="btn secondary" type="button" onclick="atualizarSolicitacoesAcompanhamento()">↻ Atualizar solicitações</button></div>
         <div class="acomp-operacional-bridge no-print" id="acompOperacionalBridge">
           <div class="acomp-operacional-bridge-icon" aria-hidden="true">↔</div>
           <div class="acomp-operacional-bridge-copy">
@@ -14321,6 +14360,10 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
             <button class="btn small secondary" type="button" onclick="redefinirLinkSistemaOperacionalWhatsApp()" title="Definir o link público enviado pelo WhatsApp">🔗 Link WhatsApp</button>
           </div>
         </div>
+          <section class="section-card acomp-requests-card" aria-labelledby="acompSolicitacoesTitulo"><div class="acomp-requests-head"><div><span class="acomp-operation-kicker">LOGIN</span><h2 id="acompSolicitacoesTitulo">Alteração de senha</h2><p>Autorize o pedido para que o próprio operador escolha uma senha no Operacional.</p></div></div><div id="acompSolicitacoesSenhaLista" class="acomp-requests-list" aria-live="polite">Abra esta área para consultar os pedidos.</div></section>
+          <section class="section-card acomp-requests-card" aria-labelledby="acompSolicitacoesPrazoTitulo"><div class="acomp-requests-head"><div><span class="acomp-operation-kicker">TAREFAS</span><h2 id="acompSolicitacoesPrazoTitulo">Alteração de data de entrega</h2><p>O líder responsável decide cada reagendamento; o prazo só muda após a aprovação.</p></div></div><div id="acompSolicitacoesPrazoLista" class="acomp-requests-list" aria-live="polite"></div></section>
+        </div>
+        <div id="acompAreaTarefas" class="acomp-area-pane" role="tabpanel" aria-labelledby="acompTabTarefas">
 
         <div id="acompFormPanel" class="section-card acompanhamento-func-header acomp-form-panel">
           <div class="acomp-form-panel-head">
@@ -14371,6 +14414,7 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
           <div class="acomp-view-switch" role="tablist" aria-label="Visualização"><button type="button" class="acomp-view-btn active" data-view="FUNCIONARIO" onclick="definirVisaoAcompanhamento('FUNCIONARIO')">👤 Funcionários</button><button type="button" class="acomp-view-btn" data-view="TAREFA" onclick="definirVisaoAcompanhamento('TAREFA')">📋 Tarefas</button><button type="button" class="acomp-view-btn" data-view="DEPARTAMENTO" onclick="definirVisaoAcompanhamento('DEPARTAMENTO')">🏬 Departamentos</button></div>
         </div>
         <div id="acompanhamentoLista" class="acomp-list"></div>
+        </div>
       </section>
 
       
@@ -14378,6 +14422,41 @@ body.dark-mode .ag-dist-lock-banner.locked{color:#86EFAC;background:rgba(22,163,
 .acomp-control-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:16px 0;padding:14px;border:1px solid var(--border);border-radius:18px;background:var(--page);box-shadow:0 6px 18px rgba(15,23,42,.045)}
 .acomp-control-group{display:flex;flex-direction:column;gap:5px;min-width:145px}.acomp-control-group label{font-size:.68rem;font-weight:900;text-transform:uppercase;color:var(--muted)}.acomp-control-group select,.acomp-control-group input{min-height:38px;border:1px solid var(--border);border-radius:10px;background:var(--page);color:var(--text);padding:8px 10px;font-weight:700}.acomp-control-search{flex:1;min-width:210px}.acomp-view-switch{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}.acomp-view-btn{border:1px solid var(--border);background:var(--page);color:var(--text);border-radius:10px;padding:9px 12px;font-weight:850;cursor:pointer}.acomp-view-btn.active{background:var(--soft);border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}.acomp-task-actions{display:flex;align-items:center;justify-content:flex-end;gap:5px;flex-wrap:wrap}.acomp-task-actions .btn.small{min-width:30px;padding:7px 8px}.acomp-status-chip{background:var(--soft);border:1px solid var(--border)}.acomp-task-card.bloqueada{border-left:4px solid #d97706}.acomp-task-card.cancelada{opacity:.65}.acomp-task-observation{margin-top:7px;padding:8px 10px;border-radius:10px;background:var(--soft);font-size:.78rem;color:var(--muted)}
 @media(max-width:900px){.acomp-control-bar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.acomp-control-search,.acomp-view-switch{grid-column:1/-1;margin-left:0}}@media(max-width:600px){.acomp-control-bar{grid-template-columns:1fr}.acomp-control-search,.acomp-view-switch{grid-column:auto}.acomp-view-switch{display:grid;grid-template-columns:1fr 1fr 1fr}.acomp-view-btn{font-size:.72rem;padding:8px 5px}}
+</style>
+
+<style id="acompanhamento-operacao-senhas-v1">
+#acompanhamento .acomp-area-pane[hidden],#acompanhamento .acomp-request-badge[hidden]{display:none!important}
+#acompanhamento .acomp-area-tabs{display:flex;gap:8px;flex-wrap:wrap;padding:7px;margin:0 0 18px;border:1px solid var(--border);border-radius:17px;background:var(--page-2)}
+#acompanhamento .acomp-area-tab{display:inline-flex;align-items:center;gap:7px;min-height:45px;padding:10px 17px;border:1px solid transparent;border-radius:12px;background:transparent;color:var(--muted);font-weight:900;cursor:pointer}
+#acompanhamento .acomp-area-tab.active{background:var(--page);border-color:var(--border);color:var(--text);box-shadow:0 3px 12px rgba(0,0,0,.07)}
+#acompanhamento .acomp-area-tab:focus-visible{outline:3px solid var(--amarelo);outline-offset:2px}
+#acompanhamento .acomp-request-badge{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 5px;border-radius:999px;background:var(--amarelo);color:var(--preto-logo);font-size:.72rem}
+#acompanhamento.acomp-area-operacao .acomp-page-actions{display:none!important}
+#acompanhamento .acomp-operation-header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:14px}
+#acompanhamento .acomp-operation-header h2,#acompanhamento .acomp-requests-head h2{font-size:1.1rem;margin:4px 0 5px;color:var(--text)}
+#acompanhamento .acomp-operation-header p,#acompanhamento .acomp-requests-head p{margin:0;color:var(--muted);font-size:.82rem;line-height:1.5}
+#acompanhamento .acomp-operation-kicker{font-size:.68rem;letter-spacing:.1em;font-weight:900;color:var(--amarelo-escuro)}
+#acompanhamento .acomp-operacional-bridge{margin-bottom:14px}
+#acompanhamento .acomp-requests-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;padding-bottom:15px;border-bottom:1px solid var(--border)}
+#acompanhamento .acomp-requests-list{display:grid;gap:10px;margin-top:16px}
+#acompanhamento .acomp-request-row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px;border:1px solid var(--border);border-left:4px solid var(--amarelo);border-radius:14px;background:var(--page-2)}
+#acompanhamento .acomp-request-row strong{display:block;font-size:.94rem;color:var(--text);overflow-wrap:anywhere}
+#acompanhamento .acomp-request-row small{display:block;margin-top:5px;color:var(--muted);font-size:.76rem;font-weight:700}
+#acompanhamento .acomp-request-row .btn{flex:none;min-height:42px}
+#acompanhamento .acomp-request-state{padding:17px;border:1px dashed var(--border);border-radius:13px;background:var(--page-2);color:var(--muted);font-weight:750}
+#acompanhamento .acomp-request-state.error{color:var(--red)}
+.acomp-password-help{margin:0 0 17px;padding:12px 14px;border:1px solid var(--border);border-left:4px solid var(--amarelo);border-radius:11px;background:var(--page-2);color:var(--text);font-size:.83rem;line-height:1.5}
+@media(max-width:700px){
+  #acompanhamento .acomp-area-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  #acompanhamento .acomp-area-tab{justify-content:center;padding:9px 7px;font-size:.79rem}
+  #acompanhamento .acomp-operation-header,#acompanhamento .acomp-request-row{flex-direction:column;align-items:stretch}
+  #acompanhamento .acomp-operation-header>.btn,#acompanhamento .acomp-requests-head>.btn,#acompanhamento .acomp-request-row .btn{width:100%;justify-content:center}
+}
+@media print{#acompanhamento .acomp-area-tabs,#acompanhamento #acompAreaSolicitacao{display:none!important}}
+#acompanhamento .acomp-requests-card{margin-bottom:14px}
+#acompanhamento .acomp-request-row.password{border-left-color:#6887ca}
+#acompanhamento .acomp-request-row.reschedule{border-left-color:#dd9a3d}
+#acompanhamento .acomp-request-actions{display:flex;flex-wrap:wrap;gap:8px}
 </style>
 
 <style id="acompanhamento-gerencial-v51-42-lock-day-style">
@@ -15246,7 +15325,7 @@ function storageSetSeguro(chave, valor, {serializar=false, silencioso=false}={})
       const avisoAnterior = sessionStorage.getItem(STORAGE_WARNING_KEY);
       if(avisoAnterior !== mensagem){
         sessionStorage.setItem(STORAGE_WARNING_KEY, mensagem);
-        alert(mensagem);
+        avNotice(mensagem);
       }
     }
     return false;
@@ -15856,7 +15935,7 @@ function temPermissaoSistemaAvLink(linkId,op=usuarioAtual?.operador){
 function validarAcessoSistemaAv(event,linkId){
   if(temPermissaoSistemaAvLink(linkId)) return true;
   event?.preventDefault?.();
-  alert('Este sistema não está liberado para o seu usuário. Solicite a liberação ao responsável pelas permissões.');
+  avNotice('Este sistema não está liberado para o seu usuário. Solicite a liberação ao responsável pelas permissões.');
   return false;
 }
 function aplicarPermissoesSistemaAV(){
@@ -16456,7 +16535,7 @@ async function salvarDadosUsuarioOnline(silencioso=false){
     if(salvarIndividual) marcarUsuarioPendente(op);
     if(salvarCompartilhado) marcarCompartilhadoPendente();
     setSyncStatus(navigator.onLine?'SEM SINCRONIZAÇÃO • alteração preservada no aparelho':'OFFLINE • alteração preservada no aparelho','offline');
-    if(!silencioso) alert('Não foi possível confirmar a alteração no servidor agora. Ela foi preservada neste aparelho.\n\nDetalhe: '+err.message);
+    if(!silencioso) avNotice('Não foi possível confirmar a alteração no servidor agora. Ela foi preservada neste aparelho.\n\nDetalhe: '+err.message);
     return false;
   }finally{
     salvamentoEmAndamento=false;
@@ -17135,7 +17214,7 @@ async function logout(opcoes={}){
       showAppLoader('Saindo com segurança','Conferindo se todas as alterações foram sincronizadas...');
       const salvo=await garantirSalvamentoAntesDeSair();
       if(!salvo){
-        const continuar=confirm('Ainda existem alterações salvas somente neste aparelho. Deseja sair mesmo assim? Elas serão reenviadas quando este operador entrar novamente neste aparelho.');
+        const continuar=await avConfirm('Ainda existem alterações salvas somente neste aparelho. Deseja sair mesmo assim? Elas serão reenviadas quando este operador entrar novamente neste aparelho.');
         if(!continuar){ hideAppLoader(); return false; }
       }
     }
@@ -17147,7 +17226,7 @@ async function logout(opcoes={}){
     }
     limparSessaoLocal();
     usuarioAtual=null;
-    if(motivo) alert(motivo);
+    if(motivo) await avNotice(motivo);
     location.reload();
     return true;
   }finally{
@@ -17157,6 +17236,7 @@ async function logout(opcoes={}){
 
 function initApp(){
   if(!usuarioAtual) return;
+  aplicarTemaGerencialDoOperador();
   atualizarIdentidadeUsuarioAtual();
   document.getElementById('loginScreen').style.display = 'none';
   const nomeLateral=document.getElementById('userNameBox');
@@ -17209,19 +17289,30 @@ function setDefaultDates(){
   document.getElementById('relFim').value = fim;
 }
 
-function toggleTheme(){
-  document.body.classList.toggle('dark-mode');
-  const dark = document.body.classList.contains('dark-mode');
+function chaveTemaGerencialDoOperador(){
+  const op=normalizarOperador(usuarioAtual?.operador);
+  return op?`adminGerencialTemaOperadorV1_${op}`:null;
+}
+function aplicarTemaGerencialDoOperador(){
+  const chave=chaveTemaGerencialDoOperador();
+  const dark=!!chave&&localStorage.getItem(chave)==='dark';
+  document.body.classList.toggle('dark-mode',dark);
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-  storageSetSeguro('adminGerencialDark', dark ? '1':'0', {silencioso:true});
   const themeBtn = document.getElementById('themeBtn');
+  if(!themeBtn)return;
   themeBtn.textContent = dark ? '☀️' : '🌙';
   themeBtn.title = dark ? 'Ativar modo claro' : 'Ativar modo escuro';
   themeBtn.setAttribute('aria-label', themeBtn.title);
 }
+function toggleTheme(){
+  const chave=chaveTemaGerencialDoOperador();
+  if(!chave)return;
+  localStorage.setItem(chave,document.body.classList.contains('dark-mode')?'light':'dark');
+  aplicarTemaGerencialDoOperador();
+}
 
 function showPage(id, btn){
-  if(!temPermissao(id)){ alert('Esta função não está liberada para o seu usuário.'); id='painel'; }
+  if(!temPermissao(id)){ avNotice('Esta função não está liberada para o seu usuário.'); id='painel'; }
   if(id==='operacoes' && typeof opMostrarTelaOperacoes==='function') opMostrarTelaOperacoes('inicio');
   if(id==='colaboradores' && typeof renderHomeOperacoes==='function') renderHomeOperacoes();
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -17236,6 +17327,7 @@ function showPage(id, btn){
   document.getElementById('pageTitle').textContent = pageInfo[id][0];
   document.getElementById('pageSubtitle').textContent = pageInfo[id][1];
   renderAll();
+  if(id==='acompanhamento')selecionarAreaAcompanhamento(acompAreaAtual,{atualizar:true});
 }
 
 function abrirConfiguracoesUsuario(event){
@@ -17688,14 +17780,14 @@ async function prepararArquivoAnexoNota(file){
 async function selecionarAnexosNota(files){
   const lista=Array.from(files||[]); if(!lista.length) return;
   for(const file of lista){
-    if(notaAnexosRascunho.length>=NOTA_ANEXOS_MAX_ARQUIVOS){ alert(`Limite de ${NOTA_ANEXOS_MAX_ARQUIVOS} anexos por anotação.`); break; }
+    if(notaAnexosRascunho.length>=NOTA_ANEXOS_MAX_ARQUIVOS){ avNotice(`Limite de ${NOTA_ANEXOS_MAX_ARQUIVOS} anexos por anotação.`); break; }
     if(notaAnexosRascunho.some(a=>a.nome===file.name && Number(a.tamanho)===Number(file.size))){ continue; }
     try{
       const anexo=await prepararArquivoAnexoNota(file);
-      if(anexo.tamanho>NOTA_ANEXO_MAX_BYTES){ alert(`O arquivo “${file.name}” ficou maior que 2 MB após o processamento.`); continue; }
-      if(tamanhoAnexosNota()+anexo.tamanho>NOTA_ANEXOS_TOTAL_MAX_BYTES){ alert('Os anexos desta anotação atingiram o limite de aproximadamente 3 MB. Remova algum arquivo antes de adicionar outro.'); break; }
+      if(anexo.tamanho>NOTA_ANEXO_MAX_BYTES){ avNotice(`O arquivo “${file.name}” ficou maior que 2 MB após o processamento.`); continue; }
+      if(tamanhoAnexosNota()+anexo.tamanho>NOTA_ANEXOS_TOTAL_MAX_BYTES){ avNotice('Os anexos desta anotação atingiram o limite de aproximadamente 3 MB. Remova algum arquivo antes de adicionar outro.'); break; }
       notaAnexosRascunho.push(anexo);
-    }catch(err){ alert(err?.message||`Não foi possível anexar “${file.name}”.`); }
+    }catch(err){ avNotice(err?.message||`Não foi possível anexar “${file.name}”.`); }
   }
   renderAnexosNotaEditor();
 }
@@ -17714,7 +17806,8 @@ function renderAnexosNotaEditor(){
 function obterAnexoNota(idNota,idAnexo){ const n=(db.notas||[]).find(x=>x.id===idNota); return anexosDaNota(n?.anexos).find(a=>a.id===idAnexo)||null; }
 function abrirAnexoNota(idNota,idAnexo){
   const a=obterAnexoNota(idNota,idAnexo); if(!a) return;
-  try{ const w=window.open('about:blank','_blank','noopener,noreferrer'); if(w){ w.opener=null; w.location.href=a.dataUrl; } else baixarAnexoNota(idNota,idAnexo); }catch(_){ baixarAnexoNota(idNota,idAnexo); }
+  if(String(a.tipo||'').startsWith('image/')||a.tipo==='application/pdf')avImage(a.dataUrl,a.nome||'Anexo da anotação','',a.tipo);
+  else baixarAnexoNota(idNota,idAnexo);
 }
 function baixarAnexoNota(idNota,idAnexo){
   const a=obterAnexoNota(idNota,idAnexo); if(!a) return;
@@ -17756,7 +17849,7 @@ function prepararRevisaoVozNota(){
   const final=document.getElementById('notaDescricao');
   const painel=document.getElementById('notaVozReviewPanel');
   const texto=String(bruto?.value||'').trim();
-  if(!texto){ alert('Grave ou digite uma transcrição antes de iniciar a revisão.'); bruto?.focus(); return; }
+  if(!texto){ avNotice('Grave ou digite uma transcrição antes de iniciar a revisão.'); bruto?.focus(); return; }
   if(final && !String(avRteObterTexto('notaDescricao')||'').trim()) avRteDefinir('notaDescricao',texto);
   if(painel) painel.hidden=false;
   const confirm=document.getElementById('notaVozRevisaoConfirmada'); if(confirm) confirm.value='0';
@@ -17765,7 +17858,7 @@ function prepararRevisaoVozNota(){
 }
 function confirmarRevisaoVozNota(){
   const final=document.getElementById('notaDescricao');
-  if(!avRteObterTexto('notaDescricao')){ alert('Revise o texto antes de confirmar.'); avRteFocar('notaDescricao'); return; }
+  if(!avRteObterTexto('notaDescricao')){ avNotice('Revise o texto antes de confirmar.'); avRteFocar('notaDescricao'); return; }
   const confirm=document.getElementById('notaVozRevisaoConfirmada'); if(confirm) confirm.value='1';
   atualizarBadgeRevisaoVozNota(true);
 }
@@ -17791,15 +17884,15 @@ function salvarNota(e){
   const inicio = document.getElementById('notaInicio').value;
   const prazo = document.getElementById('notaPrazo').value;
   const origem=normalizarOrigemNota(document.getElementById('notaOrigem')?.value || existente?.origem);
-  if(inicio && prazo && prazo < inicio){ alert('A data do prazo não pode ser anterior à data de início.'); return; }
+  if(inicio && prazo && prazo < inicio){ avNotice('A data do prazo não pode ser anterior à data de início.'); return; }
   let descricao='';
   let transcricaoOriginal='';
   if(origem==='VOZ'){
     transcricaoOriginal=String(document.getElementById('notaVozRascunho')?.value||'').trim();
     descricao=avRteObterTexto('notaDescricao');
     const revisada=document.getElementById('notaVozRevisaoConfirmada')?.value==='1';
-    if(!transcricaoOriginal){ alert('Grave a anotação por voz antes de salvar.'); return; }
-    if(!descricao || !revisada){ alert('Revise a transcrição e clique em “Confirmar revisão” antes de salvar.'); avRteFocar('notaDescricao'); return; }
+    if(!transcricaoOriginal){ avNotice('Grave a anotação por voz antes de salvar.'); return; }
+    if(!descricao || !revisada){ avNotice('Revise a transcrição e clique em “Confirmar revisão” antes de salvar.'); avRteFocar('notaDescricao'); return; }
   }else{
     descricao=avRteObterTexto('notaDescricaoEscrita');
   }
@@ -17949,7 +18042,7 @@ function reabrirNota(id){
   n.atualizadoEm=agoraBR();
   saveDB(); renderAll();
 }
-function excluirNota(id){ if(confirm('Excluir esta anotação?')){ db.notas=db.notas.filter(x=>x.id!==id); saveDB(); renderAll(); } }
+async function excluirNota(id){ if(await avConfirm('Excluir esta anotação?')){ db.notas=db.notas.filter(x=>x.id!==id); saveDB(); renderAll(); } }
 async function copiarNota(id){
   const n=db.notas.find(x=>x.id===id); if(!n) return;
   const tags=tagsDaNota(n.tags);
@@ -17958,7 +18051,7 @@ async function copiarNota(id){
   catch(_){
     const ta=document.createElement('textarea'); ta.value=texto; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
   }
-  alert('Anotação copiada.');
+  avNotice('Anotação copiada.');
 }
 function transformarNotaEmTarefa(id){
   const n=db.notas.find(x=>x.id===id); if(!n) return;
@@ -18273,7 +18366,7 @@ function baixarAnexoTarefaDraft(id){
 function baixarAnexoTarefa(tarefaId,anexoId){
   const tarefa=(db.tarefas||[]).find(t=>String(t.id)===String(tarefaId));
   const a=anexosTarefa(tarefa).find(x=>String(x.id)===String(anexoId));
-  if(!a){alert('O arquivo anexado não foi encontrado.');return;}
+  if(!a){avNotice('O arquivo anexado não foi encontrado.');return;}
   downloadDataUrlTarefa(a.dados,a.nome);
 }
 function estimarDadosIndividuaisComAnexos(anexos,idEdicao=''){
@@ -18301,10 +18394,10 @@ async function adicionarAnexosTarefa(event){
   let adicionados=0;
   for(const file of arquivos){
     if(tarefaAnexosDraft.length>=TAREFA_ANEXOS_MAX_POR_TAREFA){
-      alert(`Cada tarefa pode ter no máximo ${TAREFA_ANEXOS_MAX_POR_TAREFA} arquivos anexados.`);break;
+      avNotice(`Cada tarefa pode ter no máximo ${TAREFA_ANEXOS_MAX_POR_TAREFA} arquivos anexados.`);break;
     }
     if(file.size>TAREFA_ANEXO_MAX_ARQUIVO_BYTES){
-      alert(`“${file.name}” possui ${formatarBytesTarefa(file.size)}. O limite por arquivo é ${formatarBytesTarefa(TAREFA_ANEXO_MAX_ARQUIVO_BYTES)} para preservar a sincronização.`);continue;
+      avNotice(`“${file.name}” possui ${formatarBytesTarefa(file.size)}. O limite por arquivo é ${formatarBytesTarefa(TAREFA_ANEXO_MAX_ARQUIVO_BYTES)} para preservar a sincronização.`);continue;
     }
     try{
       const dados=await lerArquivoComoDataURL(file);
@@ -18313,12 +18406,12 @@ async function adicionarAnexosTarefa(event){
       const tarefaId=document.getElementById('tarefaId')?.value||'';
       const estimado=estimarDadosIndividuaisComAnexos(candidato,tarefaId);
       if(estimado>TAREFA_DADOS_INDIVIDUAIS_LIMITE_SEGURO){
-        alert(`“${file.name}” não foi anexado porque os dados deste usuário ficariam com aproximadamente ${formatarBytesTarefa(estimado)}. O sistema mantém uma margem segura para o Realtime do Supabase.`);continue;
+        avNotice(`“${file.name}” não foi anexado porque os dados deste usuário ficariam com aproximadamente ${formatarBytesTarefa(estimado)}. O sistema mantém uma margem segura para o Realtime do Supabase.`);continue;
       }
       tarefaAnexosDraft=candidato;adicionados++;
     }catch(err){
       console.error('Falha ao anexar arquivo:',err);
-      alert(`Não foi possível anexar “${file.name}”.`);
+      avNotice(`Não foi possível anexar “${file.name}”.`);
     }
   }
   renderAnexosTarefaEditor();
@@ -18355,24 +18448,24 @@ function salvarTarefa(e){
   const diaMesRepeticao=usaRepeticao && repeticaoLembrete==='MENSAL' ? String(document.getElementById('tarefaDiaMesRepeticao')?.value||'') : '';
   const horaRepeticao=usaRepeticao ? String(document.getElementById('tarefaHoraRepeticao')?.value||'') : '';
 
-  if(usaInicio && !inicio){ alert('Informe a data de início da tarefa.'); document.getElementById('tarefaInicio')?.focus(); return; }
-  if(usaFim && !fim){ alert('Informe a data de término da tarefa.'); document.getElementById('tarefaFim')?.focus(); return; }
+  if(usaInicio && !inicio){ avNotice('Informe a data de início da tarefa.'); document.getElementById('tarefaInicio')?.focus(); return; }
+  if(usaFim && !fim){ avNotice('Informe a data de término da tarefa.'); document.getElementById('tarefaFim')?.focus(); return; }
   if(repeticaoLembrete==='SEMANAL' && !diaSemanaRepeticaoValido(diaSemanaRepeticao)){
-    alert('Selecione o dia da semana em que a tarefa deve se repetir.');
+    avNotice('Selecione o dia da semana em que a tarefa deve se repetir.');
     document.getElementById('tarefaDiaSemanaRepeticao')?.focus(); return;
   }
   if(repeticaoLembrete==='MENSAL' && !diaMesRepeticaoValido(diaMesRepeticao)){
-    alert('Informe um dia do mês entre 1 e 31.');
+    avNotice('Informe um dia do mês entre 1 e 31.');
     document.getElementById('tarefaDiaMesRepeticao')?.focus(); return;
   }
-  if(horaInicio && !horaTarefaValida(horaInicio)){ alert('Informe uma hora de início válida.'); return; }
-  if(horaFim && !horaTarefaValida(horaFim)){ alert('Informe uma hora de término válida.'); return; }
-  if(horaRepeticao && !horaTarefaValida(horaRepeticao)){ alert('Informe uma hora válida para a repetição.'); return; }
+  if(horaInicio && !horaTarefaValida(horaInicio)){ avNotice('Informe uma hora de início válida.'); return; }
+  if(horaFim && !horaTarefaValida(horaFim)){ avNotice('Informe uma hora de término válida.'); return; }
+  if(horaRepeticao && !horaTarefaValida(horaRepeticao)){ avNotice('Informe uma hora válida para a repetição.'); return; }
   if(agendamentoTipo==='INICIO_FIM' && inicio && fim){
     const tsInicio=timestampAgendamentoTarefa(inicio,horaInicio,false);
     const tsFim=timestampAgendamentoTarefa(fim,horaFim,true);
     if(tsInicio!==null && tsFim!==null && tsFim < tsInicio){
-      alert('O término não pode ser anterior ao início da tarefa.'); return;
+      avNotice('O término não pode ser anterior ao início da tarefa.'); return;
     }
   }
 
@@ -18467,7 +18560,7 @@ function setTarefaStatus(id,status){
   t.atualizadoEm=agoraBR();
   saveDB(); renderAll();
 }
-function excluirTarefa(id){ if(confirm('Excluir esta tarefa?')){ db.tarefas=db.tarefas.filter(x=>x.id!==id); saveDB(); renderAll(); } }
+async function excluirTarefa(id){ if(await avConfirm('Excluir esta tarefa?')){ db.tarefas=db.tarefas.filter(x=>x.id!==id); saveDB(); renderAll(); } }
 function limparFormTarefa(fechar=true){
   document.getElementById('formTarefa').reset();
   avRteDefinir('tarefaDescricao','');
@@ -18695,11 +18788,11 @@ function novaTarefaAcompanhamento(){
   const painel=document.getElementById('acompFormPanel');
   if(painel) painel.scrollIntoView({behavior:'smooth',block:'start'});
 }
-function fecharFormularioAcompanhamento(forcar=false){
+async function fecharFormularioAcompanhamento(forcar=false){
   const painel=document.getElementById('acompFormPanel');
   if(!painel) return;
   if(!forcar && formularioAcompanhamentoPossuiConteudo()){
-    const ok=confirm('Deseja fechar e descartar o preenchimento desta tarefa?');
+    const ok=await avConfirm('Deseja fechar e descartar o preenchimento desta tarefa?');
     if(!ok) return;
   }
   resetarFormularioAcompanhamento(false);
@@ -18727,12 +18820,12 @@ function tarefasAcompanhamentoPossuemConteudo(){
     linha._referenciaArquivo?.nome||''
   ].some(valor=>normalizarTextoAcomp(valor)) || !!linha.querySelector('.acomp-exigir-aprovacao')?.checked || !!linha.querySelector('.acomp-foto-obrigatoria')?.checked || !!linha.querySelector('.acomp-extra-assessor')?.value);
 }
-function fecharPainelTarefasAcompanhamento(forcar=false){
+async function fecharPainelTarefasAcompanhamento(forcar=false){
   const painel=document.getElementById('acompTaskPanel');
   const editor=document.getElementById('acompTarefasEditor');
   if(!painel || !editor) return;
   if(!forcar && tarefasAcompanhamentoPossuemConteudo()){
-    const ok=confirm('Deseja fechar o quadro de tarefas e descartar as tarefas adicionadas?');
+    const ok=await avConfirm('Deseja fechar o quadro de tarefas e descartar as tarefas adicionadas?');
     if(!ok) return;
   }
   editor.innerHTML='';
@@ -18829,7 +18922,7 @@ async function carregarReferenciaTarefaAcompanhamento(input){
       ref=await new Promise((resolve,reject)=>{const r=new FileReader();r.onerror=()=>reject(new Error('Não foi possível ler o PDF.'));r.onload=()=>resolve({nome:file.name||'referencia.pdf',tipo:'application/pdf',dataUrl:r.result,tamanho:file.size||0});r.readAsDataURL(file)});
     }else throw new Error('Use uma imagem ou PDF como referência.');
     linha._referenciaArquivo=ref;atualizarEstadoReferenciaAcompanhamento(linha);
-  }catch(e){input.value='';linha._referenciaArquivo=null;atualizarEstadoReferenciaAcompanhamento(linha);alert(e.message||'Não foi possível anexar a referência.');}
+  }catch(e){input.value='';linha._referenciaArquivo=null;atualizarEstadoReferenciaAcompanhamento(linha);avNotice(e.message||'Não foi possível anexar a referência.');}
 }
 function removerReferenciaTarefaAcompanhamento(btn){const linha=btn?.closest('.acomp-task-edit-row');if(!linha)return;linha._referenciaArquivo=null;const input=linha.querySelector('.acomp-reference-input');if(input)input.value='';atualizarEstadoReferenciaAcompanhamento(linha);}
 
@@ -18921,9 +19014,9 @@ function salvarDiario(e){
   const funcionario=normalizarTextoAcomp(document.getElementById('diarioResp')?.value);
   const departamento=normalizarTextoAcomp(document.getElementById('diarioDepartamento')?.value);
   const tarefasPrincipais=coletarTarefasAcompanhamento();
-  if(!funcionario){ alert('Selecione o assessor / funcionário.'); return; }
-  if(!departamento){ alert('Selecione o departamento.'); return; }
-  if(!tarefasPrincipais.length){ alert('Adicione pelo menos uma tarefa ao acompanhamento.'); return; }
+  if(!funcionario){ avNotice('Selecione o assessor / funcionário.'); return; }
+  if(!departamento){ avNotice('Selecione o departamento.'); return; }
+  if(!tarefasPrincipais.length){ avNotice('Adicione pelo menos uma tarefa ao acompanhamento.'); return; }
   const id=document.getElementById('diarioId').value || uid('dia');
   const existente=db.diario.find(d=>d.id===id);
   const anteriores=Array.isArray(existente?.tarefas)?existente.tarefas:[];
@@ -18935,6 +19028,15 @@ function salvarDiario(e){
     t.responsavelId=String(funcionarioPrincipal.id||anterior?.responsavelId||'');
     t.responsavelOperador=normalizarOperador(funcionarioPrincipal.operador||anterior?.responsavelOperador||'');
     t.responsavelMatricula=String(funcionarioPrincipal.matricula||anterior?.responsavelMatricula||'');
+    // Preservar também metadados adicionados por versões futuras do Operacional.
+    if(anterior)Object.entries(anterior).forEach(([k,v])=>{
+      if(!Object.prototype.hasOwnProperty.call(t,k))t[k]=cloneJSONSeguro(v,v);
+    });
+    // Campos operacionais pertencem ao funcionário e não podem desaparecer ao editar a tarefa.
+    ['execucao','impedimento','fotoConclusaoRegistroId','fotoConclusaoTamanhoBytes',
+     'fotoConclusaoArmazenamento','fotoConclusaoStoragePath','fotoConclusaoMime'].forEach(k=>{
+      if(anterior && Object.prototype.hasOwnProperty.call(anterior,k))t[k]=cloneJSONSeguro(anterior[k],anterior[k]);
+    });
     t.historico=Array.isArray(anterior?.historico)?anterior.historico:[];
     t.criadoPor=anterior?.criadoPor||usuarioAtual?.nome||'Sistema';
     t.criadoPorOperador=anterior?.criadoPorOperador||normalizarOperador(usuarioAtual?.operador);
@@ -18965,6 +19067,13 @@ function salvarDiario(e){
         status:String(anteriorExtra?.status||'PENDENTE').toUpperCase(),historico:Array.isArray(anteriorExtra?.historico)?anteriorExtra.historico:[],
         criadoPor:anteriorExtra?.criadoPor||t.criadoPor,criadoPorOperador:anteriorExtra?.criadoPorOperador||t.criadoPorOperador
       };
+      if(anteriorExtra)Object.entries(anteriorExtra).forEach(([k,v])=>{
+        if(!Object.prototype.hasOwnProperty.call(extra,k))extra[k]=cloneJSONSeguro(v,v);
+      });
+      ['execucao','impedimento','fotoConclusaoRegistroId','fotoConclusaoTamanhoBytes',
+       'fotoConclusaoArmazenamento','fotoConclusaoStoragePath','fotoConclusaoMime'].forEach(k=>{
+        if(anteriorExtra && Object.prototype.hasOwnProperty.call(anteriorExtra,k))extra[k]=cloneJSONSeguro(anteriorExtra[k],anteriorExtra[k]);
+      });
       if(anteriorExtra?.reagendamento && typeof anteriorExtra.reagendamento==='object') extra.reagendamento=cloneJSONSeguro(anteriorExtra.reagendamento,anteriorExtra.reagendamento);
       if(anteriorExtra?.validacaoConclusao && typeof anteriorExtra.validacaoConclusao==='object') extra.validacaoConclusao=cloneJSONSeguro(anteriorExtra.validacaoConclusao,anteriorExtra.validacaoConclusao);
       ['fotoConclusaoDataUrl','fotoConclusaoNome','fotoConclusaoEmISO','fotoConclusaoPor','concluidaEmISO','concluidaPor','observacaoConclusao'].forEach(k=>{if(anteriorExtra?.[k])extra[k]=anteriorExtra[k]});
@@ -19010,7 +19119,7 @@ function editarDiario(id){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 async function excluirDiario(id){
-  if(confirm('Excluir este acompanhamento de funcionário?')){
+  if(await avConfirm('Excluir este acompanhamento de funcionário?')){
     const chave=String(id||'').trim();
     registrarExclusaoDiario(chave);
     db.diario=(db.diario||[]).filter(x=>String(x?.id||'').trim()!==chave);
@@ -19035,27 +19144,27 @@ function limparFormDiario(){
 function alterarStatusTarefaAcompanhamento(registroId,tarefaId,status){
   // V51.52: o status do Acompanhamento do Dia é controlado exclusivamente pelo Sistema Operacional.
   // Mantida apenas por compatibilidade com chamadas antigas; não altera dados no Gerencial.
-  alert('O status desta tarefa é atualizado pelas ações do assessor no Sistema Operacional.');
+  avNotice('O status desta tarefa é atualizado pelas ações do assessor no Sistema Operacional.');
 }
-function reatribuirTarefaAcompanhamento(registroId,tarefaId){
+async function reatribuirTarefaAcompanhamento(registroId,tarefaId){
   const d=db.diario.find(x=>x.id===registroId); if(!d) return;
   const t=d.tarefas?.find(x=>x.id===tarefaId); if(!t) return;
   const funcionarios=[...(db.funcionarios||[])].map(f=>f.nome).filter(Boolean);
-  if(!funcionarios.length){alert('Nenhum funcionário cadastrado.');return;}
+  if(!funcionarios.length){avNotice('Nenhum funcionário cadastrado.');return;}
   const atual=t.responsavel||d.responsavel||'';
-  const novo=prompt(`Reatribuir "${t.descricao||'tarefa'}" para:\n\n${funcionarios.join('\n')}`,atual);
+  const novo=await avPrompt(`Reatribuir "${t.descricao||'tarefa'}" para:`,atual,funcionarios);
   if(novo===null)return;
   const nome=normalizarTextoAcomp(novo);
-  if(!nome||!funcionarios.includes(nome)){alert('Funcionário inválido. Selecione um nome cadastrado.');return;}
+  if(!nome||!funcionarios.includes(nome)){avNotice('Funcionário inválido. Selecione um nome cadastrado.');return;}
   const anterior=t.responsavel||d.responsavel||'';
   t.responsavel=nome; adicionarHistoricoTarefa(t,'REATRIBUÍDA',`${anterior||'Sem responsável'} → ${nome}`);
   d.atualizadoPor=usuarioAtual?.nome||d.atualizadoPor; d.atualizadoEm=agoraBR();
   saveDB(); renderDiario(); renderRelatorio();
 }
-function adicionarObservacaoTarefaAcompanhamento(registroId,tarefaId){
+async function adicionarObservacaoTarefaAcompanhamento(registroId,tarefaId){
   const d=db.diario.find(x=>x.id===registroId); if(!d) return;
   const t=d.tarefas?.find(x=>x.id===tarefaId); if(!t) return;
-  const texto=prompt('Observação específica desta tarefa:',t.observacao||'');
+  const texto=await avPrompt('Observação específica desta tarefa:',t.observacao||'');
   if(texto===null)return;
   t.observacao=normalizarTextoAcomp(texto);
   if(t.observacao) adicionarHistoricoTarefa(t,'OBSERVAÇÃO',t.observacao);
@@ -19066,20 +19175,15 @@ function verHistoricoTarefaAcompanhamento(registroId,tarefaId){
   const d=db.diario.find(x=>x.id===registroId); if(!d)return;
   const t=d.tarefas?.find(x=>x.id===tarefaId); if(!t)return;
   const hist=Array.isArray(t.historico)?t.historico:[];
-  alert(`HISTÓRICO DA TAREFA\n\n${hist.length?hist.map(h=>`${h.em||'-'} • ${h.por||'-'}\n${h.evento||'EVENTO'}${h.detalhes?` — ${h.detalhes}`:''}`).join('\n\n'):'Nenhum histórico registrado.'}`);
+  avNotice(`HISTÓRICO DA TAREFA\n\n${hist.length?hist.map(h=>`${h.em||'-'} • ${h.por||'-'}\n${h.evento||'EVENTO'}${h.detalhes?` — ${h.detalhes}`:''}`).join('\n\n'):'Nenhum histórico registrado.'}`);
 }
 
 function abrirFotoConclusaoAcompanhamento(registroId,tarefaId){
   const d=(db.diario||[]).find(x=>String(x.id)===String(registroId));
   const t=d?.tarefas?.find(x=>String(x.id)===String(tarefaId));
-  if(!t?.fotoConclusaoDataUrl){ alert('Esta tarefa não possui evidência fotográfica.'); return; }
-  const w=window.open('','_blank','noopener,noreferrer');
-  if(!w){ alert('O navegador bloqueou a abertura da foto. Permita pop-ups para visualizar.'); return; }
-  const titulo=escapeHTML(t.descricao||'Evidência da conclusão');
-  const quando=escapeHTML(t.fotoConclusaoEmISO?new Date(t.fotoConclusaoEmISO).toLocaleString('pt-BR'):(t.concluidaEmISO?new Date(t.concluidaEmISO).toLocaleString('pt-BR'):'-'));
-  const por=escapeHTML(t.concluidaPor||t.responsavel||d?.responsavel||'-');
-  w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${titulo}</title><style>body{margin:0;background:#111;color:#fff;font-family:Arial,sans-serif}.wrap{max-width:1100px;margin:auto;padding:22px}.meta{margin-bottom:14px}.meta h1{font-size:20px;margin:0 0 6px}.meta p{margin:0;color:#bbb}.foto{display:block;max-width:100%;max-height:82vh;margin:auto;border-radius:14px;background:#222}</style></head><body><div class="wrap"><div class="meta"><h1>${titulo}</h1><p>Concluída por ${por} • ${quando}</p></div><img class="foto" src="${t.fotoConclusaoDataUrl}" alt="Evidência da conclusão"></div></body></html>`);
-  w.document.close();
+  if(!t?.fotoConclusaoDataUrl){ avNotice('Esta tarefa não possui evidência fotográfica.'); return; }
+  const quando=t.fotoConclusaoEmISO?new Date(t.fotoConclusaoEmISO).toLocaleString('pt-BR'):(t.concluidaEmISO?new Date(t.concluidaEmISO).toLocaleString('pt-BR'):'-');
+  avImage(t.fotoConclusaoDataUrl,t.descricao||'Evidência da conclusão',`Concluída por ${t.concluidaPor||t.responsavel||d?.responsavel||'-'} • ${quando}`,'image/jpeg');
 }
 
 function prazoAcompanhamentoTexto(valor){
@@ -19279,8 +19383,8 @@ function renderOperadores(){
 function alternarCaixaOperacional(id){
   const f = db.funcionarios.find(x => x.id === id);
   if(!f) return;
-  if(AVCargoPolicy.isFiscal(f)){ alert('Cargo FISCAL: acesso ao caixa bloqueado. Use o código funcional fiscal para identificação.'); return; }
-  if(!ehCadastroOperacional(f) && !normalizarOperador(f.operador)){ alert('Este funcionário não possui número de operador.'); return; }
+  if(AVCargoPolicy.isFiscal(f)){ avNotice('Cargo FISCAL: acesso ao caixa bloqueado. Use o código funcional fiscal para identificação.'); return; }
+  if(!ehCadastroOperacional(f) && !normalizarOperador(f.operador)){ avNotice('Este funcionário não possui número de operador.'); return; }
   f.caixaOperacional = String(f.caixaOperacional || 'INATIVO').toUpperCase() === 'ATIVO' ? 'INATIVO' : 'ATIVO';
   f.atualizadoPor = usuarioAtual.nome;
   f.atualizadoEm = agoraBR();
@@ -19369,9 +19473,9 @@ function salvarFuncionario(e){
   let operador = operacional ? '' : normalizarOperador(document.getElementById('funcOperador').value);
   const numeroCaixa = operacional ? String(document.getElementById('funcNumeroCaixa')?.value || '').trim() : '';
   const matriculaInformada = String(document.getElementById('funcMatricula')?.value || '').trim();
-  if(!operacional && !operador){ alert('Informe o número de operador para gerar a matrícula.'); return; }
-  if(operacional && !numeroCaixa){ alert('Informe o número do caixa da Tesouraria / setor operacional.'); return; }
-  if(operacional && !matriculaInformada){ alert('Informe a matrícula da Tesouraria / setor operacional.'); return; }
+  if(!operacional && !operador){ avNotice('Informe o número de operador para gerar a matrícula.'); return; }
+  if(operacional && !numeroCaixa){ avNotice('Informe o número do caixa da Tesouraria / setor operacional.'); return; }
+  if(operacional && !matriculaInformada){ avNotice('Informe a matrícula da Tesouraria / setor operacional.'); return; }
 
   const nomeNormalizado = norm(document.getElementById('funcNome').value);
   let existente = rawId ? db.funcionarios.find(f => f.id === rawId) : null;
@@ -19390,7 +19494,7 @@ function salvarFuncionario(e){
   const id = existente?.id || rawId || uid('func');
   const duplicado = operador ? (db.funcionarios || []).find(f => f.id !== id && normalizarOperador(f.operador) === operador) : null;
   if(duplicado){
-    alert('Este número de operador já está cadastrado para ' + duplicado.nome + '. Abra a ficha existente para editar.');
+    avNotice('Este número de operador já está cadastrado para ' + duplicado.nome + '. Abra a ficha existente para editar.');
     return;
   }
 
@@ -19440,8 +19544,8 @@ function salvarFuncionario(e){
   popularFiltroFuncionarios();
   renderAll();
 }
-function excluirFuncionario(id){
-  if(confirm('Excluir este funcionário do quadro?')){
+async function excluirFuncionario(id){
+  if(await avConfirm('Excluir este funcionário do quadro?')){
     const removido = db.funcionarios.find(f => f.id === id);
     const op = normalizarOperador(removido?.operador);
     db.funcionarios = db.funcionarios.filter(f => f.id !== id);
@@ -19546,8 +19650,8 @@ function observacaoFuncionarioFormTemConteudo(){
     !!avRteObterTexto('obsFuncTexto') ||
     !!String(document.getElementById('obsFuncProximo')?.value||'').trim();
 }
-function fecharCriadorObservacaoFuncionario(forcar=false){
-  if(!forcar && observacaoFuncionarioFormTemConteudo() && !confirm('Fechar e descartar as alterações desta observação?')) return;
+async function fecharCriadorObservacaoFuncionario(forcar=false){
+  if(!forcar && observacaoFuncionarioFormTemConteudo() && !await avConfirm('Fechar e descartar as alterações desta observação?')) return;
   limparFormObservacaoFuncionario(false);
   document.getElementById('obsFuncCreatorPanel')?.classList.remove('active');
 }
@@ -19569,12 +19673,12 @@ function salvarObservacaoFuncionario(e){
   const tipo=String(document.getElementById('obsFuncTipo')?.value||'Feedback geral').trim();
   const assunto=String(document.getElementById('obsFuncAssunto')?.value||'').trim();
   const texto=avRteObterTexto('obsFuncTexto');
-  if(!funcionarioId){alert('Selecione o funcionário.');document.getElementById('obsFuncFuncionario')?.focus();return;}
-  if(!dataISO){alert('Informe a data do feedback.');document.getElementById('obsFuncData')?.focus();return;}
-  if(!assunto){alert('Informe o assunto da observação.');document.getElementById('obsFuncAssunto')?.focus();return;}
-  if(!texto){alert('Escreva o feedback ou observação.');avRteFocar('obsFuncTexto');return;}
+  if(!funcionarioId){avNotice('Selecione o funcionário.');document.getElementById('obsFuncFuncionario')?.focus();return;}
+  if(!dataISO){avNotice('Informe a data do feedback.');document.getElementById('obsFuncData')?.focus();return;}
+  if(!assunto){avNotice('Informe o assunto da observação.');document.getElementById('obsFuncAssunto')?.focus();return;}
+  if(!texto){avNotice('Escreva o feedback ou observação.');avRteFocar('obsFuncTexto');return;}
   const funcionario=(db.funcionarios||[]).find(f=>String(f.id||'')===funcionarioId);
-  if(!funcionario){alert('O funcionário selecionado não foi encontrado.');return;}
+  if(!funcionario){avNotice('O funcionário selecionado não foi encontrado.');return;}
   db.observacoesFuncionarios=Array.isArray(db.observacoesFuncionarios)?db.observacoesFuncionarios:[];
   const id=String(document.getElementById('obsFuncId')?.value||'').trim();
   const existente=id?db.observacoesFuncionarios.find(o=>String(o.id)===id):null;
@@ -19601,11 +19705,11 @@ function salvarObservacaoFuncionario(e){
   renderObservacoesFuncionarios();
 }
 function editarObservacaoFuncionario(id){abrirCriadorObservacaoFuncionario(id);}
-function excluirObservacaoFuncionario(id){
+async function excluirObservacaoFuncionario(id){
   const registro=(db.observacoesFuncionarios||[]).find(o=>String(o.id)===String(id||''));
   if(!registro) return;
   const nome=registro.funcionarioNome||funcionarioDaObservacao(registro)?.nome||'este funcionário';
-  if(!confirm(`Excluir definitivamente esta observação de ${nome}?`)) return;
+  if(!await avConfirm(`Excluir definitivamente esta observação de ${nome}?`)) return;
   db.observacoesFuncionarios=(db.observacoesFuncionarios||[]).filter(o=>String(o.id)!==String(id));
   saveDB();renderObservacoesFuncionarios();
 }
@@ -20119,7 +20223,7 @@ async function atualizarAcompanhamentoDia(botao){
   }catch(err){
     console.error('Falha ao atualizar Acompanhamento do Dia:',err);
     setSyncStatus('FALHA AO ATUALIZAR • dados atuais preservados','offline');
-    alert('Não foi possível atualizar o Acompanhamento do Dia agora. Os dados atuais foram preservados.');
+    avNotice('Não foi possível atualizar o Acompanhamento do Dia agora. Os dados atuais foram preservados.');
     return false;
   }finally{
     if(btn){ btn.disabled=false; btn.innerHTML=textoOriginal; }
@@ -20149,7 +20253,7 @@ function tarefaAcompPassaFiltros(d,t){
 function dataReagendamentoAcompTexto(iso){const p=String(iso||'').slice(0,10).split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:(iso||'-');}
 function liderPodeDecidirReagendamento(d,t){const atual=normalizarOperador(usuarioAtual?.operador),criador=normalizarOperador(t?.criadoPorOperador||d?.criadoPorOperador);return !!atual&&!!criador&&atual===criador;}
 function prazoComNovaDataAcompanhamento(prazoAtual,novaData){const data=String(novaData||'').slice(0,10);if(!data)return String(prazoAtual||'');const atual=String(prazoAtual||''),hora=atual.includes('T')?atual.slice(10):'';return data+hora;}
-function decidirReagendamentoAcompanhamento(registroId,tarefaId,aprovar){const d=db.diario.find(x=>x.id===registroId);if(!d)return;const t=d.tarefas?.find(x=>x.id===tarefaId);if(!t)return;const r=t.reagendamento;if(!r||r.status!=='PENDENTE')return;if(!liderPodeDecidirReagendamento(d,t)){alert('Somente o líder responsável pela criação desta tarefa pode decidir este reagendamento.');return;}const antes=t.prazo||r.prazoOriginal||'';if(aprovar){const depois=prazoComNovaDataAcompanhamento(antes,r.dataSolicitada);t.prazo=depois;r.status='APROVADO';r.prazoAprovado=depois;r.decididoEmISO=new Date().toISOString();r.decididoEm=agoraBR();r.decididoPor=usuarioAtual?.nome||'Líder';r.decididoPorOperador=normalizarOperador(usuarioAtual?.operador);adicionarHistoricoTarefa(t,'REAGENDAMENTO APROVADO',`${dataReagendamentoAcompTexto(String(antes).slice(0,10))} → ${dataReagendamentoAcompTexto(r.dataSolicitada)} • aprovado por ${r.decididoPor}.`);}else{r.status='RECUSADO';r.decididoEmISO=new Date().toISOString();r.decididoEm=agoraBR();r.decididoPor=usuarioAtual?.nome||'Líder';r.decididoPorOperador=normalizarOperador(usuarioAtual?.operador);adicionarHistoricoTarefa(t,'REAGENDAMENTO RECUSADO',`Solicitação para ${dataReagendamentoAcompTexto(r.dataSolicitada)} recusada por ${r.decididoPor}. Prazo original mantido.`);}d.atualizadoPor=usuarioAtual?.nome||d.atualizadoPor;d.atualizadoEm=agoraBR();saveDB();renderDiario();renderRelatorio();}
+function decidirReagendamentoAcompanhamento(registroId,tarefaId,aprovar){const d=db.diario.find(x=>x.id===registroId);if(!d)return;const t=d.tarefas?.find(x=>x.id===tarefaId);if(!t)return;const r=t.reagendamento;if(!r||r.status!=='PENDENTE')return;if(!liderPodeDecidirReagendamento(d,t)){avNotice('Somente o líder responsável pela criação desta tarefa pode decidir este reagendamento.');return;}const antes=t.prazo||r.prazoOriginal||'';if(aprovar){const depois=prazoComNovaDataAcompanhamento(antes,r.dataSolicitada);t.prazo=depois;r.status='APROVADO';r.prazoAprovado=depois;r.decididoEmISO=new Date().toISOString();r.decididoEm=agoraBR();r.decididoPor=usuarioAtual?.nome||'Líder';r.decididoPorOperador=normalizarOperador(usuarioAtual?.operador);adicionarHistoricoTarefa(t,'REAGENDAMENTO APROVADO',`${dataReagendamentoAcompTexto(String(antes).slice(0,10))} → ${dataReagendamentoAcompTexto(r.dataSolicitada)} • aprovado por ${r.decididoPor}.`);}else{r.status='RECUSADO';r.decididoEmISO=new Date().toISOString();r.decididoEm=agoraBR();r.decididoPor=usuarioAtual?.nome||'Líder';r.decididoPorOperador=normalizarOperador(usuarioAtual?.operador);adicionarHistoricoTarefa(t,'REAGENDAMENTO RECUSADO',`Solicitação para ${dataReagendamentoAcompTexto(r.dataSolicitada)} recusada por ${r.decididoPor}. Prazo original mantido.`);}d.atualizadoPor=usuarioAtual?.nome||d.atualizadoPor;d.atualizadoEm=agoraBR();saveDB();renderDiario();renderRelatorio();renderSolicitacoesReagendamentoAcompanhamento();}
 const SISTEMA_OPERACIONAL_URL_OFICIAL='https://lojasavenida2424-svg.github.io/ASSISTEMA-GERENCIAL/operacional/';
 const SISTEMA_OPERACIONAL_LINK_KEY='sistemaOperacionalLinkPublicoV1';
 function normalizarTelefoneWhatsApp(valor){
@@ -20174,11 +20278,11 @@ function obterLinkSistemaOperacionalWhatsApp(){
 function enviarTarefaAcompanhamentoWhatsApp(diarioId,tarefaId){
   const d=(db.diario||[]).find(x=>String(x.id)===String(diarioId));
   const t=d?.tarefas?.find(x=>String(x.id)===String(tarefaId));
-  if(!d||!t){alert('Tarefa não encontrada.');return;}
+  if(!d||!t){avNotice('Tarefa não encontrada.');return;}
   const funcionario=funcionarioResponsavelAcompanhamento(d,t);
   const telefone=normalizarTelefoneWhatsApp(funcionario?.telefone||'');
   if(!telefone){
-    alert(`O funcionário ${t.responsavel||d.responsavel||'responsável'} não possui telefone cadastrado no Quadro de Funcionários.\n\nCadastre o telefone antes de enviar a tarefa por WhatsApp.`);
+    avNotice(`O funcionário ${t.responsavel||d.responsavel||'responsável'} não possui telefone cadastrado no Quadro de Funcionários.\n\nCadastre o telefone antes de enviar a tarefa por WhatsApp.`);
     return;
   }
   const link=obterLinkSistemaOperacionalWhatsApp();
@@ -20211,37 +20315,44 @@ function enviarTarefaAcompanhamentoWhatsApp(diarioId,tarefaId){
 }
 function redefinirLinkSistemaOperacionalWhatsApp(){
   try{localStorage.removeItem(SISTEMA_OPERACIONAL_LINK_KEY);}catch(_){ }
-  alert(`O link do Sistema Operacional está definido como:
+  avNotice(`O link do Sistema Operacional está definido como:
 
 ${SISTEMA_OPERACIONAL_URL_OFICIAL}`);
 }
 
 function liderPodeDecidirValidacaoConclusao(d,t){const atual=normalizarOperador(usuarioAtual?.operador),criador=normalizarOperador(t?.criadoPorOperador||d?.criadoPorOperador);return !!atual&&!!criador&&atual===criador;}
-function decidirValidacaoConclusaoAcompanhamento(registroId,tarefaId,aprovar){
+async function decidirValidacaoConclusaoAcompanhamento(registroId,tarefaId,aprovar){
   const d=(db.diario||[]).find(x=>String(x.id)===String(registroId)),t=d?.tarefas?.find(x=>String(x.id)===String(tarefaId));if(!d||!t)return;
-  const v=t.validacaoConclusao;if(!v||v.status!=='PENDENTE'){alert('Esta conclusão não está aguardando validação.');return;}
-  if(!liderPodeDecidirValidacaoConclusao(d,t)){alert('Somente o líder responsável pela criação desta tarefa pode validar a conclusão.');return;}
+  const v=t.validacaoConclusao;if(!v||v.status!=='PENDENTE'){avNotice('Esta conclusão não está aguardando validação.');return;}
+  if(!liderPodeDecidirValidacaoConclusao(d,t)){avNotice('Somente o líder responsável pela criação desta tarefa pode validar a conclusão.');return;}
   const lider=usuarioAtual?.nome||'Líder',op=normalizarOperador(usuarioAtual?.operador),agoraISO=new Date().toISOString();
   if(aprovar){
     v.status='APROVADA';v.decididoEmISO=agoraISO;v.decididoEm=agoraBR();v.decididoPor=lider;v.decididoPorOperador=op;
     t.status='CONCLUÍDA';t.concluidaEmISO=v.solicitadoEmISO||agoraISO;t.concluidaPor=v.solicitadoPor||t.responsavel||'';
     adicionarHistoricoTarefa(t,'CONCLUSÃO APROVADA',`Conclusão validada por ${lider}.`);adicionarHistoricoTarefa(t,'STATUS ALTERADO','AGUARDANDO VALIDAÇÃO → CONCLUÍDA • aprovação do líder');
   }else{
-    const motivo=prompt('Motivo da devolução para ajuste (opcional):','');if(motivo===null)return;
+    const motivo=await avPrompt('Motivo da devolução para ajuste (opcional):','');if(motivo===null)return;
     v.status='RECUSADA';v.decididoEmISO=agoraISO;v.decididoEm=agoraBR();v.decididoPor=lider;v.decididoPorOperador=op;v.motivoRecusa=normalizarTextoAcomp(motivo);
-    t.status='EM ANDAMENTO';adicionarHistoricoTarefa(t,'CONCLUSÃO DEVOLVIDA',`${v.motivoRecusa||'Sem observação adicional.'} • por ${lider}`);adicionarHistoricoTarefa(t,'STATUS ALTERADO','AGUARDANDO VALIDAÇÃO → EM ANDAMENTO • devolvida pelo líder');
+    // Não contar o período em que a tarefa esteve aguardando aprovação.
+    t.execucao=t.execucao&&typeof t.execucao==='object'?t.execucao:{};
+    // Pausa a partir do envio da conclusão; o tempo de aprovação não é tempo trabalhado.
+    const ultimoFim=t.execucao.fimEmISO||v.solicitadoEmISO||agoraISO;
+    t.execucao.pausadoEmISO=ultimoFim;
+    t.execucao.pausadoEm=new Date(ultimoFim).toLocaleString('pt-BR');
+    delete t.execucao.fimEmISO;delete t.execucao.fimEm;
+    t.status='PAUSADA';adicionarHistoricoTarefa(t,'CONCLUSÃO DEVOLVIDA',`${v.motivoRecusa||'Sem observação adicional.'} • por ${lider}`);adicionarHistoricoTarefa(t,'STATUS ALTERADO','AGUARDANDO VALIDAÇÃO → PAUSADA • retomar execução após devolução');
   }
   d.atualizadoPor=lider;d.atualizadoEm=agoraBR();saveDB();renderDiario();renderRelatorio();
 }
 function abrirReferenciaTarefaAcompanhamento(registroId,tarefaId){
-  const d=(db.diario||[]).find(x=>String(x.id)===String(registroId)),t=d?.tarefas?.find(x=>String(x.id)===String(tarefaId)),r=t?.referenciaArquivo;if(!r?.dataUrl)return alert('Esta tarefa não possui arquivo de referência.');
-  const w=window.open('','_blank');if(!w){alert('O navegador bloqueou a abertura do arquivo.');return;}if(String(r.tipo||'').startsWith('image/')){w.document.write(`<title>${escapeHTML(r.nome||'Referência')}</title><body style="margin:0;background:#111;display:grid;place-items:center;min-height:100vh"><img src="${r.dataUrl}" style="max-width:100%;max-height:100vh;object-fit:contain"></body>`);w.document.close();}else{w.location.href=r.dataUrl;}
+  const d=(db.diario||[]).find(x=>String(x.id)===String(registroId)),t=d?.tarefas?.find(x=>String(x.id)===String(tarefaId)),r=t?.referenciaArquivo;if(!r?.dataUrl)return avNotice('Esta tarefa não possui arquivo de referência.');
+  avImage(r.dataUrl,r.nome||'Referência da tarefa','',String(r.tipo||'application/pdf'));
 }
 
 function tarefaAcompCardHTML(d,t){
   const atrasada=tarefaAcompanhamentoAtrasada(t), status=normalizarStatusAcompVisual(t), rota=[d.departamento,t.familia,t.subfamilia].filter(Boolean).join(' › '), hist=Array.isArray(t.historico)?t.historico.length:0;
   const reag=t.reagendamento&&typeof t.reagendamento==='object'?t.reagendamento:null,reagPendente=reag?.status==='PENDENTE',podeDecidir=reagPendente&&liderPodeDecidirReagendamento(d,t),criador=t.criadoPor||d.criadoPor||'Líder não identificado';
-  const painelReag=reagPendente?`<div class="acomp-reschedule-request"><div><b>📅 Reagendamento solicitado</b><span>Nova data proposta: <strong>${escapeHTML(dataReagendamentoAcompTexto(reag.dataSolicitada))}</strong></span>${reag.motivo?`<span>Motivo: ${escapeHTML(reag.motivo)}</span>`:''}<small>Solicitado por ${escapeHTML(reag.solicitadoPor||t.responsavel||d.responsavel||'-')} • aprovação: ${escapeHTML(criador)}</small></div>${podeDecidir?`<div class="acomp-reschedule-actions no-print"><button class="btn small" type="button" onclick="decidirReagendamentoAcompanhamento('${d.id}','${t.id}',true)">✓ Aprovar</button><button class="btn small danger" type="button" onclick="decidirReagendamentoAcompanhamento('${d.id}','${t.id}',false)">✕ Recusar</button></div>`:`<span class="acomp-chip acomp-status-chip">AGUARDANDO LÍDER</span>`}</div>`:'';
+  const painelReag=reagPendente?`<div class="acomp-reschedule-request"><div><b>📅 Reagendamento solicitado</b><span>Nova data proposta: <strong>${escapeHTML(dataReagendamentoAcompTexto(reag.dataSolicitada))}</strong></span>${reag.motivo?`<span>Motivo: ${escapeHTML(reag.motivo)}</span>`:''}<small>Solicitado por ${escapeHTML(reag.solicitadoPor||t.responsavel||d.responsavel||'-')} • aprovação: ${escapeHTML(criador)}</small></div>${podeDecidir?`<button class="btn small secondary no-print" type="button" onclick="selecionarAreaAcompanhamento('SOLICITACAO')">Ver solicitação</button>`:`<span class="acomp-chip acomp-status-chip">AGUARDANDO LÍDER</span>`}</div>`:'';
   const valid=t.validacaoConclusao&&typeof t.validacaoConclusao==='object'?t.validacaoConclusao:null,validPendente=valid?.status==='PENDENTE'&&String(t.status||'').toUpperCase()==='AGUARDANDO VALIDAÇÃO',podeValidar=validPendente&&liderPodeDecidirValidacaoConclusao(d,t);
   const painelValidacao=validPendente?`<div class="acomp-validation-request"><div><b>✓ Conclusão aguardando validação</b><span>Enviada por <strong>${escapeHTML(valid.solicitadoPor||t.responsavel||'-')}</strong>${valid.solicitadoEm?` • ${escapeHTML(valid.solicitadoEm)}`:''}</span>${t.observacaoConclusao?`<small>${escapeHTML(t.observacaoConclusao)}</small>`:''}</div>${podeValidar?`<div class="acomp-validation-actions no-print"><button class="btn small" type="button" onclick="decidirValidacaoConclusaoAcompanhamento('${d.id}','${t.id}',true)">✓ Aprovar conclusão</button><button class="btn small danger" type="button" onclick="decidirValidacaoConclusaoAcompanhamento('${d.id}','${t.id}',false)">↩ Devolver</button></div>`:`<span class="acomp-chip acomp-status-chip">AGUARDANDO LÍDER</span>`}</div>`:'';
   const checklist=Array.isArray(t.checklist)?t.checklist.filter(i=>i?.texto):[],checkDone=checklist.filter(i=>i.concluido).length;
@@ -20249,6 +20360,7 @@ function tarefaAcompCardHTML(d,t){
 }
 function renderDiario(){
   const lista=document.getElementById('acompanhamentoLista'), resumo=document.getElementById('acompResumoDia'); if(!lista)return;
+  renderSolicitacoesReagendamentoAcompanhamento();
   const registros=Array.isArray(db.diario)?db.diario:[]; preencherFiltrosAcompanhamento(registros);
   const todos=registros.flatMap(d=>(Array.isArray(d.tarefas)?d.tarefas:[]).map(t=>({d,t}))), vis=todos.filter(x=>tarefaAcompPassaFiltros(x.d,x.t));
   const pend=vis.filter(x=>!['CONCLUÍDA','CANCELADA'].includes(String(x.t.status||'').toUpperCase())).length, concl=vis.filter(x=>x.t.status==='CONCLUÍDA').length, bloq=vis.filter(x=>x.t.status==='BLOQUEADA').length, crit=vis.filter(x=>!['CONCLUÍDA','CANCELADA'].includes(String(x.t.status||'').toUpperCase())&&x.t.prioridade==='CRÍTICA').length, atras=vis.filter(x=>tarefaAcompanhamentoAtrasada(x.t)).length, funcs=new Set(vis.map(x=>x.t.responsavel||x.d.responsavel).filter(Boolean)).size;
@@ -20354,19 +20466,19 @@ function pessoaJaNaEscala(funcId){
 }
 function adicionarPessoaEscala(grupo){
   const tipoAtual = document.getElementById('escalaTipo')?.value || '';
-  if(!tipoAtual){ alert('Selecione DOMINGO ou FERIADO antes de adicionar pessoas.'); return; }
+  if(!tipoAtual){ avNotice('Selecione DOMINGO ou FERIADO antes de adicionar pessoas.'); return; }
   const cap = grupo === 'abertura' ? 'Abertura' : grupo === 'fechamento' ? 'Fechamento' : 'Folgas';
   const pessoaEl = document.getElementById(grupo === 'abertura' ? 'escalaPessoaAbertura' : grupo === 'fechamento' ? 'escalaPessoaFechamento' : 'escalaPessoaFolga');
   const funcId = pessoaEl.value;
-  if(!funcId){ alert('Selecione uma pessoa para adicionar em ' + cap + '.'); return; }
+  if(!funcId){ avNotice('Selecione uma pessoa para adicionar em ' + cap + '.'); return; }
   const f = getFuncionarioEscala(funcId);
-  if(!f){ alert('Funcionário não encontrado.'); return; }
-  if(pessoaJaNaEscala(funcId)){ alert('Esta pessoa já foi alocada nesta escala. Remova primeiro para alterar o turno ou folga.'); return; }
+  if(!f){ avNotice('Funcionário não encontrado.'); return; }
+  if(pessoaJaNaEscala(funcId)){ avNotice('Esta pessoa já foi alocada nesta escala. Remova primeiro para alterar o turno ou folga.'); return; }
   if(grupo === 'folgas'){
     const diaEl = document.getElementById('escalaDiaFolga');
     const diaFolga = diaEl?.value || '';
     const diaFolgaLabel = diaEl?.options[diaEl.selectedIndex]?.text || '';
-    if(!diaFolga){ alert('Selecione o dia da folga.'); return; }
+    if(!diaFolga){ avNotice('Selecione o dia da folga.'); return; }
     escalaDraft.folgas.push({ id: uid('folga'), funcId, nome:f.nome, cargo:f.cargo || '', diaFolga, diaFolgaLabel, obs: document.getElementById('escalaObsFolga').value.trim() });
     document.getElementById('escalaObsFolga').value = '';
     diaEl.value = '';
@@ -20374,7 +20486,7 @@ function adicionarPessoaEscala(grupo){
     const entrada = document.getElementById(grupo === 'abertura' ? 'escalaEntradaAbertura' : 'escalaEntradaFechamento').value;
     const saida = document.getElementById(grupo === 'abertura' ? 'escalaSaidaAbertura' : 'escalaSaidaFechamento').value;
     const obsEl = document.getElementById(grupo === 'abertura' ? 'escalaObsAbertura' : 'escalaObsFechamento');
-    if(!entrada){ alert('Informe o horário de entrada.'); return; }
+    if(!entrada){ avNotice('Informe o horário de entrada.'); return; }
     escalaDraft[grupo].push({ id: uid('esc'), funcId, nome:f.nome, cargo:f.cargo || '', entrada, saida, obs: obsEl.value.trim() });
     obsEl.value = '';
   }
@@ -20408,8 +20520,8 @@ function duplicarEscala(id){
   novo.id = uid('escala'); novo.data = hojeISO(); novo.titulo = (novo.titulo || 'Escala') + ' — cópia'; novo.atualizadoPor = usuarioAtual?.nome || ''; novo.atualizadoEm = agoraBR();
   db.escalas.push(novo); saveDB(); renderEscalas();
 }
-function excluirEscala(id){
-  if(!confirm('Excluir esta escala?')) return;
+async function excluirEscala(id){
+  if(!await avConfirm('Excluir esta escala?')) return;
   db.escalas = db.escalas.filter(e => e.id !== id);
   saveDB(); renderEscalas();
 }
@@ -20472,7 +20584,7 @@ function abrirWhatsAppComTexto(texto){
 
 function enviarEscalaWhatsApp(id){
   const e = db.escalas.find(x => x.id === id);
-  if(!e){ alert('Escala não encontrada.'); return; }
+  if(!e){ avNotice('Escala não encontrada.'); return; }
   abrirWhatsAppComTexto(montarTextoEscalaWhatsApp(e));
 }
 function abrirCriadorEscala(novaEscala = false){
@@ -20522,7 +20634,7 @@ function abrirImpressaoEscalaTrabalho(){
   if(!modal||!sel)return;
   const domingos=domingosSalvosEscalaTrabalho();
   if(!domingos.length){
-    alert('Ainda não há domingos salvos para impressão.');
+    avNotice('Ainda não há domingos salvos para impressão.');
     return;
   }
   sel.innerHTML=domingos.map(e=>`<option value="${escapeHTML(e.id)}">${escapeHTML(labelDomingoEscalaTrabalho(e))}</option>`).join('');
@@ -20654,9 +20766,9 @@ function montarTextoFolhaAssinaturaEscala(escala,dataEscala,intervalo){
 }
 
 function escalaAssinaturaValida(escala){
-  if(!escala?.data){ alert('Informe a data da escala antes de gerar a folha de assinatura.'); return false; }
+  if(!escala?.data){ avNotice('Informe a data da escala antes de gerar a folha de assinatura.'); return false; }
   const pessoas=pessoasEscalaAssinatura(escala);
-  if(!pessoas.length){ alert('Adicione pelo menos um colaborador à escala antes de gerar a folha de assinatura.'); return false; }
+  if(!pessoas.length){ avNotice('Adicione pelo menos um colaborador à escala antes de gerar a folha de assinatura.'); return false; }
   return true;
 }
 function abrirFolhaAssinaturaEscala(escala){
@@ -20671,7 +20783,7 @@ function abrirFolhaAssinaturaEscala(escala){
   const linhas=pessoas.map(p=>`<tr><td>${escapeHTML(p.nome)}</td><td>&nbsp;</td></tr>`).join('');
   const textoDocumento=montarTextoFolhaAssinaturaEscala(escala,dataBRSimples(escala.data),intervalo);
   const win=window.open('','_blank','width=1050,height=900');
-  if(!win){ alert('Não foi possível abrir a folha de assinatura. Verifique o bloqueador de pop-ups.'); return; }
+  if(!win){ avNotice('Não foi possível abrir a folha de assinatura. Verifique o bloqueador de pop-ups.'); return; }
   try{ win.opener=null; }catch(_){ }
   const tipoDocumento=String(escala?.tipo||'').toUpperCase()==='FERIADO' ? `Feriado ${String(escala?.titulo||'').trim()}`.trim() : 'Escala de Domingo';
   const titulo=`Folha de assinatura — ${tipoDocumento} — ${dataBRSimples(escala.data)}`;
@@ -20727,13 +20839,13 @@ function imprimirFolhaAssinaturaEscalaAtual(){
 }
 function imprimirFolhaAssinaturaEscalaSalva(id){
   const escala=(db.escalas||[]).find(e=>String(e.id)===String(id));
-  if(!escala){ alert('Escala não encontrada.'); return; }
+  if(!escala){ avNotice('Escala não encontrada.'); return; }
   abrirFolhaAssinaturaEscala(escala);
 }
 function imprimirFolhaAssinaturaDomingoSelecionado(){
   const id=document.getElementById('escalaPrintDomingoSelect')?.value||'';
   const escala=(db.escalas||[]).find(e=>String(e.id)===String(id) && String(e.tipo||'').toUpperCase()==='DOMINGO');
-  if(!escala){ alert('Selecione um domingo salvo para gerar a folha de assinatura.'); return; }
+  if(!escala){ avNotice('Selecione um domingo salvo para gerar a folha de assinatura.'); return; }
   fecharImpressaoEscalaTrabalho();
   abrirFolhaAssinaturaEscala(escala);
 }
@@ -20741,7 +20853,7 @@ function imprimirFolhaAssinaturaDomingoSelecionado(){
 function imprimirDomingoEscalaSelecionado(){
   const id=document.getElementById('escalaPrintDomingoSelect')?.value||'';
   const e=(db.escalas||[]).find(x=>x.id===id && String(x.tipo||'').toUpperCase()==='DOMINGO');
-  if(!e){alert('Selecione um domingo salvo para imprimir.');return;}
+  if(!e){avNotice('Selecione um domingo salvo para imprimir.');return;}
   const responsavel=nomeFuncionarioPorId(e.responsavel)||e.responsavel||'-';
   const abertura=(e.abertura||[]).map(linhaPessoaEscalaImpressao).join('')||'<li>Nenhuma pessoa registrada.</li>';
   const fechamento=(e.fechamento||[]).map(linhaPessoaEscalaImpressao).join('')||'<li>Nenhuma pessoa registrada.</li>';
@@ -20876,8 +20988,8 @@ function funcionariosDisponiveisParaLogin(){
 async function adicionarUsuarioLogin(){
   if(normalizarOperador(usuarioAtual?.operador)!=='133')return;
   const op=normalizarOperador(document.getElementById('configNovoUsuarioLogin')?.value);
-  if(!op){alert('Selecione um funcionário com número de operador.');return;}
-  const f=operadoresCadastradosParaAcessoGerencial().find(x=>normalizarOperador(x.operador)===op); if(!f){alert('Operador não encontrado no cadastro do sistema.');return;}
+  if(!op){avNotice('Selecione um funcionário com número de operador.');return;}
+  const f=operadoresCadastradosParaAcessoGerencial().find(x=>normalizarOperador(x.operador)===op); if(!f){avNotice('Operador não encontrado no cadastro do sistema.');return;}
   const senhaTemporaria=gerarSenhaTemporariaSegura();
   const configAnterior=cloneJSONSeguro(globalConfig,{});
   globalConfig=normalizarConfigGlobal(globalConfig);
@@ -20885,23 +20997,23 @@ async function adicionarUsuarioLogin(){
   globalConfig.permissoes[op]=permissoesPadrao(op);
   try{
     await salvarConfigGlobalOnline(); renderAll();
-    alert(`Login liberado para ${f.nome}.\n\nSenha temporária: ${senhaTemporaria}\n\nEntregue esta senha somente ao usuário e peça que ele a altere no primeiro acesso.`);
+    avNotice(`Login liberado para ${f.nome}.\n\nSenha temporária: ${senhaTemporaria}\n\nEntregue esta senha somente ao usuário e peça que ele a altere no primeiro acesso.`);
   }catch(err){
     globalConfig=configAnterior;
     console.error('Falha ao liberar login:',err);
-    alert('Não foi possível liberar o login no servidor. Tente novamente.');
+    avNotice('Não foi possível liberar o login no servidor. Tente novamente.');
   }
 }
 async function removerUsuarioLogin(op){
   if(normalizarOperador(usuarioAtual?.operador)!=='133')return; const operador=normalizarOperador(op);
-  if(operador==='133'){alert('O operador 133 é indispensável e não pode ter o acesso removido.');return;}
+  if(operador==='133'){avNotice('O operador 133 é indispensável e não pode ter o acesso removido.');return;}
   const u=usuarioGlobalPorOperador(operador);
-  if(u&&confirm('Remover o acesso de '+u.nome+'?')){
+  if(u&&await avConfirm('Remover o acesso de '+u.nome+'?')){
     const configAnterior=cloneJSONSeguro(globalConfig,{});
     globalConfig.usuarios=globalConfig.usuarios.filter(x=>normalizarOperador(x.operador)!==operador);
     delete globalConfig.permissoes[operador];
     try{ await salvarConfigGlobalOnline(); renderAll(); }
-    catch(err){ globalConfig=configAnterior; console.error('Falha ao remover login:',err); alert('Não foi possível remover o acesso no servidor. Tente novamente.'); }
+    catch(err){ globalConfig=configAnterior; console.error('Falha ao remover login:',err); avNotice('Não foi possível remover o acesso no servidor. Tente novamente.'); }
   }
 }
 function renderUsuariosLoginRows(){
@@ -20928,28 +21040,114 @@ function editarPermissoesUsuario(op){
 function salvarPermissoesUsuario(op){
   if(typeof salvarCentralPermissoesAV==='function') return salvarCentralPermissoesAV(op);
 }
-function abrirAlteracaoSenha(op){
+const OPERACIONAL_SENHA_REQUEST_PREFIX='operacional_senha_';
+let acompAreaAtual='TAREFAS',solicitacoesSenhaConsultaSeq=0,solicitacoesSenhaPendentes=0;
+function atualizarContadorSolicitacoesAcompanhamento(){
+  const badge=document.getElementById('acompSolicitacoesBadge');if(!badge)return;
+  const reag=(db?.diario||[]).reduce((n,d)=>n+(d.tarefas||[]).filter(t=>t.reagendamento?.status==='PENDENTE').length,0);
+  const total=reag+solicitacoesSenhaPendentes;badge.hidden=!total;badge.textContent=String(total);
+}
+function renderSolicitacoesReagendamentoAcompanhamento(){
+  const list=document.getElementById('acompSolicitacoesPrazoLista');if(!list)return;
+  const pedidos=(db?.diario||[]).flatMap(d=>(d.tarefas||[]).filter(t=>t.reagendamento?.status==='PENDENTE').map(t=>({d,t,r:t.reagendamento})));
+  atualizarContadorSolicitacoesAcompanhamento();
+  list.innerHTML=pedidos.length?pedidos.sort((a,b)=>String(b.r.solicitadoEmISO||'').localeCompare(String(a.r.solicitadoEmISO||''))).map(({d,t,r})=>{
+    const pode=liderPodeDecidirReagendamento(d,t),dId=JSON.stringify(String(d.id)),tId=JSON.stringify(String(t.id));
+    return `<article class="acomp-request-row reschedule"><div><strong>${escapeHTML(t.descricao||'Tarefa')} · ${escapeHTML(t.responsavel||d.responsavel||'-')}</strong><small>Prazo atual: ${escapeHTML(prazoAcompanhamentoTexto(t.prazo||r.prazoOriginal))} · Nova data: ${escapeHTML(dataReagendamentoAcompTexto(r.dataSolicitada))}</small><small>Solicitado por ${escapeHTML(r.solicitadoPor||'-')} · Líder: ${escapeHTML(t.criadoPor||d.criadoPor||'-')}</small>${r.motivo?`<small>Motivo: ${escapeHTML(r.motivo)}</small>`:''}</div>${pode?`<div class="acomp-request-actions"><button class="btn small" type="button" onclick='decidirReagendamentoAcompanhamento(${dId},${tId},true)'>✓ Aprovar</button><button class="btn small danger" type="button" onclick='decidirReagendamentoAcompanhamento(${dId},${tId},false)'>✕ Recusar</button></div>`:'<span class="acomp-chip acomp-status-chip">AGUARDANDO LÍDER</span>'}</article>`;
+  }).join(''):'<div class="acomp-request-state">Nenhum pedido de mudança de data pendente.</div>';
+}
+function selecionarAreaAcompanhamento(area,{atualizar=false}={}){
+  acompAreaAtual=area==='SOLICITACAO'?'SOLICITACAO':'TAREFAS';
+  const solicitacao=acompAreaAtual==='SOLICITACAO',page=document.getElementById('acompanhamento');
+  const tarefas=document.getElementById('acompAreaTarefas'),pane=document.getElementById('acompAreaSolicitacao');
+  if(!page||!tarefas||!pane)return;
+  tarefas.hidden=solicitacao;pane.hidden=!solicitacao;page.classList.toggle('acomp-area-operacao',solicitacao);
+  for(const [id,ativo] of [['acompTabTarefas',!solicitacao],['acompTabSolicitacao',solicitacao]]){
+    const tab=document.getElementById(id);if(!tab)continue;
+    tab.classList.toggle('active',ativo);tab.setAttribute('aria-selected',String(ativo));tab.tabIndex=ativo?0:-1;
+  }
+  renderSolicitacoesReagendamentoAcompanhamento();
+  if(solicitacao)carregarSolicitacoesSenhaOperacionalGerencial();
+  else if(atualizar)carregarSolicitacoesSenhaOperacionalGerencial({apenasContador:true});
+}
+async function atualizarSolicitacoesAcompanhamento(){
+  await atualizarAcompanhamentoDia();
+  renderSolicitacoesReagendamentoAcompanhamento();
+  await carregarSolicitacoesSenhaOperacionalGerencial();
+}
+async function carregarSolicitacoesSenhaOperacionalGerencial({apenasContador=false}={}){
+  const list=document.getElementById('acompSolicitacoesSenhaLista');if(!list)return;
+  if(normalizarOperador(usuarioAtual?.operador)!=='133'){
+    solicitacoesSenhaPendentes=0;atualizarContadorSolicitacoesAcompanhamento();
+    if(!apenasContador)list.innerHTML='<div class="acomp-request-state">A aprovação de senhas é restrita ao administrador do Gerencial.</div>';
+    return;
+  }
+  if(!apenasContador)list.innerHTML='<div class="acomp-request-state">Consultando solicitações...</div>';
+  const seq=++solicitacoesSenhaConsultaSeq;
+  try{
+    const {data,error}=await comTimeout(supabaseclient.from(ONLINE_TABLE).select('id,dados,updated_at').like('id',`${OPERACIONAL_SENHA_REQUEST_PREFIX}%`).limit(200),SUPABASE_OPERATION_TIMEOUT_MS);
+    if(error)throw error;if(seq!==solicitacoesSenhaConsultaSeq)return;
+    const pendentes=(data||[]).filter(row=>{
+      const op=normalizarOperador(row.dados?.operador);
+      return op&&row.id===OPERACIONAL_SENHA_REQUEST_PREFIX+op&&row.dados?.tipo==='SOLICITACAO_ALTERACAO_SENHA'&&row.dados?.status==='PENDENTE';
+    }).sort((a,b)=>String(b.dados.solicitadoEmISO||'').localeCompare(String(a.dados.solicitadoEmISO||'')));
+    solicitacoesSenhaPendentes=pendentes.length;atualizarContadorSolicitacoesAcompanhamento();
+    if(apenasContador)return;
+    list.innerHTML=pendentes.length?pendentes.map(row=>{
+      const op=normalizarOperador(row.dados.operador),usuario=usuarioGlobalPorOperador(op),nome=usuario?.nome||row.dados.nome||`Operador ${op}`;
+      const quando=row.dados.solicitadoEmISO?new Date(row.dados.solicitadoEmISO).toLocaleString('pt-BR'):'';
+      const semConta=!usuario;
+      return `<article class="acomp-request-row password"><div><strong>${escapeHTML(nome)} · OP. ${escapeHTML(op)}</strong><small>${escapeHTML(row.dados.matricula||usuario?.matricula||'Matrícula não informada')} · Solicitado em ${escapeHTML(quando||'data não informada')}</small><small>${semConta?'Conta não cadastrada no Gerencial. Cadastre o login antes de atender.':'Ao autorizar, o operador poderá escolher a senha nas próprias configurações.'}</small></div><div class="acomp-request-actions"><button type="button" class="btn" ${semConta?'disabled':''} onclick="decidirSolicitacaoSenhaOperacional('${op}',true)">✓ Autorizar</button><button type="button" class="btn danger" onclick="decidirSolicitacaoSenhaOperacional('${op}',false)">✕ Recusar</button></div></article>`;
+    }).join(''):'<div class="acomp-request-state">Nenhuma solicitação de senha pendente.</div>';
+  }catch(err){if(seq!==solicitacoesSenhaConsultaSeq)return;if(!apenasContador)list.innerHTML='<div class="acomp-request-state error">Não foi possível consultar os pedidos. Tente atualizar novamente.</div>';console.warn('Consulta de solicitações de senha:',err)}
+}
+async function decidirSolicitacaoSenhaOperacional(op,aprovar){
+  if(normalizarOperador(usuarioAtual?.operador)!=='133')return false;
+  const operador=normalizarOperador(op),id=OPERACIONAL_SENHA_REQUEST_PREFIX+operador;
+  if(!operador)return false;
+  try{
+    const {data:row,error}=await comTimeout(supabaseclient.from(ONLINE_TABLE).select('dados,updated_at').eq('id',id).maybeSingle(),SUPABASE_OPERATION_TIMEOUT_MS);
+    if(error)throw error;
+    if(row?.dados?.tipo!=='SOLICITACAO_ALTERACAO_SENHA'||normalizarOperador(row.dados.operador)!==operador||row.dados.status!=='PENDENTE'){avNotice('O pedido não está mais pendente. Atualize a lista.');await carregarSolicitacoesSenhaOperacionalGerencial();return false}
+    if(aprovar&&!usuarioGlobalPorOperador(operador)){avNotice('Cadastre o login deste operador antes de aprovar.');return false}
+    const now=new Date().toISOString(),dados={...row.dados,status:aprovar?'AUTORIZADA':'RECUSADA',decididoEmISO:now,decididoPor:usuarioAtual?.nome||'Gerencial',decididoPorOperador:normalizarOperador(usuarioAtual?.operador)};
+    let query=supabaseclient.from(ONLINE_TABLE).update({dados,updated_at:now}).eq('id',id);
+    query=row.updated_at?query.eq('updated_at',row.updated_at):query.is('updated_at',null);
+    const {data:saved,error:writeError}=await comTimeout(query.select('id').maybeSingle(),SUPABASE_OPERATION_TIMEOUT_MS);
+    if(writeError)throw writeError;if(!saved)throw new Error('Pedido atualizado por outra sessão.');
+    await carregarSolicitacoesSenhaOperacionalGerencial();return true;
+  }catch(err){console.warn('Decisão de solicitação de senha:',err);avNotice('Não foi possível registrar a decisão. Atualize e tente novamente.');return false}
+}
+function abrirAlteracaoSenha(op,{solicitacao=false}={}){
   const operador=normalizarOperador(op);
   const dev=normalizarOperador(usuarioAtual?.operador)==='133';
   const proprio=normalizarOperador(usuarioAtual?.operador)===operador;
-  if(!dev && !(proprio && temPermissao('alterarSenha'))){ alert('Você não possui permissão para alterar esta senha.'); return; }
+  if(!dev && !(proprio && temPermissao('alterarSenha'))){ avNotice('Você não possui permissão para alterar esta senha.'); return; }
   const u=usuarioGlobalPorOperador(operador); if(!u)return;
-  const html=`<div class="modal-head"><div><h2>🔑 Alterar senha</h2><p>${escapeHTML(u.nome)} • Operador ${escapeHTML(operador)}</p></div><button class="icon-btn" onclick="fecharModalPermissoes()">✕</button></div><div class="section-card" style="box-shadow:none;margin:0;"><div class="form-grid"><div class="field w6"><label>Nova senha</label><input id="novaSenhaUsuario" type="password" minlength="4" autocomplete="new-password" placeholder="Mínimo de 4 caracteres"></div><div class="field w6"><label>Confirmar nova senha</label><input id="confirmarSenhaUsuario" type="password" minlength="4" autocomplete="new-password" placeholder="Repita a nova senha"></div><div class="field w12 actions"><button class="btn" onclick="salvarNovaSenha('${operador}')">💾 Salvar nova senha</button>${dev?`<button class="btn secondary" onclick="redefinirSenhaPadrao('${operador}')">🎲 Gerar senha temporária</button>`:''}</div></div><p style="color:var(--muted);font-weight:750;margin:12px 0 0;">Use pelo menos 4 caracteres. A senha atual não é exibida pelo sistema.</p></div>`;
+  const html=`<div class="modal-head"><div><h2>🔑 ${solicitacao?'Atender pedido de senha':'Alterar senha'}</h2><p>${escapeHTML(u.nome)} • Operador ${escapeHTML(operador)}</p></div><button class="icon-btn" onclick="fecharModalPermissoes()">✕</button></div><div class="section-card" style="box-shadow:none;margin:0;">${solicitacao?'<p class="acomp-password-help">Pedido recebido do Operacional. Ao salvar uma senha nova, a solicitação será marcada como atendida.</p>':''}<div class="form-grid"><div class="field w6"><label>Nova senha</label><input id="novaSenhaUsuario" type="password" minlength="4" autocomplete="new-password" placeholder="Mínimo de 4 caracteres"></div><div class="field w6"><label>Confirmar nova senha</label><input id="confirmarSenhaUsuario" type="password" minlength="4" autocomplete="new-password" placeholder="Repita a nova senha"></div><div class="field w12 actions"><button class="btn" onclick="salvarNovaSenha('${operador}')">${solicitacao?'✓ Aceitar e salvar nova senha':'💾 Salvar nova senha'}</button>${dev?`<button class="btn secondary" onclick="redefinirSenhaPadrao('${operador}')">🎲 Gerar senha temporária</button>`:''}</div></div><p style="color:var(--muted);font-weight:750;margin:12px 0 0;">Use pelo menos 4 caracteres. A senha atual não é exibida pelo sistema.</p></div>`;
   document.getElementById('modalPermissoesConteudo').innerHTML=html;
   document.getElementById('modalPermissoes').classList.add('active');
 }
+let alteracaoSenhaEmAndamento=false;
 async function salvarNovaSenha(op){
+  if(alteracaoSenhaEmAndamento)return;
   const operador=normalizarOperador(op);
+  const dev=normalizarOperador(usuarioAtual?.operador)==='133';
+  const proprio=normalizarOperador(usuarioAtual?.operador)===operador;
+  if(!dev&&!(proprio&&temPermissao('alterarSenha')))return;
   const nova=String(document.getElementById('novaSenhaUsuario')?.value||'').trim();
   const confirma=String(document.getElementById('confirmarSenhaUsuario')?.value||'').trim();
-  if(nova.length<4){alert('A nova senha deve ter pelo menos 4 caracteres.');return;}
-  if(nova!==confirma){alert('As senhas informadas não são iguais.');return;}
+  if(nova.length<4){avNotice('A nova senha deve ter pelo menos 4 caracteres.');return;}
+  if(nova!==confirma){avNotice('As senhas informadas não são iguais.');return;}
   const u=(globalConfig?.usuarios||[]).find(x=>normalizarOperador(x.operador)===operador); if(!u)return;
   const anterior={senha:u.senha,credencialVersao:u.credencialVersao};
   u.senha=nova;
   u.credencialVersao=Math.max(1,Number(u.credencialVersao)||1)+1;
+  alteracaoSenhaEmAndamento=true;
+  const botoes=[...document.querySelectorAll('#modalPermissoesConteudo .actions button')];botoes.forEach(b=>b.disabled=true);
   try{
-    await salvarConfigGlobalOnline();
+    const gravacaoSenha=await salvarConfigGlobalOnline();
+    if(gravacaoSenha!==true)throw new Error('A senha não foi confirmada pelo servidor.');
     if(normalizarOperador(usuarioAtual?.operador)===operador){
       sessionStorage.removeItem(SOPHIA_SESSION_KEY);
       const autenticado=await criarSessaoSophia(operador,nova);
@@ -20962,34 +21160,36 @@ async function salvarNovaSenha(op){
       sessionStorage.setItem(SESSION_KEY,JSON.stringify(criarRegistroSessao(atualizado)));
       agendarExpiracaoSessao();
     }
-    fecharModalPermissoes(); renderAll(); alert('Senha alterada com sucesso.');
+    fecharModalPermissoes(); renderAll();
+    avNotice('Senha alterada com sucesso.');
   }catch(err){
     u.senha=anterior.senha; u.credencialVersao=anterior.credencialVersao;
     console.error('Falha ao alterar senha:',err);
-    alert('Não foi possível alterar a senha no servidor. Tente novamente.');
-  }
+    avNotice('Não foi possível alterar a senha no servidor. Tente novamente.');
+  }finally{alteracaoSenhaEmAndamento=false;botoes.forEach(b=>b.disabled=false)}
 }
 async function redefinirSenhaPadrao(op){
   const operador=normalizarOperador(op);
   if(normalizarOperador(usuarioAtual?.operador)!=='133')return;
-  if(!confirm('Gerar uma nova senha temporária para este operador?'))return;
+  if(!await avConfirm('Gerar uma nova senha temporária para este operador?'))return;
   const u=(globalConfig?.usuarios||[]).find(x=>normalizarOperador(x.operador)===operador); if(!u)return;
   const temporaria=gerarSenhaTemporariaSegura();
   const anterior={senha:u.senha,credencialVersao:u.credencialVersao};
   u.senha=temporaria;
   u.credencialVersao=Math.max(1,Number(u.credencialVersao)||1)+1;
   try{
-    await salvarConfigGlobalOnline();
+    const gravacaoSenha=await salvarConfigGlobalOnline();
+    if(gravacaoSenha!==true)throw new Error('A senha não foi confirmada pelo servidor.');
     if(normalizarOperador(usuarioAtual?.operador)===operador){
       sessionStorage.removeItem(SOPHIA_SESSION_KEY);
       await logout({forcado:true,motivo:`Sua senha foi redefinida. Entre novamente com a senha temporária: ${temporaria}`});
       return;
     }
-    fecharModalPermissoes(); renderAll(); alert(`Nova senha temporária: ${temporaria}\n\nEntregue-a somente ao usuário. Ela não voltará a ser exibida.`);
+    fecharModalPermissoes(); renderAll(); avNotice(`Nova senha temporária: ${temporaria}\n\nEntregue-a somente ao usuário. Ela não voltará a ser exibida.`);
   }catch(err){
     u.senha=anterior.senha; u.credencialVersao=anterior.credencialVersao;
     console.error('Falha ao redefinir senha:',err);
-    alert('Não foi possível redefinir a senha no servidor. Tente novamente.');
+    avNotice('Não foi possível redefinir a senha no servidor. Tente novamente.');
   }
 }
 function fecharModalPermissoes(){document.getElementById('modalPermissoes')?.classList.remove('active');}
@@ -21118,7 +21318,7 @@ function renderConfig(){
 }
 function abrirPermissoesSelecionadas(){
   const op=normalizarOperador(document.getElementById('configUsuarioPermissoes')?.value);
-  if(!op){alert('Selecione um operador para editar as permissões.');return;}
+  if(!op){avNotice('Selecione um operador para editar as permissões.');return;}
   editarPermissoesUsuario(op);
 }
 
@@ -21196,7 +21396,7 @@ function agEstilosDocumentoImpressao(orientation='portrait'){
 }
 function agAbrirDocumentoImpressao(titulo,conteudoHTML,orientation='portrait',meta=[]){
   const win=window.open('','_blank','noopener,noreferrer,width=1280,height=900');
-  if(!win){ alert('Não foi possível abrir a janela de impressão. Verifique o bloqueador de pop-ups.'); return; }
+  if(!win){ avNotice('Não foi possível abrir a janela de impressão. Verifique o bloqueador de pop-ups.'); return; }
   const metaHtml=(Array.isArray(meta)?meta:[]).filter(Boolean).map(item=>`<span><b>${escapeHTML(item.label||'')}</b> ${escapeHTML(item.value||'')}</span>`).join('');
   win.document.open();
   win.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${escapeHTML(titulo)}</title><style>${agEstilosDocumentoImpressao(orientation)}</style></head><body><div class="ag-print-page"><div class="ag-doc"><header class="ag-doc-header"><div class="ag-doc-brand-row"><div class="ag-doc-brand-left"><img class="ag-doc-brand-logo" src="${AVENIDA_LOGO_OFICIAL}" alt="Avenida"><div class="ag-doc-brand-copy"><div class="ag-doc-kicker">Assistência Gerencial de Loja — Avenida</div><h1 class="ag-doc-title">${escapeHTML(titulo)}</h1></div></div></div><div class="ag-doc-rule"></div><div class="ag-doc-meta">${metaHtml}</div></header><main>${conteudoHTML}</main><footer class="ag-doc-footer"><span>Relatório gerado pelo sistema</span><span>${escapeHTML(agoraBR())}</span></footer></div></div><script>window.onload=function(){setTimeout(function(){window.focus();window.print();},180)};<\/script></body></html>`);
@@ -21288,11 +21488,11 @@ function configGlobalSeguroParaBackup(config){
 }
 async function baixarBackupCompletoSistema(){
   if(!temPermissao('backupDados')){
-    alert('Seu usuário não possui permissão para fazer backup completo do sistema.');
+    avNotice('Seu usuário não possui permissão para fazer backup completo do sistema.');
     return;
   }
   if(!navigator.onLine){
-    alert('O backup completo precisa de conexão com a internet para reunir os dados sincronizados de todos os usuários.');
+    avNotice('O backup completo precisa de conexão com a internet para reunir os dados sincronizados de todos os usuários.');
     return;
   }
   showAppLoader('Gerando backup completo','Sincronizando e reunindo os dados do Assistência Gerencial...');
@@ -21325,19 +21525,19 @@ async function baixarBackupCompletoSistema(){
     marcarSincronizacaoConfirmada('ONLINE • backup completo gerado');
   }catch(err){
     console.error('Falha ao gerar backup completo:',err);
-    alert('Não foi possível gerar o backup completo. Verifique a sincronização e tente novamente.');
+    avNotice('Não foi possível gerar o backup completo. Verifique a sincronização e tente novamente.');
   }finally{hideAppLoader();}
 }
 function baixarBackup(){ const blob = new Blob([JSON.stringify(db,null,2)], {type:'application/json'}); downloadBlob(blob, `backup_assistencia_gerencial_${hojeISO()}.json`); }
-function importarBackup(e){
+async function importarBackup(e){
   const f = e?.target?.files?.[0];
   if(!f) return;
   if(f.size > BACKUP_MAX_BYTES){
-    alert(`O backup ultrapassa o limite de ${Math.round(BACKUP_MAX_BYTES / 1024 / 1024)} MB.`);
+    avNotice(`O backup ultrapassa o limite de ${Math.round(BACKUP_MAX_BYTES / 1024 / 1024)} MB.`);
     e.target.value='';
     return;
   }
-  if(!confirm('A importação substituirá os dados atuais deste usuário. Deseja continuar?')){
+  if(!await avConfirm('A importação substituirá os dados atuais deste usuário. Deseja continuar?')){
     e.target.value='';
     return;
   }
@@ -21357,11 +21557,11 @@ function importarBackup(e){
       if(!saveDB()) throw new Error('O navegador não conseguiu armazenar o backup importado.');
       popularFiltroFuncionarios();
       renderAll();
-      alert('Backup validado e importado com sucesso.');
+      avNotice('Backup validado e importado com sucesso.');
     }catch(err){
       db = anterior;
       console.error('Falha ao importar backup:', err);
-      alert('O arquivo não pôde ser importado.\n\nDetalhe: ' + (err?.message || 'estrutura inválida'));
+      avNotice('O arquivo não pôde ser importado.\n\nDetalhe: ' + (err?.message || 'estrutura inválida'));
     }finally{
       hideAppLoader();
       if(e?.target) e.target.value='';
@@ -21369,12 +21569,12 @@ function importarBackup(e){
   };
   r.onerror = () => {
     hideAppLoader();
-    alert('Não foi possível ler o arquivo de backup.');
+    avNotice('Não foi possível ler o arquivo de backup.');
     if(e?.target) e.target.value='';
   };
   r.readAsText(f);
 }
-function limparTudo(){ if(confirm('Apagar todos os dados administrativos?')){ db=defaultDB(); sincronizarUsuariosLogin(); saveDB(); renderAll(); } }
+async function limparTudo(){ if(await avConfirm('Apagar todos os dados administrativos?')){ db=defaultDB(); sincronizarUsuariosLogin(); saveDB(); renderAll(); } }
 function downloadBlob(blob, filename){ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href); }
 function exportarCSVRelatorio(){ showAppLoader('Gerando CSV', 'Preparando o relatório completo da loja...'); setTimeout(() => { const rows=getRelatorio(); const head=['Data','Tipo','Setor','Titulo','Responsavel','Prioridade','Status','Prazo','Observacao','Atualizado por']; const csv=[head.join(';'), ...rows.map(r=>[r.data,r.tipo,r.setor,r.titulo,r.responsavel,r.prioridade,r.status,r.prazo,r.obs,r.atualizadoPor].map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(';'))].join('\n'); downloadBlob(new Blob([csv], {type:'text/csv;charset=utf-8'}), `relatorio_gerencial_${hojeISO()}.csv`); hideAppLoader(); }, 260); }
 function exportarExcelRelatorio(){ showAppLoader('Gerando Excel', 'Montando o arquivo do relatório gerencial...'); setTimeout(() => { const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>table{border-collapse:collapse;width:100%;font-family:Segoe UI,Arial}th{background:#291A1E;color:#F6C426}td,th{border:1px solid #999;padding:7px;text-align:left}h1{font-family:Segoe UI,Arial}
@@ -21610,7 +21810,7 @@ function turnoDaPessoaNaEscala(funcId){
 
 function abrirModalPessoasEscala(){
   const tipo = document.getElementById('escalaTipo')?.value || '';
-  if(!tipo){ alert('Selecione DOMINGO ou FERIADO antes de adicionar funcionários.'); return; }
+  if(!tipo){ avNotice('Selecione DOMINGO ou FERIADO antes de adicionar funcionários.'); return; }
   escalaTurnoModalAtual = document.getElementById('escalaTurnoSelect')?.value || 'abertura';
   const titulo = document.getElementById('modalEscalaTitulo');
   if(titulo) titulo.textContent = escalaTurnoModalAtual === 'abertura' ? 'Selecionar funcionários — Abertura' : 'Selecionar funcionários — Fechamento';
@@ -21658,7 +21858,7 @@ function confirmarSelecaoPessoasEscala(){
   const entrada = document.getElementById('escalaEntradaTurno')?.value || '';
   const saida = document.getElementById('escalaSaidaTurno')?.value || '';
   const obs = document.getElementById('escalaObsTurno')?.value.trim() || '';
-  if(!entrada){ alert('Informe o horário de entrada do turno.'); return; }
+  if(!entrada){ avNotice('Informe o horário de entrada do turno.'); return; }
 
   const ids = Array.from(document.querySelectorAll('.chkEscalaPessoa:checked')).map(chk => chk.value);
   escalaDraft[turno] = ids.map(funcId => {
@@ -21762,12 +21962,12 @@ function salvarEscala(){
   const tipo = document.getElementById('escalaTipo').value || '';
   const data = document.getElementById('escalaData').value;
   const titulo = document.getElementById('escalaTitulo').value.trim();
-  if(!tipo){ alert('Selecione DOMINGO ou FERIADO.'); return; }
-  if(!data){ alert('Informe a data da escala.'); return; }
-  if(tipo === 'FERIADO' && !titulo){ alert('Informe o nome do feriado.'); return; }
+  if(!tipo){ avNotice('Selecione DOMINGO ou FERIADO.'); return; }
+  if(!data){ avNotice('Informe a data da escala.'); return; }
+  if(tipo === 'FERIADO' && !titulo){ avNotice('Informe o nome do feriado.'); return; }
   sincronizarFolgasDaTela();
   const totalTurnos = escalaDraft.abertura.length + escalaDraft.fechamento.length;
-  if(totalTurnos === 0){ alert('Adicione pelo menos uma pessoa na abertura ou no fechamento.'); return; }
+  if(totalTurnos === 0){ avNotice('Adicione pelo menos uma pessoa na abertura ou no fechamento.'); return; }
   const id = document.getElementById('escalaId').value || uid('escala');
   const obj = {
     id, tipo, data,
@@ -21785,7 +21985,7 @@ function salvarEscala(){
   saveDB();
   renderEscalas();
   fecharCriadorEscala();
-  alert('Escala salva com sucesso.');
+  avNotice('Escala salva com sucesso.');
 }
 
 function editarEscala(id){
@@ -21840,10 +22040,10 @@ function escalaAtualComoObjetoWhatsApp(){
 function enviarEscalaAtualWhatsApp(){
   const e = escalaAtualComoObjetoWhatsApp();
   const total = (e.abertura?.length || 0) + (e.fechamento?.length || 0);
-  if(!e.tipo){ alert('Selecione DOMINGO ou FERIADO antes de enviar para o WhatsApp.'); return; }
-  if(!e.data){ alert('Informe a data da escala antes de enviar para o WhatsApp.'); return; }
-  if(e.tipo === 'FERIADO' && !e.titulo){ alert('Informe o nome do feriado antes de enviar.'); return; }
-  if(total === 0){ alert('Adicione pelo menos uma pessoa na abertura ou fechamento antes de enviar.'); return; }
+  if(!e.tipo){ avNotice('Selecione DOMINGO ou FERIADO antes de enviar para o WhatsApp.'); return; }
+  if(!e.data){ avNotice('Informe a data da escala antes de enviar para o WhatsApp.'); return; }
+  if(e.tipo === 'FERIADO' && !e.titulo){ avNotice('Informe o nome do feriado antes de enviar.'); return; }
+  if(total === 0){ avNotice('Adicione pelo menos uma pessoa na abertura ou fechamento antes de enviar.'); return; }
   abrirWhatsAppComTexto(montarTextoEscalaWhatsApp(e));
 }
 
@@ -22038,7 +22238,7 @@ function alternarPesquisaSophia(){
   }
 }
 function toggleSophiaWidget(){
-  if(!temPermissao('sophia')){ alert('A SOPHIA não está liberada para o seu usuário.'); return; }
+  if(!temPermissao('sophia')){ avNotice('A SOPHIA não está liberada para o seu usuário.'); return; }
   const widget=document.getElementById('sophiaWidget');
   if(!widget)return;
   if(widget.classList.contains('open') && !widget.classList.contains('minimized')){
@@ -22337,14 +22537,6 @@ window.addEventListener('load', async () => {
   const possuiSessao=!!sessionStorage.getItem(SESSION_KEY);
   if(possuiSessao) showAppLoader('Atualizando sistema','Restaurando sua sessão e verificando a sincronização...');
   loadDB();
-  if(localStorage.getItem('adminGerencialDark')==='1'){
-    document.body.classList.add('dark-mode');
-    document.documentElement.dataset.theme='dark';
-    const themeBtn = document.getElementById('themeBtn');
-    themeBtn.textContent='☀️';
-    themeBtn.title='Ativar modo claro';
-    themeBtn.setAttribute('aria-label','Ativar modo claro');
-  }
   document.getElementById('mesAtual').textContent=mesAnoBR(); ocultarIdentificacaoLogin();
   const restaurada=await trySession();
   if(restaurada){
@@ -22539,11 +22731,11 @@ window.addEventListener('load', async () => {
     const draft=isLimpeza?limpezaDraft:provadorDraft;
     const data=$(prefix+'Data')?.value||'';
     const responsavel=$(prefix+'Responsavel')?.value||'';
-    if(!data){alert('Informe a data da escala.');return;}
-    if(!responsavel){alert('Selecione o responsável geral.');return;}
+    if(!data){avNotice('Informe a data da escala.');return;}
+    if(!responsavel){avNotice('Selecione o responsável geral.');return;}
     const itens=draft.map(x=>({...x,area:String(x.area||'').trim(),atividade:String(x.atividade||'').trim()})).filter(x=>x.area);
-    if(!itens.length){alert('Adicione pelo menos uma área à escala.');return;}
-    if(itens.some(x=>!x.funcionario)){alert('Selecione o funcionário responsável de todas as áreas.');return;}
+    if(!itens.length){avNotice('Adicione pelo menos uma área à escala.');return;}
+    if(itens.some(x=>!x.funcionario)){avNotice('Selecione o funcionário responsável de todas as áreas.');return;}
     const id=$(prefix+'Id')?.value||makeId(isLimpeza?'escala_limpeza':'escala_provador');
     const list=currentDB()[listName]; const existing=list.find(x=>x.id===id);
     const record={id,data,responsavel,obs:String($(prefix+'Obs')?.value||'').trim(),itens,
@@ -22582,8 +22774,8 @@ window.addEventListener('load', async () => {
     target.querySelectorAll('[data-edit]').forEach(btn=>btn.addEventListener('click',()=>{
       const rec=currentDB()[listName].find(x=>x.id===btn.dataset.edit); if(rec)openScheduleEditor(type,rec);
     }));
-    target.querySelectorAll('[data-delete]').forEach(btn=>btn.addEventListener('click',()=>{
-      if(!confirm('Excluir esta escala?'))return;
+    target.querySelectorAll('[data-delete]').forEach(btn=>btn.addEventListener('click',async ()=>{
+      if(!await avConfirm('Excluir esta escala?'))return;
       currentDB()[listName]=currentDB()[listName].filter(x=>x.id!==btn.dataset.delete); save(); renderScheduleList(type);
     }));
   }
@@ -22684,7 +22876,7 @@ window.addEventListener('load', async () => {
   g.toggleDitadoNota=()=>{
     if(speechRunning){g.pararDitadoNota(false);return;}
     const Recognition=g.SpeechRecognition||g.webkitSpeechRecognition;
-    if(!Recognition){alert('O ditado por voz não é suportado neste navegador. Use Chrome ou Edge atualizado, ou digite a transcrição manualmente.');return;}
+    if(!Recognition){avNotice('O ditado por voz não é suportado neste navegador. Use Chrome ou Edge atualizado, ou digite a transcrição manualmente.');return;}
     const raw=$('notaVozRascunho'); if(!raw)return;
     speechRecognition=new Recognition(); speechRecognition.lang='pt-BR'; speechRecognition.continuous=true; speechRecognition.interimResults=true;
     let base=String(raw.value||'').trim(); let finalSession='';
@@ -22700,7 +22892,7 @@ window.addEventListener('load', async () => {
     };
     speechRecognition.onerror=ev=>{speechRunning=false;g.atualizarUIDitadoNota('',`Ditado indisponível: ${ev.error||'erro'}`);if(!['no-speech','aborted'].includes(ev.error))console.warn('Falha no ditado:',ev.error);};
     speechRecognition.onend=()=>{speechRunning=false;g.atualizarUIDitadoNota('','Ditado disponível');};
-    try{speechRecognition.start();}catch(err){speechRunning=false;console.error(err);alert('Não foi possível iniciar o ditado agora.');}
+    try{speechRecognition.start();}catch(err){speechRunning=false;console.error(err);avNotice('Não foi possível iniciar o ditado agora.');}
   };
 
   /* ============================================================
@@ -22877,23 +23069,23 @@ window.addEventListener('load', async () => {
   function agAbrirLancamentoResultado(dataAlvo=''){
     const permitido=agOntemISO();
     const solicitado=String(dataAlvo||permitido).slice(0,10);
-    if(solicitado!==permitido){alert(`Hoje só é permitido lançar o resultado de ${formatDate(permitido)}.`);return;}
+    if(solicitado!==permitido){avNotice(`Hoje só é permitido lançar o resultado de ${formatDate(permitido)}.`);return;}
     const d=permitido;const period=d.slice(0,7);const ger=ensureGerencial();
     if(!agDistribuicaoTemDados(period)){
-      alert(`Não existe distribuição de metas salva para ${period.split('-').reverse().join('/')}. Faça a distribuição mensal antes de lançar resultados.`);return;
+      avNotice(`Não existe distribuição de metas salva para ${period.split('-').reverse().join('/')}. Faça a distribuição mensal antes de lançar resultados.`);return;
     }
-    const meta=agMetaDia(d);if(!meta){alert(`A meta de ${formatDate(d)} não foi distribuída. O resultado não pode ser lançado.`);return;}
+    const meta=agMetaDia(d);if(!meta){avNotice(`A meta de ${formatDate(d)} não foi distribuída. O resultado não pode ser lançado.`);return;}
     if($('agPeriodo'))$('agPeriodo').value=period;
     if(typeof g.agAbrirSubaba==='function')g.agAbrirSubaba('visao',document.querySelector('[data-ag-tab="visao"]'));
     const panel=$('agResultadoRapidoPanel');if(panel)panel.classList.add('active');
     agPreencherResultadoRapido(d,true);agRenderOverview();
     setTimeout(()=>{$('agResultadoVenda')?.focus();},30);
   }
-  function agFecharLancamentoResultado(force=false){
+  async function agFecharLancamentoResultado(force=false){
     const panel=$('agResultadoRapidoPanel'); if(!panel) return;
     if(!force){
       const changed=['agResultadoVenda','agResultadoAtivados','agResultadoObs','agResultadoPcj','agResultadoPcjAcumulado',...g.AVManagement.PF.map(k=>'agResultadoPF_'+k)].some(id=>String($(id)?.value||'').trim());
-      if(changed&&!confirm('Fechar o lançamento de resultado?'))return;
+      if(changed&&!await avConfirm('Fechar o lançamento de resultado?'))return;
     }
     panel.classList.remove('active');
   }
@@ -22964,9 +23156,9 @@ window.addEventListener('load', async () => {
   function agBindSheetInputs(sheet){
     const box=$('agPlanilhaContainer');if(!box)return;
     box.querySelectorAll('[data-ag-row][data-ag-col]').forEach(el=>el.addEventListener('change',()=>{
-      const ri=Number(el.dataset.agRow),key=el.dataset.agCol;if(!sheet.rows[ri])return;if(sheet.id==='resultados'&&!agCampoResultadoEditavel(sheet.rows[ri],key)){alert('Este campo está protegido pelas regras de distribuição e lançamento diário.');agRenderSheet();return;}sheet.rows[ri][key]=el.type==='number'?safeNumber(el.value):el.value;save();agRenderOverview();g.agAtualizarEixosGrafico();
+      const ri=Number(el.dataset.agRow),key=el.dataset.agCol;if(!sheet.rows[ri])return;if(sheet.id==='resultados'&&!agCampoResultadoEditavel(sheet.rows[ri],key)){avNotice('Este campo está protegido pelas regras de distribuição e lançamento diário.');agRenderSheet();return;}sheet.rows[ri][key]=el.type==='number'?safeNumber(el.value):el.value;save();agRenderOverview();g.agAtualizarEixosGrafico();
     }));
-    box.querySelectorAll('[data-ag-delete]').forEach(btn=>btn.addEventListener('click',()=>{const i=Number(btn.dataset.agDelete);if(!Number.isInteger(i))return;if(confirm('Excluir esta linha?')){sheet.rows.splice(i,1);save();agRenderSheet();agRenderOverview();}}));
+    box.querySelectorAll('[data-ag-delete]').forEach(btn=>btn.addEventListener('click',async ()=>{const i=Number(btn.dataset.agDelete);if(!Number.isInteger(i))return;if(await avConfirm('Excluir esta linha?')){sheet.rows.splice(i,1);save();agRenderSheet();agRenderOverview();}}));
   }
   function agRenderSheet(){
     agRenderPlanilhasSelector();const sheet=agActiveSheet();const box=$('agPlanilhaContainer');if(!box)return;
@@ -22981,7 +23173,7 @@ window.addEventListener('load', async () => {
     const plans=ger.planos;const statuses=['Pendente','Em andamento','Aguardando','Concluída'];summary.innerHTML=statuses.map(s=>`<div class="status-card"><div><small>${esc(s)}</small><b>${plans.filter(p=>p.status===s).length}</b></div><span class="dot"></span></div>`).join('');
     list.innerHTML=plans.length?plans.slice().sort((a,b)=>String(a.prazo||'9999').localeCompare(String(b.prazo||'9999'))).map(p=>`<article class="ag-plan-card ${p.prazo&&p.prazo<today()&&p.status!=='Concluída'?'overdue':''}"><div class="ag-plan-card-head"><div><h3>${esc(p.indicador||'Plano de ação')}</h3><p>${esc(p.problema||'')}</p></div><span class="badge ${p.status==='Concluída'?'b-ok':p.prazo&&p.prazo<today()?'b-bad':'b-warn'}">${esc(p.status||'Pendente')}</span></div><div class="ag-plan-meta"><span class="badge b-info">👤 ${esc(employeeName(p.responsavel))}</span><span class="badge b-geral">📅 ${esc(formatDate(p.prazo))}</span></div><p><strong>Ação:</strong> ${esc(p.acao||'-')}</p><div class="actions no-print"><button class="btn secondary small" type="button" data-plan-edit="${esc(p.id)}">Editar</button><button class="btn danger small" type="button" data-plan-delete="${esc(p.id)}">Excluir</button></div></article>`).join(''):agEmpty('Nenhum plano de ação cadastrado.');
     list.querySelectorAll('[data-plan-edit]').forEach(btn=>btn.addEventListener('click',()=>{const p=ger.planos.find(x=>x.id===btn.dataset.planEdit);if(!p)return;$('agPlanoId').value=p.id;$('agPlanoIndicador').value=p.indicador||'Venda';$('agPlanoProblema').value=p.problema||'';setSelectHTML('agPlanoResponsavel',employeeOptions(p.responsavel),p.responsavel);$('agPlanoAcao').value=p.acao||'';$('agPlanoPrazo').value=p.prazo||'';$('agPlanoStatus').value=p.status||'Pendente';$('agPlanoProblema').focus();}));
-    list.querySelectorAll('[data-plan-delete]').forEach(btn=>btn.addEventListener('click',()=>{if(confirm('Excluir este plano de ação?')){ger.planos=ger.planos.filter(x=>x.id!==btn.dataset.planDelete);save();agRenderPlans();}}));
+    list.querySelectorAll('[data-plan-delete]').forEach(btn=>btn.addEventListener('click',async ()=>{if(await avConfirm('Excluir este plano de ação?')){ger.planos=ger.planos.filter(x=>x.id!==btn.dataset.planDelete);save();agRenderPlans();}}));
   }
   function agDiasPeriodo(period=agPeriod()){
     const [y,m]=period.split('-').map(Number),days=new Date(y,m,0).getDate();
@@ -23109,21 +23301,21 @@ window.addEventListener('load', async () => {
   g.agAbrirCalendarioMeta=agAbrirCalendarioMeta;
   g.agAlterarQuantidadeEventos=agAlterarQuantidadeEventos;
   g.agCriarDistribuicao=()=>{const ger=ensureGerencial(),period=agPeriod();agDistDraft=clone(ger.distribuicoes[period]||{});const dates=agDiasPeriodo(period);dates.forEach(d=>{const atual=agDistDraft[d]||{};agDistDraft[d]={venda:safeNumber(atual.venda),ativados:safeNumber(atual.ativados)};});const contexto=agContextoMensal(period);agContextoMesDraft={feriados:contexto.feriados,eventos:contexto.eventos};agDistEditing=true;agPopularTotaisDistribuicao(agDistDraft);agRenderDistribution();agAtualizarResumoMetaMensal();};
-  g.agDistribuirAutomaticamente=()=>{if(!agDistEditing)return;const period=agPeriod(),dates=agDiasPeriodo(period),editaveis=dates.filter(d=>!agDiaDistribuicaoBloqueado(d)),bloqueados=dates.filter(d=>agDiaDistribuicaoBloqueado(d));if(!editaveis.length){alert('Todos os dias deste período já possuem resultado lançado e estão bloqueados.');return;}const alvoVenda=Math.max(0,safeNumber($('agDistTotalVenda')?.value||0)),alvoAtiv=Math.max(0,safeNumber($('agDistTotalAtivados')?.value||0));const fixoVenda=bloqueados.reduce((a,d)=>a+safeNumber(agDistDraft[d]?.venda),0),fixoAtiv=bloqueados.reduce((a,d)=>a+safeNumber(agDistDraft[d]?.ativados),0);if(alvoVenda<fixoVenda){alert(`A meta mensal de venda não pode ser menor que ${brl(fixoVenda)}, pois esse valor já pertence a dias lançados e bloqueados.`);return;}if(alvoAtiv<fixoAtiv){alert(`A meta mensal de Ativados não pode ser menor que ${Math.round(fixoAtiv)}, pois esse total já pertence a dias lançados e bloqueados.`);return;}const vendas=agDistribuirValor(alvoVenda-fixoVenda,editaveis.length,false),ativ=agDistribuirValor(alvoAtiv-fixoAtiv,editaveis.length,true);editaveis.forEach((d,i)=>{agDistDraft[d]={venda:vendas[i],ativados:ativ[i]};});agRenderDistribution();};
-  g.agSalvarDistribuicao=()=>{
+  g.agDistribuirAutomaticamente=()=>{if(!agDistEditing)return;const period=agPeriod(),dates=agDiasPeriodo(period),editaveis=dates.filter(d=>!agDiaDistribuicaoBloqueado(d)),bloqueados=dates.filter(d=>agDiaDistribuicaoBloqueado(d));if(!editaveis.length){avNotice('Todos os dias deste período já possuem resultado lançado e estão bloqueados.');return;}const alvoVenda=Math.max(0,safeNumber($('agDistTotalVenda')?.value||0)),alvoAtiv=Math.max(0,safeNumber($('agDistTotalAtivados')?.value||0));const fixoVenda=bloqueados.reduce((a,d)=>a+safeNumber(agDistDraft[d]?.venda),0),fixoAtiv=bloqueados.reduce((a,d)=>a+safeNumber(agDistDraft[d]?.ativados),0);if(alvoVenda<fixoVenda){avNotice(`A meta mensal de venda não pode ser menor que ${brl(fixoVenda)}, pois esse valor já pertence a dias lançados e bloqueados.`);return;}if(alvoAtiv<fixoAtiv){avNotice(`A meta mensal de Ativados não pode ser menor que ${Math.round(fixoAtiv)}, pois esse total já pertence a dias lançados e bloqueados.`);return;}const vendas=agDistribuirValor(alvoVenda-fixoVenda,editaveis.length,false),ativ=agDistribuirValor(alvoAtiv-fixoAtiv,editaveis.length,true);editaveis.forEach((d,i)=>{agDistDraft[d]={venda:vendas[i],ativados:ativ[i]};});agRenderDistribution();};
+  g.agSalvarDistribuicao=async ()=>{
     const ger=ensureGerencial(),period=agPeriod();
     if(!agDistEditing)return;
     agAtualizarContextoMensalDraft();
-    const contextoOk=agValidarContextoMensal();if(!contextoOk.ok){alert(contextoOk.msg);return;}
+    const contextoOk=agValidarContextoMensal();if(!contextoOk.ok){avNotice(contextoOk.msg);return;}
     const dates=agDiasPeriodo(period),saved=ger.distribuicoes[period]||{};
-    if(!dates.every(d=>agDistDraft[d]&&typeof agDistDraft[d]==='object')){alert('Todos os dias do mês precisam fazer parte da distribuição.');return;}
+    if(!dates.every(d=>agDistDraft[d]&&typeof agDistDraft[d]==='object')){avNotice('Todos os dias do mês precisam fazer parte da distribuição.');return;}
     const totalVenda=agTotaisDistribuicao(agDistDraft).venda,totalAtiv=agTotaisDistribuicao(agDistDraft).ativados;
-    if(totalVenda<=0){alert('A meta mensal de venda precisa ser maior que zero.');return;}
-    if(totalAtiv<0){alert('A meta mensal de Ativados é inválida.');return;}
+    if(totalVenda<=0){avNotice('A meta mensal de venda precisa ser maior que zero.');return;}
+    if(totalAtiv<0){avNotice('A meta mensal de Ativados é inválida.');return;}
     const bloqueados=dates.filter(agDiaDistribuicaoBloqueado),editaveis=dates.filter(d=>!agDiaDistribuicaoBloqueado(d));
     // Dias com resultado lançado mantêm exatamente a meta que existia no momento do lançamento.
     bloqueados.forEach(date=>{const row=agFindResultadoByDate(date),antiga=saved[date]||{};agDistDraft[date]={venda:safeNumber(row?.meta??antiga.venda),ativados:safeNumber(row?.metaAtivados??antiga.ativados)};});
-    if(!confirm(`SALVAR AJUSTES DA DISTRIBUIÇÃO?\n\n${bloqueados.length} dia(s) já lançado(s) permanecerão bloqueados. ${editaveis.length} dia(s) sem lançamento continuarão editáveis após salvar.`))return;
+    if(!await avConfirm(`SALVAR AJUSTES DA DISTRIBUIÇÃO?\n\n${bloqueados.length} dia(s) já lançado(s) permanecerão bloqueados. ${editaveis.length} dia(s) sem lançamento continuarão editáveis após salvar.`))return;
     ger.distribuicoes[period]=Object.fromEntries(dates.map(date=>[date,{venda:safeNumber(agDistDraft[date]?.venda),ativados:safeNumber(agDistDraft[date]?.ativados)}]));
     ger.contextoMensal[period]={feriados:agContextoMesDraft.feriados,eventos:agContextoMesDraft.eventos,salvoEm:nowBR(),salvoPor:currentUser()?.nome||''};
     ger.distribuicaoControle[period]={bloqueado:false,modo:'POR_DIA_LANCADO',salvoEm:nowBR(),salvoPor:currentUser()?.nome||'',diasBloqueados:bloqueados.length};
@@ -23132,15 +23324,15 @@ window.addEventListener('load', async () => {
   };
   g.agCancelarDistribuicao=()=>{agDistEditing=false;agDistDraft={};agContextoMesDraft={feriados:null,eventos:null};agRenderDistribution();};
   g.agSelecionarPlanilha=value=>{agSheetKey=value||'resultados';agRenderSheet();g.agAtualizarEixosGrafico();};
-  g.agNovaPlanilhaCustom=()=>{const nome=prompt('Nome da nova planilha:','Nova planilha');if(!String(nome||'').trim())return;const ger=ensureGerencial();const id=makeId('ag_planilha');ger.planilhas.push({id,nome:String(nome).trim(),colunas:[{id:'descricao',nome:'Descrição',tipo:'text'},{id:'valor',nome:'Valor',tipo:'number'}],linhas:[],criadoEm:nowBR()});agSheetKey=id;save();agRenderSheet();g.agAtualizarEixosGrafico();};
-  g.agAdicionarColunaCustom=()=>{const sheet=agActiveSheet();if(sheet.builtin){alert('As colunas das planilhas padrão são fixas.');return;}const nome=prompt('Nome da coluna:','Nova coluna');if(!String(nome||'').trim())return;const tipo=(prompt('Tipo da coluna: texto, numero ou data','texto')||'texto').toLowerCase();let id=String(nome).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')||makeId('col');while(sheet.columns.some(c=>c[0]===id))id+='_2';sheet.raw.colunas.push({id,nome:String(nome).trim(),tipo:tipo.startsWith('num')?'number':tipo.startsWith('data')?'date':'text'});save();agRenderSheet();g.agAtualizarEixosGrafico();};
+  g.agNovaPlanilhaCustom=async ()=>{const nome=await avPrompt('Nome da nova planilha:','Nova planilha');if(!String(nome||'').trim())return;const ger=ensureGerencial();const id=makeId('ag_planilha');ger.planilhas.push({id,nome:String(nome).trim(),colunas:[{id:'descricao',nome:'Descrição',tipo:'text'},{id:'valor',nome:'Valor',tipo:'number'}],linhas:[],criadoEm:nowBR()});agSheetKey=id;save();agRenderSheet();g.agAtualizarEixosGrafico();};
+  g.agAdicionarColunaCustom=async ()=>{const sheet=agActiveSheet();if(sheet.builtin){avNotice('As colunas das planilhas padrão são fixas.');return;}const nome=await avPrompt('Nome da coluna:','Nova coluna');if(!String(nome||'').trim())return;const tipoEscolhido=await avPrompt('Tipo da coluna: texto, numero ou data','texto');if(tipoEscolhido===null)return;const tipo=(tipoEscolhido||'texto').toLowerCase();let id=String(nome).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')||makeId('col');while(sheet.columns.some(c=>c[0]===id))id+='_2';sheet.raw.colunas.push({id,nome:String(nome).trim(),tipo:tipo.startsWith('num')?'number':tipo.startsWith('data')?'date':'text'});save();agRenderSheet();g.agAtualizarEixosGrafico();};
   g.agAdicionarLinhaAtual=()=>{const sheet=agActiveSheet();if(sheet.id==='resultados'){agAbrirLancamentoResultado();return;}const row={id:makeId('ag_linha')};sheet.columns.forEach(([k,l,t])=>row[k]=t==='number'?0:t==='date'?today():'');sheet.rows.push(row);save();agRenderSheet();agRenderOverview();};
   g.agIrParaPlanilhaResultado=()=>{agSheetKey='resultados';g.agAbrirSubaba('planilhas',document.querySelector('[data-ag-tab="planilhas"]'));agRenderSheet();setTimeout(()=>g.agAdicionarLinhaAtual(),30);};
   g.agAtualizarTotalPF=()=>{$('agResultadoPF').value=g.AVManagement.PF.reduce((sum,k)=>sum+safeNumber($('agResultadoPF_'+k)?.value),0);};
   function agColetarIndicadoresExtras(){
     const pcjRaw=$('agResultadoPcj').value,accRaw=$('agResultadoPcjAcumulado').value;
     const pfDetalhado=Object.fromEntries(g.AVManagement.PF.map(k=>[k,Number($('agResultadoPF_'+k).value||0)]));
-    if(Object.values(pfDetalhado).some(v=>!Number.isInteger(v)||v<0)||[pcjRaw,accRaw].some(v=>v!==''&&(!Number.isFinite(Number(v))||Number(v)<0||Number(v)>100))){alert('PF deve ser uma quantidade inteira e PCJ deve ficar entre 0 e 100%.');return null;}
+    if(Object.values(pfDetalhado).some(v=>!Number.isInteger(v)||v<0)||[pcjRaw,accRaw].some(v=>v!==''&&(!Number.isFinite(Number(v))||Number(v)<0||Number(v)>100))){avNotice('PF deve ser uma quantidade inteira e PCJ deve ficar entre 0 e 100%.');return null;}
     return {pcj:pcjRaw===''?null:Number(pcjRaw),pcjAcumulado:accRaw===''?null:Number(accRaw),pfDetalhado,pf:g.AVManagement.pfTotal(pfDetalhado)};
   }
   function agCarregarMetasComplementares(){
@@ -23151,11 +23343,11 @@ window.addEventListener('load', async () => {
   g.agSalvarMetasComplementares=()=>{
     const ger=ensureGerencial();if(!ger)return;
     const pcj=Number($('agMetaPCJ').value||0),pf=Object.fromEntries(g.AVManagement.PF.map(k=>[k,Number($('agMetaPF_'+k).value||0)]));
-    if(!Number.isFinite(pcj)||pcj<0||pcj>100||Object.values(pf).some(v=>!Number.isInteger(v)||v<0)){alert('Informe quantidades inteiras positivas ou zero e PCJ entre 0 e 100%.');return;}
-    ger.metasComplementares=ger.metasComplementares||{};ger.metasComplementares[agPeriod()]={pcj,pf,atualizadoEm:new Date().toISOString()};save();alert('Metas de PCJ e PF salvas para o RESULTADO.');
+    if(!Number.isFinite(pcj)||pcj<0||pcj>100||Object.values(pf).some(v=>!Number.isInteger(v)||v<0)){avNotice('Informe quantidades inteiras positivas ou zero e PCJ entre 0 e 100%.');return;}
+    ger.metasComplementares=ger.metasComplementares||{};ger.metasComplementares[agPeriod()]={pcj,pf,atualizadoEm:new Date().toISOString()};save();avNotice('Metas de PCJ e PF salvas para o RESULTADO.');
   };
-  g.agSalvarResultadoRapido=e=>{e?.preventDefault?.();const data=String($('agResultadoData')?.value||'').slice(0,10),permitido=agOntemISO();if(data!==permitido){alert(`Hoje só é permitido lançar o resultado de ${formatDate(permitido)}.`);return;}const meta=agMetaDia(data);if(!meta){alert('Não existe meta distribuída para este dia.');return;}const venda=safeNumber($('agResultadoVenda')?.value||0),ativados=safeNumber($('agResultadoAtivados')?.value||0);if([venda,ativados].some(v=>v<0)||!Number.isInteger(ativados)){alert('Os valores realizados não podem ser negativos.');return;}const extras=agColetarIndicadoresExtras();if(!extras)return;const analise=agColetarAnaliseResultado(),valid=agValidarAnaliseResultado(analise);if(!valid.ok){alert(valid.msg);return;}const ger=ensureGerencial(),row=agFindOrCreateResultado(data);Object.assign(row,extras);row.atualizadoEmISO=new Date().toISOString();row.data=data;row.venda=venda;row.ativados=ativados;row.meta=safeNumber(meta.venda);row.metaAtivados=safeNumber(meta.ativados);row.analiseResultado=analise;row.observacao=String($('agResultadoObs')?.value||'').trim();row.periodo=data.slice(0,7);row.lancadoEm=nowBR();row.lancadoPor=currentUser()?.nome||'';ger.monitor.ultimaDataResultado=data;save();agRenderOverview();g.agRenderComparativos();agRenderSheet();agRenderDistribution();agFecharLancamentoResultado(true);};
-  g.agSalvarPlano=e=>{e?.preventDefault?.();const ger=ensureGerencial();const id=$('agPlanoId')?.value||makeId('ag_plano');const existing=ger.planos.find(p=>p.id===id);const rec={id,indicador:$('agPlanoIndicador')?.value||'',problema:String($('agPlanoProblema')?.value||'').trim(),responsavel:$('agPlanoResponsavel')?.value||'',acao:String($('agPlanoAcao')?.value||'').trim(),prazo:$('agPlanoPrazo')?.value||'',status:$('agPlanoStatus')?.value||'Pendente',criadoEm:existing?.criadoEm||nowBR(),atualizadoEm:nowBR(),atualizadoPor:currentUser()?.nome||''};if(!rec.problema||!rec.acao||!rec.prazo){alert('Preencha problema, ação e prazo.');return;}if(existing)Object.assign(existing,rec);else ger.planos.unshift(rec);save();g.agLimparPlanoForm();agRenderPlans();};
+  g.agSalvarResultadoRapido=e=>{e?.preventDefault?.();const data=String($('agResultadoData')?.value||'').slice(0,10),permitido=agOntemISO();if(data!==permitido){avNotice(`Hoje só é permitido lançar o resultado de ${formatDate(permitido)}.`);return;}const meta=agMetaDia(data);if(!meta){avNotice('Não existe meta distribuída para este dia.');return;}const venda=safeNumber($('agResultadoVenda')?.value||0),ativados=safeNumber($('agResultadoAtivados')?.value||0);if([venda,ativados].some(v=>v<0)||!Number.isInteger(ativados)){avNotice('Os valores realizados não podem ser negativos.');return;}const extras=agColetarIndicadoresExtras();if(!extras)return;const analise=agColetarAnaliseResultado(),valid=agValidarAnaliseResultado(analise);if(!valid.ok){avNotice(valid.msg);return;}const ger=ensureGerencial(),row=agFindOrCreateResultado(data);Object.assign(row,extras);row.atualizadoEmISO=new Date().toISOString();row.data=data;row.venda=venda;row.ativados=ativados;row.meta=safeNumber(meta.venda);row.metaAtivados=safeNumber(meta.ativados);row.analiseResultado=analise;row.observacao=String($('agResultadoObs')?.value||'').trim();row.periodo=data.slice(0,7);row.lancadoEm=nowBR();row.lancadoPor=currentUser()?.nome||'';ger.monitor.ultimaDataResultado=data;save();agRenderOverview();g.agRenderComparativos();agRenderSheet();agRenderDistribution();agFecharLancamentoResultado(true);};
+  g.agSalvarPlano=e=>{e?.preventDefault?.();const ger=ensureGerencial();const id=$('agPlanoId')?.value||makeId('ag_plano');const existing=ger.planos.find(p=>p.id===id);const rec={id,indicador:$('agPlanoIndicador')?.value||'',problema:String($('agPlanoProblema')?.value||'').trim(),responsavel:$('agPlanoResponsavel')?.value||'',acao:String($('agPlanoAcao')?.value||'').trim(),prazo:$('agPlanoPrazo')?.value||'',status:$('agPlanoStatus')?.value||'Pendente',criadoEm:existing?.criadoEm||nowBR(),atualizadoEm:nowBR(),atualizadoPor:currentUser()?.nome||''};if(!rec.problema||!rec.acao||!rec.prazo){avNotice('Preencha problema, ação e prazo.');return;}if(existing)Object.assign(existing,rec);else ger.planos.unshift(rec);save();g.agLimparPlanoForm();agRenderPlans();};
   g.agLimparPlanoForm=()=>{const form=$('agPlanoForm');form?.reset();if($('agPlanoId'))$('agPlanoId').value='';setSelectHTML('agPlanoResponsavel',employeeOptions(),'');};
   g.agAtualizarEixosGrafico=()=>{const source=$('agGrafFonte');if(!source)return;const sheets=agAllSheets();source.innerHTML=sheets.map(s=>`<option value="${esc(s.id)}">${esc(s.nome)}</option>`).join('');if(!sheets.some(s=>s.id===source.value))source.value=agSheetKey;const old=agSheetKey;agSheetKey=source.value;const sheet=agActiveSheet();agSheetKey=old;const x=$('agGrafX'),y=$('agGrafY');if(x)x.innerHTML=sheet.columns.map(c=>`<option value="${esc(c[0])}">${esc(c[1])}</option>`).join('');if(y){const num=sheet.columns.filter(c=>c[2]==='number');y.innerHTML=(num.length?num:sheet.columns).map(c=>`<option value="${esc(c[0])}">${esc(c[1])}</option>`).join('');}g.agRenderGraficoPersonalizado();};
   g.agRenderGraficoPersonalizado=()=>{const source=$('agGrafFonte')?.value||agSheetKey;const old=agSheetKey;agSheetKey=source;const sheet=agActiveSheet();agSheetKey=old;const x=$('agGrafX')?.value||sheet.columns[0]?.[0],y=$('agGrafY')?.value||sheet.columns.find(c=>c[2]==='number')?.[0];const chart=$('agGraphCustom');if(chart)chart.innerHTML=x&&y?agBarChart(sheet.rows.slice(0,40).map((r,i)=>({label:r[x]||`Linha ${i+1}`,value:safeNumber(r[y])}))):agEmpty('Escolha os eixos do gráfico.');};
@@ -23233,7 +23425,7 @@ window.addEventListener('load', async () => {
   }
   function agFecharMenuImpressao(){const modal=$('agPrintMenuModal');if(modal)modal.classList.remove('active');}
   function agImprimirVendaMes(){agFecharMenuImpressao();agImprimirHTML(`Venda por Mês — ${agMesNome()}`,agConteudoImpressaoMes(),'landscape');}
-  function agImprimirVendaDia(){const date=String($('agPrintDia')?.value||'').slice(0,10);if(!date){alert('Escolha o dia que deseja imprimir.');return;}if(date.slice(0,7)!==agPeriod()){alert('Escolha uma data dentro do período selecionado.');return;}agFecharMenuImpressao();agImprimirHTML(`Venda por Dia — ${formatDate(date)}`,agConteudoImpressaoDia(date),'portrait');}
+  function agImprimirVendaDia(){const date=String($('agPrintDia')?.value||'').slice(0,10);if(!date){avNotice('Escolha o dia que deseja imprimir.');return;}if(date.slice(0,7)!==agPeriod()){avNotice('Escolha uma data dentro do período selecionado.');return;}agFecharMenuImpressao();agImprimirHTML(`Venda por Dia — ${formatDate(date)}`,agConteudoImpressaoDia(date),'portrait');}
   function agImprimirDetalhada(){agFecharMenuImpressao();agImprimirHTML(`Acompanhamento Detalhado — ${agMesNome()}`,agConteudoImpressaoDetalhada(),'portrait');}
   function agAbrirMenuImpressao(){
     const period=agPeriod();let modal=$('agPrintMenuModal');if(!modal){modal=document.createElement('div');modal.id='agPrintMenuModal';modal.className='modal-backdrop no-print';document.body.appendChild(modal);}
@@ -23248,11 +23440,11 @@ window.addEventListener('load', async () => {
   g.agImprimirDetalhada=agImprimirDetalhada;
   g.agImprimirAcompanhamentoGerencial=agAbrirMenuImpressao;
   g.agAbrirImportacaoAcompanhamento=()=>$('agImportAcompanhamentoFile')?.click();
-  function readWorkbookFile(file,callback){if(!file)return;const reader=new FileReader();reader.onload=()=>{try{if(!g.XLSX)throw new Error('Biblioteca de Excel indisponível.');const wb=g.XLSX.read(reader.result,{type:'array',cellDates:false});callback(wb);}catch(err){console.error(err);alert('Não foi possível importar o arquivo. '+(err.message||''));}};reader.readAsArrayBuffer(file);}
+  function readWorkbookFile(file,callback){if(!file)return;const reader=new FileReader();reader.onload=()=>{try{if(!g.XLSX)throw new Error('Biblioteca de Excel indisponível.');const wb=g.XLSX.read(reader.result,{type:'array',cellDates:false});callback(wb);}catch(err){console.error(err);avNotice('Não foi possível importar o arquivo. '+(err.message||''));}};reader.readAsArrayBuffer(file);}
   function aoaToObjects(aoa){if(!aoa?.length)return[];const headers=(aoa[0]||[]).map((h,i)=>String(h||`Coluna ${i+1}`).trim());return (aoa.slice(1)||[]).filter(r=>r.some(v=>v!==''&&v!==null&&v!==undefined)).map(r=>Object.fromEntries(headers.map((h,i)=>[h,r[i]??''])));}
   function normalizeHeaderKey(h){const s=String(h||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');const map={data:'data',dia:'data',venda:'venda',vendas:'venda',meta:'meta',metavenda:'meta',ativados:'ativados',metaativados:'metaAtivados',pcj:'pcj',pcjdodia:'pcj',pcjacumulado:'pcjAcumulado',pf:'pf',setor:'setor',realizado:'realizado',funcionario:'funcionario',colaborador:'funcionario'};return map[s]||null;}
   function mapImportedRows(aoa){const objects=aoaToObjects(aoa);return objects.map(obj=>{const out={id:makeId('ag_import')};Object.entries(obj).forEach(([h,v])=>{const k=normalizeHeaderKey(h);if(k)out[k]=['venda','meta','ativados','metaAtivados','realizado','pcj','pcjAcumulado','pf'].includes(k)?safeNumber(v):String(v??'');});return out;});}
-  g.agImportarAcompanhamento=e=>{const file=e?.target?.files?.[0];readWorkbookFile(file,wb=>{const ger=ensureGerencial();const names=wb.SheetNames;let imported=0;names.forEach(name=>{const aoa=g.XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,defval:''});const lower=name.toLowerCase();if(lower.includes('setor')){const rows=mapImportedRows(aoa);ger.setores.push(...rows);imported+=rows.length;}else if(lower.includes('equipe')){const rows=mapImportedRows(aoa);ger.equipe.push(...rows);imported+=rows.length;}else if(lower.includes('resultado')||lower.includes('comercial')){const rows=mapImportedRows(aoa);ger.resultados.push(...rows);imported+=rows.length;}else{const headers=(aoa[0]||[]).map((h,i)=>({id:`c${i+1}`,nome:String(h||`Coluna ${i+1}`),tipo:'text'}));const linhas=(aoa.slice(1)||[]).filter(r=>r.some(v=>v!==''&&v!=null)).map(r=>Object.fromEntries(headers.map((c,i)=>[c.id,r[i]??''])));ger.planilhas.push({id:makeId('ag_planilha'),nome:name,colunas:headers,linhas});imported+=linhas.length;}});save();g.renderAcompanhamentoGerencial();alert(`${imported} registro(s) importado(s).`);});if(e?.target)e.target.value='';};
+  g.agImportarAcompanhamento=e=>{const file=e?.target?.files?.[0];readWorkbookFile(file,wb=>{const ger=ensureGerencial();const names=wb.SheetNames;let imported=0;names.forEach(name=>{const aoa=g.XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,defval:''});const lower=name.toLowerCase();if(lower.includes('setor')){const rows=mapImportedRows(aoa);ger.setores.push(...rows);imported+=rows.length;}else if(lower.includes('equipe')){const rows=mapImportedRows(aoa);ger.equipe.push(...rows);imported+=rows.length;}else if(lower.includes('resultado')||lower.includes('comercial')){const rows=mapImportedRows(aoa);ger.resultados.push(...rows);imported+=rows.length;}else{const headers=(aoa[0]||[]).map((h,i)=>({id:`c${i+1}`,nome:String(h||`Coluna ${i+1}`),tipo:'text'}));const linhas=(aoa.slice(1)||[]).filter(r=>r.some(v=>v!==''&&v!=null)).map(r=>Object.fromEntries(headers.map((c,i)=>[c.id,r[i]??''])));ger.planilhas.push({id:makeId('ag_planilha'),nome:name,colunas:headers,linhas});imported+=linhas.length;}});save();g.renderAcompanhamentoGerencial();avNotice(`${imported} registro(s) importado(s).`);});if(e?.target)e.target.value='';};
   g.agImportarPlanilha=e=>{const file=e?.target?.files?.[0];if(!file)return;readWorkbookFile(file,wb=>{const aoa=g.XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});if(!aoa.length)return;const headers=(aoa[0]||[]).map((h,i)=>({id:`c${i+1}`,nome:String(h||`Coluna ${i+1}`),tipo:'text'}));const linhas=aoa.slice(1).filter(r=>r.some(v=>v!==''&&v!=null)).map(r=>Object.fromEntries(headers.map((c,i)=>[c.id,r[i]??''])));const ger=ensureGerencial();const id=makeId('ag_planilha');ger.planilhas.push({id,nome:file.name.replace(/\.[^.]+$/,''),colunas:headers,linhas});agSheetKey=id;save();agRenderSheet();g.agAtualizarEixosGrafico();});e.target.value='';};
   g.renderAcompanhamentoGerencial=()=>{const ger=ensureGerencial();if(!ger)return;const resetAplicado=agAplicarResetDiasV5145();if(resetAplicado){agDistEditing=false;agDistDraft={};agContextoMesDraft={feriados:null,eventos:null};save();}const period=$('agPeriodo');if(period&&!period.value)period.value=today().slice(0,7);setSelectHTML('agPlanoResponsavel',employeeOptions($('agPlanoResponsavel')?.value||''),$('agPlanoResponsavel')?.value||'');const venda=$('agResultadoVenda'),ativados=$('agResultadoAtivados');if(venda&&!venda.dataset.agBound){venda.addEventListener('input',agAtualizarAtingimentoRapido);venda.dataset.agBound='1';}if(ativados&&!ativados.dataset.agBound){ativados.addEventListener('input',agAtualizarAtingimentoRapido);ativados.dataset.agBound='1';}agRenderOverview();agRenderSheet();agRenderDistribution();agRenderPlans();g.agAtualizarEixosGrafico();g.agRenderComparativos();};
 
@@ -24490,7 +24682,7 @@ window.addEventListener('load', async () => {
       const tpl=OPERATION_TEMPLATES[reg.templateId];
       if(!tpl) return;
       if(tpl.editable===false){
-        alert('Este documento é um modelo fixo e não possui campos editáveis.');
+        avNotice('Este documento é um modelo fixo e não possui campos editáveis.');
         return;
       }
       opAbrirArquivoCentral(id);
@@ -24539,7 +24731,7 @@ window.addEventListener('load', async () => {
       const reg=opArquivoCentralBuscar(id);
       if(!reg || !exigirPermissaoDocumentoAV(reg.templateId,'excluir')) return;
       const identificacao=[reg.templateNome,reg.colaboradorNome||'',reg.numeroDocumento||''].filter(Boolean).join(' — ');
-      if(!confirm(`Excluir definitivamente ${identificacao||'este documento'}?\n\nEsta ação remove o arquivo da pasta e do histórico de origem. Não será possível desfazer.`)) return;
+      if(!await avConfirm(`Excluir definitivamente ${identificacao||'este documento'}?\n\nEsta ação remove o arquivo da pasta e do histórico de origem. Não será possível desfazer.`)) return;
       try{
         /* O registro compartilhado é removido do Supabase antes do cache local. */
         await opExcluirArquivoCentralSupabase(reg);
@@ -24550,7 +24742,7 @@ window.addEventListener('load', async () => {
         renderHomeOperacoes();
       }catch(err){
         console.error('Falha ao excluir arquivo de Operações:',err);
-        alert('Não foi possível excluir o documento. Nenhum registro foi removido da tela.');
+        avNotice('Não foi possível excluir o documento. Nenhum registro foi removido da tela.');
         try{await opHidratarArquivoCentral();}catch(_){ }
       }
     }
@@ -24598,7 +24790,7 @@ window.addEventListener('load', async () => {
         if(opEhTermoUniforme(tpl.id)) reg=await opAtualizarUniformeAoImprimirArquivo(reg,tpl);
       }catch(err){
         console.error('Não foi possível atualizar o fluxo do termo antes da impressão:',err);
-        alert('Não foi possível preparar o documento para impressão.');
+        avNotice('Não foi possível preparar o documento para impressão.');
         return;
       }
 
@@ -24610,7 +24802,7 @@ window.addEventListener('load', async () => {
       }finally{
         operacaoPaginaAtual=paginaAnterior;
       }
-      if(!html){alert('A versão digital deste documento não pôde ser montada.');return;}
+      if(!html){avNotice('A versão digital deste documento não pôde ser montada.');return;}
 
       const landscape=tpl.printOrientation==='landscape'||String(html).includes('vm-landscape');
       const frame=document.createElement('iframe');
@@ -24661,7 +24853,7 @@ window.addEventListener('load', async () => {
       }catch(err){
         console.error('Falha ao imprimir arquivo de Operações:',err);
         try{frame.remove();}catch(_){ }
-        alert('Não foi possível preparar este documento para impressão.');
+        avNotice('Não foi possível preparar este documento para impressão.');
       }
     }
     function renderHomeOperacoes(){
@@ -25081,7 +25273,7 @@ window.addEventListener('load', async () => {
       const item=operacaoHistoricoMudancasDepartamento.find(reg=>String(reg.id)===String(id));
       if(!item) return;
       const nome=String(item.dados?.colaboradorNome||item.dados?.numeroDocumento||'este documento');
-      if(!confirm(`Excluir ${nome}? Esta ação remove o arquivo da lista de documentos salvos.`)) return;
+      if(!await avConfirm(`Excluir ${nome}? Esta ação remove o arquivo da lista de documentos salvos.`)) return;
       const novaLista=operacaoHistoricoMudancasDepartamento.filter(reg=>String(reg.id)!==String(id));
       try{ await opPersistirHistoricoMudancasDepartamento(novaLista); }catch(_){
         const status=document.getElementById('operacaoSaveStatus');
@@ -25162,7 +25354,7 @@ window.addEventListener('load', async () => {
     function opImprimirPdfFixo(tpl){
       const blob=opPdfFixoBlob(tpl);
       if(!blob){
-        alert('O PDF original não está disponível para impressão.');
+        avNotice('O PDF original não está disponível para impressão.');
         return;
       }
       const url=URL.createObjectURL(blob);
@@ -25180,7 +25372,7 @@ window.addEventListener('load', async () => {
             frame.contentWindow?.print();
           }catch(_){
             const janela=window.open(url,'_blank');
-            if(!janela) alert('Não foi possível abrir o PDF. Verifique o bloqueio de pop-ups do navegador.');
+            if(!janela) avNotice('Não foi possível abrir o PDF. Verifique o bloqueio de pop-ups do navegador.');
           }
           setTimeout(limpar,60000);
         },700);
@@ -27122,7 +27314,7 @@ window.addEventListener('load', async () => {
       const dados=lerFormularioDocumentoCorporativo(tpl);
       const linhas=Array.isArray(dados[repetidorId])?dados[repetidorId]:[];
       if(linhas.length>=Number(repetidor.maxRows||20)){
-        alert(`Este documento aceita até ${repetidor.maxRows||20} registros nesta tabela.`);
+        avNotice(`Este documento aceita até ${repetidor.maxRows||20} registros nesta tabela.`);
         return;
       }
       linhas.push(opLinhaPadraoDocumento(repetidor));
@@ -27141,7 +27333,7 @@ window.addEventListener('load', async () => {
       const linhas=Array.isArray(dados[repetidorId])?dados[repetidorId]:[];
       const minimo=repetidor.minRows===undefined?1:Math.max(0,Number(repetidor.minRows)||0);
       if(linhas.length<=minimo){
-        if(minimo>0) alert('O documento precisa manter pelo menos um registro nesta tabela.');
+        if(minimo>0) avNotice('O documento precisa manter pelo menos um registro nesta tabela.');
         return;
       }
       linhas.splice(Number(index),1);
@@ -28679,12 +28871,12 @@ window.addEventListener('load', async () => {
       const arquivo=input?.files?.[0];
       if(!arquivo) return;
       if(!String(arquivo.type||'').startsWith('image/')){
-        alert('Selecione um arquivo de imagem.');
+        avNotice('Selecione um arquivo de imagem.');
         input.value='';
         return;
       }
       if(arquivo.size>12*1024*1024){
-        alert('A imagem é muito grande. Escolha uma foto com até 12 MB.');
+        avNotice('A imagem é muito grande. Escolha uma foto com até 12 MB.');
         input.value='';
         return;
       }
@@ -28721,7 +28913,7 @@ window.addEventListener('load', async () => {
         atualizarPreviewOperacao();
       }catch(err){
         console.error(err);
-        alert('Não foi possível preparar a foto selecionada.');
+        avNotice('Não foi possível preparar a foto selecionada.');
       }finally{
         input.value='';
       }
@@ -29955,7 +30147,7 @@ window.addEventListener('load', async () => {
       );
 
       if(!operacaoHistoricoAtaJanela){
-        alert('O navegador bloqueou a janela do histórico. Permita pop-ups para este arquivo.');
+        avNotice('O navegador bloqueou a janela do histórico. Permita pop-ups para este arquivo.');
         return;
       }
 
@@ -30150,11 +30342,11 @@ window.addEventListener('load', async () => {
       }
     }
 
-    function excluirAtaHistorico(id){
+    async function excluirAtaHistorico(id){
       const registro=operacaoHistoricoAtas.find(item=>item.id===id);
       if(!registro) return;
 
-      if(!confirm(
+      if(!await avConfirm(
         `Excluir permanentemente a ata “${opTituloHistoricoAta(registro.dados)}”?`
       )) return;
 
@@ -30165,7 +30357,7 @@ window.addEventListener('load', async () => {
       try{
         opSalvarHistoricoAtasLocal(novaLista);
       }catch(_){
-        alert('Não foi possível excluir a ata do histórico.');
+        avNotice('Não foi possível excluir a ata do histórico.');
         return;
       }
 
@@ -31004,7 +31196,7 @@ window.addEventListener('load', async () => {
       );
 
       if(!operacaoHistoricoJanela){
-        alert('O navegador bloqueou a janela do histórico. Permita pop-ups para este arquivo e tente novamente.');
+        avNotice('O navegador bloqueou a janela do histórico. Permita pop-ups para este arquivo e tente novamente.');
         return;
       }
 
@@ -31342,7 +31534,7 @@ window.addEventListener('load', async () => {
       const box=doc?.getElementById('hist_quoteItemsEditor');
       const linhas=box?.querySelectorAll('[data-quote-item]')||[];
       if(linhas.length<=1){
-        alert('O orçamento precisa manter pelo menos um item.');
+        avNotice('O orçamento precisa manter pelo menos um item.');
         return;
       }
       botao.closest('[data-quote-item]')?.remove();
@@ -31469,7 +31661,7 @@ window.addEventListener('load', async () => {
       try{
         opSalvarHistoricoOrcamentosLocal(atualizado);
       }catch(_){
-        alert('Não foi possível salvar as alterações. O registro original foi mantido.');
+        avNotice('Não foi possível salvar as alterações. O registro original foi mantido.');
         return;
       }
 
@@ -31590,11 +31782,11 @@ window.addEventListener('load', async () => {
       const status=document.getElementById('operacaoSaveStatus');
       if(status) status.textContent='Cópia carregada como um novo orçamento, com novo número e protocolo.';
     }
-    function excluirOrcamentoHistorico(id){
+    async function excluirOrcamentoHistorico(id){
       const registro=operacaoHistoricoOrcamentos.find(item=>item.id===id);
       if(!registro) return;
       const numero=registro.dados?.numero||'este orçamento';
-      if(!confirm(`Excluir ${numero} permanentemente do histórico?`)) return;
+      if(!await avConfirm(`Excluir ${numero} permanentemente do histórico?`)) return;
 
       const anterior=operacaoHistoricoOrcamentos;
       const novaLista=anterior.filter(item=>item.id!==id);
@@ -31602,7 +31794,7 @@ window.addEventListener('load', async () => {
         opSalvarHistoricoOrcamentosLocal(novaLista);
         operacaoHistoricoOrcamentos=novaLista;
       }catch(_){
-        alert('Não foi possível excluir o orçamento do histórico.');
+        avNotice('Não foi possível excluir o orçamento do histórico.');
         return;
       }
 
@@ -31693,7 +31885,7 @@ window.addEventListener('load', async () => {
       );
 
       if(!operacaoHistoricoContratoJanela){
-        alert(
+        avNotice(
           'O navegador bloqueou a janela do histórico. Permita pop-ups e tente novamente.'
         );
         return;
@@ -32184,7 +32376,7 @@ window.addEventListener('load', async () => {
       }
     }
 
-    function excluirContratoHistorico(id){
+    async function excluirContratoHistorico(id){
       const registro=operacaoHistoricoContratos.find(
         item=>item.id===id
       );
@@ -32194,7 +32386,7 @@ window.addEventListener('load', async () => {
         registro.dados||{}
       );
       if(
-        !confirm(
+        !await avConfirm(
           `Excluir permanentemente o contrato de ${titulo}?`
         )
       ) return;
@@ -32207,7 +32399,7 @@ window.addEventListener('load', async () => {
         opSalvarHistoricoContratosLocal(novaLista);
         operacaoHistoricoContratos=novaLista;
       }catch(_){
-        alert(
+        avNotice(
           'Não foi possível excluir o contrato do histórico.'
         );
         return;
@@ -33739,10 +33931,10 @@ window.addEventListener('load', async () => {
       if(!tpl) return;
       const dados=opCloneSeguro(reg.dados||{});
       const status=opStatusArquivoUniforme(dados);
-      if(status==='EM PREENCHIMENTO'){alert('Este termo ainda está EM PREENCHIMENTO. Abra o formulário e imprima o documento antes de anexar a versão assinada.');return;}
+      if(status==='EM PREENCHIMENTO'){avNotice('Este termo ainda está EM PREENCHIMENTO. Abra o formulário e imprima o documento antes de anexar a versão assinada.');return;}
       const tipo=String(file.type||'').toLowerCase();
-      if(!(tipo==='application/pdf'||tipo.startsWith('image/'))){alert('Envie o documento digitalizado em PDF ou imagem.');return;}
-      if(Number(file.size)>OP_UNIFORM_DIGITAL_MAX_BYTES){alert('O arquivo digitalizado deve ter no máximo 20 MB.');return;}
+      if(!(tipo==='application/pdf'||tipo.startsWith('image/'))){avNotice('Envie o documento digitalizado em PDF ou imagem.');return;}
+      if(Number(file.size)>OP_UNIFORM_DIGITAL_MAX_BYTES){avNotice('O arquivo digitalizado deve ter no máximo 20 MB.');return;}
       try{
         dados.arquivoUniformeId=reg.id;
         const remoto=await opEnviarUniformeDigitalizadoSupabase(tpl,dados,file);
@@ -33756,7 +33948,7 @@ window.addEventListener('load', async () => {
         if(!persistido) throw new Error('Registro do uniforme não localizado para atualização.');
         if(operacaoRascunhos[tpl.id]?.arquivoUniformeId===reg.id){operacaoRascunhos[tpl.id]=opCloneSeguro(persistido.dados);try{opSalvarRascunhosPersistentes();}catch(_){ }}
         renderFormularioOperacao();renderPreviewOperacao();
-      }catch(err){console.error(err);alert('Não foi possível salvar o arquivo digitalizado no Supabase.');}
+      }catch(err){console.error(err);avNotice('Não foi possível salvar o arquivo digitalizado no Supabase.');}
     }
     async function opAbrirDigitalizadoArquivoUniforme(id,baixar=false){
       const reg=opArquivoUniformePorId(id);
@@ -33767,7 +33959,7 @@ window.addEventListener('load', async () => {
         const central=opArquivoCentralDoUniforme(reg.id)||
           operacaoArquivoCentral.find(item=>item.templateId===tpl.id&&String(item.numeroDocumento||'')===String(reg.dados?.numeroDocumento||''))||
           null;
-        if(!central?.supabaseId){alert('Este arquivo ainda não está sincronizado com o Supabase.');return;}
+        if(!central?.supabaseId){avNotice('Este arquivo ainda não está sincronizado com o Supabase.');return;}
         const url=await opUrlUniformeDigitalizadoSupabase(central,baixar);
         if(baixar){
           const a=document.createElement('a');
@@ -33775,11 +33967,8 @@ window.addEventListener('load', async () => {
           a.download=reg.dados?.digitalizadoNome||'uniforme-digitalizado';
           a.rel='noopener';
           document.body.appendChild(a);a.click();a.remove();
-        }else{
-          const janela=window.open(url,'_blank','noopener');
-          if(!janela) alert('O navegador bloqueou a abertura do arquivo.');
-        }
-      }catch(err){console.error(err);alert('Não foi possível abrir o arquivo digitalizado no Supabase.');}
+        }else avImage(url,reg.dados?.digitalizadoNome||'Arquivo digitalizado','',String(reg.dados?.digitalizadoTipo||'application/pdf'));
+      }catch(err){console.error(err);avNotice('Não foi possível abrir o arquivo digitalizado no Supabase.');}
     }
     function opBaixarDigitalizadoArquivoUniforme(id){return opAbrirDigitalizadoArquivoUniforme(id,true);}
 
@@ -34059,12 +34248,12 @@ window.addEventListener('load', async () => {
       if(!opEhTermoUniforme(tpl?.id)||!file) return;
       const dados=lerFormularioDocumentoCorporativo(tpl);
       if(String(dados.statusDocumento||'').toUpperCase()==='EM PREENCHIMENTO'){
-        alert('Imprima o termo antes de anexar o arquivo assinado. A impressão mudará a situação para AGUARDANDO ASSINATURA.');
+        avNotice('Imprima o termo antes de anexar o arquivo assinado. A impressão mudará a situação para AGUARDANDO ASSINATURA.');
         return;
       }
       const tipo=String(file.type||'').toLowerCase();
-      if(!(tipo==='application/pdf'||tipo.startsWith('image/'))){alert('Envie o documento digitalizado em PDF ou imagem.');return;}
-      if(Number(file.size)>OP_UNIFORM_DIGITAL_MAX_BYTES){alert('O arquivo digitalizado deve ter no máximo 20 MB.');return;}
+      if(!(tipo==='application/pdf'||tipo.startsWith('image/'))){avNotice('Envie o documento digitalizado em PDF ou imagem.');return;}
+      if(Number(file.size)>OP_UNIFORM_DIGITAL_MAX_BYTES){avNotice('O arquivo digitalizado deve ter no máximo 20 MB.');return;}
       const status=document.getElementById('operacaoSaveStatus');
       if(status) status.textContent='Enviando arquivo digitalizado...';
       try{
@@ -34084,7 +34273,7 @@ window.addEventListener('load', async () => {
         renderPreviewOperacao();
         const status2=document.getElementById('operacaoSaveStatus');
         if(status2) status2.textContent='✓ Arquivo assinado anexado. Documento CONCLUÍDO.';
-      }catch(err){console.error(err); if(status) status.textContent='Não foi possível armazenar o arquivo digitalizado.'; alert('Não foi possível salvar o arquivo digitalizado no Supabase.');}
+      }catch(err){console.error(err); if(status) status.textContent='Não foi possível armazenar o arquivo digitalizado.'; avNotice('Não foi possível salvar o arquivo digitalizado no Supabase.');}
     }
     async function opAbrirTermoUniformeDigitalizado(baixar=false){
       const tpl=OPERATION_TEMPLATES[operacaoModeloAtual];
@@ -34096,7 +34285,7 @@ window.addEventListener('load', async () => {
         if(!central&&operacaoArquivoCentralModo==='editar'&&operacaoArquivoCentralEditandoId){
           central=opArquivoCentralBuscar(operacaoArquivoCentralEditandoId);
         }
-        if(!central?.supabaseId){alert('Este documento ainda não está sincronizado com o Supabase.');return;}
+        if(!central?.supabaseId){avNotice('Este documento ainda não está sincronizado com o Supabase.');return;}
         const url=await opUrlUniformeDigitalizadoSupabase(central,baixar);
         if(baixar){
           const a=document.createElement('a');
@@ -34104,18 +34293,15 @@ window.addEventListener('load', async () => {
           a.download=dados.digitalizadoNome||'uniforme-digitalizado';
           a.rel='noopener';
           document.body.appendChild(a);a.click();a.remove();
-        }else{
-          const janela=window.open(url,'_blank','noopener');
-          if(!janela) alert('O navegador bloqueou a abertura do arquivo.');
-        }
-      }catch(err){console.error(err);alert('Não foi possível abrir o arquivo digitalizado no Supabase.');}
+        }else avImage(url,dados.digitalizadoNome||'Arquivo digitalizado','',String(dados.digitalizadoTipo||'application/pdf'));
+      }catch(err){console.error(err);avNotice('Não foi possível abrir o arquivo digitalizado no Supabase.');}
     }
     function opBaixarTermoUniformeDigitalizado(){ return opAbrirTermoUniformeDigitalizado(true); }
     async function opRemoverTermoUniformeDigitalizado(){
       const tpl=OPERATION_TEMPLATES[operacaoModeloAtual];
       if(!opEhTermoUniforme(tpl?.id)) return;
       const dados=valoresOperacao(tpl.id);
-      if(!confirm('Remover o arquivo assinado? O documento voltará para AGUARDANDO ASSINATURA.')) return;
+      if(!await avConfirm('Remover o arquivo assinado? O documento voltará para AGUARDANDO ASSINATURA.')) return;
       try{
         let central=null;
         if(dados.arquivoUniformeId) central=opArquivoCentralDoUniforme(dados.arquivoUniformeId);
@@ -34131,7 +34317,7 @@ window.addEventListener('load', async () => {
         renderFormularioOperacao();renderPreviewOperacao();
         const status=document.getElementById('operacaoSaveStatus');
         if(status) status.textContent='Arquivo digitalizado removido. Situação: AGUARDANDO ASSINATURA.';
-      }catch(err){console.error(err);alert('Não foi possível remover o arquivo digitalizado.');}
+      }catch(err){console.error(err);avNotice('Não foi possível remover o arquivo digitalizado.');}
     }
 
 
@@ -34247,7 +34433,7 @@ window.addEventListener('load', async () => {
       }catch(err){
         console.error('Falha ao imprimir Tabela de Acompanhamento:',err);
         try{frame.remove();}catch(_){ }
-        alert('Não foi possível preparar a Tabela de Acompanhamento para impressão.');
+        avNotice('Não foi possível preparar a Tabela de Acompanhamento para impressão.');
         return false;
       }
     }
@@ -34849,7 +35035,7 @@ async function opBaixarArteOriginal(formato){
     const name=tpl.id+'_'+(dados.mesAno||'arte');
     if(formato==='pdf')opArteDownload(opArtePDF(canvas),name+'.pdf');
     else opArteDownload(await new Promise(r=>canvas.toBlob(r,'image/png')),name+'.png');
-  }catch(e){console.error(e);alert('Não foi possível exportar a arte. Tente novamente.');}
+  }catch(e){console.error(e);avNotice('Não foi possível exportar a arte. Tente novamente.');}
 }
 async function opImprimirArteOriginal(tpl){
   const canvas=await opArteCanvas(tpl,lerFormularioOperacao());
@@ -35722,7 +35908,7 @@ async function opImprimirArteOriginal(tpl){
         try{frame.remove();}catch(_){ }
         const status=document.getElementById('operacaoSaveStatus');
         if(status) status.textContent='Não foi possível preparar o termo para impressão.';
-        alert('Não foi possível imprimir o termo. O documento continua salvo e nenhuma informação foi perdida.');
+        avNotice('Não foi possível imprimir o termo. O documento continua salvo e nenhuma informação foi perdida.');
         return false;
       }
     }
@@ -35921,7 +36107,7 @@ async function opImprimirArteOriginal(tpl){
       }catch(err){
         console.error('Falha na impressão isolada do documento corporativo:',err);
         try{frame.remove();}catch(_){}
-        alert('Não foi possível preparar o documento para impressão.');
+        avNotice('Não foi possível preparar o documento para impressão.');
         return false;
       }
     }
@@ -36033,7 +36219,7 @@ body{display:block!important}
       }catch(err){
         console.error('Falha na impressão do Guardião:',err);
         try{frame.remove();}catch(_){}
-        alert('Não foi possível preparar o Guardião para impressão.');
+        avNotice('Não foi possível preparar o Guardião para impressão.');
         return false;
       }
     }
@@ -36042,7 +36228,7 @@ body{display:block!important}
     async function opImprimirPremiacaoMuralIsolada(tpl){
       if(!tpl || !['premiacao_destaque','premiacao_aniversario'].includes(String(tpl.kind||''))) return false;
       if(opArteOriginalAplicavel(tpl)){
-        try{await opImprimirArteOriginal(tpl);return true;}catch(e){console.error(e);alert('Não foi possível preparar a impressão. Utilize Baixar PDF A4.');return false;}
+        try{await opImprimirArteOriginal(tpl);return true;}catch(e){console.error(e);avNotice('Não foi possível preparar a impressão. Utilize Baixar PDF A4.');return false;}
       }
 
       const frame=document.createElement('iframe');
@@ -36114,7 +36300,7 @@ body{display:block!important}
       }catch(err){
         console.error('Falha na impressão da premiação:',err);
         try{frame.remove();}catch(_){}
-        alert('Não foi possível preparar a arte para impressão.');
+        avNotice('Não foi possível preparar a arte para impressão.');
         return false;
       }
     }
@@ -36163,7 +36349,7 @@ body{display:block!important}
       }catch(err){
         console.error('Falha ao imprimir Arquivo de Documentos AV:',err);
         try{frame.remove();}catch(_){ }
-        alert('Não foi possível preparar as etiquetas para impressão.');
+        avNotice('Não foi possível preparar as etiquetas para impressão.');
         return false;
       }
     }
@@ -36427,18 +36613,22 @@ body{display:block!important}
       .filter(f=>normalizarOperador(f?.operador) && !['DESLIGADO','INATIVO'].includes(String(f?.status||'ATIVO').toUpperCase()))
       .slice().sort((a,b)=>String(a?.nome||'').localeCompare(String(b?.nome||''),'pt-BR'));
   }
+  // O rascunho mantém alterações de todos os operadores, mesmo ao filtrar a lista.
+  let rascunhoAcessos=null;
+  window.alterarRascunhoAcessoOperacional=function(op,habilitado){if(!rascunhoAcessos)rascunhoAcessos={...mapaAcessos()};rascunhoAcessos[normalizarOperador(op)]=!!habilitado};
   window.abrirConfiguracaoAcessoOperacional=function(){
-    if(typeof temPermissao==='function' && !temPermissao('acompanhamento')){alert('Você não possui permissão para configurar o Sistema Operacional.');return;}
+    if(typeof temPermissao==='function' && !temPermissao('acompanhamento')){avNotice('Você não possui permissão para configurar o Sistema Operacional.');return;}
     const modal=document.getElementById('modalAcessoOperacional'); if(!modal)return;
+    rascunhoAcessos={...mapaAcessos()};
     const busca=document.getElementById('buscaAcessoOperacional'); if(busca)busca.value='';
     renderConfiguracaoAcessoOperacional(); modal.classList.add('active');
     setTimeout(()=>busca?.focus(),80);
   };
-  window.fecharConfiguracaoAcessoOperacional=function(){document.getElementById('modalAcessoOperacional')?.classList.remove('active');};
+  window.fecharConfiguracaoAcessoOperacional=function(){rascunhoAcessos=null;document.getElementById('modalAcessoOperacional')?.classList.remove('active');};
   window.renderConfiguracaoAcessoOperacional=function(){
     const alvo=document.getElementById('listaAcessoOperacional'); if(!alvo)return;
     const busca=typeof norm==='function'?norm(document.getElementById('buscaAcessoOperacional')?.value||''):String(document.getElementById('buscaAcessoOperacional')?.value||'').toUpperCase();
-    const acessos=mapaAcessos();
+    const acessos=rascunhoAcessos||mapaAcessos();
     const todos=funcionariosConfiguraveis();
     const filtrados=todos.filter(f=>{
       const texto=`${f?.nome||''} ${f?.operador||''} ${f?.matricula||''} ${f?.cargo||''} ${f?.setor||f?.departamento||''}`;
@@ -36454,16 +36644,16 @@ body{display:block!important}
         <div class="operacional-access-cell">OP. ${escapeHTML(op)}</div>
         <div class="operacional-access-cell op-access-matricula">${escapeHTML(f.matricula||'-')}</div>
         <div class="operacional-access-cell op-access-cargo">${escapeHTML(f.cargo||'-')}</div>
-        <label class="operacional-access-toggle"><input type="checkbox" data-operacional-acesso="${escapeHTML(op)}" ${liberado?'checked':''} onchange="this.nextElementSibling.textContent=this.checked?'LIBERADO':'BLOQUEADO'"><span>${liberado?'LIBERADO':'BLOQUEADO'}</span></label>
+        <label class="operacional-access-toggle"><input type="checkbox" data-operacional-acesso="${escapeHTML(op)}" ${liberado?'checked':''} onchange="alterarRascunhoAcessoOperacional(this.dataset.operacionalAcesso,this.checked);this.nextElementSibling.textContent=this.checked?'LIBERADO':'BLOQUEADO'"><span>${liberado?'LIBERADO':'BLOQUEADO'}</span></label>
       </div>`;
     }).join('');
   };
   window.salvarConfiguracaoAcessoOperacional=async function(botao){
-    if(!globalConfig || typeof globalConfig!=='object'){alert('Configuração global ainda não foi carregada.');return;}
+    if(!globalConfig || typeof globalConfig!=='object'){avNotice('Configuração global ainda não foi carregada.');return;}
     const configAnterior=cloneJSONSeguro(globalConfig,{});
     const mapa={...mapaAcessos()};
-    funcionariosConfiguraveis().forEach(f=>{const op=normalizarOperador(f.operador); mapa[op]=false;});
-    document.querySelectorAll('#listaAcessoOperacional [data-operacional-acesso]').forEach(el=>{mapa[normalizarOperador(el.dataset.operacionalAcesso)]=!!el.checked;});
+    // Persistir somente as alterações feitas no modal, preservando quem ficou oculto pela busca.
+    Object.assign(mapa,rascunhoAcessos||{});
     globalConfig.operacionalAcessos=mapa;
     globalConfig.operacionalAcessosAtualizadoPor=usuarioAtual?.nome||'';
     globalConfig.operacionalAcessosAtualizadoEm=typeof agoraBR==='function'?agoraBR():new Date().toLocaleString('pt-BR');
@@ -36473,8 +36663,8 @@ body{display:block!important}
       renderConfiguracaoAcessoOperacional();
       if(typeof marcarSincronizacaoConfirmada==='function')marcarSincronizacaoConfirmada('ONLINE • acessos do Operacional atualizados');
       fecharConfiguracaoAcessoOperacional();
-      alert('Acessos do Sistema Operacional atualizados com sucesso.');
-    }catch(err){globalConfig=configAnterior;console.error('Falha ao salvar acessos do Operacional:',err);alert('Não foi possível salvar os acessos do Sistema Operacional. Verifique a conexão e tente novamente.');}
+      avNotice('Acessos do Sistema Operacional atualizados com sucesso.');
+    }catch(err){globalConfig=configAnterior;console.error('Falha ao salvar acessos do Operacional:',err);avNotice('Não foi possível salvar os acessos do Sistema Operacional. Verifique a conexão e tente novamente.');}
     finally{if(botao){botao.disabled=false;botao.innerHTML=original||'💾 Salvar acessos';}}
   };
 })();
@@ -37177,7 +37367,7 @@ console.info('[V51.73] Salvamento seguro ativo; Realtime monolítico permanece d
   window.opAbrirCamposDocumentoOperacao = function(){
     const select=el('operacaoModeloSelect');
     if(!select?.value){
-      alert('Selecione um documento antes de criar.');
+      avNotice('Selecione um documento antes de criar.');
       select?.focus();
       return;
     }
@@ -37412,7 +37602,7 @@ console.info('[V51.73] Salvamento seguro ativo; Realtime monolítico permanece d
     return {period,y,m,days,funcs,cells,obs:saved?.obs||'',manual:saved?.manual||{}};
   }
   let atual=null;
-  window.gerarEscalaMensal=function(){ const period=$('escalaMesRef')?.value;if(!period){alert('Selecione o mês.');return;} atual=mensalGerado(period);renderMensal(); };
+  window.gerarEscalaMensal=function(){ const period=$('escalaMesRef')?.value;if(!period){avNotice('Selecione o mês.');return;} atual=mensalGerado(period);renderMensal(); };
   function rotuloStatusEscalaMensal(status){
     return status==='X'?'Não trabalha':status==='F'?'Folga':'Trabalho';
   }
@@ -37470,7 +37660,7 @@ console.info('[V51.73] Salvamento seguro ativo; Realtime monolítico permanece d
     ev.preventDefault();
     definirStatusCelulaEscalaMensal(fid,d,status);
   };
-  window.salvarEscalaMensal=function(){if(!atual){alert('Gere a escala mensal primeiro.');return;}db.escalasMensais=db.escalasMensais||{};db.escalasMensais[atual.period]={periodo:atual.period,manual:atual.manual,obs:$('escalaMonthObs')?.value.trim()||'',atualizadoPor:window.usuarioAtual?.nome||'',atualizadoEm:typeof agoraBR==='function'?agoraBR():new Date().toLocaleString('pt-BR')};saveDB();atual.obs=db.escalasMensais[atual.period].obs;alert('Escala mensal salva com sucesso.');};
+  window.salvarEscalaMensal=function(){if(!atual){avNotice('Gere a escala mensal primeiro.');return;}db.escalasMensais=db.escalasMensais||{};db.escalasMensais[atual.period]={periodo:atual.period,manual:atual.manual,obs:$('escalaMonthObs')?.value.trim()||'',atualizadoPor:window.usuarioAtual?.nome||'',atualizadoEm:typeof agoraBR==='function'?agoraBR():new Date().toLocaleString('pt-BR')};saveDB();atual.obs=db.escalasMensais[atual.period].obs;avNotice('Escala mensal salva com sucesso.');};
 
   /* V52.21 — impressão dedicada da Escala Mensal no modelo AVENIDA aprovado. */
   window.imprimirEscalaMensal=function(){
