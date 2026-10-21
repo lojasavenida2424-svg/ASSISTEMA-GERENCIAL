@@ -738,11 +738,90 @@
       const all=accounts(),enabled=all.filter(a=>a.active),admins=enabled.filter(a=>a.role==='admin');
       body=`<div class="user-summary"><div class="mini"><span>Contas cadastradas</span><strong>${all.length}</strong></div><div class="mini"><span>Contas ativas</span><strong>${enabled.length}</strong></div><div class="mini"><span>Administradores ativos</span><strong>${admins.length}</strong></div></div><section class="panel"><div class="panel-head"><div><strong>Usuários com acesso</strong><p class="text-note" style="margin:5px 0 0">Crie, edite, bloqueie ou remova usuários deste navegador.</p></div>${isAdmin()?`<button class="btn btn-primary btn-small" data-action="userCreate">${ico('plus',16)} Novo usuário</button>`:''}</div><div class="user-list">${all.map(a=>`<div class="user-line"><div class="user-avatar">${escapeHtml(a.name.slice(0,2).toUpperCase())}</div><div class="user-detail"><strong>${escapeHtml(a.name)} ${a.id===sessionUser?.id?'<span class="chip yellow" style="margin-left:5px">Você</span>':''}</strong><small>@${escapeHtml(a.username)} · ${a.createdAt?dt(a.createdAt):'Conta antiga'}</small><div class="user-tags"><span class="chip ${a.role==='admin'?'yellow':'dark'}">${a.role==='admin'?'Administrador':'Operador'}</span><span class="chip ${a.active?'green':'red'}">${a.active?'Ativo':'Bloqueado'}</span></div></div>${isAdmin()?`<div class="user-actions"><button class="btn btn-small" data-action="userEdit" data-id="${escapeHtml(a.id)}" title="Editar usuário">${ico('edit',14)} Editar</button><button class="btn btn-small" data-action="userReset" data-id="${escapeHtml(a.id)}" title="Alterar senha">${ico('shield',14)} Senha</button>${a.id!==sessionUser?.id?`<button class="btn btn-small ${a.active?'btn-danger':''}" data-action="userToggle" data-id="${escapeHtml(a.id)}">${ico(a.active?'close':'check',13)} ${a.active?'Bloquear':'Ativar'}</button><button class="btn btn-small" data-action="userDelete" data-id="${escapeHtml(a.id)}" title="Excluir conta">${ico('trash',14)}</button>`:''}</div>`:''}</div>`).join('')}</div></section><div class="account-tip">${ico('info',18)} <span>${isAdmin()?'Os administradores podem criar contas e alterar o acesso; operadores não conseguem administrar usuários.':'Seu perfil é de operador. Somente administradores podem alterar usuários.'} <b>Este gerenciamento é local:</b> não cria usuários em outros celulares ou computadores, nem substitui as políticas de acesso de um servidor.</span></div>`;
     }
+    if(settingsTab==='users' && isAdmin())body+=`<section class="panel section-gap"><div class="panel-head"><div><strong>Migração segura de contas para o Supabase</strong><p class="text-note" style="margin:5px 0 0">Etapa 3: copiar contas locais com hashes protegidos, sem mudar o login atual.</p></div></div><div class="body-pad"><div class="notice blue">${ico('shield')}<span>A migração usa as contas deste navegador como referência inicial. Outros dispositivos podem possuir contas ou senhas diferentes. Confira antes de continuar; a sincronização das senhas ainda depende da Etapa 4.</span></div><div class="actions" style="margin-top:14px"><button class="btn btn-primary" data-action="accountMigrationModal">${ico('upload',16)} Preparar migração e testar login online</button></div></div></section>`;
     if(settingsTab==='backup')body=`<section class="panel"><div class="panel-head"><strong>Backup e recuperação dos registros</strong>${ico('shield')}</div><div class="body-pad"><p class="text-note">Exporte todos os registros operacionais, mercadorias, lojas, caminhões, perdas, inventários e fotos compactadas para um JSON.</p><div class="actions" style="margin:18px 0">${act('Exportar backup','exportBackup','download','btn-dark')}${act('Restaurar backup','importBackup','upload','')}</div><div class="notice blue">${ico('info')}<span>O arquivo de backup contém os registros operacionais. As credenciais dos usuários locais são gerenciadas separadamente neste navegador e não acompanham este backup.</span></div></div></section>`;
     if(settingsTab==='about')body=`<section class="panel"><div class="panel-head"><strong>ESTOQUE AV — V2.0</strong><span class="chip">${cloudEnabled?'Supabase':'Local'} · HTML</span></div><div class="body-pad">${[['Cadastro e movimentações manuais','Ativo'],['Múltiplas lojas; depósito e salão','Ativo'],['Transferências com confirmação','Ativo'],['Recebimento de caminhões por categoria','Ativo'],['Perdas sem cadastro e baixas automáticas quando houver saldo','Ativo'],['Leitor contextual de 12 dígitos com tema automático','Ativo'],['Gerenciamento local de usuários','Ativo'],['Sincronização pelo Gerencial e função protegida',cloudReady?'Ativo':'Requer configuração']].map(([label,status])=>`<div class="report-row"><span>${label}</span><span class="chip ${status==='Ativo'?'green':'yellow'}">${status}</span></div>`).join('')}</div></section><div class="notice blue">${ico('info')}<span>As contas locais deste módulo continuam como antes e não são credenciais do Supabase. Quando usado pelo Gerencial com a ponte instalada, o servidor valida o operador e a permissão a cada leitura ou gravação; acessos somente locais permanecem limitados a este navegador.</span></div>`;
     return pageHead('Configurações','Gerencie preferências, usuários, proteção dos registros e informações do sistema.')+tabs+`<section class="settings-content" role="tabpanel">${body}</section>`;
   }
   function setSettingsTab(tab){if(!settingTabs.some(x=>x[0]===tab))return;settingsTab=tab;if(prefs.page!=='settings'){setPage('settings');return}render()}
+  // Migração opcional, apenas uma vez, para a função SEPARADA estoque-av-accounts.
+  // Não altera o login legado, nem remove localStorage, nem salva o segredo no navegador.
+  function accountMigrationModal(){
+    if(!requireAdmin())return;
+    const existing=accounts();
+    const rows=existing.map(a=>({
+      id:a.id,username:a.username,name:a.name,role:a.role,active:a.active,
+      salt:a.salt,hash:a.hash
+    }));
+    const problems=[];
+    if(!rows.length||rows.length>200)problems.push('O número de contas deve estar entre 1 e 200.');
+    const ids=new Set(),names=new Set();
+    for(const a of rows){
+      if(typeof a.id!=='string'||!/^[a-zA-Z0-9_-]{6,128}$/.test(a.id))problems.push('Identificador de conta inválido.');
+      if(typeof a.username!=='string'||!/^[a-z0-9._-]{3,40}$/.test(a.username))problems.push('Há um login fora do padrão aceito.');
+      if(typeof a.name!=='string'||a.name.trim().length<2||a.name.trim().length>90)problems.push('Há um nome fora do padrão aceito.');
+      if(!['admin','operator'].includes(a.role)||typeof a.active!=='boolean')problems.push('Perfil de conta inválido.');
+      try{if(typeof a.salt!=='string'||fromB64(a.salt).length!==16||typeof a.hash!=='string'||fromB64(a.hash).length!==32)problems.push('Há uma conta sem hash PBKDF2 compatível.');}
+      catch(_){problems.push('Há uma conta com credenciais incompatíveis.');}
+      if(ids.has(a.id)||names.has(a.username))problems.push('Há identificadores ou logins duplicados.');
+      ids.add(a.id);names.add(a.username);
+    }
+    if(!rows.some(a=>a.role==='admin'&&a.active))problems.push('É necessário manter um administrador ativo.');
+    const validated=problems.length===0;
+    const summary=rows.map(a=>`<div class="report-row"><span>${escapeHtml(a.name)} (@${escapeHtml(a.username)})</span><span class="chip ${a.active?'green':'red'}">${a.role==='admin'?'Administrador':'Operador'} · ${a.active?'ativo':'bloqueado'}</span></div>`).join('');
+    const form=`<div class="notice ${validated?'blue':''}">${ico(validated?'info':'shield')}<span>${validated?'Revise os '+rows.length+' usuário(s) locais antes do envio. Nenhuma senha em texto será transferida.':'A lista atual contém problemas de compatibilidade: '+escapeHtml([...new Set(problems)].join(' '))}</span></div>
+      <div style="max-height:230px;overflow:auto;margin:12px 0">${summary}</div>
+      <div class="field"><label for="migration-secret">Segredo temporário criado em Edge Function Secrets (não compartilhe)</label><input id="migration-secret" type="password" minlength="32" autocomplete="off" placeholder="Cole o segredo de 32 ou mais caracteres"></div>
+      <label style="display:flex;gap:10px;align-items:flex-start;margin:14px 0;font-size:13px"><input type="checkbox" id="migration-confirm"><span>Confirmo que ESTE computador é a fonte principal das contas e compreendo que a migração não altera o login local até a atualização seguinte.</span></label>
+      <div id="migration-feedback" role="status" aria-live="polite" class="notice" style="display:none"></div>
+      <div class="field" style="margin-top:14px"><label for="migration-test-username">Testar uma conta migrada (login)</label><input id="migration-test-username" type="text" value="${escapeHtml(sessionUser?.username||'')}" autocomplete="username" placeholder="Login"></div>
+      <div class="field"><label for="migration-test-password">Senha atual dessa conta (somente para teste)</label><input id="migration-test-password" type="password" autocomplete="off" placeholder="Digite a senha atual"></div>
+      <p class="text-note">Após migrar, teste o login online aqui. O teste encerra a sessão imediatamente e não salva a senha digitada.</p>`;
+    modal('Migração de contas — Etapa 3','Não substitui sua tela de login nem a ponte atual do Estoque.',form,
+      `<button type="button" class="btn" id="migration-test">Testar login online</button><button type="button" class="btn btn-primary" id="migration-send" ${validated?'':'disabled'}>${ico('upload')} Migrar contas uma vez</button>`,true);
+    const endpoint=CLOUD_URL+'/functions/v1/estoque-av-accounts';
+    const state=$('#migration-feedback');
+    const report=(message,ok)=>{if(!state)return;state.style.display='block';state.className='notice '+(ok?'blue':'');state.textContent=message;};
+    const invoke=async body=>{
+      if(!navigator.onLine)throw Error('Sem conexão com a internet.');
+      const response=await fetch(endpoint,{method:'POST',mode:'cors',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      let payload={};try{payload=await response.json()}catch(_){throw Error('Resposta inválida da função do Supabase (HTTP '+response.status+').')}
+      if(!response.ok||!payload.ok)throw Error((payload.error||'FALHA_NA_REQUISICAO')+' (HTTP '+response.status+').');
+      return payload;
+    };
+    $('#migration-send').addEventListener('click',async()=>{
+      if(!isAdmin())return;
+      const secretNode=$('#migration-secret'),secret=secretNode.value;
+      const send=$('#migration-send');
+      if(!validated)return report('Há dados de contas incompatíveis. Não foi enviado nenhum registro.',false);
+      if(secret.length<32)return report('Preencha o segredo temporário de pelo menos 32 caracteres definido no Supabase.',false);
+      if(!$('#migration-confirm').checked)return report('Confirme qual computador possui a lista de contas que deverá prevalecer.',false);
+      send.disabled=true;send.textContent='Enviando contas protegidas…';
+      try{
+        const result=await invoke({action:'bootstrap',bootstrap_secret:secret,accounts:rows});
+        report('Migração concluída: '+result.migrated+' conta(s) copiadas. Não apague contas locais. Teste o acesso centralizado abaixo, depois desative o segredo temporário no Supabase.',true);
+        send.textContent='Contas migradas';
+      }catch(err){
+        report('Não foi possível confirmar a migração: '+(err.message||'falha desconhecida')+'. Se houve falha de rede, verifique a contagem no Supabase antes de tentar novamente.',false);
+        send.disabled=false;send.textContent='Migrar contas uma vez';
+      }finally{secretNode.value='';}
+    });
+    $('#migration-test').addEventListener('click',async()=>{
+      const btn=$('#migration-test');
+      const username=$('#migration-test-username').value.trim().toLowerCase();
+      const passwordNode=$('#migration-test-password');
+      const password=passwordNode.value;
+      if(!username||!password)return report('Informe login e senha para testar a autenticação online.',false);
+      btn.disabled=true;btn.textContent='Testando autenticação…';
+      try{
+        const result=await invoke({action:'login',username,password});
+        try{await invoke({action:'logout',token:result.token})}
+        catch(_){/* A sessão vence automaticamente; o token jamais é salvo. */}
+        report('Teste concluído: a função central reconheceu @'+result.user.username+'. A tela de login ainda é local até a próxima atualização do HTML.',true);
+      }catch(err){report('Teste não passou: '+(err.message||'falha de conexão'),false)}
+      finally{passwordNode.value='';btn.disabled=false;btn.textContent='Testar login online';}
+    });
+  }
   function userCreate(){userEdit()}
   function userEdit(id){
     if(!requireAdmin())return;
@@ -946,7 +1025,7 @@
     update();code.focus({preventScroll:true});
   }
 
-  const actionMap={cloudConnectModal,cloudMigrateLocal,cloudForceRefresh,cloudDisconnectAsk,userCreate,userEdit,userReset,userToggle,userDelete,receiptModal,receiptDetail,exportReceipts,accountModal,productModal,productDetail,movementModal,transferModal,receiveModal,transferDetail,lossModal,lossDetail,inventoryNew,inventoryDetail,storeModal,operatorModal,exportProducts,exportMovement,exportLosses,exportBackup,importBackup,switchStore:id=>{prefs.storeId=id;savePrefs();render()},themeSwitch:()=>{prefs.theme=prefs.theme==='dark'?'light':'dark';savePrefs();render()},print:()=>window.print()};
+  const actionMap={cloudConnectModal,cloudMigrateLocal,cloudForceRefresh,cloudDisconnectAsk,accountMigrationModal,userCreate,userEdit,userReset,userToggle,userDelete,receiptModal,receiptDetail,exportReceipts,accountModal,productModal,productDetail,movementModal,transferModal,receiveModal,transferDetail,lossModal,lossDetail,inventoryNew,inventoryDetail,storeModal,operatorModal,exportProducts,exportMovement,exportLosses,exportBackup,importBackup,switchStore:id=>{prefs.storeId=id;savePrefs();render()},themeSwitch:()=>{prefs.theme=prefs.theme==='dark'?'light':'dark';savePrefs();render()},print:()=>window.print()};
   function bindContent(){const c=$('#content');c.querySelectorAll('[data-settings-tab]').forEach(button=>button.addEventListener('click',()=>setSettingsTab(button.dataset.settingsTab)));c.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>{const fn=actionMap[el.dataset.action];if(fn)fn(el.dataset.id)}));c.querySelectorAll('[data-page]').forEach(el=>el.addEventListener('click',()=>setPage(el.dataset.page)));const search=c.querySelector('#list-search');if(search){search.addEventListener('input',e=>{const value=e.target.value,pos=e.target.selectionStart;searchValue=value;const page=prefs.page;const rerender={products:productsPage,movement:movementPage,losses:lossesPage,receipts:receiptsPage}[page];if(rerender){c.innerHTML=rerender();bindContent();const inp=c.querySelector('#list-search');if(inp){inp.focus();inp.setSelectionRange(pos,pos)}}})}mountScannerIcons(c);const select=c.querySelector('#list-filter');if(select)select.addEventListener('change',e=>{filterValue=e.target.value;const page=prefs.page;const rerender={products:productsPage,movement:movementPage,losses:lossesPage,transfers:transfersPage,receipts:receiptsPage}[page];if(rerender){c.innerHTML=rerender();bindContent()}})}
   $('#overlay-mobile').addEventListener('click',()=>{$('#sidebar').classList.remove('open');$('#overlay-mobile').classList.remove('show')});window.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#scanner-root')?.firstElementChild)closeScanner();else if(e.key==='Escape'&&modalState)closeModal()});window.addEventListener('storage',e=>{if(e.key===ACCOUNTS_KEY){const own=accounts().find(a=>a.id===sessionUser?.id&&a.active);if(sessionUser&&!own){logout();toast('Seu acesso foi alterado em outra aba.',true)}else if(sessionUser)render()}if(e.key===KEY){if(!cloudEnabled){db=loadData();render();toast('Dados locais atualizados de outra aba.')}else if(!cloudBusy)cloudPull({quiet:true,preserveModal:!!modalState}) }});
   boot();
