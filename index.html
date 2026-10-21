@@ -15801,10 +15801,8 @@ async function garantirUsuariosOficiaisOnlineAntesDoLogin(){
   // Login nunca pode criar/recriar cadastros nem sobrescrever o estado oficial.
   if(!supabaseclient || !navigator.onLine) return false;
   try{
-    const data=await comTimeout(chamarGerencialAutenticacaoSegura('public_config'),SUPABASE_OPERATION_TIMEOUT_MS);
-    if(!Array.isArray(data?.config?.usuarios)) return false;
-    gerencialConfigUpdatedAt=data.updated_at;
-    globalConfig=normalizarConfigGlobal(data.config);
+    const config=await obterConfigGerencialCompat();
+    globalConfig=normalizarConfigGlobal(config);
     globalConfigBase=cloneJSONSeguro(globalConfig,{});
     return true;
   }catch(err){
@@ -15826,16 +15824,15 @@ async function carregarConfigGlobalOnline(opcoes = {}){
       Date.now()-loginConfigUltimaConsultaEm<LOGIN_CONFIG_CACHE_MS) return true;
   const promessa=(async()=>{
     try{
-      const data=await comTimeout(chamarGerencialAutenticacaoSegura('public_config'),SUPABASE_OPERATION_TIMEOUT_MS);
-      if(!Array.isArray(data?.config?.usuarios)) throw new Error('Configuração oficial de usuários não encontrada.');
-      gerencialConfigUpdatedAt=data.updated_at;
-      globalConfig=normalizarConfigGlobal(data.config);
+      const config=await obterConfigGerencialCompat();
+      globalConfig=normalizarConfigGlobal(config);
       globalConfigBase=cloneJSONSeguro(globalConfig,{});
       loginConfigUltimaConsultaEm=Date.now();
       // Não criar usuários/configuração automaticamente no carregamento inicial.
       return true;
     }catch(err){
       console.error('Falha ao carregar configuração global:',err);
+      gerencialUltimoErroConsulta=String(err?.message||err||'Falha de consulta ao Supabase');
       loginConfigUltimaConsultaEm=0;
       globalConfig=null; // Falha da nuvem nunca permite fallback de autorização local.
       return false;
@@ -15854,6 +15851,15 @@ async function salvarConfigGlobalOnline(){
   globalConfig.atualizadoEm=agoraBR();
   // Credenciais legadas não são mais persistidas em localStorage.
   localStorage.removeItem(`${STORAGE_KEY}_config_global`);
+  if(gerencialModoAutenticacao==='legado'){
+    // Compatibilidade temporaria com ambiente ainda nao migrado; usa a mesma CAS da V2.0.
+    // Nao usar se o RLS de credenciais ja foi aplicado (o servidor recusara a operacao).
+    const salvo=await salvarLinhaComConcorrencia(GLOBAL_ROW_ID,globalConfig,globalConfigBase||{});
+    globalConfig=normalizarConfigGlobal(salvo);
+    globalConfigBase=cloneJSONSeguro(globalConfig,{});
+    marcarSincronizacaoConfirmada('ONLINE • configurações legadas salvas');
+    return true;
+  }
   const token=sessionStorage.getItem(GERENCIAL_SAFE_AUTH_KEY);
   if(!token)throw Error('Sua sessão segura expirou. Entre novamente para editar usuários e permissões.');
   const isDev=normalizarOperador(usuarioAtual?.operador)==='133';
@@ -16787,6 +16793,47 @@ let operacoesDocsUltimoErro='';
 const ESTOQUE_BRIDGE_SESSION_KEY='estoque_av_bridge_session_v20';
 const GERENCIAL_SAFE_AUTH_KEY='gerencial_auth_server_token_v21';
 let gerencialConfigUpdatedAt='';
+let gerencialModoAutenticacao='indefinido'; // 'seguro' se Edge V2.1; 'legado' enquanto Edge ainda nao foi publicada
+let gerencialUltimoErroConsulta='';
+function falhaEdgeAntigaOuAusente(err){
+  const motivo=String(err?.message||err||'');
+  return /(?:\bACAO_DESCONHECIDA\b|\bHTTP\s*404\b|\bNOT_FOUND\b)/i.test(motivo);
+}
+async function obterConfigGerencialCompat(){
+  try{
+    const data=await comTimeout(chamarGerencialAutenticacaoSegura('public_config'),SUPABASE_OPERATION_TIMEOUT_MS);
+    if(!Array.isArray(data?.config?.usuarios)) throw new Error('CONFIG_GERENCIAL_INDISPONIVEL');
+    gerencialModoAutenticacao='seguro';
+    gerencialUltimoErroConsulta='';
+    gerencialConfigUpdatedAt=data.updated_at;
+    return data.config;
+  }catch(edgeError){
+    // Nunca rebaixar o login se a Edge V2.1 responde erro de autenticacao, BD, ou rede.
+    // A transicao legada so e permitida se a funcao V2.1 AINDA nao existe no servidor.
+    if(!falhaEdgeAntigaOuAusente(edgeError)){
+      gerencialModoAutenticacao='indisponivel';
+      gerencialUltimoErroConsulta='A autenticação segura do Supabase está indisponível ('+String(edgeError?.message||edgeError)+').';
+      throw new Error(gerencialUltimoErroConsulta);
+    }
+    try{
+      if(!supabaseclient)throw new Error('Cliente Supabase indisponível');
+      const {data,error}=await comTimeout(
+        supabaseclient.from(ONLINE_TABLE).select('dados,updated_at').eq('id',GLOBAL_ROW_ID).maybeSingle(),
+        SUPABASE_OPERATION_TIMEOUT_MS
+      );
+      if(error)throw error;
+      if(!Array.isArray(data?.dados?.usuarios))throw new Error('Cadastro global de usuários não disponível.');
+      gerencialModoAutenticacao='legado';
+      gerencialUltimoErroConsulta='';
+      gerencialConfigUpdatedAt=data.updated_at||'';
+      return data.dados;
+    }catch(legacyError){
+      gerencialModoAutenticacao='indisponivel';
+      gerencialUltimoErroConsulta='Atualização do Supabase pendente: publique a função estoque-av-sync V2.1. A consulta legada também está bloqueada ('+String(legacyError?.message||legacyError)+').';
+      throw new Error(gerencialUltimoErroConsulta);
+    }
+  }
+}
 async function chamarGerencialAutenticacaoSegura(action,extra={}){
   const response=await fetch(`${SUPABASE_URL}/functions/v1/estoque-av-sync`,{
     method:'POST',mode:'cors',credentials:'omit',cache:'no-store',
@@ -16913,22 +16960,43 @@ async function login(){
   try{
     // O clique em Entrar sempre confirma credenciais atualizadas no servidor.
     const configOk=await carregarConfigGlobalOnline({forcar:true});
-    if(!configOk){err.textContent='Não foi possível carregar os acessos do Gerencial. Verifique a conexão.';return;}
+    if(!configOk){err.textContent=gerencialUltimoErroConsulta||'Não foi possível consultar o cadastro no Supabase. Verifique a configuração do servidor.';return;}
     const user=usuarioGlobalPorOperador(operadorInput);
-    if(!user){err.textContent='Operador não autorizado para acessar o sistema.';bloquearSenhaAteVerificar();return;}
-    let sessaoAutenticada;
-    try{sessaoAutenticada=await chamarGerencialAutenticacaoSegura('gerencial_auth',{operador:operadorInput,senha:pass});}
-    catch(_){err.textContent='Operador ou senha inválidos, ou serviço de autenticação indisponível.';return;}
-    sessionStorage.setItem(GERENCIAL_SAFE_AUTH_KEY,sessaoAutenticada.token);
-    sessionStorage.setItem(ESTOQUE_BRIDGE_SESSION_KEY,JSON.stringify({token:sessaoAutenticada.token,operator:String(sessaoAutenticada.operator),is_admin:sessaoAutenticada.is_admin===true,expires_at:sessaoAutenticada.expires_at}));
-    setAppLoaderCheck('access','success','Credenciais confirmadas diretamente no servidor.');
+    if(!user){err.textContent='Operador não cadastrado na configuração oficial deste Supabase. Confira o banco vinculado; nenhum usuário foi apagado pelo login.';bloquearSenhaAteVerificar();return;}
+    if(gerencialModoAutenticacao==='seguro'){
+      let sessaoAutenticada;
+      try{sessaoAutenticada=await chamarGerencialAutenticacaoSegura('gerencial_auth',{operador:operadorInput,senha:pass});}
+      catch(error){
+        const msg=String(error?.message||'');
+        err.textContent=/CREDENCIAIS_OU_ACESSO_INVALIDOS|CREDENCIAIS_INVALIDAS/.test(msg)?'Operador ou senha inválidos.':
+          /MUITAS_TENTATIVAS/.test(msg)?'Muitas tentativas. Tente novamente após o bloqueio de segurança.':
+          'Não foi possível autenticar no servidor: '+msg;
+        return;
+      }
+      sessionStorage.setItem(GERENCIAL_SAFE_AUTH_KEY,sessaoAutenticada.token);
+      sessionStorage.setItem(ESTOQUE_BRIDGE_SESSION_KEY,JSON.stringify({token:sessaoAutenticada.token,operator:String(sessaoAutenticada.operator),is_admin:sessaoAutenticada.is_admin===true,expires_at:sessaoAutenticada.expires_at}));
+      setAppLoaderCheck('access','success','Credenciais confirmadas diretamente no servidor.');
+    }else if(gerencialModoAutenticacao==='legado'){
+      // Modo transitório: autenticação idêntica à V2.0, sem criar usuarios ou redefinir senhas.
+      const senhaConfigurada=String(user.senha||'').trim();
+      if(!senhaConfigurada||senhaConfigurada==='__CREDENCIAL_PROTEGIDA__'||pass!==senhaConfigurada){
+        err.textContent='Operador ou senha inválidos.';return;
+      }
+      sessionStorage.removeItem(GERENCIAL_SAFE_AUTH_KEY);
+      sessionStorage.removeItem(ESTOQUE_BRIDGE_SESSION_KEY);
+      void estoqueGerencialProvisionarSessao(operadorInput,pass);
+      setAppLoaderCheck('access','success','Credenciais confirmadas pelo cadastro legado (migração pendente).');
+    }else{
+      err.textContent='O Supabase ainda não está preparado para validar o login. Consulte o guia de implantação.';
+      return;
+    }
     setAppLoaderCheck('internet','success','Conexão com o servidor de acesso confirmada.');
     setAppLoaderCheck('config','success','Configurações oficiais e permissões carregadas.');
 
     usuarioAtual={...user};delete usuarioAtual.senha;
     sessionStorage.setItem(SESSION_KEY,JSON.stringify(criarRegistroSessao(user)));
     // Sincroniza somente o ESTOQUE AV em segundo plano; o login do Gerencial segue inalterado.
-    // A mesma sessão validada pelo servidor está disponível ao Estoque AV; sem segundo envio de senha.
+    // Sessão Edge compartilhada se autenticada; no legado, provisionamento separado sem armazenar senha.
     agendarExpiracaoSessao();
 
     setAppLoaderCheck('sync','checking','Carregando os dados principais da loja...');
@@ -17079,7 +17147,7 @@ async function atualizarIdentificacaoLogin(mostrar=false){
       bloquearSenhaAteVerificar();
       preview.className='login-user-preview not-found';
       preview.innerHTML=`<div><small>Identificação</small><b id="loginUserFullName">${configOk?'Acesso não autorizado':'Não foi possível verificar'}</b><small>${configOk?'Este operador não possui acesso ao Gerencial':'Servidor indisponível. Tente novamente.'}</small></div><span class="preview-operator">OP. ${escapeHTML(operador)}</span>`;
-      estadoOperadorLogin('error',configOk?'Operador não autorizado. Confira o número informado.':'Não foi possível acessar o cadastro. Tente novamente.');
+      estadoOperadorLogin('error',configOk?'Operador não localizado neste cadastro. Confira o projeto Supabase.':(gerencialUltimoErroConsulta||'Não foi possível consultar o Supabase.'));
       return false;
     }
     loginOperadorValidado=operador;
