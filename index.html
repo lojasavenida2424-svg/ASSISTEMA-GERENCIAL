@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="referrer" content="no-referrer" />
-  <title>Assistência Gerencial Avenida — Sistema AV</title>
+  <title>Assistência Gerencial Avenida — V75.4 • Marca no login</title>
   <!-- PWA / Ícones do Sistema Gerencial Avenida -->
   <meta name="theme-color" content="#291A1E">
   <meta name="application-name" content="Gerencial Avenida">
@@ -15417,7 +15417,7 @@ function gerarSenhaTemporariaSegura(tamanho=14){
 function senhaDoUsuario(operador){
   const op = normalizarOperador(operador);
   const usuario = (globalConfig?.usuarios || []).find(u => normalizarOperador(u.operador) === op);
-  return String(usuario?.senha || '__CREDENCIAL_PROTEGIDA__');
+  return String(usuario?.senha || senhaPorOperador(op));
 }
 function garantirOperadorLoginFuncionario(nome, operadorPadrao){
   const opPadrao = normalizarOperador(operadorPadrao);
@@ -15801,8 +15801,13 @@ async function garantirUsuariosOficiaisOnlineAntesDoLogin(){
   // Login nunca pode criar/recriar cadastros nem sobrescrever o estado oficial.
   if(!supabaseclient || !navigator.onLine) return false;
   try{
-    const config=await obterConfigGerencialCompat();
-    globalConfig=normalizarConfigGlobal(config);
+    const {data,error}=await comTimeout(
+      supabaseclient.from(ONLINE_TABLE).select('dados,updated_at').eq('id',GLOBAL_ROW_ID).maybeSingle(),
+      SUPABASE_OPERATION_TIMEOUT_MS
+    );
+    if(error) throw error;
+    if(!Array.isArray(data?.dados?.usuarios)) return false;
+    globalConfig=normalizarConfigGlobal(data.dados);
     globalConfigBase=cloneJSONSeguro(globalConfig,{});
     return true;
   }catch(err){
@@ -15824,15 +15829,19 @@ async function carregarConfigGlobalOnline(opcoes = {}){
       Date.now()-loginConfigUltimaConsultaEm<LOGIN_CONFIG_CACHE_MS) return true;
   const promessa=(async()=>{
     try{
-      const config=await obterConfigGerencialCompat();
-      globalConfig=normalizarConfigGlobal(config);
+      const {data,error}=await comTimeout(
+        supabaseclient.from(ONLINE_TABLE).select('dados,updated_at').eq('id',GLOBAL_ROW_ID).maybeSingle(),
+        SUPABASE_OPERATION_TIMEOUT_MS
+      );
+      if(error) throw error;
+      if(!Array.isArray(data?.dados?.usuarios)) throw new Error('Configuração oficial de usuários não encontrada.');
+      globalConfig=normalizarConfigGlobal(data.dados);
       globalConfigBase=cloneJSONSeguro(globalConfig,{});
       loginConfigUltimaConsultaEm=Date.now();
       // Não criar usuários/configuração automaticamente no carregamento inicial.
       return true;
     }catch(err){
       console.error('Falha ao carregar configuração global:',err);
-      gerencialUltimoErroConsulta=String(err?.message||err||'Falha de consulta ao Supabase');
       loginConfigUltimaConsultaEm=0;
       globalConfig=null; // Falha da nuvem nunca permite fallback de autorização local.
       return false;
@@ -15851,30 +15860,12 @@ async function salvarConfigGlobalOnline(){
   globalConfig.atualizadoEm=agoraBR();
   // Credenciais legadas não são mais persistidas em localStorage.
   localStorage.removeItem(`${STORAGE_KEY}_config_global`);
-  if(gerencialModoAutenticacao==='legado'){
-    // Compatibilidade temporaria com ambiente ainda nao migrado; usa a mesma CAS da V2.0.
-    // Nao usar se o RLS de credenciais ja foi aplicado (o servidor recusara a operacao).
-    const salvo=await salvarLinhaComConcorrencia(GLOBAL_ROW_ID,globalConfig,globalConfigBase||{});
-    globalConfig=normalizarConfigGlobal(salvo);
-    globalConfigBase=cloneJSONSeguro(globalConfig,{});
-    marcarSincronizacaoConfirmada('ONLINE • configurações legadas salvas');
-    return true;
-  }
-  const token=sessionStorage.getItem(GERENCIAL_SAFE_AUTH_KEY);
-  if(!token)throw Error('Sua sessão segura expirou. Entre novamente para editar usuários e permissões.');
-  const isDev=normalizarOperador(usuarioAtual?.operador)==='133';
-  let resposta;
-  if(isDev){
-    resposta=await chamarGerencialAutenticacaoSegura('gerencial_config_write',{token,config:globalConfig,expected_updated_at:gerencialConfigUpdatedAt});
-    gerencialConfigUpdatedAt=resposta.updated_at;
-  }else{
-    const op=normalizarOperador(usuarioAtual?.operador);
-    const account=(globalConfig?.usuarios||[]).find(u=>normalizarOperador(u.operador)===op);
-    if(!account||!account.senha||account.senha==='__CREDENCIAL_PROTEGIDA__')throw Error('Senha não informada.');
-    resposta=await chamarGerencialAutenticacaoSegura('gerencial_password',{token,password:account.senha});
-    sessionStorage.removeItem(GERENCIAL_SAFE_AUTH_KEY);
-  }
-  globalConfig=normalizarConfigGlobal(resposta.config);
+  const salvo=await salvarLinhaComConcorrencia(
+    GLOBAL_ROW_ID,
+    globalConfig,
+    globalConfigBase || {}
+  );
+  globalConfig=normalizarConfigGlobal(salvo);
   globalConfigBase=cloneJSONSeguro(globalConfig,{});
   marcarSincronizacaoConfirmada('ONLINE • configurações salvas');
   return true;
@@ -16756,7 +16747,6 @@ function limparSessaoLocal(){
   sessionStorage.removeItem(SOPHIA_HISTORY_KEY);
   sessionStorage.removeItem(OPERACOES_DOCS_SESSION_KEY);
   sessionStorage.removeItem(ESTOQUE_BRIDGE_SESSION_KEY);
-  sessionStorage.removeItem(GERENCIAL_SAFE_AUTH_KEY);
   localStorage.removeItem(SESSION_KEY);
 }
 function validarSessaoAtualContraConfig(){
@@ -16791,60 +16781,6 @@ let operacoesDocsUltimoErro='';
 
 /* PONTE ESTOQUE AV V2.0: reaproveita o acesso JA VALIDADO no login original. */
 const ESTOQUE_BRIDGE_SESSION_KEY='estoque_av_bridge_session_v20';
-const GERENCIAL_SAFE_AUTH_KEY='gerencial_auth_server_token_v21';
-let gerencialConfigUpdatedAt='';
-let gerencialModoAutenticacao='indefinido'; // 'seguro' se Edge V2.1; 'legado' enquanto Edge ainda nao foi publicada
-let gerencialUltimoErroConsulta='';
-function falhaEdgeAntigaOuAusente(err){
-  const motivo=String(err?.message||err||'');
-  return /(?:\bACAO_DESCONHECIDA\b|\bHTTP\s*404\b|\bNOT_FOUND\b)/i.test(motivo);
-}
-async function obterConfigGerencialCompat(){
-  try{
-    const data=await comTimeout(chamarGerencialAutenticacaoSegura('public_config'),SUPABASE_OPERATION_TIMEOUT_MS);
-    if(!Array.isArray(data?.config?.usuarios)) throw new Error('CONFIG_GERENCIAL_INDISPONIVEL');
-    gerencialModoAutenticacao='seguro';
-    gerencialUltimoErroConsulta='';
-    gerencialConfigUpdatedAt=data.updated_at;
-    return data.config;
-  }catch(edgeError){
-    // Nunca rebaixar o login se a Edge V2.1 responde erro de autenticacao, BD, ou rede.
-    // A transicao legada so e permitida se a funcao V2.1 AINDA nao existe no servidor.
-    if(!falhaEdgeAntigaOuAusente(edgeError)){
-      gerencialModoAutenticacao='indisponivel';
-      gerencialUltimoErroConsulta='A autenticação segura do Supabase está indisponível ('+String(edgeError?.message||edgeError)+').';
-      throw new Error(gerencialUltimoErroConsulta);
-    }
-    try{
-      if(!supabaseclient)throw new Error('Cliente Supabase indisponível');
-      const {data,error}=await comTimeout(
-        supabaseclient.from(ONLINE_TABLE).select('dados,updated_at').eq('id',GLOBAL_ROW_ID).maybeSingle(),
-        SUPABASE_OPERATION_TIMEOUT_MS
-      );
-      if(error)throw error;
-      if(!Array.isArray(data?.dados?.usuarios))throw new Error('Cadastro global de usuários não disponível.');
-      gerencialModoAutenticacao='legado';
-      gerencialUltimoErroConsulta='';
-      gerencialConfigUpdatedAt=data.updated_at||'';
-      return data.dados;
-    }catch(legacyError){
-      gerencialModoAutenticacao='indisponivel';
-      gerencialUltimoErroConsulta='Atualização do Supabase pendente: publique a função estoque-av-sync V2.1. A consulta legada também está bloqueada ('+String(legacyError?.message||legacyError)+').';
-      throw new Error(gerencialUltimoErroConsulta);
-    }
-  }
-}
-async function chamarGerencialAutenticacaoSegura(action,extra={}){
-  const response=await fetch(`${SUPABASE_URL}/functions/v1/estoque-av-sync`,{
-    method:'POST',mode:'cors',credentials:'omit',cache:'no-store',
-    headers:{'Content-Type':'text/plain;charset=UTF-8'},
-    body:JSON.stringify({action,...extra})
-  });
-  const data=await response.json().catch(()=>({}));
-  if(!response.ok||data.ok===false)throw Error(data.error||`Servidor de acesso: HTTP ${response.status}`);
-  return data;
-}
-
 async function estoqueGerencialProvisionarSessao(operador,senha){
   try{
     const response=await fetch(`${SUPABASE_URL}/functions/v1/estoque-av-sync`,{
@@ -16856,7 +16792,7 @@ async function estoqueGerencialProvisionarSessao(operador,senha){
     if(!response.ok||!obj?.token)throw Error(String(obj?.error||'A ponte do Estoque não está disponível'));
     // Token temporario. NUNCA persistir a senha em sessionStorage/localStorage.
     sessionStorage.setItem(ESTOQUE_BRIDGE_SESSION_KEY,JSON.stringify({
-      token:obj.token,operator:String(obj.operator),is_admin:obj.is_admin===true,expires_at:obj.expires_at
+      token:obj.token,operator:String(obj.operator),expires_at:obj.expires_at
     }));
     window.dispatchEvent(new Event('estoque-av-auth-ready'));
   }catch(err){
@@ -16960,43 +16896,19 @@ async function login(){
   try{
     // O clique em Entrar sempre confirma credenciais atualizadas no servidor.
     const configOk=await carregarConfigGlobalOnline({forcar:true});
-    if(!configOk){err.textContent=gerencialUltimoErroConsulta||'Não foi possível consultar o cadastro no Supabase. Verifique a configuração do servidor.';return;}
+    if(!configOk){err.textContent='Não foi possível carregar os acessos do Gerencial. Verifique a conexão.';return;}
     const user=usuarioGlobalPorOperador(operadorInput);
-    if(!user){err.textContent='Operador não cadastrado na configuração oficial deste Supabase. Confira o banco vinculado; nenhum usuário foi apagado pelo login.';bloquearSenhaAteVerificar();return;}
-    if(gerencialModoAutenticacao==='seguro'){
-      let sessaoAutenticada;
-      try{sessaoAutenticada=await chamarGerencialAutenticacaoSegura('gerencial_auth',{operador:operadorInput,senha:pass});}
-      catch(error){
-        const msg=String(error?.message||'');
-        err.textContent=/CREDENCIAIS_OU_ACESSO_INVALIDOS|CREDENCIAIS_INVALIDAS/.test(msg)?'Operador ou senha inválidos.':
-          /MUITAS_TENTATIVAS/.test(msg)?'Muitas tentativas. Tente novamente após o bloqueio de segurança.':
-          'Não foi possível autenticar no servidor: '+msg;
-        return;
-      }
-      sessionStorage.setItem(GERENCIAL_SAFE_AUTH_KEY,sessaoAutenticada.token);
-      sessionStorage.setItem(ESTOQUE_BRIDGE_SESSION_KEY,JSON.stringify({token:sessaoAutenticada.token,operator:String(sessaoAutenticada.operator),is_admin:sessaoAutenticada.is_admin===true,expires_at:sessaoAutenticada.expires_at}));
-      setAppLoaderCheck('access','success','Credenciais confirmadas diretamente no servidor.');
-    }else if(gerencialModoAutenticacao==='legado'){
-      // Modo transitório: autenticação idêntica à V2.0, sem criar usuarios ou redefinir senhas.
-      const senhaConfigurada=String(user.senha||'').trim();
-      if(!senhaConfigurada||senhaConfigurada==='__CREDENCIAL_PROTEGIDA__'||pass!==senhaConfigurada){
-        err.textContent='Operador ou senha inválidos.';return;
-      }
-      sessionStorage.removeItem(GERENCIAL_SAFE_AUTH_KEY);
-      sessionStorage.removeItem(ESTOQUE_BRIDGE_SESSION_KEY);
-      void estoqueGerencialProvisionarSessao(operadorInput,pass);
-      setAppLoaderCheck('access','success','Credenciais confirmadas pelo cadastro legado (migração pendente).');
-    }else{
-      err.textContent='O Supabase ainda não está preparado para validar o login. Consulte o guia de implantação.';
-      return;
-    }
+    if(!user){err.textContent='Operador não autorizado para acessar o sistema.';bloquearSenhaAteVerificar();return;}
+    const senhaConfigurada=String(user.senha||senhaPorOperador(operadorInput)).trim();
+    if(pass!==senhaConfigurada){err.textContent='Operador ou senha inválidos.';return;}
+    setAppLoaderCheck('access','success','Credenciais do operador confirmadas.');
     setAppLoaderCheck('internet','success','Conexão com o servidor de acesso confirmada.');
     setAppLoaderCheck('config','success','Configurações oficiais e permissões carregadas.');
 
     usuarioAtual={...user};delete usuarioAtual.senha;
     sessionStorage.setItem(SESSION_KEY,JSON.stringify(criarRegistroSessao(user)));
     // Sincroniza somente o ESTOQUE AV em segundo plano; o login do Gerencial segue inalterado.
-    // Sessão Edge compartilhada se autenticada; no legado, provisionamento separado sem armazenar senha.
+    void estoqueGerencialProvisionarSessao(operadorInput,pass);
     agendarExpiracaoSessao();
 
     setAppLoaderCheck('sync','checking','Carregando os dados principais da loja...');
@@ -17147,7 +17059,7 @@ async function atualizarIdentificacaoLogin(mostrar=false){
       bloquearSenhaAteVerificar();
       preview.className='login-user-preview not-found';
       preview.innerHTML=`<div><small>Identificação</small><b id="loginUserFullName">${configOk?'Acesso não autorizado':'Não foi possível verificar'}</b><small>${configOk?'Este operador não possui acesso ao Gerencial':'Servidor indisponível. Tente novamente.'}</small></div><span class="preview-operator">OP. ${escapeHTML(operador)}</span>`;
-      estadoOperadorLogin('error',configOk?'Operador não localizado neste cadastro. Confira o projeto Supabase.':(gerencialUltimoErroConsulta||'Não foi possível consultar o Supabase.'));
+      estadoOperadorLogin('error',configOk?'Operador não autorizado. Confira o número informado.':'Não foi possível acessar o cadastro. Tente novamente.');
       return false;
     }
     loginOperadorValidado=operador;
@@ -17304,7 +17216,7 @@ async function executarAutoAtualizacaoGerencial(){
   salvarEstadoAntesAtualizacaoGerencial();
   showAppLoader('Atualizando sistema','Salvando sua posição e carregando os dados mais recentes...');
   const salvo=await garantirSalvamentoAntesDeSair();
-  if(!salvo){
+  if(!salvo && navigator.onLine){
     hideAppLoader();
     setSyncStatus('ATENÇÃO • atualização adiada; salvamento pendente','syncing');
     autoRefreshTimerGerencial=setTimeout(executarAutoAtualizacaoGerencial,60000);
@@ -21236,7 +21148,7 @@ function abrirAlteracaoSenha(op,{solicitacao=false}={}){
   const proprio=normalizarOperador(usuarioAtual?.operador)===operador;
   if(!dev && !(proprio && temPermissao('alterarSenha'))){ avNotice('Você não possui permissão para alterar esta senha.'); return; }
   const u=usuarioGlobalPorOperador(operador); if(!u)return;
-  const html=`<div class="modal-head"><div><h2>🔑 ${solicitacao?'Atender pedido de senha':'Alterar senha'}</h2><p>${escapeHTML(u.nome)} • Operador ${escapeHTML(operador)}</p></div><button class="icon-btn" onclick="fecharModalPermissoes()">✕</button></div><div class="section-card" style="box-shadow:none;margin:0;">${solicitacao?'<p class="acomp-password-help">Pedido recebido do Operacional. Ao salvar uma senha nova, a solicitação será marcada como atendida.</p>':''}<div class="form-grid"><div class="field w6"><label>Nova senha</label><input id="novaSenhaUsuario" type="password" minlength="8" autocomplete="new-password" placeholder="Mínimo de 8 caracteres"></div><div class="field w6"><label>Confirmar nova senha</label><input id="confirmarSenhaUsuario" type="password" minlength="8" autocomplete="new-password" placeholder="Repita a nova senha"></div><div class="field w12 actions"><button class="btn" onclick="salvarNovaSenha('${operador}')">${solicitacao?'✓ Aceitar e salvar nova senha':'💾 Salvar nova senha'}</button>${dev?`<button class="btn secondary" onclick="redefinirSenhaPadrao('${operador}')">🎲 Gerar senha temporária</button>`:''}</div></div><p style="color:var(--muted);font-weight:750;margin:12px 0 0;">Use pelo menos 8 caracteres. A senha atual não é exibida pelo sistema.</p></div>`;
+  const html=`<div class="modal-head"><div><h2>🔑 ${solicitacao?'Atender pedido de senha':'Alterar senha'}</h2><p>${escapeHTML(u.nome)} • Operador ${escapeHTML(operador)}</p></div><button class="icon-btn" onclick="fecharModalPermissoes()">✕</button></div><div class="section-card" style="box-shadow:none;margin:0;">${solicitacao?'<p class="acomp-password-help">Pedido recebido do Operacional. Ao salvar uma senha nova, a solicitação será marcada como atendida.</p>':''}<div class="form-grid"><div class="field w6"><label>Nova senha</label><input id="novaSenhaUsuario" type="password" minlength="4" autocomplete="new-password" placeholder="Mínimo de 4 caracteres"></div><div class="field w6"><label>Confirmar nova senha</label><input id="confirmarSenhaUsuario" type="password" minlength="4" autocomplete="new-password" placeholder="Repita a nova senha"></div><div class="field w12 actions"><button class="btn" onclick="salvarNovaSenha('${operador}')">${solicitacao?'✓ Aceitar e salvar nova senha':'💾 Salvar nova senha'}</button>${dev?`<button class="btn secondary" onclick="redefinirSenhaPadrao('${operador}')">🎲 Gerar senha temporária</button>`:''}</div></div><p style="color:var(--muted);font-weight:750;margin:12px 0 0;">Use pelo menos 4 caracteres. A senha atual não é exibida pelo sistema.</p></div>`;
   document.getElementById('modalPermissoesConteudo').innerHTML=html;
   document.getElementById('modalPermissoes').classList.add('active');
 }
@@ -21249,7 +21161,7 @@ async function salvarNovaSenha(op){
   if(!dev&&!(proprio&&temPermissao('alterarSenha')))return;
   const nova=String(document.getElementById('novaSenhaUsuario')?.value||'').trim();
   const confirma=String(document.getElementById('confirmarSenhaUsuario')?.value||'').trim();
-  if(nova.length<8){avNotice('A nova senha deve ter pelo menos 8 caracteres.');return;}
+  if(nova.length<4){avNotice('A nova senha deve ter pelo menos 4 caracteres.');return;}
   if(nova!==confirma){avNotice('As senhas informadas não são iguais.');return;}
   const u=(globalConfig?.usuarios||[]).find(x=>normalizarOperador(x.operador)===operador); if(!u)return;
   const anterior={senha:u.senha,credencialVersao:u.credencialVersao};
