@@ -14946,14 +14946,14 @@ function avImage(src,title='',description='',mime='image/jpeg'){return avDialog(
             </a>
 
 
-            <a class="sistema-av-button" data-sistema-av-link="estoque" onclick="return validarAcessoSistemaAv(event,'estoque')" href="https://lojasavenida2424-svg.github.io/avenida-estoque/" target="_blank" rel="noopener noreferrer" aria-label="Abrir Sistema de Estoque Avenida">
+            <a class="sistema-av-button" data-sistema-av-link="estoque" onclick="return abrirEstoqueAV(event)" href="./estoque/index.html" target="_blank" rel="noopener noreferrer" aria-label="Abrir Sistema de Estoque Avenida">
               <div class="sistema-av-logo">
                 <span class="logo-fallback" aria-hidden="true">📦</span>
                 <img src="./icons/sistema-estoque-icon.png" alt="Ícone do Sistema de Estoque Avenida" onerror="this.style.display='none'" />
               </div>
-              <h2>SISTEMA DE ESTOQUE</h2>
-              <p>Recebimentos, DRM, inventários, check lists e relatórios de estoque.</p>
-              <span class="sistema-av-open">ABRIR SISTEMA ↗</span>
+              <h2>ESTOQUE AV</h2>
+              <p>Recebimento de caminhões, perdas, leitura de códigos, transferências e inventário.</p>
+              <span class="sistema-av-open">ABRIR NO GERENCIAL ↗</span>
             </a>
 
             <a class="sistema-av-button" data-sistema-av-link="resultado" onclick="return validarAcessoSistemaAv(event,'resultado')" href="./resultados/index.html" target="_blank" rel="noopener noreferrer" aria-label="Abrir Sistema AV Resultado">
@@ -15493,7 +15493,7 @@ function atualizarMatriculaPreview(){
 function escapeHTML(s){ return String(s||'').replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m])); }
 function num(v){ return Number(v||0); }
 
-const SISTEMA_ESTOQUE_URL = 'https://lojasavenida2424-svg.github.io/avenida-estoque/';
+const SISTEMA_ESTOQUE_URL = new URL('./estoque/index.html', document.baseURI).href;
 const SISTEMA_RESULTADOS_URL = new URL('./resultados/index.html', document.baseURI).href;
 const SISTEMA_GERENCIAL_URL = (() => {
   try{
@@ -37721,5 +37721,73 @@ console.info('[V51.73] Salvamento seguro ativo; Realtime monolítico permanece d
 <script src="shared/editor-texto-v81.js" defer></script>
 <link rel="stylesheet" href="styles/escalas-modal-v83.css">
 <script src="shared/escalas-modal-v83.js"></script>
+
+<!-- ESTOQUE AV V1.8: acessível no mesmo sistema pelo painel SISTEMA AV. -->
+<div id="avEstoqueShell" class="av-estoque-shell" role="dialog" aria-modal="true" aria-label="Sistema ESTOQUE AV" hidden>
+  <div class="av-estoque-pane">
+    <header class="av-estoque-toolbar">
+      <div class="av-estoque-title">
+        <img src="./icons/sistema-estoque-icon.png" alt="" />
+        <div><strong>ESTOQUE AV</strong><small>AVENIDA S/A · Gestão de estoque</small></div>
+      </div>
+      <div class="av-estoque-actions">
+        <a class="av-estoque-out" href="./estoque/index.html" target="_blank" rel="noopener noreferrer" title="Abrir o Estoque em outra guia">↗ <span>Abrir em outra guia</span></a>
+        <button class="av-estoque-close" id="avEstoqueClose" type="button" aria-label="Fechar Estoque AV">✕ <span>Voltar ao Gerencial</span></button>
+      </div>
+    </header>
+    <div class="av-estoque-body">
+      <div id="avEstoqueLoading" class="av-estoque-loading" role="status">Carregando ESTOQUE AV…</div>
+      <iframe id="avEstoqueFrame" title="ESTOQUE AV — sistema de estoque" loading="lazy" referrerpolicy="same-origin" allow="camera" src="about:blank"></iframe>
+    </div>
+  </div>
+</div>
+<style id="av-estoque-embedded-styles">
+.av-estoque-shell[hidden]{display:none!important}
+.av-estoque-shell{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:clamp(8px,1.2vw,18px);background:rgba(8,10,15,.76);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif}
+.av-estoque-pane{width:100%;height:100%;max-width:1800px;border-radius:20px;overflow:hidden;background:#fff;display:flex;flex-direction:column;box-shadow:0 32px 100px rgba(0,0,0,.36);border:1px solid rgba(255,255,255,.21)}
+.av-estoque-toolbar{min-height:68px;flex:0 0 auto;padding:12px 19px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;color:#262626;border-bottom:1px solid #e4e4e7}
+.av-estoque-title{display:flex;gap:11px;align-items:center;min-width:0}.av-estoque-title img{height:40px;width:40px;object-fit:contain;border-radius:12px}.av-estoque-title strong{font-size:17px;letter-spacing:.035em;font-weight:850;display:block}.av-estoque-title small{display:block;color:#777;font-size:11px;line-height:1.5}
+.av-estoque-actions{display:flex;align-items:center;gap:9px}.av-estoque-actions a,.av-estoque-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;border-radius:11px;font-weight:700;font-size:12px;text-decoration:none;padding:9px 13px;cursor:pointer;white-space:nowrap}.av-estoque-out{border:1px solid #d8d8d8;color:#292929;background:#fafafa}.av-estoque-close{border:1px solid #d9a72b;color:#28231b;background:#f6c426}.av-estoque-actions button:hover{filter:brightness(.97)}
+.av-estoque-body{position:relative;flex:1;min-height:0;background:#f5f6f8}.av-estoque-body iframe{width:100%;height:100%;display:block;border:0;background:#f5f6f8}.av-estoque-loading{position:absolute;inset:0;display:grid;place-items:center;font-size:14px;color:#424242;background:#f5f6f8;z-index:1}.av-estoque-loading[hidden]{display:none!important}
+body.dark-mode .av-estoque-pane,body.dark-mode .av-estoque-toolbar{background:#1e1e21;color:#f9fafb;border-color:#3f3f46}body.dark-mode .av-estoque-title small{color:#b7b7bf}body.dark-mode .av-estoque-out{background:#303036;color:#fff;border-color:#50505a}
+@media(max-width:680px){.av-estoque-shell{padding:0}.av-estoque-pane{border-radius:0}.av-estoque-toolbar{min-height:60px;padding:9px 12px}.av-estoque-title img{height:35px;width:35px}.av-estoque-title strong{font-size:15px}.av-estoque-title small{font-size:10px}.av-estoque-actions a,.av-estoque-actions button{min-width:38px;padding:8px 10px}.av-estoque-actions span{display:none}}
+</style>
+<script id="av-estoque-embedded-script">
+(function(){
+  'use strict';
+  const shell=document.getElementById('avEstoqueShell');
+  const frame=document.getElementById('avEstoqueFrame');
+  const loading=document.getElementById('avEstoqueLoading');
+  const close=document.getElementById('avEstoqueClose');
+  if(!shell||!frame||!close)return;
+  let previousFocus=null;
+  window.abrirEstoqueAV=function(event){
+    if(typeof validarAcessoSistemaAv==='function'&&!validarAcessoSistemaAv(event,'estoque'))return false;
+    event?.preventDefault?.();
+    previousFocus=document.activeElement;
+    shell.hidden=false;
+    document.body.classList.add('av-estoque-aberto');
+    loading.hidden=false;
+    if(frame.getAttribute('src')==='about:blank')frame.src='./estoque/index.html';
+    close.focus();
+    return false;
+  };
+  function fecharEstoqueAV(){
+    shell.hidden=true;
+    document.body.classList.remove('av-estoque-aberto');
+    if(previousFocus?.isConnected)previousFocus.focus();
+  }
+  window.fecharEstoqueAV=fecharEstoqueAV;
+  frame.addEventListener('load',()=>{loading.hidden=true});
+  close.addEventListener('click',fecharEstoqueAV);
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape'&&!shell.hidden){
+      // ESC só fecha o contêiner quando o foco estiver fora do conteúdo interno.
+      if(document.activeElement!==frame){event.preventDefault();fecharEstoqueAV()}
+    }
+  });
+  const css=document.createElement('style');css.textContent='body.av-estoque-aberto{overflow:hidden!important}';document.head.append(css);
+})();
+</script>
 </body>
 </html>
