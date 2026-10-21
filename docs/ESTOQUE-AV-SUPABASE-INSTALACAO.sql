@@ -1,3 +1,5 @@
+-- ATENÇÃO: SCRIPT HISTÓRICO V1.9 — NÃO EXECUTAR NA INSTALAÇÃO V2.1.
+-- A ponte atual V2.1 utiliza docs/ESTOQUE-AV-V2.0-BRIDGE-SEM-AUTH.sql e o guia ESTOQUE-AV-V2.1-CORRECOES-E-INSTALACAO.md.
 -- ESTOQUE AV V1.9 | Supabase SQL Editor | executar uma vez no projeto do Gerencial.
 -- IMPORTANTE: a sessão do Gerencial é própria do sistema e NÃO equivale ao Supabase Auth.
 -- Crie usuários em Authentication > Users. Depois associe seus IDs nesta tabela:

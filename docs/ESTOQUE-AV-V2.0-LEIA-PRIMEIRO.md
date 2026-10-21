@@ -1,3 +1,5 @@
+> **ATENÇÃO — pacote V2.1:** este documento descreve a integração anterior. Para instalar o ZIP corrigido, leia PRIMEIRO `ESTOQUE-AV-V2.1-CORRECOES-E-INSTALACAO.md` e execute as migrações na ordem prescrita. Não publique somente o HTML.
+
 # ESTOQUE AV V2.0 — sincronização usando o login atual do Gerencial
 
 **ESTADO:** pacote de código preparado e teste funcional com servidor simulado aprovado. **Não está publicado no seu projeto Supabase**. Para compartilhar informações entre aparelhos em produção, execute os passos abaixo. **Não modifica as telas e o fluxo de login existentes. Não cadastra usuários no Supabase Authentication.**
