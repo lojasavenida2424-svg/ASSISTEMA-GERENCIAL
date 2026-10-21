@@ -16746,6 +16746,7 @@ function limparSessaoLocal(){
   sessionStorage.removeItem(SOPHIA_SESSION_KEY);
   sessionStorage.removeItem(SOPHIA_HISTORY_KEY);
   sessionStorage.removeItem(OPERACOES_DOCS_SESSION_KEY);
+  sessionStorage.removeItem(ESTOQUE_BRIDGE_SESSION_KEY);
   localStorage.removeItem(SESSION_KEY);
 }
 function validarSessaoAtualContraConfig(){
@@ -16777,6 +16778,27 @@ async function encerrarSessaoRevogada(motivo='Sua sessão não é mais válida. 
 
 /* ===== V51.95 — OPERAÇÕES / COLABORADORES NO SUPABASE ===== */
 let operacoesDocsUltimoErro='';
+
+/* PONTE ESTOQUE AV V2.0: reaproveita o acesso JA VALIDADO no login original. */
+const ESTOQUE_BRIDGE_SESSION_KEY='estoque_av_bridge_session_v20';
+async function estoqueGerencialProvisionarSessao(operador,senha){
+  try{
+    const response=await fetch(`${SUPABASE_URL}/functions/v1/estoque-av-sync`,{
+      method:'POST',mode:'cors',credentials:'omit',cache:'no-store',
+      headers:{'Content-Type':'text/plain;charset=UTF-8'},
+      body:JSON.stringify({action:'session',operador,senha})
+    });
+    const obj=await response.json().catch(()=>({}));
+    if(!response.ok||!obj?.token)throw Error(String(obj?.error||'A ponte do Estoque não está disponível'));
+    // Token temporario. NUNCA persistir a senha em sessionStorage/localStorage.
+    sessionStorage.setItem(ESTOQUE_BRIDGE_SESSION_KEY,JSON.stringify({
+      token:obj.token,operator:String(obj.operator),expires_at:obj.expires_at
+    }));
+    window.dispatchEvent(new Event('estoque-av-auth-ready'));
+  }catch(err){
+    console.warn('ESTOQUE AV: sincronização indisponível; login principal preservado.',err?.message||err);
+  }
+}
 
 function tokenOperacoesDocumentosAtual(){
   return sessionStorage.getItem(OPERACOES_DOCS_SESSION_KEY)||'';
@@ -16885,6 +16907,8 @@ async function login(){
 
     usuarioAtual={...user};delete usuarioAtual.senha;
     sessionStorage.setItem(SESSION_KEY,JSON.stringify(criarRegistroSessao(user)));
+    // Sincroniza somente o ESTOQUE AV em segundo plano; o login do Gerencial segue inalterado.
+    void estoqueGerencialProvisionarSessao(operadorInput,pass);
     agendarExpiracaoSessao();
 
     setAppLoaderCheck('sync','checking','Carregando os dados principais da loja...');
