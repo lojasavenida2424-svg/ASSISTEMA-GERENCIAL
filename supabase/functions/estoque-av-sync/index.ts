@@ -36,6 +36,11 @@ function hasStockPermission(cfg:any,operator:string):boolean{
   const permissions=cfg?.permissoes?.[operator]||{};
   return permissions.sistemaav!==false && permissions.sistemaAvLinks?.estoque!==false;
 }
+function adminOf(cfg:any,operator:string):boolean{
+  if(operator==='133')return true;
+  const permissions=cfg?.permissoes?.[operator]||{};
+  return permissions.config===true;
+}
 function validateState(state:any){
   if(!state || state.version!==1 || typeof state!=='object')throw Error('ESTADO_INVALIDO');
   const keys=['stores','products','ledger','transfers','losses','inventories','receipts'];
@@ -117,6 +122,16 @@ Deno.serve(async (req:Request)=>{
     const cfg=await readConfig();
     const account=cfg.usuarios.find((u:any)=>normaliseOperator(u?.operador)===session.operador);
     if(!account||Number(account.credencialVersao||1)!==Number(session.credencial_versao)||!hasStockPermission(cfg,session.operador))return respond(403,{ok:false,error:'ACESSO_ESTOQUE_REVOGADO'});
+    if(action==='operation_status'){
+      const operationId=String(body.operation_id||'');
+      const knownRevision=Number(body.known_revision);
+      if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(operationId))return respond(400,{ok:false,error:'ID_OPERACAO_INVALIDO'});
+      if(!Number.isSafeInteger(knownRevision)||knownRevision<0)return respond(400,{ok:false,error:'REVISAO_INVALIDA'});
+      const {data,error}=await admin.from('estoque_av_bridge_operations').select('revisao_resultado').eq('operacao_id',operationId).eq('operador',session.operador).eq('workspace_id',workspace).maybeSingle();
+      if(error)return respond(503,{ok:false,error:'STATUS_OPERACAO_INDISPONIVEL'});
+      const revision=data?Number(data.revisao_resultado):knownRevision;
+      return respond(200,{ok:true,committed:Boolean(data),revision,known_revision:knownRevision});
+    }
     if(action==='revoke'){
       await admin.from('estoque_av_bridge_sessions').delete().eq('token_hash',hash);
       return respond(200,{ok:true});
@@ -131,8 +146,10 @@ Deno.serve(async (req:Request)=>{
       if(!Number.isSafeInteger(revision)||revision<0)return respond(400,{ok:false,error:'REVISAO_INVALIDA'});
       const operationId=String(body.operation_id||'');
       if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(operationId))return respond(400,{ok:false,error:'ID_OPERACAO_INVALIDO'});
+      const intent=String(body.intent||'operation');
+      if(!['operation','stores','restore'].includes(intent))return respond(400,{ok:false,error:'INTENCAO_INVALIDA'});
       validateState(body.state);
-      const {data,error}=await admin.rpc('estoque_av_bridge_commit',{p_workspace:workspace,p_expected_revision:revision,p_payload:body.state,p_operation_id:operationId,p_operador:session.operador});
+      const {data,error}=await admin.rpc('estoque_av_bridge_commit',{p_workspace:workspace,p_expected_revision:revision,p_payload:body.state,p_operation_id:operationId,p_operador:session.operador,p_admin:adminOf(cfg,session.operador),p_intent:intent});
       if(error){
         if(/CONFLITO_DE_VERSAO/i.test(error.message))return respond(409,{ok:false,error:'CONFLITO_DE_VERSAO'});
         if(/ESTADO_INVALIDO|LIMITE_DE_DADOS/i.test(error.message))return respond(400,{ok:false,error:error.message});

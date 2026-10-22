@@ -558,7 +558,11 @@
       if(!session)throw Error('Aguardando sessão segura emitida pelo Gerencial. Se persistir, entre novamente no Gerencial após a instalação da função no Supabase.');
       cloudEmail='Operador '+session.operator;
       if(!localStorage.getItem(CLOUD_BACKUP))localStorage.setItem(CLOUD_BACKUP,JSON.stringify(db));
-      await cloudPull({quiet:true});
+      const loaded=await cloudPull({quiet:true});
+      if(loaded){
+        const pending=await getPendingCommit();
+        if(pending){cloudBusy=true;try{await resolvePendingCommit(pending)}catch(error){cloudError=String(error?.message||error);console.error('Gravação pendente aguardando reconciliação:',error)}finally{cloudBusy=false}}
+      }
     }catch(err){cloudReady=false;cloudError=cloudErrorMessage(err)}finally{cloudInitialising=false;if(sessionUser)render()}
   }
   function cloudConnectModal(){
@@ -585,22 +589,114 @@
     try{const next=structuredClone(db);mutate(next);cloudValidate(next);localStorage.setItem(KEY,JSON.stringify(next));db=next;closeModal();render();toast(success||'Operação salva neste dispositivo (modo local).');return true}
     catch(err){console.error(err);toast(err?.message||'Não foi possível salvar.',true);return false}
   }
-  async function cloudRemoteCommit(mutate,success){
+  const OUTBOX_DB_NAME='estoque_av_commit_outbox_v1',OUTBOX_STORE_NAME='pending',OUTBOX_KEY='avenida';
+  let outboxDbPromise=null;
+  function normaliseOperator(value){const digits=String(value??'').replace(/\D/g,'');return digits?String(Number(digits)):''}
+  function openOutboxDB(){
+    if(!globalThis.indexedDB)return Promise.reject(Error('Este navegador não oferece armazenamento seguro para reconciliar gravações.'));
+    if(!outboxDbPromise)outboxDbPromise=new Promise((resolve,reject)=>{
+      let request;
+      try{request=indexedDB.open(OUTBOX_DB_NAME,1)}catch(error){outboxDbPromise=null;reject(error);return}
+      request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains(OUTBOX_STORE_NAME))request.result.createObjectStore(OUTBOX_STORE_NAME)};
+      request.onsuccess=()=>{const db=request.result;db.onversionchange=()=>{db.close();outboxDbPromise=null};resolve(db)};
+      request.onerror=()=>{outboxDbPromise=null;reject(request.error||Error('Não foi possível abrir o registro de segurança da sincronização.'))};
+      request.onblocked=()=>{outboxDbPromise=null;reject(Error('Feche outras abas do Estoque AV para concluir a atualização da sincronização.'))};
+    });
+    return outboxDbPromise;
+  }
+  async function getPendingCommit(){
+    const db=await openOutboxDB();
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction(OUTBOX_STORE_NAME,'readonly'),request=tx.objectStore(OUTBOX_STORE_NAME).get(OUTBOX_KEY);
+      request.onsuccess=()=>resolve(request.result||null);
+      request.onerror=()=>reject(request.error||Error('Não foi possível verificar uma gravação pendente.'));
+      tx.onabort=()=>reject(tx.error||Error('A leitura da gravação pendente foi interrompida.'));
+    });
+  }
+  async function savePendingCommit(record){
+    const db=await openOutboxDB();
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction(OUTBOX_STORE_NAME,'readwrite');
+      tx.objectStore(OUTBOX_STORE_NAME).put(record,OUTBOX_KEY);
+      tx.oncomplete=()=>resolve(true);
+      tx.onerror=()=>reject(tx.error||Error('Não foi possível proteger a gravação antes do envio.'));
+      tx.onabort=()=>reject(tx.error||Error('A gravação não foi protegida antes do envio.'));
+    });
+  }
+  async function clearPendingCommit(operationId){
+    const pending=await getPendingCommit();
+    if(!pending||pending.operation_id!==operationId)return false;
+    const db=await openOutboxDB();
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction(OUTBOX_STORE_NAME,'readwrite');
+      tx.objectStore(OUTBOX_STORE_NAME).delete(OUTBOX_KEY);
+      tx.oncomplete=()=>resolve(true);
+      tx.onerror=()=>reject(tx.error||Error('Não foi possível encerrar o registro da gravação.'));
+      tx.onabort=()=>reject(tx.error||Error('Não foi possível encerrar o registro da gravação.'));
+    });
+  }
+  async function resolvePendingCommit(pending){
+    pending=pending||await getPendingCommit();
+    if(!pending)return true;
+    const session=bridgeSession();
+    if(!session||normaliseOperator(session.operator)!==normaliseOperator(pending.operator))throw Error('Há uma gravação pendente do operador '+String(pending.operator||'')+'. Entre novamente com esse operador para confirmar o resultado antes de continuar.');
+    let status;
+    try{status=await bridgeApi('operation_status',{operation_id:pending.operation_id,known_revision:pending.known_revision})}
+    catch(error){if(Number(error?.status)===400&&/ACAO_DESCONHECIDA/i.test(error.message||''))status={committed:false};else throw error}
+    if(status.committed){
+      const fresh=await cloudPull({quiet:true,preserveModal:true,force:true});
+      if(!fresh)throw Error('A gravação anterior consta no servidor, mas não foi possível atualizar os dados. Verifique a conexão antes de continuar.');
+      await clearPendingCommit(pending.operation_id);
+      toast('A gravação anterior foi confirmada. Confira os dados antes de repetir a operação.');
+      return false;
+    }
+    try{
+      const result=await bridgeApi('commit',{revision:pending.known_revision,known_revision:pending.known_revision,state:pending.state,operation_id:pending.operation_id,intent:pending.intent});
+      if(result.replayed){
+        const fresh=await cloudPull({quiet:true,preserveModal:true,force:true});
+        if(!fresh)throw Error('A gravação anterior foi confirmada, mas os dados atuais não puderam ser carregados.');
+      }else cloudPersist(pending.state,result.revision,false);
+      await clearPendingCommit(pending.operation_id);
+      toast('A gravação anterior foi reconciliada. Confira os dados antes de repetir a operação.');
+      return false;
+    }catch(error){
+      if(/CONFLITO_DE_VERSAO/i.test(error.message||'')){
+        const fresh=await cloudPull({quiet:true,preserveModal:true,force:true});
+        if(!fresh)throw Error('A gravação anterior não foi confirmada e os dados atuais não puderam ser carregados.');
+        await clearPendingCommit(pending.operation_id);
+        toast('A gravação anterior não foi aplicada porque outro dispositivo atualizou o estoque. Confira os dados e faça o lançamento novamente.',true);
+        return false;
+      }
+      if([400,403].includes(Number(error?.status))){
+        await clearPendingCommit(pending.operation_id);
+        toast('O servidor recusou a gravação pendente e não alterou o estoque: '+cloudErrorMessage(error),true);
+        return false;
+      }
+      throw error;
+    }
+  }
+  async function cloudRemoteCommit(mutate,success,intent='operation'){
     if(cloudBusy){toast('Existe outra gravação em andamento. Aguarde a conclusão.',true);return false}
     if(!cloudReady||!navigator.onLine){toast('Alteração NÃO gravada: a nuvem não está conectada. Verifique Configurações → Sincronização.',true);return false}
     cloudBusy=true;
-    const operationId=crypto.randomUUID();
     const button=$('#modal-root .modal-foot .btn-primary, #modal-root .modal-foot .btn-danger');if(button)button.disabled=true;
     try{
+      const pending=await getPendingCommit();
+      if(pending){await resolvePendingCommit(pending);return false}
+      const session=bridgeSession();
+      if(!session?.operator)throw Error('A sessão do operador expirou. Entre novamente no Gerencial antes de gravar.');
+      const operationId=crypto.randomUUID();
       for(let tries=0;tries<4;tries++){
         const next=structuredClone(db);mutate(next);cloudValidate(next);
+        await savePendingCommit({version:1,operation_id:operationId,operator:normaliseOperator(session.operator),known_revision:cloudRevision,intent,state:next,created_at:iso()});
         try{
-          const data=await bridgeApi('commit',{revision:cloudRevision,state:next,operation_id:operationId});
+          const data=await bridgeApi('commit',{revision:cloudRevision,known_revision:cloudRevision,state:next,operation_id:operationId,intent});
           if(data.replayed){
             // Idempotencia: o servidor ja processou o mesmo ID. Recarregar o estado verdadeiro.
             const fresh=await cloudPull({quiet:true,preserveModal:true,force:true});
             if(!fresh)throw Error('Operação registrada, mas houve falha ao obter o novo estado. Atualize a página.');
           }else cloudPersist(next,data.revision,false);
+          await clearPendingCommit(operationId);
           closeModal();render();toast(success||'Operação salva e sincronizada na nuvem.');return true;
         }catch(error){
           if(/CONFLITO_DE_VERSAO/i.test(error.message||'')){
@@ -608,14 +704,15 @@
             if(!fresh)throw Error('Não foi possível atualizar dados após uma alteração de outro dispositivo.');
             continue;
           }
+          if(Number(error?.status)>=400&&Number(error?.status)<500)await clearPendingCommit(operationId);
           throw error;
         }
       }
       throw Error('Muitos lançamentos simultâneos. Atualize os dados e tente novamente.');
-    }catch(err){console.error(err);toast('Operação NÃO gravada na nuvem: '+cloudErrorMessage(err),true);return false}
+    }catch(err){console.error(err);const status=Number(err?.status);const uncertain=!status||status>=500;toast(uncertain?'Não foi possível confirmar o resultado da gravação. O sistema guardou a operação para reconciliar com o servidor; não repita o lançamento agora.':'Operação NÃO gravada na nuvem: '+cloudErrorMessage(err),true);return false}
     finally{cloudBusy=false;if(button?.isConnected)button.disabled=false}
   }
-  function commit(mutate,success){if(gerencialSessaoValida())cloudEnabled=true;return cloudEnabled?cloudRemoteCommit(mutate,success):cloudLocalCommit(mutate,success)}
+  function commit(mutate,success,intent='operation'){if(gerencialSessaoValida())cloudEnabled=true;return cloudEnabled?cloudRemoteCommit(mutate,success,intent):cloudLocalCommit(mutate,success)}
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cloudEnabled&&!cloudBusy)cloudPull({quiet:true,preserveModal:!!modalState})});
   window.addEventListener('online',()=>{if(cloudEnabled&&!cloudBusy)cloudPull({quiet:true,preserveModal:!!modalState})});
   cloudPoll=setInterval(()=>{if(!cloudBusy&&!document.hidden){if(gerencialSessaoValida()&&!cloudEnabled)cloudEnabled=true;if(cloudEnabled&&!cloudReady&&bridgeSession()){cloudStart();return}if(cloudEnabled&&cloudReady&&Date.now()-cloudLastPull>12000)cloudPull({quiet:true,preserveModal:!!modalState})}},5000);

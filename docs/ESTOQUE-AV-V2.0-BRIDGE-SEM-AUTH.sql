@@ -94,7 +94,7 @@ declare
 begin
   if p_workspace is null or p_expected_revision is null or p_payload is null or
      p_operation_id is null or p_operador is null or p_operador !~ '^[0-9]{1,10}$' or
-     p_admin is null or p_intent not in ('operation','stores','restore') then
+     p_admin is null or p_intent is null or p_intent not in ('operation','stores','restore') then
     raise exception 'PARAMETROS_INVALIDOS' using errcode = '22023';
   end if;
   select o.revisao_resultado into v_existing
@@ -231,4 +231,4 @@ select
  to_regclass('public.estoque_av_cloud') is not null as estoque,
  to_regclass('public.estoque_av_bridge_sessions') is not null as sessoes,
  to_regclass('public.estoque_av_bridge_operations') is not null as operacoes,
- to_regprocedure('public.estoque_av_bridge_commit(text,bigint,jsonb,uuid,text)') is not null as funcao;
+ to_regprocedure('public.estoque_av_bridge_commit(text,bigint,jsonb,uuid,text,boolean,text)') is not null as funcao;

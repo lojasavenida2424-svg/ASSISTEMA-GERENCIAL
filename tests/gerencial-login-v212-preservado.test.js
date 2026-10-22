@@ -1,0 +1,14 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.resolve(__dirname,'..');
+const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const guide=fs.readFileSync(path.join(root,'LEIA-PRIMEIRO-RECUPERACAO-V212.md'),'utf8');
+assert.match(html,/async function login\(\)/,'Fluxo original de login encontrado');
+assert.match(html,/carregarConfigGlobalOnline\(\{forcar:true\}\)/,'O login consulta a configuração oficial existente');
+assert.match(html,/usuarioGlobalPorOperador\(operadorInput\)/,'O operador segue validado pela lista existente');
+assert.match(html,/pass!==senhaConfigurada/,'A senha existente continua sendo respeitada');
+assert.match(guide,/O login existente do Gerencial.*preservados/i,'A orientação informa o modo de compatibilidade');
+assert.match(guide,/Não execute .*SEGURANCA-GERENCIAL-CREDENCIAIS-RLS\.sql.*bloquearia o login/i,'A orientação impede uma política que bloqueie o login legado');
+console.log('PASS — login Gerencial existente e credenciais preservadas na recuperação V2.1.2');
