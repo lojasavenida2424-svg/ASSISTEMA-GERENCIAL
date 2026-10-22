@@ -2,6 +2,7 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
+const vm=require('node:vm');
 const root=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const stock=read('estoque/index.html');
@@ -15,6 +16,15 @@ assert.match(stock,/function importBackup\(\)\{if\(!requireAdmin\(\)\)/,'Restaur
 assert.match(stock,/function storeModal\(id\)\{if\(!requireAdmin\(\)\)/,'Edição de loja exige administrador');
 assert.match(stock,/function reverseLossModal\(id\)\{if\(!requireAdmin\(\)\)/,'Estorno de perda exige administrador');
 assert.match(stock,/const ONLINE_TABLE='assistencia_gerencial'/,'Estoque usa a tabela existente do Gerencial');
+assert.match(stock,/const estoqueSessaoAtiva=\(\)=>!!\(sessionUser\?\.id/,'A sincronização segue a sessão local ativa do Estoque');
+const stockSessionGate=stock.match(/const estoqueSessaoAtiva=\(\)=>!!\(sessionUser\?\.id&&accounts\(\)\.some\(account=>account\.id===sessionUser\.id&&account\.active\)\);/)?.[0];
+assert.ok(stockSessionGate,'O gate da sessão do Estoque está definido');
+const sessionGate=(sessionUser,all)=>vm.runInNewContext(`${stockSessionGate}; estoqueSessaoAtiva()`,{sessionUser,accounts:()=>all});
+assert.equal(sessionGate({id:'stock-account'},[{id:'stock-account',active:true}]),true,'Conta local ativa pode iniciar a sincronização');
+assert.equal(sessionGate(null,[{id:'stock-account',active:true}]),false,'Sem login do Estoque não há sincronização');
+assert.equal(sessionGate({id:'stock-account'},[{id:'stock-account',active:false}]),false,'Conta do Estoque bloqueada não sincroniza');
+assert.match(stock,/cloudEnabled=true;cloudStart\(\)/,'A conexão Supabase começa após o login no Estoque');
+assert.doesNotMatch(stock,/adminGerencialSessaoV21Individual|gerencialPodeAcessarEstoque/,'O app Estoque independente não depende da sessionStorage do Gerencial');
 const stockUrl=stock.match(/const CLOUD_URL='([^']+)'/)?.[1];
 const gerencialUrl=gerencial.match(/const SUPABASE_URL = '([^']+)'/)?.[1];
 const stockKey=stock.match(/const CLOUD_ANON_KEY='([^']+)'/)?.[1];
@@ -34,5 +44,5 @@ assert.doesNotMatch(gerencial,/estoqueGerencialProvisionarSessao|ESTOQUE_BRIDGE_
 assert.match(gerencial,/const SUPABASE_URL = 'https:\/\/euyrhkusnasgiueefldg\.supabase\.co'/,'O projeto Supabase permanece o mesmo');
 assert.match(gerencial,/const configOk=await carregarConfigGlobalOnline\(\{forcar:true\}\)/,'Login existente do Gerencial continua usando cadastro oficial');
 assert.match(gerencial,/if\(pass!==senhaConfigurada\)/,'Autenticação legada permanece compatível');
-assert.match(guide,/Não é preciso criar contas, publicar Edge Function ou instalar SQL/,'A instalação atual não exige configuração paralela');
-console.log('PASS — sincronização do Estoque no projeto/tabela do Gerencial, conflitos, remoção da migração de contas e login preservado');
+assert.match(guide,/Não é preciso abrir o Gerencial junto, criar contas, publicar Edge Function ou instalar SQL/,'A instalação atual não exige sessão do Gerencial nem configuração paralela');
+console.log('PASS — sincronização após login do Estoque no projeto/tabela do Gerencial, conflitos, remoção da migração de contas e login preservado');

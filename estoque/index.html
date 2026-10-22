@@ -328,7 +328,7 @@
   function loadPrefs(){try{return {...{storeId:'store24',operator:'Operador local',page:'dashboard',theme:'light'},...JSON.parse(localStorage.getItem(PREF)||'{}')}}catch{return{storeId:'store24',operator:'Operador local',page:'dashboard',theme:'light'}}}
 
   // Acesso LOCAL: separação visual de sessão e credenciais neste navegador.
-  // O compartilhamento usa a sessão ativa e as permissões do Gerencial.
+  // O compartilhamento começa após o login local do Estoque, inclusive no app instalado.
   const ACCOUNTS_KEY='estoque_av_local_accounts_v1',SESSION_KEY='estoque_av_session_v1',REMEMBER_KEY='estoque_av_remember_user_v1';
   let sessionUser=null,authAttempts=0,authBlockedUntil=0;
   function accounts(){try{const a=JSON.parse(localStorage.getItem(ACCOUNTS_KEY)||'[]');return Array.isArray(a)?a.map((entry,index)=>({...entry,role:entry.role==='admin'||entry.role==='operator'?entry.role:(index===0?'admin':'operator'),active:entry.active!==false})):[]}catch{return []}}
@@ -429,7 +429,7 @@
       ${setup?`<div class="auth-field"><label for="auth-confirm">Confirme sua senha</label><div class="auth-input-wrap">${htmlAuthIcon('shield',18)}<input class="auth-input" type="password" id="auth-confirm" name="confirmPassword" placeholder="Repita a senha" autocomplete="new-password" minlength="8" required><button class="auth-eye" type="button" data-toggle="auth-confirm" aria-label="Mostrar senha" title="Mostrar senha">${htmlAuthIcon('eye',19)}</button></div></div>`:`<div class="auth-between"><label class="auth-remember"><input type="checkbox" id="auth-remember" ${remembered?'checked':''}> Lembrar usuário</label><span class="auth-helper">Acesso exclusivo deste navegador</span></div>`}
       <div id="auth-error" class="auth-error" role="alert" aria-live="polite"></div>
       <button class="auth-submit" id="auth-submit" type="submit"><span>${setup?'Criar acesso e entrar':'Entrar no ESTOQUE AV'}</span>${htmlAuthIcon('right',19)}</button>
-      </form><div class="auth-info">${htmlAuthIcon('info',16)}<span>${setup?'As credenciais serão guardadas apenas neste dispositivo. Guarde sua senha com segurança.':'O acesso do Estoque é local; a sincronização de registros depende de um login autorizado no Gerencial.'}</span></div>
+      </form><div class="auth-info">${htmlAuthIcon('info',16)}<span>${setup?'As credenciais serão guardadas apenas neste dispositivo. Guarde sua senha com segurança.':'Entre com seu usuário do Estoque; a sincronização usa o mesmo Supabase configurado no Gerencial.'}</span></div>
       <div class="auth-footer-mobile">LOJAS AVENIDA S/A · ESTOQUE AV</div>
     </div></section></div>`;
   }
@@ -465,10 +465,10 @@
     });
     if(window.matchMedia('(min-width:701px)').matches)$('#auth-user')?.focus({preventScroll:true});
   }
-  function startSession(account){if(!account?.active)return;sessionUser={id:account.id,username:account.username,name:account.name,role:account.role};try{sessionStorage.setItem(SESSION_KEY,account.id)}catch(e){console.warn('Sessão temporária indisponível',e)}prefs.operator=account.name;savePrefs();$('#auth-root').innerHTML='';document.body.classList.remove('auth-locked');render();if(cloudEnabled)cloudStart()}
+  function startSession(account){if(!account?.active)return;sessionUser={id:account.id,username:account.username,name:account.name,role:account.role};try{sessionStorage.setItem(SESSION_KEY,account.id)}catch(e){console.warn('Sessão temporária indisponível',e)}prefs.operator=account.name;savePrefs();$('#auth-root').innerHTML='';document.body.classList.remove('auth-locked');render();cloudEnabled=true;cloudStart()}
   function boot(){let sid=null;try{sid=sessionStorage.getItem(SESSION_KEY)}catch(e){console.warn('Sessão do navegador indisponível',e)}const account=accounts().find(a=>a.id===sid);if(account&&account.active){startSession(account)}else{try{sessionStorage.removeItem(SESSION_KEY)}catch(e){}showAuth()}}
-  function logout(){try{sessionStorage.removeItem(SESSION_KEY)}catch(e){}sessionUser=null;showAuth()}
-  function accountModal(){if(!sessionUser)return;modal('Minha conta','Acesso local neste navegador.',`<div class="report-row"><span>Operador</span><strong>${escapeHtml(sessionUser.name)}</strong></div><div class="report-row"><span>Usuário</span><strong>${escapeHtml(sessionUser.username)}</strong></div><div class="notice blue">${ico('info')}<span>Este login local foi preservado. Quando aberto pelo Gerencial, o compartilhamento online usa a mesma configuração Supabase, sem exigir uma nova conta no Supabase Authentication.</span></div>`,`<button class="btn btn-dark" id="logout-now">${ico('logout')} Sair do sistema</button>`);$('#logout-now').addEventListener('click',logout)}
+  function logout(){try{sessionStorage.removeItem(SESSION_KEY)}catch(e){}sessionUser=null;cloudEnabled=false;cloudReady=false;cloudEmail='';showAuth()}
+  function accountModal(){if(!sessionUser)return;modal('Minha conta','Acesso local neste navegador.',`<div class="report-row"><span>Operador</span><strong>${escapeHtml(sessionUser.name)}</strong></div><div class="report-row"><span>Usuário</span><strong>${escapeHtml(sessionUser.username)}</strong></div><div class="notice blue">${ico('info')}<span>Este login local foi preservado. A sincronização usa o mesmo projeto Supabase configurado no Gerencial, sem exigir uma conta adicional no Supabase Authentication.</span></div>`,`<button class="btn btn-dark" id="logout-now">${ico('logout')} Sair do sistema</button>`);$('#logout-now').addEventListener('click',logout)}
   let db=loadData(),prefs=loadPrefs(),searchValue='',filterValue='all',modalState=null;
   if(!db.stores.find(s=>s.id===prefs.storeId))prefs.storeId=db.stores[0]?.id||'';
   const getStore=()=>db.stores.find(s=>s.id===prefs.storeId);
@@ -488,17 +488,11 @@
   const CLOUD_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1eXJoa3VzbmFzZ2l1ZWVmbGRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzY0MTksImV4cCI6MjA5ODk1MjQxOX0.woI5Il3ObKrj8BJfdYz8DcUW08Jl5c458ykh1SrHYr4';
   const ONLINE_TABLE='assistencia_gerencial',CLOUD_ROW_ID='estoque_av_compartilhado_v1';
   const CLOUD_BACKUP=KEY+'_antes_nuvem_v20';
-  const GERENCIAL_SESSION_KEY='adminGerencialSessaoV21Individual';
   const stockClient=window.supabase?.createClient?window.supabase.createClient(CLOUD_URL,CLOUD_ANON_KEY,{
     auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
   }):null;
-  const gerencialSession=()=>{try{return JSON.parse(sessionStorage.getItem(GERENCIAL_SESSION_KEY)||'null')}catch{return null}};
-  const gerencialSessaoValida=()=>{const s=gerencialSession();return !!(s?.operador&&Number(s?.expiraEm)>Date.now())};
-  const gerencialPodeAcessarEstoque=()=>{
-    const s=gerencialSession(),operator=normaliseOperator(s?.operador),permissions=s?.permissoes||{};
-    return gerencialSessaoValida()&&(operator==='133'||(permissions.sistemaav!==false&&permissions.sistemaAvLinks?.estoque!==false));
-  };
-  let cloudEnabled=gerencialPodeAcessarEstoque(),cloudReady=false,cloudBusy=false,cloudUpdatedAt=null,cloudRowExists=false,cloudError='',cloudEmail='',cloudLastPull=0;
+  const estoqueSessaoAtiva=()=>!!(sessionUser?.id&&accounts().some(account=>account.id===sessionUser.id&&account.active));
+  let cloudEnabled=false,cloudReady=false,cloudBusy=false,cloudUpdatedAt=null,cloudRowExists=false,cloudError='',cloudEmail='',cloudLastPull=0;
   let cloudPoll=null,cloudInitialising=false;
   function cloudStatus(){return cloudEnabled?(cloudReady?(cloudRowExists?'Nuvem sincronizada':'Nuvem pronta para o primeiro registro'):cloudError?'Nuvem indisponível':'Conectando…'):'Modo local'}
   function cloudStatusClass(){return cloudEnabled?(cloudReady?'live':cloudError?'error':'wait'):'wait'}
@@ -540,7 +534,7 @@
     if(redraw&&sessionUser)render();
   }
   async function cloudPull({quiet=false,preserveModal=false,force=false}={}){
-    if(!gerencialPodeAcessarEstoque()){cloudEnabled=false;cloudReady=false;cloudError='Entre no Gerencial com um usuário autorizado para sincronizar.';return false}
+    if(!estoqueSessaoAtiva()){cloudEnabled=false;cloudReady=false;cloudError='Entre no Estoque AV para sincronizar.';return false}
     if(!cloudEnabled||(cloudBusy&&!force)||!navigator.onLine)return false;
     try{
       const row=await cloudReadRow();
@@ -551,12 +545,12 @@
     }catch(err){cloudReady=false;cloudError=cloudErrorMessage(err);if(!quiet)toast(cloudError,true);if(sessionUser&&!preserveModal)render();return false}
   }
   async function cloudStart(){
-    if(!gerencialPodeAcessarEstoque()){cloudEnabled=false;cloudReady=false;cloudError='Entre no Gerencial com um usuário autorizado para sincronizar.';if(sessionUser)render();return}
+    if(!estoqueSessaoAtiva()){cloudEnabled=false;cloudReady=false;cloudError='Entre no Estoque AV para sincronizar.';if(sessionUser)render();return}
     cloudEnabled=true;
     if(cloudInitialising)return;
     cloudInitialising=true;cloudReady=false;cloudError='';
     try{
-      const session=gerencialSession();cloudEmail='Operador '+normaliseOperator(session?.operador);
+      cloudEmail=sessionUser?.name||sessionUser?.username||'Estoque AV';
       if(!localStorage.getItem(CLOUD_BACKUP))localStorage.setItem(CLOUD_BACKUP,JSON.stringify(db));
       const loaded=await cloudPull({quiet:true});
       if(loaded){const pending=await getPendingCommit();if(pending){cloudBusy=true;try{await resolvePendingCommit(pending)}catch(error){cloudError=String(error?.message||error);console.error('Gravação pendente aguardando reconciliação:',error)}finally{cloudBusy=false}}}
@@ -564,11 +558,11 @@
   }
   function cloudConnectModal(){
     modal('Sincronização com o Gerencial','Nenhum login ou configuração adicional é necessário.',
-      `<div class="notice blue">${ico('shield')}<span>O ESTOQUE AV usa o mesmo projeto Supabase já configurado no Gerencial. Seu login atual e as contas locais do Estoque continuam iguais.</span></div><p class="text-note" style="margin-top:14px">Situação: <strong>${escapeHtml(cloudStatus())}</strong></p><p class="text-note">${escapeHtml(cloudError||'Entre no Gerencial com um usuário autorizado e verifique a conexão.')}</p>`,
+      `<div class="notice blue">${ico('shield')}<span>O ESTOQUE AV usa o mesmo projeto Supabase configurado no Gerencial. Faça login no próprio Estoque; suas contas locais continuam iguais.</span></div><p class="text-note" style="margin-top:14px">Situação: <strong>${escapeHtml(cloudStatus())}</strong></p><p class="text-note">${escapeHtml(cloudError||'Verifique a conexão com o Supabase.')}</p>`,
       `<button class="btn btn-primary" id="cloud-connect-submit">${ico('repeat')} Verificar conexão</button>`);
-    $('#cloud-connect-submit').addEventListener('click',async()=>{if(!gerencialPodeAcessarEstoque()){toast('Entre no Gerencial com um usuário autorizado.',true);return}cloudEnabled=true;await cloudStart();if(cloudReady){closeModal();toast('Conexão confirmada!')}else toast(cloudError,true)});
+    $('#cloud-connect-submit').addEventListener('click',async()=>{if(!estoqueSessaoAtiva()){toast('Entre no Estoque AV para sincronizar.',true);return}cloudEnabled=true;await cloudStart();if(cloudReady){closeModal();toast('Conexão confirmada!')}else toast(cloudError,true)});
   }
-  function cloudDisconnect(){toast('A sincronização usa a sessão ativa do Gerencial e não pode ser desligada aqui.',true)}
+  function cloudDisconnect(){toast('A sincronização usa o mesmo Supabase do Gerencial e não pode ser desligada aqui.',true)}
   async function cloudSendLocalBackup(){
     if(!cloudReady||cloudRowExists){toast('O envio inicial só está disponível quando ainda não há estoque compartilhado na nuvem.',true);return}
     let local=null;try{local=JSON.parse(localStorage.getItem(CLOUD_BACKUP)||'null')}catch{}
@@ -577,7 +571,7 @@
       void commit(target=>{for(const prop of ['stores','products','ledger','transfers','losses','inventories','receipts'])target[prop]=structuredClone(local[prop]||[])},'Estoque local enviado para o Supabase.');
     });
   }
-  function cloudForceRefresh(){if(!cloudEnabled){toast('Entre no Gerencial para sincronizar.',true);return}cloudPull()}
+  function cloudForceRefresh(){if(!cloudEnabled){toast('Entre no Estoque AV para sincronizar.',true);return}cloudPull()}
   function cloudDisconnectAsk(){cloudDisconnect()}
   function cloudLocalCommit(mutate,success){
     try{const next=structuredClone(db);mutate(next);cloudValidate(next);localStorage.setItem(KEY,JSON.stringify(next));db=next;closeModal();render();toast(success||'Operação salva neste dispositivo (modo local).');return true}
@@ -585,7 +579,6 @@
   }
   const OUTBOX_DB_NAME='estoque_av_commit_outbox_v1',OUTBOX_STORE_NAME='pending',OUTBOX_KEY='avenida';
   let outboxDbPromise=null;
-  function normaliseOperator(value){const digits=String(value??'').replace(/\D/g,'');return digits?String(Number(digits)):''}
   function openOutboxDB(){
     if(!globalThis.indexedDB)return Promise.reject(Error('Este navegador não oferece armazenamento seguro para reconciliar gravações.'));
     if(!outboxDbPromise)outboxDbPromise=new Promise((resolve,reject)=>{
@@ -649,8 +642,10 @@
   const sameStockState=(a,b)=>{try{return JSON.stringify(a)===JSON.stringify(b)}catch{return false}};
   async function resolvePendingCommit(pending){
     pending=pending||await getPendingCommit();if(!pending)return true;
-    const session=gerencialSession(),operator=normaliseOperator(session?.operador);
-    if(!gerencialPodeAcessarEstoque()||!operator||operator!==normaliseOperator(pending.operator))throw Error('Há uma gravação pendente de outro operador. Entre no Gerencial com esse usuário para confirmar o resultado antes de continuar.');
+    const operator=String(sessionUser?.id||'');
+    const pendingOperator=String(pending.operator||'');
+    const isLegacyManagerOperator=/^\d+$/.test(pendingOperator);
+    if(!estoqueSessaoAtiva()||(!isLegacyManagerOperator&&pendingOperator&&pendingOperator!==operator))throw Error('Há uma gravação pendente vinculada a outro usuário. Entre com esse usuário para confirmar o resultado antes de continuar.');
     const fresh=await cloudPull({quiet:true,preserveModal:true,force:true});
     if(!fresh)throw Error('Não foi possível consultar o Supabase para reconciliar uma gravação anterior.');
     if(cloudRowExists&&sameStockState(db,pending.state)){
@@ -693,14 +688,14 @@
   }
   async function cloudRemoteCommit(mutate,success,intent='operation'){
     if(cloudBusy){toast('Existe outra gravação em andamento. Aguarde a conclusão.',true);return false}
-    if(!gerencialPodeAcessarEstoque()||!cloudReady||!navigator.onLine){toast('Alteração NÃO gravada: entre no Gerencial e confirme a conexão com a nuvem.',true);return false}
+    if(!estoqueSessaoAtiva()||!cloudReady||!navigator.onLine){toast('Alteração NÃO gravada: entre no Estoque AV e confirme a conexão com a nuvem.',true);return false}
     cloudBusy=true;
     const button=$('#modal-root .modal-foot .btn-primary, #modal-root .modal-foot .btn-danger');if(button)button.disabled=true;
     try{
       const pending=await getPendingCommit();
       if(pending){await resolvePendingCommit(pending);return false}
-      const session=gerencialSession(),operator=normaliseOperator(session?.operador);
-      if(!operator)throw Error('A sessão do Gerencial expirou. Entre novamente antes de gravar.');
+      const operator=String(sessionUser?.id||'');
+      if(!operator)throw Error('A sessão do Estoque expirou. Entre novamente antes de gravar.');
       for(let tries=0;tries<4;tries++){
         const next=structuredClone(db);mutate(next);cloudValidate(next);
         const operationId=uid();
@@ -725,13 +720,13 @@
     }catch(err){console.error(err);const status=Number(err?.status);const uncertain=!status||status>=500;toast(uncertain?'Não foi possível confirmar a gravação. O sistema guardou a operação para reconciliar com o Supabase; não repita o lançamento agora.':'Operação NÃO gravada na nuvem: '+cloudErrorMessage(err),true);return false}
     finally{cloudBusy=false;if(button?.isConnected)button.disabled=false}
   }
-  function commit(mutate,success,intent='operation'){if(gerencialPodeAcessarEstoque())cloudEnabled=true;else cloudEnabled=false;return cloudEnabled?cloudRemoteCommit(mutate,success,intent):cloudLocalCommit(mutate,success)}
+  function commit(mutate,success,intent='operation'){if(estoqueSessaoAtiva())cloudEnabled=true;else cloudEnabled=false;return cloudEnabled?cloudRemoteCommit(mutate,success,intent):cloudLocalCommit(mutate,success)}
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cloudEnabled&&!cloudBusy)cloudPull({quiet:true,preserveModal:!!modalState})});
   window.addEventListener('online',()=>{if(cloudEnabled&&!cloudBusy)cloudPull({quiet:true,preserveModal:!!modalState})});
   cloudPoll=setInterval(()=>{
     if(cloudBusy||document.hidden)return;
-    const allowed=gerencialPodeAcessarEstoque();
-    if(!allowed&&cloudEnabled){cloudEnabled=false;cloudReady=false;cloudError='A sessão ou a permissão do Gerencial expirou.';if(sessionUser)render();return}
+    const allowed=estoqueSessaoAtiva();
+    if(!allowed&&cloudEnabled){cloudEnabled=false;cloudReady=false;cloudError='A sessão do Estoque expirou.';if(sessionUser)render();return}
     if(allowed&&!cloudEnabled){cloudEnabled=true;cloudStart();return}
     if(cloudEnabled&&!cloudReady){cloudStart();return}
     if(cloudEnabled&&cloudReady&&Date.now()-cloudLastPull>12000)cloudPull({quiet:true,preserveModal:!!modalState});
@@ -849,14 +844,14 @@
   function settingsPage(){
     const tabs=`<nav class="settings-tabs" aria-label="Abas de configurações">${settingTabs.map(([id,name,icon])=>`<button type="button" class="settings-tab ${settingsTab===id?'active':''}" data-settings-tab="${id}" role="tab" aria-selected="${settingsTab===id?'true':'false'}">${ico(icon,17)} ${name}</button>`).join('')}</nav>`;
     let body='';
-    if(settingsTab==='general')body=`<div class="cols-2 equal" style="margin-top:0"><section class="panel"><div class="panel-head"><strong>Preferências do sistema</strong>${ico('settings')}</div><div class="body-pad"><div class="report-row"><span>Conta conectada</span><button class="btn btn-small" data-action="accountModal">${ico('user',15)} ${escapeHtml(op())}</button></div><div class="report-row"><span>Tema do sistema</span><button class="btn btn-small" data-action="themeSwitch">${ico(prefs.theme==='dark'?'moon':'sun',15)} ${prefs.theme==='dark'?'Escuro':'Claro'} · Alterar tema</button></div><div class="report-row"><span>Unidade selecionada</span><strong>${escapeHtml(getStore()?.name||'—')}</strong></div></div></section><section class="panel"><div class="panel-head"><strong>Ambiente e acesso</strong>${ico('shield')}</div><div class="body-pad"><div class="report-row"><span>Tipo de conta</span><span class="chip ${isAdmin()?'yellow':'dark'}">${isAdmin()?'Administrador':'Operador'}</span></div><div class="report-row"><span>Registros</span><span class="chip">${cloudReady?'Supabase online':cloudEnabled?'Aguardando Gerencial':'Armazenamento local'}</span></div><div class="report-row"><span>Autenticação</span><span class="chip yellow">${cloudEnabled?'Gerencial (login preservado)':'Login local atual'}</span></div><p class="text-note" style="margin-top:16px">As preferências visuais acompanham o tema selecionado, inclusive na janela de leitura de código de barras.</p></div></section></div>`;
-    if(settingsTab==='sync')body=`<section class="panel"><div class="panel-head"><strong>Sincronização entre dispositivos</strong><span class="chip ${cloudReady?'green':cloudEnabled?'red':'yellow'}">${escapeHtml(cloudStatus())}</span></div><div class="cloud-panel"><p>Conecte o ESTOQUE AV ao mesmo projeto Supabase do Gerencial. Produtos, lojas, recebimentos, perdas e movimentações passam a compartilhar a mesma base para os usuários autorizados.</p><div class="notice ${cloudReady?'blue':''}">${ico(cloudReady?'check':'info')}<span>${cloudEnabled?(cloudReady?'Sincronizado. Os lançamentos são confirmados pelo Supabase; mudanças de outros dispositivos são consultadas automaticamente.':escapeHtml(cloudError||'Aguardando conexão com o Supabase. Operações de gravação são bloqueadas enquanto a nuvem está indisponível.')):'Modo local: os registros NÃO são compartilhados. Abra o sistema pelo Gerencial com um usuário autorizado.'}</span></div><div class="report-row"><span>Projeto</span><strong>${escapeHtml(new URL(CLOUD_URL).hostname)}</strong></div><div class="report-row"><span>Conta online</span><strong>${escapeHtml(cloudEmail||'Não conectada')}</strong></div><div class="report-row"><span>Última atualização</span><strong>${cloudReady?(cloudUpdatedAt?dt(cloudUpdatedAt):'Sem registro'):'—'}</strong></div><div class="actions" style="margin-top:18px"><button type="button" class="btn btn-primary" data-action="cloudConnectModal">${ico('shield')} ${cloudEnabled?'Verificar conexão':'Verificar conexão'}</button>${cloudEnabled&&cloudReady?`<button type="button" class="btn" data-action="cloudForceRefresh">${ico('repeat')} Atualizar dados</button>${cloudRowExists?'':`<button type="button" class="btn" data-action="cloudSendLocalBackup">${ico('upload')} Enviar backup local</button>`}`:''}</div><p class="text-note" style="margin-top:18px">A sincronização usa o mesmo projeto Supabase do Gerencial, sem função Edge, SQL de instalação ou conta adicional. Não é necessário criar contas no Supabase Auth. Antes da primeira conexão, exporte um backup em Configurações → Backup e dados.</p></div></section>`;
+    if(settingsTab==='general')body=`<div class="cols-2 equal" style="margin-top:0"><section class="panel"><div class="panel-head"><strong>Preferências do sistema</strong>${ico('settings')}</div><div class="body-pad"><div class="report-row"><span>Conta conectada</span><button class="btn btn-small" data-action="accountModal">${ico('user',15)} ${escapeHtml(op())}</button></div><div class="report-row"><span>Tema do sistema</span><button class="btn btn-small" data-action="themeSwitch">${ico(prefs.theme==='dark'?'moon':'sun',15)} ${prefs.theme==='dark'?'Escuro':'Claro'} · Alterar tema</button></div><div class="report-row"><span>Unidade selecionada</span><strong>${escapeHtml(getStore()?.name||'—')}</strong></div></div></section><section class="panel"><div class="panel-head"><strong>Ambiente e acesso</strong>${ico('shield')}</div><div class="body-pad"><div class="report-row"><span>Tipo de conta</span><span class="chip ${isAdmin()?'yellow':'dark'}">${isAdmin()?'Administrador':'Operador'}</span></div><div class="report-row"><span>Registros</span><span class="chip">${cloudReady?'Supabase online':cloudEnabled?'Aguardando Supabase':'Armazenamento local'}</span></div><div class="report-row"><span>Autenticação</span><span class="chip yellow">${cloudEnabled?'Supabase do Gerencial':'Login local atual'}</span></div><p class="text-note" style="margin-top:16px">As preferências visuais acompanham o tema selecionado, inclusive na janela de leitura de código de barras.</p></div></section></div>`;
+    if(settingsTab==='sync')body=`<section class="panel"><div class="panel-head"><strong>Sincronização entre dispositivos</strong><span class="chip ${cloudReady?'green':cloudEnabled?'red':'yellow'}">${escapeHtml(cloudStatus())}</span></div><div class="cloud-panel"><p>Conecte o ESTOQUE AV ao mesmo projeto Supabase do Gerencial. Produtos, lojas, recebimentos, perdas e movimentações passam a compartilhar a mesma base para os usuários autorizados.</p><div class="notice ${cloudReady?'blue':''}">${ico(cloudReady?'check':'info')}<span>${cloudEnabled?(cloudReady?'Sincronizado. Os lançamentos são confirmados pelo Supabase; mudanças de outros dispositivos são consultadas automaticamente.':escapeHtml(cloudError||'Aguardando conexão com o Supabase. Operações de gravação são bloqueadas enquanto a nuvem está indisponível.')):'Modo local: os registros NÃO são compartilhados. Faça login no Estoque AV para conectar ao Supabase do Gerencial.'}</span></div><div class="report-row"><span>Projeto</span><strong>${escapeHtml(new URL(CLOUD_URL).hostname)}</strong></div><div class="report-row"><span>Conta online</span><strong>${escapeHtml(cloudEmail||'Não conectada')}</strong></div><div class="report-row"><span>Última atualização</span><strong>${cloudReady?(cloudUpdatedAt?dt(cloudUpdatedAt):'Sem registro'):'—'}</strong></div><div class="actions" style="margin-top:18px"><button type="button" class="btn btn-primary" data-action="cloudConnectModal">${ico('shield')} ${cloudEnabled?'Verificar conexão':'Verificar conexão'}</button>${cloudEnabled&&cloudReady?`<button type="button" class="btn" data-action="cloudForceRefresh">${ico('repeat')} Atualizar dados</button>${cloudRowExists?'':`<button type="button" class="btn" data-action="cloudSendLocalBackup">${ico('upload')} Enviar backup local</button>`}`:''}</div><p class="text-note" style="margin-top:18px">A sincronização usa o mesmo projeto Supabase do Gerencial, sem função Edge, SQL de instalação ou conta adicional. Não é necessário criar contas no Supabase Auth. Antes da primeira conexão, exporte um backup em Configurações → Backup e dados.</p></div></section>`;
     if(settingsTab==='users'){
       const all=accounts(),enabled=all.filter(a=>a.active),admins=enabled.filter(a=>a.role==='admin');
       body=`<div class="user-summary"><div class="mini"><span>Contas cadastradas</span><strong>${all.length}</strong></div><div class="mini"><span>Contas ativas</span><strong>${enabled.length}</strong></div><div class="mini"><span>Administradores ativos</span><strong>${admins.length}</strong></div></div><section class="panel"><div class="panel-head"><div><strong>Usuários com acesso</strong><p class="text-note" style="margin:5px 0 0">Crie, edite, bloqueie ou remova usuários deste navegador.</p></div>${isAdmin()?`<button class="btn btn-primary btn-small" data-action="userCreate">${ico('plus',16)} Novo usuário</button>`:''}</div><div class="user-list">${all.map(a=>`<div class="user-line"><div class="user-avatar">${escapeHtml(a.name.slice(0,2).toUpperCase())}</div><div class="user-detail"><strong>${escapeHtml(a.name)} ${a.id===sessionUser?.id?'<span class="chip yellow" style="margin-left:5px">Você</span>':''}</strong><small>@${escapeHtml(a.username)} · ${a.createdAt?dt(a.createdAt):'Conta antiga'}</small><div class="user-tags"><span class="chip ${a.role==='admin'?'yellow':'dark'}">${a.role==='admin'?'Administrador':'Operador'}</span><span class="chip ${a.active?'green':'red'}">${a.active?'Ativo':'Bloqueado'}</span></div></div>${isAdmin()?`<div class="user-actions"><button class="btn btn-small" data-action="userEdit" data-id="${escapeHtml(a.id)}" title="Editar usuário">${ico('edit',14)} Editar</button><button class="btn btn-small" data-action="userReset" data-id="${escapeHtml(a.id)}" title="Alterar senha">${ico('shield',14)} Senha</button>${a.id!==sessionUser?.id?`<button class="btn btn-small ${a.active?'btn-danger':''}" data-action="userToggle" data-id="${escapeHtml(a.id)}">${ico(a.active?'close':'check',13)} ${a.active?'Bloquear':'Ativar'}</button><button class="btn btn-small" data-action="userDelete" data-id="${escapeHtml(a.id)}" title="Excluir conta">${ico('trash',14)}</button>`:''}</div>`:''}</div>`).join('')}</div></section><div class="account-tip">${ico('info',18)} <span>${isAdmin()?'Os administradores podem criar contas e alterar o acesso; operadores não conseguem administrar usuários.':'Seu perfil é de operador. Somente administradores podem alterar usuários.'} <b>Este gerenciamento é local:</b> não cria usuários em outros celulares ou computadores, nem substitui as políticas de acesso de um servidor.</span></div>`;
     }
     if(settingsTab==='backup')body=`<section class="panel"><div class="panel-head"><strong>Backup e recuperação dos registros</strong>${ico('shield')}</div><div class="body-pad"><p class="text-note">Exporte todos os registros operacionais, mercadorias, lojas, caminhões, perdas, inventários e fotos compactadas para um JSON.</p><div class="actions" style="margin:18px 0">${act('Exportar backup','exportBackup','download','btn-dark')}${act('Restaurar backup','importBackup','upload','')}</div><div class="notice blue">${ico('info')}<span>O arquivo de backup contém os registros operacionais. As credenciais dos usuários locais são gerenciadas separadamente neste navegador e não acompanham este backup.</span></div></div></section>`;
-    if(settingsTab==='about')body=`<section class="panel"><div class="panel-head"><strong>ESTOQUE AV — V2.2</strong><span class="chip">${cloudEnabled?'Supabase':'Local'} · HTML</span></div><div class="body-pad">${[['Cadastro e movimentações manuais','Ativo'],['Múltiplas lojas; depósito e salão','Ativo'],['Transferências com confirmação','Ativo'],['Recebimento de caminhões por categoria','Ativo'],['Perdas sem cadastro e baixas automáticas quando houver saldo','Ativo'],['Leitor contextual de 12 dígitos com tema automático','Ativo'],['Gerenciamento local de usuários','Ativo'],['Sincronização pelo Supabase do Gerencial',cloudReady?'Ativo':'Requer configuração']].map(([label,status])=>`<div class="report-row"><span>${label}</span><span class="chip ${status==='Ativo'?'green':'yellow'}">${status}</span></div>`).join('')}</div></section><div class="notice blue">${ico('info')}<span>As contas locais deste módulo continuam como antes e não são credenciais do Supabase. Quando há uma sessão autorizada do Gerencial, o Estoque grava na mesma tabela Supabase usada pelos demais módulos. As contas de acesso do Estoque permanecem neste navegador.</span></div>`;
+    if(settingsTab==='about')body=`<section class="panel"><div class="panel-head"><strong>ESTOQUE AV — V2.2.1</strong><span class="chip">${cloudEnabled?'Supabase':'Local'} · HTML</span></div><div class="body-pad">${[['Cadastro e movimentações manuais','Ativo'],['Múltiplas lojas; depósito e salão','Ativo'],['Transferências com confirmação','Ativo'],['Recebimento de caminhões por categoria','Ativo'],['Perdas sem cadastro e baixas automáticas quando houver saldo','Ativo'],['Leitor contextual de 12 dígitos com tema automático','Ativo'],['Gerenciamento local de usuários','Ativo'],['Sincronização pelo Supabase do Gerencial',cloudReady?'Ativo':'Requer configuração']].map(([label,status])=>`<div class="report-row"><span>${label}</span><span class="chip ${status==='Ativo'?'green':'yellow'}">${status}</span></div>`).join('')}</div></section><div class="notice blue">${ico('info')}<span>As contas locais deste módulo continuam como antes e não são credenciais do Supabase. Após o login no Estoque, os registros são sincronizados pela mesma tabela e projeto Supabase usados pelo Gerencial. As contas de acesso do Estoque permanecem neste navegador.</span></div>`;
     return pageHead('Configurações','Gerencie preferências, usuários, proteção dos registros e informações do sistema.')+tabs+`<section class="settings-content" role="tabpanel">${body}</section>`;
   }
   function setSettingsTab(tab){if(!settingTabs.some(x=>x[0]===tab))return;settingsTab=tab;if(prefs.page!=='settings'){setPage('settings');return}render()}

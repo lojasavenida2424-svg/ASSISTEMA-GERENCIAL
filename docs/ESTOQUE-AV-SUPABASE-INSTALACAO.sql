@@ -1,3 +1,4 @@
+-- LEGADO V1.9: não executar para a versão atual; veja LEIA-PRIMEIRO-ESTOQUE-V22.md.
 -- ESTOQUE AV V1.9 | Supabase SQL Editor | executar uma vez no projeto do Gerencial.
 -- IMPORTANTE: a sessão do Gerencial é própria do sistema e NÃO equivale ao Supabase Auth.
 -- Crie usuários em Authentication > Users. Depois associe seus IDs nesta tabela:

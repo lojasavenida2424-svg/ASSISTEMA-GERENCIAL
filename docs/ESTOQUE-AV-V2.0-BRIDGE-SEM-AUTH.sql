@@ -1,3 +1,5 @@
+-- OBSOLETO: ponte antiga do Estoque. Não executar para a sincronização atual.
+-- Veja LEIA-PRIMEIRO-ESTOQUE-V22.md; o sistema agora usa a tabela do Gerencial.
 -- ESTOQUE AV V2.0 - Ponte segura com o login JA EXISTENTE do Gerencial.
 -- Execute no SQL Editor do mesmo projeto Supabase usado pelo Gerencial.
 -- Nao cria usuarios Supabase Auth. Nao altera a tela ou o login do Gerencial.

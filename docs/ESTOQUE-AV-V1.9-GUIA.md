@@ -1,3 +1,5 @@
+> **GUIA ANTIGO:** aplica-se somente à sincronização V1.9. Para a versão atual, siga `LEIA-PRIMEIRO-ESTOQUE-V22.md` na raiz.
+
 # ESTOQUE AV — V1.9 | Cadastro corrigido e sincronização multi-dispositivo
 
 ## 1. Erro corrigido
