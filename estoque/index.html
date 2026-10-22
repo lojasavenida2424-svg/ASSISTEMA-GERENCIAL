@@ -65,6 +65,9 @@
     .auth-remember{display:inline-flex;align-items:center;gap:9px;cursor:pointer;font-size:12px;color:#616b6d}
     .auth-remember input{width:16px;height:16px;accent-color:#ddb042;cursor:pointer}
     .auth-helper{font-size:11px;color:#a3a7a1}
+    .auth-forgot-link{border:0;background:transparent;padding:4px 0;color:#94752d;font:inherit;font-size:11px;font-weight:700;text-decoration:underline;cursor:pointer;white-space:nowrap}
+    .auth-forgot-link:hover{color:#705317}
+    .auth-forgot-link:focus-visible{outline:2px solid #c89c2e;outline-offset:3px;border-radius:3px}
     .auth-submit{margin-top:4px;border:1px solid #e5b843;background:linear-gradient(125deg,#f6d47a,#e9b840);color:#1c2121;min-height:55px;width:100%;border-radius:13px;font-size:14px;letter-spacing:.1px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:11px;box-shadow:0 10px 26px #dca83b38;transition:transform .2s,box-shadow .2s}
     .auth-submit:hover{transform:translateY(-1px);box-shadow:0 13px 27px #dca83b4d}
     .auth-submit:disabled{opacity:.6;cursor:wait;transform:none}
@@ -315,7 +318,7 @@
   <script>
   'use strict';
   const KEY='estoque_av_v1';const PREF='estoque_av_preferences';
-  const VISIBLE_PAGE_IDS=['products','receipts','losses','inventory'];
+  const VISIBLE_PAGE_IDS=['products','receipts','losses','inventory','settings'];
   const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
   const uid=()=>('id'+(globalThis.crypto?.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)));
   const iso=()=>new Date().toISOString();
@@ -332,12 +335,24 @@
   // Acesso LOCAL: separação visual de sessão e credenciais neste navegador.
   // O compartilhamento começa após o login local do Estoque, inclusive no app instalado.
   const ACCOUNTS_KEY='estoque_av_local_accounts_v1',SESSION_KEY='estoque_av_session_v1',REMEMBER_KEY='estoque_av_remember_user_v1';
-  let sessionUser=null,authAttempts=0,authBlockedUntil=0;
-  function accounts(){try{const a=JSON.parse(localStorage.getItem(ACCOUNTS_KEY)||'[]');return Array.isArray(a)?a.map((entry,index)=>({...entry,role:entry.role==='admin'||entry.role==='operator'?entry.role:(index===0?'admin':'operator'),active:entry.active!==false})):[]}catch{return []}}
-  function isAdmin(){return sessionUser?.role==='admin'}
-  function requireAdmin(){if(!isAdmin()){toast('Apenas administradores podem gerenciar contas locais.',true);return false}return true}
-  function accountSave(next,message){localStorage.setItem(ACCOUNTS_KEY,JSON.stringify(next));if(sessionUser){const own=next.find(a=>a.id===sessionUser.id);if(own&&own.active){sessionUser={id:own.id,username:own.username,name:own.name,role:own.role};prefs.operator=own.name;savePrefs()}}closeModal();render();toast(message)}
-  function requireAccount(id){if(!requireAdmin())return null;const account=accounts().find(a=>a.id===id);if(!account){toast('Usuário não encontrado.',true);return null}return account}
+  const DEVELOPER_OPERATOR='133',DEVELOPER_NAME='JOAO PEDRO DE OLIVEIRA SILVA';
+  let sessionUser=null,authAttempts=0,authBlockedUntil=0,pendingFirstUse=null;
+  function isDeveloperAccount(account){return String(account?.operator||account?.username||'').replace(/\D/g,'').replace(/^0+(?=\d)/,'')===DEVELOPER_OPERATOR||account?.systemRole==='developer'||account?.id==='gerencial_133'}
+  function accounts(){
+    let saved=[];try{const parsed=JSON.parse(localStorage.getItem(ACCOUNTS_KEY)||'[]');if(Array.isArray(parsed))saved=parsed}catch{}
+    const byOperator=new Map();
+    for(const entry of saved){
+      const operator=String(entry?.operator||entry?.username||'').replace(/\D/g,'').replace(/^0+(?=\d)/,'');
+      if(!/^\d{3,}$/.test(operator))continue;
+      const developer=operator===DEVELOPER_OPERATOR;
+      byOperator.set(operator,{...entry,id:`gerencial_${operator}`,username:operator,operator,name:developer?DEVELOPER_NAME:String(entry.name||`Operador ${operator}`),role:developer?'admin':'operator',systemRole:developer?'developer':'operator',authSource:'gerencial',active:developer||entry.active!==false,needsPasswordSetup:!(entry.salt&&entry.hash)});
+    }
+    if(!byOperator.has(DEVELOPER_OPERATOR))byOperator.set(DEVELOPER_OPERATOR,{id:'gerencial_133',username:'133',operator:'133',name:DEVELOPER_NAME,role:'admin',systemRole:'developer',authSource:'gerencial',active:true,needsPasswordSetup:true});
+    return [...byOperator.values()];
+  }
+  function isAdmin(){return isDeveloperAccount(sessionUser)&&sessionUser?.active!==false}
+  function isDeveloper(){return isDeveloperAccount(sessionUser)}
+  function requireAdmin(){if(!isAdmin()){toast('Apenas o usuário DESENVOLVEDOR pode administrar o sistema.',true);return false}return true}
   function activeAdmins(all){return all.filter(a=>a.active&&a.role==='admin').length}
 
   function b64(bytes){return btoa(String.fromCharCode(...bytes))}
@@ -413,71 +428,74 @@
   function avenueLogo(size='normal'){
     return `<span class="avenida-emblem ${size==='large'?'avenida-emblem-large':''}"><svg class="av-corporate-symbol" viewBox="0 0 72 72" role="img" aria-label="Emblema AV Avenida"><defs><linearGradient id="av-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE47B"/><stop offset="1" stop-color="#E7B528"/></linearGradient></defs><circle cx="36" cy="36" r="35" fill="#5B1936"/><path d="M36 1a35 35 0 0 1 31.5 19.8L55.5 31.6 45.3 12.8Z" fill="url(#av-gold)"/><path d="M12 54 31 17h6L18 54h-6Zm13.5 0 10.5-21 10.5 21h-7l-3.5-7.5L32.5 54h-7Z" fill="#fff"/><path d="m43 18 9.6 20.5L63 18h-7L52.5 26 49.5 18Z" fill="#fff"/><circle cx="36" cy="36" r="34.4" fill="none" stroke="#fff" stroke-opacity=".12" stroke-width=".6"/></svg></span>`;
   }
-  function authTemplate(setup=false){
-    const remembered=(()=>{try{return localStorage.getItem(REMEMBER_KEY)||''}catch{return ''}})();
+  function authTemplate(mode='login'){
+    if(mode==='forgot-password')return `<div class="auth-scene"><section class="auth-visual" aria-label="Apresentação do Estoque AV"><div class="auth-art" aria-hidden="true"><i class="ring"></i><i class="ring"></i><i class="ring"></i></div><div class="auth-brand">${avenueLogo('large')}<div><strong>AVENIDA <span class="brand-sa">S/A</span></strong><small>ESTOQUE AV · SISTEMA OPERACIONAL</small></div></div><div class="auth-hero"><div class="auth-pretitle">RECUPERAÇÃO DE ACESSO</div><h2>Vamos recuperar sua <em>senha.</em></h2><p>Confirme seus dados do Gerencial para enviar uma solicitação ao desenvolvedor.</p></div><div class="auth-visual-foot"><span><i></i> Acesso autorizado pelo Gerencial</span><span>LOJAS AVENIDA S/A</span></div></section><section class="auth-form-side"><div class="auth-pane"><div class="auth-topline"><span>AVENIDA S/A · ESTOQUE</span><span class="auth-status">Solicitação protegida</span></div><div class="auth-greeting">${avenidaLogo()}</div><h1>Esqueci a senha</h1><p class="auth-subtitle">Informe os dados exatamente como aparecem no Gerencial. O desenvolvedor receberá sua solicitação para redefinir a senha.</p><form class="auth-form" id="auth-form" autocomplete="on" novalidate><div class="auth-field"><label for="recovery-name">NOME COMPLETO</label><div class="auth-input-wrap">${htmlAuthIcon('user',18)}<input class="auth-input" type="text" id="recovery-name" autocomplete="name" maxlength="120" required></div></div><div class="auth-field"><label for="recovery-birth">DATA DE NASCIMENTO</label><div class="auth-input-wrap">${htmlAuthIcon('calendar',18)}<input class="auth-input" type="date" id="recovery-birth" autocomplete="bday" required></div></div><div class="auth-field"><label for="recovery-operator">OPERADOR</label><div class="auth-input-wrap">${htmlAuthIcon('user',18)}<input class="auth-input" type="text" id="recovery-operator" inputmode="numeric" pattern="[0-9]{3,}" placeholder="Número do operador" required></div></div><div id="auth-error" class="auth-error" role="alert" aria-live="polite"></div><button class="auth-submit" id="auth-submit" type="submit"><span>Enviar solicitação</span>${htmlAuthIcon('right',19)}</button></form><button type="button" class="auth-local-setup" id="auth-recovery-back">Voltar ao login</button><div class="auth-footer-mobile">LOJAS AVENIDA S/A · ESTOQUE AV</div></div></section></div>`;
+    const setup=mode==='set-password',remembered=(()=>{try{return localStorage.getItem(REMEMBER_KEY)||''}catch{return ''}})(),authorized=pendingFirstUse;
     return `<div class="auth-scene"><section class="auth-visual" aria-label="Apresentação do Estoque AV">
       <div class="auth-art" aria-hidden="true"><i class="ring"></i><i class="ring"></i><i class="ring"></i></div>
       <div class="auth-brand">${avenueLogo('large')}<div><strong>AVENIDA <span class="brand-sa">S/A</span></strong><small>ESTOQUE AV · SISTEMA OPERACIONAL</small></div></div>
       <div class="auth-hero"><div class="auth-pretitle">CONTROLE OPERACIONAL · LOJAS AVENIDA</div><h2>Precisão em cada <em>movimento.</em></h2><p>Uma experiência inteligente para controlar mercadorias, organizar unidades e acompanhar sua operação com mais clareza.</p>
       <div class="auth-pills"><span class="auth-pill">${htmlAuthIcon('box',16)} Gestão de produtos</span><span class="auth-pill">${htmlAuthIcon('arrows',16)} Transferências</span><span class="auth-pill">${htmlAuthIcon('shield',16)} Controle de perdas</span></div></div>
-      <div class="auth-visual-foot"><span><i></i> Ambiente de operação local</span><span>LOJAS AVENIDA S/A</span></div>
-    </section><section class="auth-form-side"><div class="auth-pane"><div class="auth-topline"><span>AVENIDA S/A · ESTOQUE</span><span class="auth-status">Ambiente local</span></div>
+      <div class="auth-visual-foot"><span><i></i> Acesso autorizado pelo Gerencial</span><span>LOJAS AVENIDA S/A</span></div>
+    </section><section class="auth-form-side"><div class="auth-pane"><div class="auth-topline"><span>AVENIDA S/A · ESTOQUE</span><span class="auth-status">Acesso protegido</span></div>
       <div class="auth-greeting">${avenueLogo()}</div>
-      <h1>${setup?'Configure seu acesso.':'Bem-vindo de volta.'}</h1><p class="auth-subtitle">${setup?'Crie um acesso local para este dispositivo.':'Entre com seu operador e senha do Gerencial ou com o usuário local já cadastrado neste dispositivo.'}</p>
+      <h1>${setup?(authorized?.passwordResetRequestId?'Redefina sua senha.':'Defina sua senha.'):'Bem-vindo ao Estoque AV.'}</h1><p class="auth-subtitle">${setup?(authorized?.passwordResetRequestId?'Sua solicitação foi aprovada pelo desenvolvedor. Escolha uma nova senha para este dispositivo.':'Operador autorizado pelo Gerencial. Crie uma senha pessoal para este dispositivo.'):'Informe seu operador. O acesso é conferido diretamente no Gerencial; na primeira entrada, você escolherá sua senha.'}</p>
+      ${setup?`<div class="notice blue" style="margin-bottom:16px"><span><b>${escapeHtml(authorized?.name||'')}</b><br>OPERADOR ${escapeHtml(authorized?.operator||'')}</span></div>`:''}
       <form class="auth-form" id="auth-form" autocomplete="on" novalidate>
-      ${setup?`<div class="auth-field"><label for="auth-name">Nome do responsável</label><div class="auth-input-wrap">${htmlAuthIcon('store',18)}<input class="auth-input" type="text" id="auth-name" name="name" placeholder="Seu nome completo" autocomplete="name" minlength="2" maxlength="90" required></div></div>`:''}
-      <div class="auth-field"><label for="auth-user">${setup?'Usuário local':'Usuário ou número do operador'}</label><div class="auth-input-wrap">${htmlAuthIcon('store',18)}<input class="auth-input" type="text" id="auth-user" name="username" placeholder="${setup?'Digite um usuário':'Operador do Gerencial ou usuário local'}" value="${setup?'':escapeHtml(remembered)}" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" minlength="3" maxlength="40" required></div></div>
-      <div class="auth-field"><label for="auth-password">${setup?'Crie uma senha':'Senha de acesso'}</label><div class="auth-input-wrap">${htmlAuthIcon('shield',18)}<input class="auth-input" type="password" id="auth-password" name="password" placeholder="${setup?'Mínimo de 8 caracteres':'Digite sua senha'}" autocomplete="${setup?'new-password':'current-password'}" minlength="${setup?8:1}" required><button class="auth-eye" type="button" data-toggle="auth-password" aria-label="Mostrar senha" title="Mostrar senha">${htmlAuthIcon('eye',19)}</button></div></div>
-      ${setup?`<div class="auth-field"><label for="auth-confirm">Confirme sua senha</label><div class="auth-input-wrap">${htmlAuthIcon('shield',18)}<input class="auth-input" type="password" id="auth-confirm" name="confirmPassword" placeholder="Repita a senha" autocomplete="new-password" minlength="8" required><button class="auth-eye" type="button" data-toggle="auth-confirm" aria-label="Mostrar senha" title="Mostrar senha">${htmlAuthIcon('eye',19)}</button></div></div>`:`<div class="auth-between"><label class="auth-remember"><input type="checkbox" id="auth-remember" ${remembered?'checked':''}> Lembrar usuário</label><span class="auth-helper">Acesso exclusivo deste navegador</span></div>`}
+      ${setup?'':`<div class="auth-field"><label for="auth-user">USUARIO</label><div class="auth-input-wrap">${htmlAuthIcon('user',18)}<input class="auth-input" type="text" id="auth-user" name="operator" inputmode="numeric" pattern="[0-9]{3,}" placeholder="Número do operador" value="${escapeHtml(remembered)}" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required></div></div>`}
+      <div class="auth-field"><label for="auth-password">${setup?'NOVA SENHA':'SENHA'}</label><div class="auth-input-wrap">${htmlAuthIcon('shield',18)}<input class="auth-input" type="password" id="auth-password" name="password" placeholder="Mínimo de 8 caracteres" autocomplete="${setup?'new-password':'current-password'}" minlength="${setup?8:1}" ${setup?'required':''}><button class="auth-eye" type="button" data-toggle="auth-password" aria-label="Mostrar senha" title="Mostrar senha">${htmlAuthIcon('eye',19)}</button></div></div>
+      ${setup?`<div class="auth-field"><label for="auth-confirm">REPITA A NOVA SENHA</label><div class="auth-input-wrap">${htmlAuthIcon('shield',18)}<input class="auth-input" type="password" id="auth-confirm" name="confirmPassword" placeholder="Digite novamente a senha" autocomplete="new-password" minlength="8" required><button class="auth-eye" type="button" data-toggle="auth-confirm" aria-label="Mostrar senha" title="Mostrar senha">${htmlAuthIcon('eye',19)}</button></div></div>`:`<div class="auth-between"><label class="auth-remember"><input type="checkbox" id="auth-remember" ${remembered?'checked':''}> Lembrar operador</label><button type="button" class="auth-forgot-link" id="auth-forgot-password">ESQUECI A SENHA</button></div>`}
       <div id="auth-error" class="auth-error" role="alert" aria-live="polite"></div>
-      <button class="auth-submit" id="auth-submit" type="submit"><span>${setup?'Criar acesso e entrar':'Entrar no ESTOQUE AV'}</span>${htmlAuthIcon('right',19)}</button>
-      </form><div class="auth-info">${htmlAuthIcon('info',16)}<span>${setup?'As credenciais locais serão guardadas apenas neste dispositivo.':'O acesso do Gerencial é validado na mesma base online; o usuário local deste dispositivo também continua válido.'}</span></div>
-      ${!setup&&accounts().length===0?'<button type="button" class="auth-local-setup" id="auth-create-local">Configurar um acesso local neste dispositivo</button>':''}
-      ${setup?'<button type="button" class="auth-local-setup" id="auth-back-login">Voltar ao login do Gerencial</button>':''}
+      <button class="auth-submit" id="auth-submit" type="submit"><span>${setup?'Salvar senha e entrar':'Continuar'}</span>${htmlAuthIcon('right',19)}</button>
+      </form><div class="auth-info">${htmlAuthIcon('info',16)}<span>${setup?'Sua senha fica guardada apenas neste dispositivo. O acesso ao sistema depende da autorização do DESENVOLVEDOR.':'O Estoque confirma seu cadastro no Gerencial e verifica se o DESENVOLVEDOR liberou o acesso.'}</span></div>
+      ${setup?'<button type="button" class="auth-local-setup" id="auth-back-login">Voltar</button>':''}
       <div class="auth-footer-mobile">LOJAS AVENIDA S/A · ESTOQUE AV</div>
     </div></section></div>`;
   }
   function authError(message){const el=$('#auth-error');if(el)el.textContent=message}
-  function showAuth(setupMode=false){
+  function showAuth(mode='login',message=''){
     document.body.classList.add('auth-locked');closeModal();
-    const setup=!!setupMode&&accounts().length===0;$('#auth-root').innerHTML=authTemplate(setup);
-    $('#auth-create-local')?.addEventListener('click',()=>showAuth(true));
-    $('#auth-back-login')?.addEventListener('click',()=>showAuth(false));
+    const setup=mode==='set-password'&&pendingFirstUse;$('#auth-root').innerHTML=authTemplate(setup?'set-password':'login');
+    if(mode==='forgot-password')$('#auth-root').innerHTML=authTemplate('forgot-password');
+    if(message)authError(message);
+    $('#auth-back-login')?.addEventListener('click',()=>{pendingFirstUse=null;showAuth('login')});
+    $('#auth-forgot-password')?.addEventListener('click',()=>showAuth('forgot-password'));
+    $('#auth-recovery-back')?.addEventListener('click',()=>showAuth('login'));
     $$('#auth-root [data-toggle]').forEach(button=>button.addEventListener('click',()=>{const input=document.getElementById(button.dataset.toggle);if(input){input.type=input.type==='password'?'text':'password';button.setAttribute('aria-label',input.type==='password'?'Mostrar senha':'Ocultar senha')}}));
+    if(mode==='forgot-password'){
+      $('#auth-form').addEventListener('submit',async event=>{event.preventDefault();authError('');const btn=$('#auth-submit');btn.disabled=true;btn.querySelector('span').textContent='Validando cadastro…';try{await solicitarRedefinicaoSenha({name:$('#recovery-name').value,birthDate:$('#recovery-birth').value,operator:$('#recovery-operator').value});authError('Solicitação enviada ao DESENVOLVEDOR. Após a aprovação, volte ao login, informe seu operador e clique em Continuar para criar a nova senha neste mesmo navegador.');$('#auth-error').style.color='#197448';$('#auth-error').style.background='#e9f8ef';$('#auth-error').style.borderColor='#a1d6b4';$('#auth-form').reset();btn.querySelector('span').textContent='Solicitação enviada';}catch(err){authError(err.message||'Não foi possível enviar a solicitação.');btn.disabled=false;btn.querySelector('span').textContent='Enviar solicitação'}});
+      $('#recovery-name')?.focus({preventScroll:true});return;
+    }
     $('#auth-form').addEventListener('submit',async event=>{
       event.preventDefault();authError('');
-       const btn=$('#auth-submit'),user=$('#auth-user').value.trim().toLowerCase(),pass=$('#auth-password').value;
-      if(!/^[a-z0-9._-]{3,40}$/.test(user)){authError('O usuário deve ter de 3 a 40 caracteres: letras sem acento, números, ponto, hífen ou sublinhado.');return}
-      if(setup){
-        const name=$('#auth-name').value.trim(),confirm=$('#auth-confirm').value;
-        if(name.length<2){authError('Informe o nome do responsável.');return}
-        if(pass.length<8){authError('A senha deve conter pelo menos 8 caracteres.');return}
-        if(pass!==confirm){authError('As senhas não coincidem.');return}
-        btn.disabled=true;btn.querySelector('span').textContent='Configurando seu acesso…';
-        try{const salt=authSalt(),hash=await passwordHash(pass,salt);const account={id:uid(),username:user,name,salt,hash,role:'admin',active:true,createdAt:iso()};
-          localStorage.setItem(ACCOUNTS_KEY,JSON.stringify([account]));localStorage.setItem(REMEMBER_KEY,user);startSession(account);
-        }catch(err){authError(err?.name==='SecurityError'?'O armazenamento deste navegador está bloqueado. Abra este arquivo no Chrome ou hospede-o em um endereço HTTPS.':(err.message||'Não foi possível criar seu acesso.'));btn.disabled=false;btn.querySelector('span').textContent='Criar acesso e entrar'}
-        return;
-      }
+      const btn=$('#auth-submit'),pass=$('#auth-password').value,rawOperator=setup?'':$('#auth-user').value.trim();
+      if(!setup&&!/^\d{3,}$/.test(rawOperator)){authError('Informe um número de operador válido.');return}
       if(Date.now()<authBlockedUntil){authError('Muitas tentativas. Tente novamente em alguns instantes.');return}
-      if(!pass){authError('Digite sua senha.');return}
-      btn.disabled=true;btn.querySelector('span').textContent='Verificando acesso…';
-       try{
-         const account=accounts().find(a=>a.username===user);let valid=false;
-         if(account&&account.active){const entered=await passwordHash(pass,account.salt);valid=entered===account.hash}
-         if(valid){
-           authAttempts=0;
-           if($('#auth-remember')?.checked)localStorage.setItem(REMEMBER_KEY,user);else localStorage.removeItem(REMEMBER_KEY);
-           startSession(account);return;
-         }
-         if(/^\d{3,}$/.test(user)){
-           btn.querySelector('span').textContent='Validando no Gerencial…';
-           const gerencialAccount=await autenticarOperadorGerencial(user,pass);
-            if(gerencialAccount){authAttempts=0;try{localStorage.setItem(REMEMBER_KEY,user)}catch{}startSession(gerencialAccount);return}
-         }
-         authAttempts++;if(authAttempts>=5){authBlockedUntil=Date.now()+30000;authAttempts=0}
-         authError(account&&!account.active?'Esta conta local está bloqueada.':'Usuário ou senha incorretos. Use seu operador e senha do Gerencial ou o acesso local deste dispositivo.');
-      }catch(err){authError(err.message||'Falha ao validar a senha.')}finally{btn.disabled=false;if(btn.isConnected)btn.querySelector('span').textContent='Entrar no ESTOQUE AV'}
+      btn.disabled=true;btn.querySelector('span').textContent=setup?'Salvando senha…':'Consultando Gerencial…';
+      try{
+        if(setup){
+          const confirm=$('#auth-confirm').value;
+          if(pass.length<8)throw Error('A nova senha deve conter pelo menos 8 caracteres.');
+          if(!validNewPasswordPair(pass,confirm))throw Error('As senhas não coincidem.');
+          const resetRequestId=pendingFirstUse?.passwordResetRequestId,fresh=await autorizarOperadorGerencial(pendingFirstUse.operator);
+          if(!fresh)throw Error('Operador não autorizado no Gerencial.');
+          const salt=authSalt(),hash=await passwordHash(pass,salt),next=accountForGerencial(fresh,{salt,hash,createdAt:iso()});
+          const all=accounts().filter(a=>a.operator!==fresh.operator);all.push(next);localStorage.setItem(ACCOUNTS_KEY,JSON.stringify(all));localStorage.setItem(REMEMBER_KEY,fresh.operator);if(resetRequestId)await atualizarSolicitacaoRedefinicao(resetRequestId,'completed');pendingFirstUse=null;authAttempts=0;startSession(next);return;
+        }
+        const authorized=await autorizarOperadorGerencial(rawOperator);
+        if(!authorized)throw Error('Este operador não está cadastrado no Gerencial.');
+        const approvedReset=await redefinicaoAprovada(authorized.operator);
+        if(approvedReset){pendingFirstUse={...authorized,passwordResetRequestId:approvedReset.id};showAuth('set-password');return}
+        const account=accounts().find(a=>a.operator===authorized.operator);
+        if(!account?.hash||!account?.salt){pendingFirstUse=authorized;showAuth('set-password');return}
+        if(!pass){authError('Digite a senha definida para este dispositivo.');btn.disabled=false;btn.querySelector('span').textContent='Continuar';return}
+        const entered=await passwordHash(pass,account.salt);
+        if(entered!==account.hash){authAttempts++;if(authAttempts>=5){authBlockedUntil=Date.now()+30000;authAttempts=0}throw Error('Senha incorreta. Tente novamente.');}
+        authAttempts=0;const refreshed=accountForGerencial(authorized,{salt:account.salt,hash:account.hash,createdAt:account.createdAt});
+        const all=accounts().filter(a=>a.operator!==authorized.operator);all.push(refreshed);localStorage.setItem(ACCOUNTS_KEY,JSON.stringify(all));
+        if($('#auth-remember')?.checked)localStorage.setItem(REMEMBER_KEY,authorized.operator);else localStorage.removeItem(REMEMBER_KEY);
+        startSession(refreshed);
+      }catch(err){authError(err.message||'Não foi possível validar o acesso.');btn.disabled=false;if(btn.isConnected)btn.querySelector('span').textContent=setup?'Salvar senha e entrar':'Continuar'}
     });
     if(window.matchMedia('(min-width:701px)').matches)$('#auth-user')?.focus({preventScroll:true});
   }
@@ -485,25 +503,25 @@
     if(!account?.active)return;
     if(account.authSource==='gerencial'){
       const expiresAt=Number(account.expiresAt)||(Date.now()+12*60*60*1000);
-      sessionUser={id:String(account.id||`gerencial_${account.operator}`),username:String(account.username||account.operator),name:String(account.name||`Operador ${account.operator}`),role:account.role||'operator',active:true,authSource:'gerencial',operator:String(account.operator),permissions:account.permissions||{},credentialVersion:Number(account.credentialVersion)||1,expiresAt,authVerifiedAt:Number(account.authVerifiedAt)||0};
+      sessionUser={id:String(account.id||`gerencial_${account.operator}`),username:String(account.username||account.operator),name:isDeveloperAccount(account)?DEVELOPER_NAME:String(account.name||`Operador ${account.operator}`),role:isDeveloperAccount(account)?'admin':'operator',systemRole:isDeveloperAccount(account)?'developer':'operator',active:true,authSource:'gerencial',operator:String(account.operator),permissions:account.permissions||{},credentialVersion:Number(account.credentialVersion)||1,expiresAt,authVerifiedAt:Number(account.authVerifiedAt)||0};
       try{sessionStorage.setItem(SESSION_KEY,JSON.stringify(sessionUser))}catch(e){console.warn('Sessão temporária indisponível',e)}
-    }else{
-      sessionUser={id:account.id,username:account.username,name:account.name,role:account.role,active:true,authSource:'local'};
-      try{sessionStorage.setItem(SESSION_KEY,account.id)}catch(e){console.warn('Sessão temporária indisponível',e)}
-    }
-    prefs.operator=sessionUser.name;savePrefs();$('#auth-root').innerHTML='';document.body.classList.remove('auth-locked');render();cloudEnabled=true;cloudStart()
+    }else{return}
+    prefs.operator=sessionUser.name;savePrefs();$('#auth-root').innerHTML='';document.body.classList.remove('auth-locked');render();cloudEnabled=true;cloudStart();if(isDeveloper())iniciarNotificacoesRedefinicao()
   }
-  function boot(){
+  async function boot(){
     let sid=null;try{sid=sessionStorage.getItem(SESSION_KEY)}catch(e){console.warn('Sessão do navegador indisponível',e)}
-    const localAccount=accounts().find(a=>a.id===sid&&a.active);
-    if(localAccount){startSession(localAccount);return}
     let managerSession=null;try{managerSession=JSON.parse(sid||'null')}catch{}
-    if(managerSession?.authSource==='gerencial'&&managerSession?.operator&&Number(managerSession.expiresAt)>Date.now()){startSession(managerSession,true);return}
     try{sessionStorage.removeItem(SESSION_KEY)}catch(e){}
-    showAuth(false)
+    if(managerSession?.authSource==='gerencial'&&managerSession?.operator&&Number(managerSession.expiresAt)>Date.now()){
+      try{
+        const authorized=await autorizarOperadorGerencial(managerSession.operator),account=accounts().find(a=>a.operator===normalizarOperadorGerencial(managerSession.operator)&&a.active&&a.hash&&a.salt);
+        if(authorized&&account){startSession(accountForGerencial(authorized,{salt:account.salt,hash:account.hash,createdAt:account.createdAt,expiresAt:managerSession.expiresAt}),true);return}
+      }catch(err){showAuth('login',err.message||'Conecte-se para validar o operador no Gerencial.');return}
+    }
+    showAuth('login')
   }
-  function logout(){try{sessionStorage.removeItem(SESSION_KEY)}catch(e){}sessionUser=null;cloudEnabled=false;cloudReady=false;cloudEmail='';showAuth()}
-  function accountModal(){if(!sessionUser)return;modal('Minha conta',sessionUser.authSource==='gerencial'?'Acesso pelo Gerencial.':'Acesso local neste navegador.',`<div class="report-row"><span>Operador</span><strong>${escapeHtml(sessionUser.name)}</strong></div><div class="report-row"><span>Usuário</span><strong>${escapeHtml(sessionUser.username)}</strong></div><div class="notice blue">${ico('info')}<span>O Estoque aceita as credenciais oficiais do Gerencial e mantém o login local já cadastrado neste dispositivo. A sincronização usa o mesmo projeto Supabase.</span></div>`,`<button class="btn btn-dark" id="logout-now">${ico('logout')} Sair do sistema</button>`);$('#logout-now').addEventListener('click',logout)}
+  function logout(){try{sessionStorage.removeItem(SESSION_KEY)}catch(e){}clearInterval(resetNotificationPolling);clearInterval(userAdminPolling);sessionUser=null;cloudEnabled=false;cloudReady=false;cloudEmail='';showAuth('login')}
+  function accountModal(){if(!sessionUser)return;modal('Minha conta','Acesso autorizado pelo desenvolvedor.',`<div class="report-row"><span>Nome</span><strong>${escapeHtml(sessionUser.name)}</strong></div><div class="report-row"><span>Operador</span><strong>${escapeHtml(sessionUser.operator)}</strong></div><div class="report-row"><span>Perfil</span><strong>${isDeveloper()?'DESENVOLVEDOR':'OPERADOR'}</strong></div><div class="notice blue">${ico('info')}<span>Sua identificação vem do Gerencial e o DESENVOLVEDOR controla a autorização do Estoque AV. A senha foi definida por você e fica guardada apenas neste dispositivo.</span></div>`,`<button class="btn btn-dark" id="logout-now">${ico('logout')} Sair do sistema</button>`);$('#logout-now').addEventListener('click',logout)}
   let db=loadData(),prefs=loadPrefs(),searchValue='',filterValue='all',modalState=null;
   if(!VISIBLE_PAGE_IDS.includes(prefs.page)){prefs.page='products';savePrefs()}
   if(!db.stores.find(s=>s.id===prefs.storeId))prefs.storeId=db.stores[0]?.id||'';
@@ -527,9 +545,30 @@
   const stockClient=window.supabase?.createClient?window.supabase.createClient(CLOUD_URL,CLOUD_ANON_KEY,{
     auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
   }):null;
-  const GERENCIAL_CONFIG_ROW_ID='config_global_v1',GERENCIAL_SESSION_TTL_MS=12*60*60*1000;
+  const GERENCIAL_CONFIG_ROW_ID='config_global_v1',GERENCIAL_SESSION_TTL_MS=12*60*60*1000,ACCESS_CONTROL_ROW_ID='estoque_av_controle_acesso_v1',DEVICE_ID_KEY='estoque_av_device_id_v1';
   const normalizarOperadorGerencial=value=>{const digits=String(value??'').replace(/\D/g,'');return digits?String(Number(digits)):''};
-  function gerencialPermiteEstoque(operator,permissions={}){return operator==='133'||(permissions.sistemaav!==false&&permissions.sistemaAvLinks?.estoque!==false)}
+  function operadorEstoqueIdentificado(operator){return operator===DEVELOPER_OPERATOR||/^\d{3,}$/.test(String(operator||''))}
+  function accountForGerencial(user,credential={}){
+    const developer=user.operator===DEVELOPER_OPERATOR;
+    return {id:`gerencial_${user.operator}`,username:user.operator,operator:user.operator,name:developer?DEVELOPER_NAME:user.name,role:developer?'admin':'operator',systemRole:developer?'developer':'operator',active:true,authSource:'gerencial',permissions:user.permissions||{},credentialVersion:user.credentialVersion||1,expiresAt:Number(credential.expiresAt)||(Date.now()+GERENCIAL_SESSION_TTL_MS),authVerifiedAt:Date.now(),salt:credential.salt,hash:credential.hash,createdAt:credential.createdAt||iso()};
+  }
+  const needsFirstUsePassword=account=>!(account?.salt&&account?.hash);
+  const validNewPasswordPair=(password,confirmation)=>String(password||'').length>=8&&password===confirmation;
+  async function alterarSenhaPropria({newPassword,confirmation}){
+    const operator=normalizarOperadorGerencial(sessionUser?.operator);
+    if(!operator)throw Error('Não foi possível identificar o usuário conectado. Entre novamente.');
+    if(!validNewPasswordPair(newPassword,confirmation))throw Error(String(newPassword||'').length<8?'A nova senha deve conter pelo menos 8 caracteres.':'As novas senhas não coincidem.');
+    const all=accounts(),current=all.find(account=>account.operator===operator);
+    if(!current?.salt||!current?.hash)throw Error('Este usuário ainda não tem uma senha definida neste dispositivo. Saia e entre novamente para configurá-la.');
+    const salt=authSalt(),hash=await passwordHash(newPassword,salt),updated={...current,salt,hash,updatedAt:iso()};
+    localStorage.setItem(ACCOUNTS_KEY,JSON.stringify(all.map(account=>account.operator===operator?updated:account)));
+    return updated;
+  }
+  function nomeCompletoMaisProvavel(...values){
+    const candidates=[...new Set(values.flat().map(value=>String(value||'').trim()).filter(value=>value&&!/^OPERADOR\s+\d+$/i.test(value)))];
+    candidates.sort((a,b)=>(b.split(/\s+/).filter(Boolean).length-a.split(/\s+/).filter(Boolean).length)||(b.length-a.length));
+    return candidates[0]||'';
+  }
   async function estoqueComTimeout(promise,ms=15000){let timer;const timeout=new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('O servidor do Gerencial não respondeu em 15 segundos. Verifique a internet e tente novamente.')),ms)});try{return await Promise.race([Promise.resolve(promise),timeout])}finally{clearTimeout(timer)}}
   async function lerConfigGerencialOnline(){
     if(!stockClient)throw Error('A biblioteca Supabase não carregou. Atualize a página e tente novamente.');
@@ -539,35 +578,117 @@
     if(!Array.isArray(data?.dados?.usuarios))throw Error('O cadastro oficial de usuários do Gerencial não foi encontrado no Supabase.');
     return data.dados;
   }
-  async function autenticarOperadorGerencial(value,password){
+  async function lerNomeCompletoGerencial(operator,user){
+    const candidates=[user?.nomeCompleto,user?.nome_completo,user?.fullName,[user?.nome,user?.sobrenome].filter(Boolean).join(' '),user?.nome];
+    try{
+      const ids=['gerencial_compartilhados_v1','dados_compartilhados_v1','usuario_133',GERENCIAL_CONFIG_ROW_ID];
+      const query=stockClient.from(ONLINE_TABLE).select('id,dados').in('id',ids);
+      const {data,error}=await estoqueComTimeout(query,10000);if(error)throw error;
+      for(const row of data||[]){const payload=row?.dados||{};for(const person of [...(payload.funcionarios||[]),...(payload.usuarios||[])]){
+        if(normalizarOperadorGerencial(person?.operador)!==operator)continue;
+        candidates.push(person?.nomeCompleto,person?.nome_completo,person?.fullName,[person?.nome,person?.sobrenome].filter(Boolean).join(' '),person?.nome);
+      }}
+    }catch(error){console.warn('Não foi possível consultar o nome completo no diretório do Gerencial:',error)}
+    if(operator===DEVELOPER_OPERATOR)return DEVELOPER_NAME;
+    return nomeCompletoMaisProvavel(...candidates)||`Operador ${operator}`;
+  }
+  function accessControlData(value={}){
+    const permitted=[...new Set((Array.isArray(value.permittedOperators)?value.permittedOperators:[]).map(normalizarOperadorGerencial).filter(x=>/^\d{3,}$/.test(x)))];
+    if(!permitted.includes(DEVELOPER_OPERATOR))permitted.unshift(DEVELOPER_OPERATOR);
+    return {version:1,permittedOperators:permitted,resetRequests:Array.isArray(value.resetRequests)?value.resetRequests.filter(x=>x&&typeof x==='object'):[]};
+  }
+  async function lerControleAcessoEstoque(){
+    if(!stockClient)throw Error('A biblioteca Supabase não carregou. Atualize a página e tente novamente.');
+    if(!navigator.onLine)throw Error('Sem conexão com a internet. A autorização precisa ser consultada online.');
+    const {data,error}=await estoqueComTimeout(stockClient.from(ONLINE_TABLE).select('dados,updated_at').eq('id',ACCESS_CONTROL_ROW_ID).maybeSingle());
+    if(error)throw Error('Não foi possível consultar as permissões do Estoque AV: '+String(error.message||error));
+    return {row:data||null,data:accessControlData(data?.dados||{})};
+  }
+  async function gravarControleAcessoEstoque(change){
+    for(let attempt=0;attempt<3;attempt++){
+      const current=await lerControleAcessoEstoque(),next=accessControlData(await change(structuredClone(current.data))),now=iso(),table=stockClient.from(ONLINE_TABLE);
+      let query;
+      if(current.row){query=table.update({dados:next,updated_at:now}).eq('id',ACCESS_CONTROL_ROW_ID);query=current.row.updated_at?query.eq('updated_at',current.row.updated_at):query.is('updated_at',null);query=query.select('dados,updated_at').maybeSingle()}
+      else query=table.insert({id:ACCESS_CONTROL_ROW_ID,dados:next,updated_at:now}).select('dados,updated_at').maybeSingle();
+      const {data,error}=await estoqueComTimeout(query);
+      if(error){if((error.code==='23505'||Number(error.status)===409)&&attempt<2)continue;throw Error('Não foi possível salvar as permissões: '+String(error.message||error))}
+      if(data)return accessControlData(data.dados||next);
+    }
+    throw Error('As permissões mudaram em outro dispositivo. Atualize a tela e tente novamente.');
+  }
+  async function lerDiretorioGerencial(){
+    if(!stockClient)throw Error('A biblioteca Supabase não carregou.');
+    const ids=['gerencial_compartilhados_v1','dados_compartilhados_v1','usuario_133',GERENCIAL_CONFIG_ROW_ID];
+    const {data,error}=await estoqueComTimeout(stockClient.from(ONLINE_TABLE).select('id,dados').in('id',ids));
+    if(error)throw Error('Não foi possível carregar a lista de colaboradores do Gerencial: '+String(error.message||error));
+    const byOperator=new Map();
+    for(const row of data||[]){const payload=row?.dados||{};for(const person of [...(payload.funcionarios||[]),...(payload.usuarios||[])]){
+      const operator=normalizarOperadorGerencial(person?.operador);if(!/^\d{3,}$/.test(operator))continue;
+      const name=nomeCompletoMaisProvavel(person?.nomeCompleto,person?.nome_completo,person?.fullName,[person?.nome,person?.sobrenome].filter(Boolean).join(' '),person?.nome);
+      const birth=String(person?.dataNascimento||person?.data_nascimento||person?.nascimento||person?.nascimentoData||person?.birthDate||person?.birth_date||'').trim();
+      const previous=byOperator.get(operator)||{operator,name:'',birthDate:'',permissions:{}};
+      byOperator.set(operator,{...previous,name:nomeCompletoMaisProvavel(previous.name,name),birthDate:previous.birthDate||birth,managerRecord:previous.managerRecord||person,permissions:row?.id===GERENCIAL_CONFIG_ROW_ID?(payload.permissoes?.[operator]||{}):previous.permissions});
+    }}
+    if(!byOperator.has(DEVELOPER_OPERATOR))byOperator.set(DEVELOPER_OPERATOR,{operator:DEVELOPER_OPERATOR,name:DEVELOPER_NAME,birthDate:'',managerRecord:{operador:DEVELOPER_OPERATOR,nomeCompleto:DEVELOPER_NAME},permissions:{}});
+    else byOperator.set(DEVELOPER_OPERATOR,{...byOperator.get(DEVELOPER_OPERATOR),name:DEVELOPER_NAME});
+    return [...byOperator.values()].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
+  }
+  function normalizarNomePessoa(value){return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\p{L}\p{N}]+/gu,' ').trim().replace(/\s+/g,' ').toUpperCase()}
+  function normalizarDataNascimento(value){const raw=String(value||'').trim();let m=raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;m=raw.match(/^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{4})$/);return m?`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`:''}
+  function obterIdDispositivo(){try{let id=localStorage.getItem(DEVICE_ID_KEY);if(!id){id=uid();localStorage.setItem(DEVICE_ID_KEY,id)}return id}catch{return 'sessao-'+uid()}}
+  async function solicitarRedefinicaoSenha({name,birthDate,operator}){
+    const normalizedOperator=normalizarOperadorGerencial(operator),officialName=normalizarNomePessoa(name),officialBirth=normalizarDataNascimento(birthDate);
+    if(!/^\d{3,}$/.test(normalizedOperator)||!officialName||!officialBirth)throw Error('Preencha nome completo, data de nascimento e operador.');
+    const [directory,authorized]=await Promise.all([lerDiretorioGerencial(),autorizarOperadorGerencial(normalizedOperator)]);
+    if(!authorized)throw Error('Não foi possível confirmar esse operador. Confira os dados no Gerencial.');
+    const employee=directory.find(person=>person.operator===normalizedOperator);
+    if(!employee||normalizarNomePessoa(employee.name)!==officialName)throw Error('Nome completo ou operador não corresponde ao cadastro do Gerencial.');
+    const registeredBirth=normalizarDataNascimento(employee.birthDate);
+    if(registeredBirth&&registeredBirth!==officialBirth)throw Error('A data de nascimento ou operador não corresponde ao cadastro do Gerencial.');
+    const deviceId=obterIdDispositivo(),control=await lerControleAcessoEstoque();
+    if(!control.data.permittedOperators.includes(normalizedOperator))throw Error('Este operador ainda não tem autorização para usar o Estoque AV.');
+    const duplicate=control.data.resetRequests.find(request=>request.operator===normalizedOperator&&request.deviceId===deviceId&&['pending','approved'].includes(request.status));
+    if(duplicate)throw Error('Já existe uma solicitação de redefinição aguardando análise do desenvolvedor.');
+    const request={id:uid(),operator:normalizedOperator,name:employee.name,deviceId,createdAt:iso(),status:'pending',birthDateVerified:Boolean(registeredBirth)};
+    await gravarControleAcessoEstoque(current=>{if(current.resetRequests.some(item=>item.operator===normalizedOperator&&item.deviceId===deviceId&&['pending','approved'].includes(item.status)))throw Error('Já existe uma solicitação de redefinição aguardando análise do desenvolvedor.');return {...current,resetRequests:[...current.resetRequests,request]}});
+    return request;
+  }
+  async function redefinicaoAprovada(operator){const {data}=await lerControleAcessoEstoque(),deviceId=obterIdDispositivo();return data.resetRequests.find(request=>request.operator===operator&&request.deviceId===deviceId&&request.status==='approved')||null}
+  async function atualizarSolicitacaoRedefinicao(id,status){
+    if(!isDeveloper()&&status!=='completed')throw Error('Apenas o usuário DESENVOLVEDOR pode analisar solicitações.');
+    if(!['approved','rejected','completed'].includes(status))throw Error('Status de solicitação inválido.');
+    return gravarControleAcessoEstoque(current=>{const target=current.resetRequests.find(request=>request.id===id);if(!target)throw Error('Solicitação não encontrada.');if(status!=='completed'&&target.status!=='pending')throw Error('Esta solicitação já foi analisada.');if(status==='completed'&&(target.status!=='approved'||target.deviceId!==obterIdDispositivo()))throw Error('A solicitação aprovada não corresponde a este dispositivo.');return {...current,resetRequests:current.resetRequests.map(request=>request.id===id?{...request,status,reviewedAt:iso(),reviewedBy:isDeveloper()?DEVELOPER_OPERATOR:request.operator}:request)}});
+  }
+  async function autorizarOperadorGerencial(value){
     const operator=normalizarOperadorGerencial(value);
-    if(!/^\d{3,}$/.test(String(value||''))||!operator)return null;
+    if(!/^\d{3,}$/.test(String(value||'').trim())||!operator)return null;
     const config=await lerConfigGerencialOnline();
-    const user=(config.usuarios||[]).find(item=>normalizarOperadorGerencial(item?.operador)===operator);
+    const user=(config.usuarios||[]).find(item=>normalizarOperadorGerencial(item?.operador)===operator)||(await lerDiretorioGerencial()).find(person=>person.operator===operator)?.managerRecord;
     if(!user)return null;
     const permissions=config.permissoes?.[operator]||{};
-    if(!gerencialPermiteEstoque(operator,permissions))throw Error('Este operador não tem permissão para abrir o Estoque AV no Gerencial.');
-    const senhaConfigurada=String(user.senha||`${operator}24`).trim();
-    if(senhaConfigurada!==String(password||'').trim())return null;
+    const access=await lerControleAcessoEstoque();
+    if(operator!==DEVELOPER_OPERATOR&&!access.data.permittedOperators.includes(operator))throw Error('Acesso ao Estoque AV ainda não liberado pelo DESENVOLVEDOR.');
     const now=Date.now();
-    return {id:`gerencial_${operator}`,username:operator,name:String(user.nome||`Operador ${operator}`),role:operator==='133'?'admin':'operator',active:true,authSource:'gerencial',operator,permissions,credentialVersion:Math.max(1,Number(user.credencialVersao)||1),expiresAt:now+GERENCIAL_SESSION_TTL_MS,authVerifiedAt:now};
+    const name=await lerNomeCompletoGerencial(operator,user);
+    return {id:`gerencial_${operator}`,username:operator,name:operator===DEVELOPER_OPERATOR?DEVELOPER_NAME:name,role:operator===DEVELOPER_OPERATOR?'admin':'operator',systemRole:operator===DEVELOPER_OPERATOR?'developer':'operator',active:true,authSource:'gerencial',operator,permissions,credentialVersion:Math.max(1,Number(user.credencialVersao)||1),expiresAt:now+GERENCIAL_SESSION_TTL_MS,authVerifiedAt:now};
   }
   async function validarSessaoGerencialOnline(){
     if(sessionUser?.authSource!=='gerencial')return true;
     if(Number(sessionUser.expiresAt)<=Date.now())throw Error('Sua sessão do Gerencial expirou. Entre novamente.');
     if(Date.now()-Number(sessionUser.authVerifiedAt||0)<45000)return true;
     const config=await lerConfigGerencialOnline(),operator=normalizarOperadorGerencial(sessionUser.operator);
-    const user=(config.usuarios||[]).find(item=>normalizarOperadorGerencial(item?.operador)===operator);
-    if(!user||Math.max(1,Number(user.credencialVersao)||1)!==Number(sessionUser.credentialVersion))throw Error('O acesso do Gerencial mudou. Entre novamente no Estoque AV.');
+    const user=(config.usuarios||[]).find(item=>normalizarOperadorGerencial(item?.operador)===operator)||(await lerDiretorioGerencial()).find(person=>person.operator===operator)?.managerRecord;
+    if(!user)throw Error('O acesso do Gerencial foi removido. Entre novamente no Estoque AV.');
     const permissions=config.permissoes?.[operator]||{};
-    if(!gerencialPermiteEstoque(operator,permissions))throw Error('O acesso ao Estoque AV foi removido para este operador.');
-    sessionUser={...sessionUser,name:String(user.nome||sessionUser.name),permissions,authVerifiedAt:Date.now()};
+    const access=await lerControleAcessoEstoque();
+    if(operator!==DEVELOPER_OPERATOR&&!access.data.permittedOperators.includes(operator))throw Error('O DESENVOLVEDOR removeu sua autorização para o Estoque AV.');
+    sessionUser={...sessionUser,name:operator===DEVELOPER_OPERATOR?DEVELOPER_NAME:String(user.nomeCompleto||user.nome_completo||user.nome||sessionUser.name),role:operator===DEVELOPER_OPERATOR?'admin':'operator',systemRole:operator===DEVELOPER_OPERATOR?'developer':'operator',permissions,credentialVersion:Math.max(1,Number(user.credencialVersao)||1),authVerifiedAt:Date.now()};
     try{sessionStorage.setItem(SESSION_KEY,JSON.stringify(sessionUser))}catch{}
     return true;
   }
   const estoqueSessaoAtiva=()=>{
-    if(sessionUser?.authSource==='gerencial')return !!(sessionUser.operator&&Number(sessionUser.expiresAt)>Date.now()&&gerencialPermiteEstoque(normalizarOperadorGerencial(sessionUser.operator),sessionUser.permissions||{}));
-    return !!(sessionUser?.id&&accounts().some(account=>account.id===sessionUser.id&&account.active));
+    if(sessionUser?.authSource==='gerencial')return !!(sessionUser.operator&&Number(sessionUser.expiresAt)>Date.now()&&operadorEstoqueIdentificado(normalizarOperadorGerencial(sessionUser.operator)));
+    return false;
   };
   let cloudEnabled=false,cloudReady=false,cloudBusy=false,cloudUpdatedAt=null,cloudRowExists=false,cloudError='',cloudEmail='',cloudLastPull=0;
   let cloudPoll=null,cloudInitialising=false;
@@ -636,7 +757,7 @@
     }catch(err){if(!invalidarSessaoGerencial(err)){cloudReady=false;cloudError=cloudErrorMessage(err)}}finally{cloudInitialising=false;if(sessionUser)render()}
   }
   function invalidarSessaoGerencial(error){
-    if(sessionUser?.authSource!=='gerencial'||!/(expirou|acesso do Gerencial mudou|acesso ao Estoque AV foi removido)/i.test(String(error?.message||error)))return false;
+    if(sessionUser?.authSource!=='gerencial'||!/(expirou|acesso do Gerencial (?:mudou|foi removido)|acesso ao Estoque AV foi removido)/i.test(String(error?.message||error)))return false;
     const message=String(error.message);try{sessionStorage.removeItem(SESSION_KEY)}catch{}sessionUser=null;cloudEnabled=false;cloudReady=false;cloudError=message;showAuth(false);authError(message);return true;
   }
   function cloudConnectModal(){
@@ -827,7 +948,7 @@
   function posInt(value,label='Quantidade'){const n=Number(value);assert(Number.isSafeInteger(n)&&n>0,`${label} deve ser um número inteiro maior que zero.`);return n}
   function nonNeg(value,label='Quantidade'){const n=Number(value);assert(Number.isSafeInteger(n)&&n>=0,`${label} deve ser um número inteiro igual ou maior que zero.`);return n}
   function ico(n,size=18){const paths={dashboard:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',box:'<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="M3 8v9l9 5 9-5V8M12 13v9"/>',list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',arrows:'<path d="M7 7h14l-4-4m4 4-4 4M17 17H3l4-4m-4 4 4 4"/>',loss:'<path d="M10.3 3.9 2.4 17.5a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4m0 4h.01"/>',clipboard:'<rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="m9 14 2 2 4-4"/>',chart:'<path d="M3 3v18h18M7 16v-5m5 5V7m5 9V5"/>',store:'<path d="M3 10h18l-2-6H5l-2 6Zm0 0v11h18V10M8 21v-7h8v7"/>',settings:'<path d="M12 2v3m0 14v3M4.9 4.9 7 7m10 10 2.1 2.1M2 12h3m14 0h3M4.9 19.1 7 17M17 7l2.1-2.1"/><circle cx="12" cy="12" r="4"/>',plus:'<path d="M12 5v14M5 12h14"/>',search:'<circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/>',menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',close:'<path d="M18 6 6 18M6 6l12 12"/>',down:'<path d="m6 9 6 6 6-6"/>',up:'<path d="m6 15 6-6 6 6"/>',right:'<path d="M5 12h14m-6-6 6 6-6 6"/>',truck:'<path d="M1 6h13v12H1zM14 10h4l4 4v4h-8"/><circle cx="5" cy="19" r="2"/><circle cx="18" cy="19" r="2"/>',check:'<path d="m5 12 4 4L19 6"/>',clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h8"/>',download:'<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>',upload:'<path d="M12 17V5m-5 5 5-5 5 5M4 17v4h16v-4"/>',edit:'<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-5 1 1-5Z"/>',trash:'<path d="M3 6h18M8 6V4h8v2m3 0-1 15H6L5 6M10 10v7m4-7v7"/>',repeat:'<path d="M3 12a9 9 0 0 1 15.4-6.4L21 8m0-5v5h-5M21 12A9 9 0 0 1 5.6 18.4L3 16m0 5v-5h5"/>',eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>',moon:'<path d="M20 14A8 8 0 0 1 10 4 8 8 0 1 0 20 14Z"/>',camera:'<path d="M14 4h-4L8 7H3v13h18V7h-5l-2-3Z"/><circle cx="12" cy="13" r="4"/>',info:'<circle cx="12" cy="12" r="10"/><path d="M12 11v6m0-10h.01"/>',location:'<path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',filter:'<path d="M4 7h16M7 12h10M10 17h4"/>',shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/>',logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m7 4 5 5-5 5m5-5H9"/>',printer:'<path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/>',alert:'<circle cx="12" cy="12" r="10"/><path d="M12 7v6m0 4h.01"/>',barcode:'<path d="M2 5v14m3-14v14m4-14v14m3-14v14m4-14v14m3-14v14m3-14v14"/>',layers:'<path d="m12 2 10 5-10 5L2 7l10-5Zm-10 10 10 5 10-5M2 17l10 5 10-5"/>'};return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[n]||paths.box}</svg>`}
-  const nav=[{id:'products',icon:'box',name:'Produtos'},{id:'receipts',icon:'truck',name:'Recebimento de caminhão'},{id:'losses',icon:'loss',name:'Controle de perdas'},{id:'inventory',icon:'clipboard',name:'Inventário'}];
+  const nav=[{id:'products',icon:'box',name:'Produtos'},{id:'receipts',icon:'truck',name:'Recebimento de caminhão'},{id:'losses',icon:'loss',name:'Controle de perdas'},{id:'inventory',icon:'clipboard',name:'Inventário'},{id:'settings',icon:'settings',name:'Configurações'}];
   function toast(msg,error=false){const el=document.createElement('div');el.className='toast'+(error?' err':'');el.innerHTML=ico(error?'alert':'check')+'<span>'+escapeHtml(msg)+'</span>';$('#toasts').appendChild(el);setTimeout(()=>el.remove(),4200)}
   function closeModal(){if($('#scanner-root')?.firstElementChild)closeScanner();modalState=null;$('#modal-root').innerHTML='';document.body.style.overflow=''}
   function modal(title,description,body,actions='',wide=false){modalState={title};$('#modal-root').innerHTML=`<div class="modal-layer" id="modal-layer"><div class="modal ${wide?'wide':''}" role="dialog" aria-modal="true" aria-label="${escapeHtml(title)}"><div class="modal-header"><div><h2>${escapeHtml(title)}</h2><p>${escapeHtml(description)}</p></div><button type="button" class="icon-btn" data-close aria-label="Fechar">${ico('close')}</button></div><div class="modal-body">${body}</div><div class="modal-foot"><button type="button" class="btn" data-close>Cancelar</button>${actions}</div></div></div>`;document.body.style.overflow='hidden';$('#modal-layer').addEventListener('mousedown',e=>{if(e.target.id==='modal-layer')closeModal()});$$('[data-close]').forEach(b=>b.addEventListener('click',closeModal));const focus=$('.modal input,.modal select,.modal textarea');if(focus)focus.focus({preventScroll:true});mountScannerIcons($('#modal-root'));enhanceModalForm()}
@@ -872,19 +993,15 @@
   function formError(message,preferred){const node=preferred?document.getElementById(preferred):null;if(node){node.closest('.field')?.classList.add('error');node.focus({preventScroll:false})}toast(message,true)}
   const locationOptions=[['deposito','Depósito'],['salao','Salão de vendas']];
   const lossOptions=[['furto','Furto / indício de furto'],['avaria','Produto danificado / avaria']];
-  function setPage(page){if(!VISIBLE_PAGE_IDS.includes(page))return;prefs.page=page;searchValue='';filterValue='all';savePrefs();$('#sidebar').classList.remove('open');$('#overlay-mobile').classList.remove('show');render();window.scrollTo({top:0,behavior:'smooth'})}
+  function setPage(page){if(!VISIBLE_PAGE_IDS.includes(page))return;prefs.page=page;searchValue='';filterValue='all';savePrefs();$('#sidebar').classList.remove('open');$('#overlay-mobile').classList.remove('show');render();if(page==='settings'&&settingsTab==='users')iniciarAtualizacaoUsuarios();else clearInterval(userAdminPolling);window.scrollTo({top:0,behavior:'smooth'})}
   function renderNav(){$('#sidebar').innerHTML=`<div class="brand">${avenueLogo()}<span><strong>AVENIDA <i class="brand-sa">S/A</i></strong><small>ESTOQUE AV · OPERACIONAL</small></span></div>${nav.map(p=>`<button class="nav-btn ${prefs.page===p.id?'active':''}" data-page="${p.id}">${ico(p.icon)}<span>${p.name}</span></button>`).join('')}<div class="sidebar-foot"><span class="dot"></span><div><strong>${cloudStatus()}</strong><small>${cloudReady?'Registros sincronizados com a nuvem.':'Consulte a conexão pelo indicador no topo.'}</small></div></div>`;$$('[data-page]').forEach(el=>el.addEventListener('click',()=>setPage(el.dataset.page)))}
-  function renderTop(){const options=db.stores.map(s=>`<option value="${escapeHtml(s.id)}" ${s.id===prefs.storeId?'selected':''}>${escapeHtml(s.name)}</option>`).join('');$('#topbar').innerHTML=`<button class="icon-btn mobile-toggle" id="mobile-toggle" aria-label="Abrir menu">${ico('menu')}</button><span class="topbar-title">Operações <b>/ ${escapeHtml(nav.find(n=>n.id===prefs.page)?.name||'Produtos')}</b></span><span class="top-spacer"></span><button type="button" id="cloud-status-btn" class="online-pill ${cloudStatusClass()}" title="Verificar sincronização">${escapeHtml(cloudStatus())}</button><div class="store-box">${ico('store',16)}<label>Unidade</label><select id="store-switch" aria-label="Selecionar loja">${options}</select></div><button class="icon-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema">${ico(prefs.theme==='dark'?'sun':'moon')}</button><button class="icon-btn" id="user-button" title="Identificação do operador"><div class="avatar">${escapeHtml(op().slice(0,2).toUpperCase())}</div></button>`;$('#cloud-status-btn')?.addEventListener('click',()=>cloudConnectModal());$('#store-switch').addEventListener('change',e=>{prefs.storeId=e.target.value;savePrefs();render()});$('#theme-toggle').addEventListener('click',()=>{prefs.theme=prefs.theme==='dark'?'light':'dark';savePrefs();render()});$('#user-button').addEventListener('click',accountModal);$('#mobile-toggle')?.addEventListener('click',()=>{$('#sidebar').classList.add('open');$('#overlay-mobile').classList.add('show')})}
+  function renderTop(){const options=db.stores.map(s=>`<option value="${escapeHtml(s.id)}" ${s.id===prefs.storeId?'selected':''}>${escapeHtml(s.name)}</option>`).join('');$('#topbar').innerHTML=`<button class="icon-btn mobile-toggle" id="mobile-toggle" aria-label="Abrir menu">${ico('menu')}</button><span class="topbar-title">${prefs.page==='settings'?'Sistema':'Operações'} <b>/ ${escapeHtml(nav.find(n=>n.id===prefs.page)?.name||'Produtos')}</b></span><span class="top-spacer"></span><button type="button" id="cloud-status-btn" class="online-pill ${cloudStatusClass()}" title="Verificar sincronização">${escapeHtml(cloudStatus())}</button><div class="store-box">${ico('store',16)}<label>Unidade</label><select id="store-switch" aria-label="Selecionar loja">${options}</select></div><button class="icon-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema">${ico(prefs.theme==='dark'?'sun':'moon')}</button><button class="icon-btn" id="user-button" title="Identificação do operador"><div class="avatar">${escapeHtml(op().slice(0,2).toUpperCase())}</div></button>`;$('#cloud-status-btn')?.addEventListener('click',()=>cloudConnectModal());$('#store-switch').addEventListener('change',e=>{prefs.storeId=e.target.value;savePrefs();render()});$('#theme-toggle').addEventListener('click',()=>{prefs.theme=prefs.theme==='dark'?'light':'dark';savePrefs();render()});$('#user-button').addEventListener('click',accountModal);$('#mobile-toggle')?.addEventListener('click',()=>{$('#sidebar').classList.add('open');$('#overlay-mobile').classList.add('show')})}
   function render(){
     if(!sessionUser){showAuth(false);return}
     if(sessionUser.authSource==='gerencial'){
       if(!estoqueSessaoAtiva()){logout();return}
-    }else{
-      const currentAccount=accounts().find(a=>a.id===sessionUser.id&&a.active);
-      if(!currentAccount){logout();return}
-      sessionUser.role=currentAccount.role;sessionUser.name=currentAccount.name;sessionUser.username=currentAccount.username;
-    }
-    document.body.classList.toggle('dark',prefs.theme==='dark');renderNav();renderTop();const pages={products:productsPage,receipts:receiptsPage,losses:lossesPage,inventory:inventoryPage};$('#content').innerHTML=(pages[prefs.page]||productsPage)();bindContent()
+    }else{logout();return}
+    document.body.classList.toggle('dark',prefs.theme==='dark');renderNav();renderTop();const pages={products:productsPage,receipts:receiptsPage,losses:lossesPage,inventory:inventoryPage,settings:settingsPage};$('#content').innerHTML=(pages[prefs.page]||productsPage)();bindContent()
   }
   function pageHead(title,desc,actions='',kicker='GESTÃO DE ESTOQUE'){return `<div class="page-intro"><div><div class="eyebrow">${kicker}</div><h1>${title}</h1><p>${desc}</p></div><div class="actions">${actions}</div></div>`}
   const act=(name,action,icon='plus',klass='btn-primary')=>`<button class="btn ${klass}" data-action="${action}">${ico(icon)}${name}</button>`;
@@ -964,73 +1081,56 @@
   function storesPage(){return pageHead('Unidades','Cadastre lojas e acompanhe o estoque de cada uma de forma independente.',(isAdmin()?act('Adicionar loja','storeModal'):''))+`<div class="stores-grid">${db.stores.map(s=>{const t=totals(s.id);return `<section class="panel"><div class="store-card"><span class="store-mark">${ico('store',23)}</span><div style="flex:1;min-width:0"><h3>${escapeHtml(s.name)}</h3><p>Código: ${escapeHtml(s.code)}</p></div><button class="icon-btn" title="Editar loja" data-action="storeModal" data-id="${s.id}">${ico('edit',16)}</button></div><div class="body-pad" style="padding-top:0"><div class="report-row"><span>Depósito</span><b>${fmt(t.deposito)}</b></div><div class="report-row"><span>Salão</span><b>${fmt(t.salao)}</b></div><div class="report-row"><span>Em transferência</span><b>${fmt(t.transito)}</b></div><div class="report-row"><span><b>Total de peças</b></span><b>${fmt(t.total)}</b></div><button class="btn btn-small" style="margin-top:13px;width:100%" data-action="switchStore" data-id="${s.id}">${ico('right',15)} ${s.id===prefs.storeId?'Unidade selecionada':'Acessar unidade'}</button></div></section>`}).join('')}</div><div class="notice">${ico('info')}<span>O cadastro dos produtos é compartilhado. Porém os saldos, perdas, inventários e transferências são vinculados à unidade que realizou a operação.</span></div>`}
   function storeModal(id){if(!requireAdmin())return;const s=db.stores.find(x=>x.id===id);modal(s?'Editar unidade':'Cadastrar unidade','Defina como a loja será identificada no sistema.',`<div class="form-grid">${field('s-code','Código da loja *','text',s?.code||'','maxlength="12"')}${field('s-name','Nome da unidade *','text',s?.name||'','maxlength="80"')}</div>`,`<button class="btn btn-primary" id="s-submit">${ico('check')} Salvar unidade</button>`);$('#s-submit').addEventListener('click',()=>{try{const code=formVal('s-code'),name=formVal('s-name');assert(code&&name,'Preencha o código e o nome.');assert(!db.stores.some(x=>x.id!==id&&x.code.toLowerCase()===code.toLowerCase()),'Já existe uma unidade com este código.');commit(d=>{if(s)Object.assign(d.stores.find(x=>x.id===id),{code,name});else d.stores.push({id:uid(),code,name,createdAt:iso()})},'Unidade salva com sucesso.','stores')}catch(e){toast(e.message,true)}})}
   let settingsTab='general';
+  let userAdminDirectory=[],userAdminControl=accessControlData(),userAdminError='',userAdminLoading=false,userAdminPolling=null,resetNotificationPolling=null,seenResetRequestIds=null;
+  const RESET_NOTIFIED_KEY='estoque_av_reset_notifications_seen_v1';
   const settingTabs=[['general','Geral','settings'],['users','Usuários','user'],['sync','Sincronização','arrows'],['backup','Backup e dados','shield'],['about','Sobre','info']];
+  async function verificarNotificacoesRedefinicao(){if(!isDeveloper())return;try{const {data}=await lerControleAcessoEstoque();const pending=data.resetRequests.filter(request=>request.status==='pending');if(!seenResetRequestIds){try{const saved=JSON.parse(localStorage.getItem(RESET_NOTIFIED_KEY)||'[]');seenResetRequestIds=new Set(Array.isArray(saved)?saved:[])}catch{seenResetRequestIds=new Set()}}for(const request of pending){if(!seenResetRequestIds.has(request.id))toast(`Nova solicitação de redefinição: ${request.name} · operador ${request.operator}.`);seenResetRequestIds.add(request.id)}try{localStorage.setItem(RESET_NOTIFIED_KEY,JSON.stringify([...seenResetRequestIds].slice(-300)))}catch{}userAdminControl=data;if(prefs.page==='settings')render()}catch(error){console.warn('Não foi possível verificar solicitações de redefinição:',error)}}
+  function iniciarNotificacoesRedefinicao(){clearInterval(resetNotificationPolling);seenResetRequestIds=null;verificarNotificacoesRedefinicao();resetNotificationPolling=setInterval(()=>verificarNotificacoesRedefinicao(),20000)}
+  async function atualizarUsuariosGerencial({quiet=false}={}){
+    if(!isDeveloper())return;
+    if(!quiet){userAdminLoading=true;userAdminError='';if(prefs.page==='settings'&&settingsTab==='users')render()}
+    try{const [directory,control]=await Promise.all([lerDiretorioGerencial(),lerControleAcessoEstoque()]);userAdminDirectory=directory;userAdminControl=control.data;userAdminError=''}catch(error){userAdminError=error.message||'Não foi possível carregar usuários do Gerencial.'}
+    userAdminLoading=false;
+    if(prefs.page==='settings'&&settingsTab==='users')render();
+  }
+  function iniciarAtualizacaoUsuarios(){clearInterval(userAdminPolling);if(isDeveloper()){atualizarUsuariosGerencial();userAdminPolling=setInterval(()=>atualizarUsuariosGerencial({quiet:true}),20000)}}
   function settingsPage(){
-    const tabs=`<nav class="settings-tabs" aria-label="Abas de configurações">${settingTabs.map(([id,name,icon])=>`<button type="button" class="settings-tab ${settingsTab===id?'active':''}" data-settings-tab="${id}" role="tab" aria-selected="${settingsTab===id?'true':'false'}">${ico(icon,17)} ${name}</button>`).join('')}</nav>`;
+    const pendingResetCount=(userAdminControl.resetRequests||[]).filter(request=>request.status==='pending').length;
+    const tabs=`<nav class="settings-tabs" aria-label="Abas de configurações">${settingTabs.map(([id,name,icon])=>`<button type="button" class="settings-tab ${settingsTab===id?'active':''}" data-settings-tab="${id}" role="tab" aria-selected="${settingsTab===id?'true':'false'}">${ico(icon,17)} ${name}${id==='users'&&pendingResetCount?` <span class="chip yellow">${pendingResetCount}</span>`:''}</button>`).join('')}</nav>`;
     let body='';
-    if(settingsTab==='general')body=`<div class="cols-2 equal" style="margin-top:0"><section class="panel"><div class="panel-head"><strong>Preferências do sistema</strong>${ico('settings')}</div><div class="body-pad"><div class="report-row"><span>Conta conectada</span><button class="btn btn-small" data-action="accountModal">${ico('user',15)} ${escapeHtml(op())}</button></div><div class="report-row"><span>Tema do sistema</span><button class="btn btn-small" data-action="themeSwitch">${ico(prefs.theme==='dark'?'moon':'sun',15)} ${prefs.theme==='dark'?'Escuro':'Claro'} · Alterar tema</button></div><div class="report-row"><span>Unidade selecionada</span><strong>${escapeHtml(getStore()?.name||'—')}</strong></div></div></section><section class="panel"><div class="panel-head"><strong>Ambiente e acesso</strong>${ico('shield')}</div><div class="body-pad"><div class="report-row"><span>Tipo de conta</span><span class="chip ${isAdmin()?'yellow':'dark'}">${isAdmin()?'Administrador':'Operador'}</span></div><div class="report-row"><span>Registros</span><span class="chip">${cloudReady?'Supabase online':cloudEnabled?'Aguardando Supabase':'Armazenamento local'}</span></div><div class="report-row"><span>Autenticação</span><span class="chip yellow">${cloudEnabled?'Supabase do Gerencial':'Login local atual'}</span></div><p class="text-note" style="margin-top:16px">As preferências visuais acompanham o tema selecionado, inclusive na janela de leitura de código de barras.</p></div></section></div>`;
+    if(settingsTab==='general')body=`<div class="cols-2 equal" style="margin-top:0"><section class="panel"><div class="panel-head"><strong>Preferências do sistema</strong>${ico('settings')}</div><div class="body-pad"><div class="report-row"><span>Conta conectada</span><button class="btn btn-small" data-action="accountModal">${ico('user',15)} ${escapeHtml(op())}</button></div><div class="report-row"><span>Tema do sistema</span><button class="btn btn-small" data-action="themeSwitch">${ico(prefs.theme==='dark'?'moon':'sun',15)} ${prefs.theme==='dark'?'Escuro':'Claro'} · Alterar tema</button></div><div class="report-row"><span>Unidade selecionada</span><strong>${escapeHtml(getStore()?.name||'—')}</strong></div></div></section><section class="panel"><div class="panel-head"><strong>Ambiente e acesso</strong>${ico('shield')}</div><div class="body-pad"><div class="report-row"><span>Tipo de conta</span><span class="chip ${isDeveloper()?'yellow':'dark'}">${isDeveloper()?'DESENVOLVEDOR':'Operador Gerencial'}</span></div><div class="report-row"><span>Registros</span><span class="chip">${cloudReady?'Supabase online':cloudEnabled?'Aguardando Supabase':'Armazenamento local'}</span></div><div class="report-row"><span>Autenticação</span><span class="chip yellow">${cloudEnabled?'Supabase do Gerencial':'Login local atual'}</span></div><p class="text-note" style="margin-top:16px">As preferências visuais acompanham o tema selecionado, inclusive na janela de leitura de código de barras.</p></div></section></div>`;
     if(settingsTab==='sync')body=`<section class="panel"><div class="panel-head"><strong>Sincronização entre dispositivos</strong><span class="chip ${cloudReady?'green':cloudEnabled?'red':'yellow'}">${escapeHtml(cloudStatus())}</span></div><div class="cloud-panel"><p>Conecte o ESTOQUE AV ao mesmo projeto Supabase do Gerencial. Produtos, lojas, recebimentos, perdas e movimentações passam a compartilhar a mesma base para os usuários autorizados.</p><div class="notice ${cloudReady?'blue':''}">${ico(cloudReady?'check':'info')}<span>${cloudEnabled?(cloudReady?'Sincronizado. Os lançamentos são confirmados pelo Supabase; mudanças de outros dispositivos são consultadas automaticamente.':escapeHtml(cloudError||'Aguardando conexão com o Supabase. Operações de gravação são bloqueadas enquanto a nuvem está indisponível.')):'Modo local: os registros NÃO são compartilhados. Faça login no Estoque AV para conectar ao Supabase do Gerencial.'}</span></div><div class="report-row"><span>Projeto</span><strong>${escapeHtml(new URL(CLOUD_URL).hostname)}</strong></div><div class="report-row"><span>Conta online</span><strong>${escapeHtml(cloudEmail||'Não conectada')}</strong></div><div class="report-row"><span>Última atualização</span><strong>${cloudReady?(cloudUpdatedAt?dt(cloudUpdatedAt):'Sem registro'):'—'}</strong></div><div class="actions" style="margin-top:18px"><button type="button" class="btn btn-primary" data-action="cloudConnectModal">${ico('shield')} ${cloudEnabled?'Verificar conexão':'Verificar conexão'}</button>${cloudEnabled&&cloudReady?`<button type="button" class="btn" data-action="cloudForceRefresh">${ico('repeat')} Atualizar dados</button>${cloudRowExists?'':`<button type="button" class="btn" data-action="cloudSendLocalBackup">${ico('upload')} Enviar backup local</button>`}`:''}</div><p class="text-note" style="margin-top:18px">A sincronização usa o mesmo projeto Supabase do Gerencial, sem função Edge, SQL de instalação ou conta adicional. Não é necessário criar contas no Supabase Auth. Antes da primeira conexão, exporte um backup em Configurações → Backup e dados.</p></div></section>`;
     if(settingsTab==='users'){
-      const all=accounts(),enabled=all.filter(a=>a.active),admins=enabled.filter(a=>a.role==='admin');
-      body=`<div class="user-summary"><div class="mini"><span>Contas cadastradas</span><strong>${all.length}</strong></div><div class="mini"><span>Contas ativas</span><strong>${enabled.length}</strong></div><div class="mini"><span>Administradores ativos</span><strong>${admins.length}</strong></div></div><section class="panel"><div class="panel-head"><div><strong>Usuários com acesso</strong><p class="text-note" style="margin:5px 0 0">Crie, edite, bloqueie ou remova usuários deste navegador.</p></div>${isAdmin()?`<button class="btn btn-primary btn-small" data-action="userCreate">${ico('plus',16)} Novo usuário</button>`:''}</div><div class="user-list">${all.map(a=>`<div class="user-line"><div class="user-avatar">${escapeHtml(a.name.slice(0,2).toUpperCase())}</div><div class="user-detail"><strong>${escapeHtml(a.name)} ${a.id===sessionUser?.id?'<span class="chip yellow" style="margin-left:5px">Você</span>':''}</strong><small>@${escapeHtml(a.username)} · ${a.createdAt?dt(a.createdAt):'Conta antiga'}</small><div class="user-tags"><span class="chip ${a.role==='admin'?'yellow':'dark'}">${a.role==='admin'?'Administrador':'Operador'}</span><span class="chip ${a.active?'green':'red'}">${a.active?'Ativo':'Bloqueado'}</span></div></div>${isAdmin()?`<div class="user-actions"><button class="btn btn-small" data-action="userEdit" data-id="${escapeHtml(a.id)}" title="Editar usuário">${ico('edit',14)} Editar</button><button class="btn btn-small" data-action="userReset" data-id="${escapeHtml(a.id)}" title="Alterar senha">${ico('shield',14)} Senha</button>${a.id!==sessionUser?.id?`<button class="btn btn-small ${a.active?'btn-danger':''}" data-action="userToggle" data-id="${escapeHtml(a.id)}">${ico(a.active?'close':'check',13)} ${a.active?'Bloquear':'Ativar'}</button><button class="btn btn-small" data-action="userDelete" data-id="${escapeHtml(a.id)}" title="Excluir conta">${ico('trash',14)}</button>`:''}</div>`:''}</div>`).join('')}</div></section><div class="account-tip">${ico('info',18)} <span>${isAdmin()?'Os administradores podem criar contas e alterar o acesso; operadores não conseguem administrar usuários.':'Seu perfil é de operador. Somente administradores podem alterar usuários.'} <b>Este gerenciamento é local:</b> não cria usuários em outros celulares ou computadores, nem substitui as políticas de acesso de um servidor.</span></div>`;
+      const ownPasswordPanel=`<section class="panel"><div class="panel-head"><div><strong>Minha senha</strong><p class="text-note" style="margin:5px 0 0">Altere a senha do seu próprio usuário.</p></div><button type="button" class="btn btn-primary" data-action="userChangeOwnPassword">${ico('shield')} Redefinir senha</button></div><div class="body-pad"><p class="text-note" style="margin:0">A alteração vale neste navegador e dispositivo. Em outro dispositivo, redefina a senha por lá também.</p></div></section>`;
+      if(!isDeveloper())body=`<section class="panel"><div class="body-pad"><div class="notice">${ico('shield')}<span>Somente o usuário DESENVOLVEDOR pode autorizar colaboradores e analisar redefinições de senha.</span></div></div></section>`;
+      else{
+        const staff=userAdminDirectory,permitted=userAdminControl.permittedOperators||[DEVELOPER_OPERATOR],permittedStaff=staff.filter(person=>permitted.includes(person.operator)),pending=(userAdminControl.resetRequests||[]).filter(request=>request.status==='pending'),visibleRequests=(userAdminControl.resetRequests||[]).filter(request=>['pending','approved','rejected'].includes(request.status)).slice().reverse();
+        if(!permittedStaff.some(person=>person.operator===DEVELOPER_OPERATOR))permittedStaff.unshift({operator:DEVELOPER_OPERATOR,name:DEVELOPER_NAME});
+        body=`<div class="user-summary"><div class="mini"><span>Colaboradores do Gerencial</span><strong>${staff.length||'—'}</strong></div><div class="mini"><span>Usuários permitidos</span><strong>${permittedStaff.length}</strong></div><div class="mini"><span>Redefinições aguardando</span><strong>${pending.length}</strong></div></div>${userAdminError?`<div class="notice" role="alert">${ico('alert')}<span>${escapeHtml(userAdminError)} <button type="button" class="btn btn-small" data-action="userRefresh">Tentar novamente</button></span></div>`:''}${userAdminLoading?`<div class="notice blue">${ico('repeat')}<span>Carregando colaboradores e solicitações…</span></div>`:''}<section class="panel"><div class="panel-head"><div><strong>Usuários permitidos</strong><p class="text-note" style="margin:5px 0 0">Apenas colaboradores desta lista podem entrar no Estoque AV.</p></div><button type="button" class="btn btn-primary" data-action="userCreate">${ico('plus')} Adicionar</button></div><div class="user-list">${permittedStaff.length?permittedStaff.map(person=>`<div class="user-line"><div class="user-avatar">${escapeHtml((person.name||'??').slice(0,2).toUpperCase())}</div><div class="user-detail"><strong>${escapeHtml(person.name||'Colaborador sem nome')}</strong><small>OPERADOR ${escapeHtml(person.operator)}</small><div class="user-tags"><span class="chip ${person.operator===DEVELOPER_OPERATOR?'yellow':'green'}">${person.operator===DEVELOPER_OPERATOR?'DESENVOLVEDOR PERMANENTE':'Acesso liberado'}</span></div></div><div class="user-actions">${person.operator===DEVELOPER_OPERATOR?'<span class="chip yellow">Permanente</span>':`<button type="button" class="btn btn-small btn-danger" data-action="userRevoke" data-id="${escapeHtml(person.operator)}">Remover</button>`}</div></div>`).join(''):'<div class="body-pad"><p class="text-note">Nenhum colaborador foi liberado.</p></div>'}</div></section><section class="panel" style="margin-top:15px"><div class="panel-head"><div><strong>Solicitações de redefinição de senha</strong><p class="text-note" style="margin:5px 0 0">Os pedidos com data cadastrada são validados automaticamente. Se o Gerencial não tiver a data, confira a identidade manualmente antes de aprovar.</p></div><span class="chip ${pending.length?'yellow':'green'}">${pending.length} pendente${pending.length===1?'':'s'}</span></div><div class="user-list">${visibleRequests.length?visibleRequests.map(request=>`<div class="user-line"><div class="user-avatar">${escapeHtml((request.name||'??').slice(0,2).toUpperCase())}</div><div class="user-detail"><strong>${escapeHtml(request.name||'Colaborador')}</strong><small>OPERADOR ${escapeHtml(request.operator)} · ${escapeHtml(dt(request.createdAt))}</small><div class="user-tags"><span class="chip ${request.status==='pending'?'yellow':request.status==='approved'?'green':'dark'}">${request.status==='pending'?'AGUARDANDO ANÁLISE':request.status==='approved'?'APROVADA · AGUARDANDO USUÁRIO':'RECUSADA'}</span>${request.birthDateVerified===false?'<span class="chip yellow">DATA AUSENTE NO GERENCIAL · CONFERIR MANUALMENTE</span>':''}</div></div>${request.status==='pending'?`<div class="user-actions"><button type="button" class="btn btn-small btn-primary" data-action="userApproveReset" data-id="${escapeHtml(request.id)}">Aprovar redefinição</button><button type="button" class="btn btn-small" data-action="userRejectReset" data-id="${escapeHtml(request.id)}">Recusar</button></div>`:''}</div>`).join(''):'<div class="body-pad"><p class="text-note">Nenhuma solicitação de redefinição.</p></div>'}</div></section><div class="account-tip">${ico('info',18)} <span>${escapeHtml(DEVELOPER_NAME)} — OPERADOR 133 — é o DESENVOLVEDOR permanente. As autorizações e solicitações são sincronizadas para os dispositivos pelo Supabase do Gerencial.</span></div>`;
+      }
+      body=ownPasswordPanel+body;
     }
     if(settingsTab==='backup')body=`<section class="panel"><div class="panel-head"><strong>Backup e recuperação dos registros</strong>${ico('shield')}</div><div class="body-pad"><p class="text-note">Exporte todos os registros operacionais, mercadorias, lojas, caminhões, perdas, inventários e fotos compactadas para um JSON.</p><div class="actions" style="margin:18px 0">${act('Exportar backup','exportBackup','download','btn-dark')}${act('Restaurar backup','importBackup','upload','')}</div><div class="notice blue">${ico('info')}<span>O arquivo de backup contém os registros operacionais. As credenciais dos usuários locais são gerenciadas separadamente neste navegador e não acompanham este backup.</span></div></div></section>`;
-    if(settingsTab==='about')body=`<section class="panel"><div class="panel-head"><strong>ESTOQUE AV — V2.2.3</strong><span class="chip">${cloudEnabled?'Supabase':'Local'} · HTML</span></div><div class="body-pad">${[['Cadastro e movimentações manuais','Ativo'],['Múltiplas lojas; depósito e salão','Ativo'],['Transferências com confirmação','Ativo'],['Recebimento de caminhões por categoria','Ativo'],['Perdas sem cadastro e baixas automáticas quando houver saldo','Ativo'],['Leitor contextual de 12 dígitos com tema automático','Ativo'],['Gerenciamento local de usuários','Ativo'],['Sincronização pelo Supabase do Gerencial',cloudReady?'Ativo':'Requer configuração']].map(([label,status])=>`<div class="report-row"><span>${label}</span><span class="chip ${status==='Ativo'?'green':'yellow'}">${status}</span></div>`).join('')}</div></section><div class="notice blue">${ico('info')}<span>Entre com o operador e a senha já cadastrados no Gerencial ou com a conta local deste dispositivo. Após o login, o Estoque sincroniza usando o mesmo projeto Supabase do Gerencial.</span></div>`;
+    if(settingsTab==='about')body=`<section class="panel"><div class="panel-head"><strong>ESTOQUE AV — V2.2.9</strong><span class="chip">${cloudEnabled?'Supabase':'Local'} · HTML</span></div><div class="body-pad">${[['Cadastro e movimentações manuais','Ativo'],['Múltiplas lojas; depósito e salão','Ativo'],['Transferências com confirmação','Ativo'],['Recebimento de caminhões por categoria','Ativo'],['Perdas sem cadastro e baixas automáticas quando houver saldo','Ativo'],['Leitor contextual de 12 dígitos com tema automático','Ativo'],['Acesso autorizado pelo desenvolvedor; senha definida por cada usuário','Ativo'],['Redefinição da própria senha em Configurações → Usuários','Ativo'],['Solicitação e aprovação de redefinição de senha','Ativo'],['Sincronização pelo Supabase do Gerencial',cloudReady?'Ativo':'Requer configuração']].map(([label,status])=>`<div class="report-row"><span>${label}</span><span class="chip ${status==='Ativo'?'green':'yellow'}">${status}</span></div>`).join('')}</div></section><div class="notice blue">${ico('info')}<span>O desenvolvedor libera os colaboradores do Gerencial. Cada pessoa escolhe sua senha na primeira entrada em cada dispositivo e pode solicitar redefinição pelo login.</span></div>`;
     return pageHead('Configurações','Gerencie preferências, usuários, proteção dos registros e informações do sistema.')+tabs+`<section class="settings-content" role="tabpanel">${body}</section>`;
   }
-  function setSettingsTab(tab){if(!settingTabs.some(x=>x[0]===tab))return;settingsTab=tab;if(prefs.page!=='settings'){setPage('settings');return}render()}
-  function userCreate(){userEdit()}
-  function userEdit(id){
-    if(!requireAdmin())return;
-    const user=id?requireAccount(id):null;if(id&&!user)return;
-    const own=user?.id===sessionUser?.id;
-    modal(user?'Editar usuário':'Cadastrar usuário',user?'Altere nome, login e perfil de acesso local.':'Cadastre um novo usuário para este navegador.',
-      `<div class="form-grid">${field('u-name','Nome completo *','text',user?.name||'','maxlength="90" autocomplete="off"')}${field('u-username','Usuário (login) *','text',user?.username||'','maxlength="40" autocapitalize="none" autocomplete="off"')}${selectField('u-role','Perfil de acesso',[['operator','Operador'],['admin','Administrador']],user?.role||'operator',own?'disabled':'')}${user?'':`${field('u-password','Senha *','password','','autocomplete="new-password" minlength="8"')}${field('u-password2','Confirmar senha *','password','','autocomplete="new-password" minlength="8"')}`}</div><div class="account-tip">${ico('shield',18)} <span>${own?'Por segurança, sua própria conta não pode perder o perfil de administrador por esta tela.': 'Administradores gerenciam contas; operadores realizam atividades de estoque.'} As credenciais ficam neste navegador.</span></div>`,
-      `<button class="btn btn-primary" id="u-submit">${ico('check')} ${user?'Salvar alterações':'Criar usuário'}</button>`);
-    $('#u-submit').addEventListener('click',async()=>{const button=$('#u-submit');try{
-      if(!requireAdmin())return;
-      const name=formVal('u-name'),username=formVal('u-username').toLowerCase(),role=own?user.role:formVal('u-role'),all=accounts();
-      assert(name.length>=2,'Informe o nome completo (pelo menos 2 caracteres).');
-      assert(/^[a-z0-9._-]{3,40}$/.test(username),'O login deve ter entre 3 e 40 caracteres e utilizar letras sem acento, números, ponto, hífen ou sublinhado.');
-      assert(!all.some(a=>a.username===username&&a.id!==user?.id),'Este login já está em uso.');
-      assert(['admin','operator'].includes(role),'Selecione um perfil válido.');
-      if(user){const next=all.map(a=>a.id===user.id?{...a,name,username,role,updatedAt:iso()}:a);assert(activeAdmins(next)>=1,'É necessário manter pelo menos um administrador ativo.');accountSave(next,'Usuário atualizado com sucesso.');return}
-      const password=$('#u-password').value,confirmPassword=$('#u-password2').value;
-      assert(password.length>=8,'A senha deve ter pelo menos 8 caracteres.');assert(password===confirmPassword,'A confirmação da senha está diferente.');
-      button.disabled=true;button.textContent='Criando…';const salt=authSalt(),hash=await passwordHash(password,salt);
-      const fresh=accounts();assert(!fresh.some(a=>a.username===username),'Este login já foi utilizado.');
-      accountSave([...fresh,{id:uid(),name,username,role,active:true,salt,hash,createdAt:iso()}],'Usuário criado com sucesso.');
-    }catch(err){toast(err.message||'Não foi possível salvar o usuário.',true)}finally{if(button.isConnected){button.disabled=false;button.innerHTML=ico('check')+(user?' Salvar alterações':' Criar usuário')}}});
+  function setSettingsTab(tab){if(!settingTabs.some(x=>x[0]===tab))return;settingsTab=tab;if(prefs.page!=='settings'){setPage('settings');if(tab==='users')iniciarAtualizacaoUsuarios();return}render();if(tab==='users')iniciarAtualizacaoUsuarios();else clearInterval(userAdminPolling)}
+  function userRefresh(){if(!requireAdmin())return;atualizarUsuariosGerencial()}
+  function userChangeOwnPassword(){
+    if(!sessionUser?.operator)return toast('Entre novamente para alterar sua senha.',true);
+    modal('Redefinir minha senha','Escolha uma nova senha para este dispositivo.',`<form id="own-password-form" class="form-grid" autocomplete="off">${field('own-password-new','NOVA SENHA *','password','','placeholder="Mínimo de 8 caracteres" autocomplete="new-password" minlength="8" required')}${field('own-password-confirm','REPITA A NOVA SENHA *','password','','autocomplete="new-password" minlength="8" required')}<div class="span2"><div id="own-password-error" class="auth-error" role="alert" aria-live="polite"></div></div></form>`,`<button type="submit" class="btn btn-primary" id="own-password-submit" form="own-password-form">${ico('check')} Salvar nova senha</button>`);
+    $('#own-password-form').addEventListener('submit',async event=>{event.preventDefault();const button=$('#own-password-submit'),error=$('#own-password-error');error.textContent='';button.disabled=true;button.textContent='Salvando senha…';try{await alterarSenhaPropria({newPassword:$('#own-password-new').value,confirmation:$('#own-password-confirm').value});closeModal();toast('Sua senha foi redefinida neste dispositivo.')}catch(err){error.textContent=err.message||'Não foi possível alterar a senha.';button.disabled=false;button.innerHTML=ico('check')+' Salvar nova senha'}});
   }
-  function userReset(id){const user=requireAccount(id);if(!user)return;
-    modal('Redefinir senha',`Defina uma nova senha para ${user.name}.`,
-      `${field('u-newpass','Nova senha *','password','','minlength="8" autocomplete="new-password"')}${field('u-newpass2','Repetir nova senha *','password','','minlength="8" autocomplete="new-password"')}<div class="account-tip">${ico('info')} <span>A senha anterior deixa de funcionar neste navegador assim que esta operação for concluída.</span></div>`,
-      `<button class="btn btn-primary" id="u-reset-save">${ico('check')} Atualizar senha</button>`);
-    $('#u-reset-save').addEventListener('click',async()=>{const button=$('#u-reset-save');try{
-      if(!requireAdmin())return;const pass=$('#u-newpass').value,confirm=$('#u-newpass2').value;
-      assert(pass.length>=8,'Informe uma senha com ao menos 8 caracteres.');assert(pass===confirm,'As senhas não coincidem.');button.disabled=true;button.textContent='Salvando…';
-      const salt=authSalt(),hash=await passwordHash(pass,salt),all=accounts();
-      assert(all.some(a=>a.id===id),'Usuário não encontrado.');
-      accountSave(all.map(a=>a.id===id?{...a,salt,hash,updatedAt:iso()}:a),'Senha redefinida com sucesso.');
-    }catch(err){toast(err.message||'Não foi possível alterar a senha.',true)}finally{if(button.isConnected){button.disabled=false;button.innerHTML=ico('check')+' Atualizar senha'}}});
-  }
-  function userToggle(id){const account=requireAccount(id);if(!account)return;
-    if(id===sessionUser.id){toast('Não é possível bloquear sua própria conta.',true);return}
-    const verb=account.active?'bloquear':'reativar';
-    confirmDialog((account.active?'Bloquear':'Ativar')+' usuário',`Deseja ${verb} o acesso local de ${account.name}?`,()=>{
-      if(!requireAdmin())return;const all=accounts(),next=all.map(a=>a.id===id?{...a,active:!a.active,updatedAt:iso()}:a);
-      if(activeAdmins(next)<1){toast('É necessário manter ao menos um administrador ativo.',true);return}
-      accountSave(next,account.active?'Acesso bloqueado.':'Acesso reativado.');
-    });
-  }
-  function userDelete(id){const account=requireAccount(id);if(!account)return;
-    if(id===sessionUser.id){toast('Não é possível excluir sua própria conta.',true);return}
-    confirmDialog('Excluir usuário',`Excluir a conta de ${account.name} deste navegador? O histórico operacional continuará com o nome registrado.`,()=>{
-      if(!requireAdmin())return;const all=accounts(),next=all.filter(a=>a.id!==id);
-      if(activeAdmins(next)<1){toast('É necessário manter ao menos um administrador ativo.',true);return}
-      accountSave(next,'Conta excluída deste navegador.');
-    });
-  }
+  function userCreate(){if(!requireAdmin())return;const permitted=userAdminControl.permittedOperators||[DEVELOPER_OPERATOR],staff=userAdminDirectory,selectable=staff.some(person=>person.operator!==DEVELOPER_OPERATOR&&!permitted.includes(person.operator));const contents=staff.length?`<p class="text-note" style="margin:0 0 10px">Selecione todos que devem ter acesso. Os já permitidos aparecem marcados.</p><div id="user-add-list" style="max-height:55vh;overflow:auto">${staff.map(person=>{const enabled=person.operator===DEVELOPER_OPERATOR||permitted.includes(person.operator);return `<label class="user-line" style="cursor:${enabled?'default':'pointer'}"><input type="checkbox" value="${escapeHtml(person.operator)}" ${enabled?'checked disabled':''} style="width:18px;height:18px;accent-color:#c89c2e"><span class="user-detail"><strong>${escapeHtml(person.name||'Colaborador sem nome')}</strong><small>OPERADOR ${escapeHtml(person.operator)}</small></span>${enabled?`<span class="chip ${person.operator===DEVELOPER_OPERATOR?'yellow':'green'}">${person.operator===DEVELOPER_OPERATOR?'DESENVOLVEDOR':'Permitido'}</span>`:''}</label>`}).join('')}</div>`:'<div class="notice blue">'+ico('info')+'<span>Nenhum colaborador foi encontrado no Gerencial. Atualize a lista e tente novamente.</span></div>';modal('Adicionar usuários','Escolha colaboradores da lista do Gerencial e confirme para liberá-los no Estoque AV.',contents,`<button type="button" class="btn btn-primary" id="user-add-submit">${ico('check')} Confirmar seleção</button>`,true);$('#user-add-submit').disabled=!selectable;$('#user-add-submit').addEventListener('click',userAddSelected)}
+  async function userAddSelected(){if(!requireAdmin())return;const selected=$$('#user-add-list input:checked:not(:disabled)').map(input=>normalizarOperadorGerencial(input.value));if(!selected.length){toast('Selecione pelo menos um colaborador ainda não permitido.',true);return}try{await gravarControleAcessoEstoque(current=>({...current,permittedOperators:[...new Set([...current.permittedOperators,...selected])]}));closeModal();toast('Acesso liberado. Os colaboradores aparecem agora em Usuários permitidos.');await atualizarUsuariosGerencial({quiet:true})}catch(error){toast(error.message||'Não foi possível liberar o acesso.',true)}}
+  async function userAuthorize(operator){if(!requireAdmin())return;const person=userAdminDirectory.find(item=>item.operator===normalizarOperadorGerencial(operator));if(!person||person.operator===DEVELOPER_OPERATOR)return toast('Colaborador não encontrado no Gerencial.',true);try{await gravarControleAcessoEstoque(current=>({...current,permittedOperators:[...new Set([...current.permittedOperators,person.operator])]}));toast(`Acesso liberado para ${person.name}.`);await atualizarUsuariosGerencial({quiet:true})}catch(error){toast(error.message||'Não foi possível liberar o acesso.',true)}}
+  async function userRevoke(operator){if(!requireAdmin())return;const normalized=normalizarOperadorGerencial(operator);if(normalized===DEVELOPER_OPERATOR)return toast('O acesso permanente do DESENVOLVEDOR não pode ser removido.',true);try{await gravarControleAcessoEstoque(current=>({...current,permittedOperators:current.permittedOperators.filter(value=>value!==normalized)}));toast('Acesso ao Estoque AV removido.');await atualizarUsuariosGerencial({quiet:true})}catch(error){toast(error.message||'Não foi possível remover o acesso.',true)}}
+  async function userApproveReset(id){if(!requireAdmin())return;try{await atualizarSolicitacaoRedefinicao(id,'approved');toast('Redefinição aprovada. O colaborador poderá criar uma nova senha neste dispositivo.');await atualizarUsuariosGerencial({quiet:true})}catch(error){toast(error.message||'Não foi possível aprovar a solicitação.',true)}}
+  async function userRejectReset(id){if(!requireAdmin())return;try{await atualizarSolicitacaoRedefinicao(id,'rejected');toast('Solicitação recusada.');await atualizarUsuariosGerencial({quiet:true})}catch(error){toast(error.message||'Não foi possível recusar a solicitação.',true)}}
+  function userEdit(id){const account=accounts().find(a=>a.id===id);if(isDeveloperAccount(account)){toast('O usuário DESENVOLVEDOR é permanente e não pode ser editado.',true);return}toast('Nome, perfil e autorização são controlados pelo Gerencial.',true)}
+  function userReset(id){const account=accounts().find(a=>a.id===id);if(isDeveloperAccount(account)){toast('A senha do DESENVOLVEDOR só pode ser redefinida pelo próprio usuário.',true);return}toast('A senha é definida pelo próprio operador neste dispositivo.',true)}
+  function userToggle(id){const account=accounts().find(a=>a.id===id);if(isDeveloperAccount(account)){toast('O usuário DESENVOLVEDOR não pode ser bloqueado.',true);return}toast('Bloqueie ou reative o operador no Gerencial.',true)}
+  function userDelete(id){const account=accounts().find(a=>a.id===id);if(isDeveloperAccount(account)){toast('O usuário DESENVOLVEDOR é permanente e não pode ser removido.',true);return}toast('O acesso e a remoção de operadores são controlados pelo Gerencial.',true)}
   function operatorModal(){modal('Identificação local','Este nome será registrado nas próximas operações deste navegador.',`${field('operator-name','Nome do colaborador *','text',op(),'maxlength="90"')}<div class="notice">${ico('info')}<span>Esta identificação não constitui login ou autenticação. Para impedir que alguém se identifique como outro operador, será necessário ativar autenticação em um servidor.</span></div>`,`<button class="btn btn-primary" id="operator-save">${ico('check')} Salvar</button>`);$('#operator-save').addEventListener('click',()=>{const name=formVal('operator-name');if(name.length<2){toast('Informe o nome do colaborador.',true);return}prefs.operator=name;savePrefs();closeModal();render();toast('Identificação local atualizada.')})}
   function confirmDialog(title,description,action){modal(title,description,`<p style="line-height:1.7;font-size:13px">${escapeHtml(description)}</p>`,`<button class="btn btn-danger" id="confirm-act">${ico('check')} Confirmar</button>`);$('#confirm-act').addEventListener('click',action)}
   const csvCell=v=>{let t=String(v??'');if(/^[\s\t\r\n]*[=+\-@]/.test(t))t="'"+t;return '"'+t.replace(/"/g,'""')+'"'};
@@ -1182,7 +1282,7 @@
     update();code.focus({preventScroll:true});
   }
 
-  const actionMap={cloudConnectModal,cloudSendLocalBackup,cloudForceRefresh,cloudDisconnectAsk,userCreate,userEdit,userReset,userToggle,userDelete,receiptModal,receiptDetail,exportReceipts,accountModal,productModal,productDetail,movementModal,transferModal,receiveModal,transferDetail,lossModal,lossDetail,inventoryNew,inventoryDetail,storeModal,operatorModal,exportProducts,exportMovement,exportLosses,exportBackup,importBackup,switchStore:id=>{prefs.storeId=id;savePrefs();render()},themeSwitch:()=>{prefs.theme=prefs.theme==='dark'?'light':'dark';savePrefs();render()},print:()=>window.print()};
+  const actionMap={cloudConnectModal,cloudSendLocalBackup,cloudForceRefresh,cloudDisconnectAsk,userCreate,userAuthorize,userRevoke,userApproveReset,userRejectReset,userRefresh,userChangeOwnPassword,userEdit,userReset,userToggle,userDelete,receiptModal,receiptDetail,exportReceipts,accountModal,productModal,productDetail,movementModal,transferModal,receiveModal,transferDetail,lossModal,lossDetail,inventoryNew,inventoryDetail,storeModal,operatorModal,exportProducts,exportMovement,exportLosses,exportBackup,importBackup,switchStore:id=>{prefs.storeId=id;savePrefs();render()},themeSwitch:()=>{prefs.theme=prefs.theme==='dark'?'light':'dark';savePrefs();render()},print:()=>window.print()};
   function bindContent(){const c=$('#content');c.querySelectorAll('[data-settings-tab]').forEach(button=>button.addEventListener('click',()=>setSettingsTab(button.dataset.settingsTab)));c.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>{const fn=actionMap[el.dataset.action];if(fn)fn(el.dataset.id)}));c.querySelectorAll('[data-page]').forEach(el=>el.addEventListener('click',()=>setPage(el.dataset.page)));const search=c.querySelector('#list-search');if(search){search.addEventListener('input',e=>{const value=e.target.value,pos=e.target.selectionStart;searchValue=value;const page=prefs.page;const rerender={products:productsPage,losses:lossesPage,receipts:receiptsPage}[page];if(rerender){c.innerHTML=rerender();bindContent();const inp=c.querySelector('#list-search');if(inp){inp.focus();inp.setSelectionRange(pos,pos)}}})}mountScannerIcons(c);const select=c.querySelector('#list-filter');if(select)select.addEventListener('change',e=>{filterValue=e.target.value;const page=prefs.page;const rerender={products:productsPage,losses:lossesPage,receipts:receiptsPage}[page];if(rerender){c.innerHTML=rerender();bindContent()}})}
   $('#overlay-mobile').addEventListener('click',()=>{$('#sidebar').classList.remove('open');$('#overlay-mobile').classList.remove('show')});window.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#scanner-root')?.firstElementChild)closeScanner();else if(e.key==='Escape'&&modalState)closeModal()});window.addEventListener('storage',e=>{if(e.key===ACCOUNTS_KEY){const own=accounts().find(a=>a.id===sessionUser?.id&&a.active);if(sessionUser&&!own){logout();toast('Seu acesso foi alterado em outra aba.',true)}else if(sessionUser)render()}if(e.key===KEY){if(!cloudEnabled){db=loadData();render();toast('Dados locais atualizados de outra aba.')}else if(!cloudBusy)cloudPull({quiet:true,preserveModal:!!modalState}) }});
   boot();
