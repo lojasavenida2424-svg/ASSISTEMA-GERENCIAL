@@ -293,6 +293,10 @@
     body.dark .online-pill.live{color:#7ce2a5;background:#18352a}
     body.dark .online-pill.error{color:#ffaaaa;background:#492628}
   </style>
+  <script src="https://unpkg.com/@supabase/supabase-js@2.112.3"></script>
+  <script>
+    if(!window.supabase){document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3"><\/script>')}
+  </script>
 </head>
 <body class="auth-locked">
   <div id="auth-root"></div>
@@ -324,7 +328,7 @@
   function loadPrefs(){try{return {...{storeId:'store24',operator:'Operador local',page:'dashboard',theme:'light'},...JSON.parse(localStorage.getItem(PREF)||'{}')}}catch{return{storeId:'store24',operator:'Operador local',page:'dashboard',theme:'light'}}}
 
   // Acesso LOCAL: separação visual de sessão e credenciais neste navegador.
-  // Controle local de interface; o acesso remoto exige validação na ponte protegida do Gerencial.
+  // O compartilhamento usa a sessão ativa e as permissões do Gerencial.
   const ACCOUNTS_KEY='estoque_av_local_accounts_v1',SESSION_KEY='estoque_av_session_v1',REMEMBER_KEY='estoque_av_remember_user_v1';
   let sessionUser=null,authAttempts=0,authBlockedUntil=0;
   function accounts(){try{const a=JSON.parse(localStorage.getItem(ACCOUNTS_KEY)||'[]');return Array.isArray(a)?a.map((entry,index)=>({...entry,role:entry.role==='admin'||entry.role==='operator'?entry.role:(index===0?'admin':'operator'),active:entry.active!==false})):[]}catch{return []}}
@@ -425,7 +429,7 @@
       ${setup?`<div class="auth-field"><label for="auth-confirm">Confirme sua senha</label><div class="auth-input-wrap">${htmlAuthIcon('shield',18)}<input class="auth-input" type="password" id="auth-confirm" name="confirmPassword" placeholder="Repita a senha" autocomplete="new-password" minlength="8" required><button class="auth-eye" type="button" data-toggle="auth-confirm" aria-label="Mostrar senha" title="Mostrar senha">${htmlAuthIcon('eye',19)}</button></div></div>`:`<div class="auth-between"><label class="auth-remember"><input type="checkbox" id="auth-remember" ${remembered?'checked':''}> Lembrar usuário</label><span class="auth-helper">Acesso exclusivo deste navegador</span></div>`}
       <div id="auth-error" class="auth-error" role="alert" aria-live="polite"></div>
       <button class="auth-submit" id="auth-submit" type="submit"><span>${setup?'Criar acesso e entrar':'Entrar no ESTOQUE AV'}</span>${htmlAuthIcon('right',19)}</button>
-      </form><div class="auth-info">${htmlAuthIcon('info',16)}<span>${setup?'As credenciais serão guardadas apenas neste dispositivo. Guarde sua senha com segurança.':'Esta edição é local: os dados não são sincronizados entre dispositivos. O acesso por senha não substitui a segurança de uma autenticação em servidor.'}</span></div>
+      </form><div class="auth-info">${htmlAuthIcon('info',16)}<span>${setup?'As credenciais serão guardadas apenas neste dispositivo. Guarde sua senha com segurança.':'O acesso do Estoque é local; a sincronização de registros depende de um login autorizado no Gerencial.'}</span></div>
       <div class="auth-footer-mobile">LOJAS AVENIDA S/A · ESTOQUE AV</div>
     </div></section></div>`;
   }
@@ -464,7 +468,7 @@
   function startSession(account){if(!account?.active)return;sessionUser={id:account.id,username:account.username,name:account.name,role:account.role};try{sessionStorage.setItem(SESSION_KEY,account.id)}catch(e){console.warn('Sessão temporária indisponível',e)}prefs.operator=account.name;savePrefs();$('#auth-root').innerHTML='';document.body.classList.remove('auth-locked');render();if(cloudEnabled)cloudStart()}
   function boot(){let sid=null;try{sid=sessionStorage.getItem(SESSION_KEY)}catch(e){console.warn('Sessão do navegador indisponível',e)}const account=accounts().find(a=>a.id===sid);if(account&&account.active){startSession(account)}else{try{sessionStorage.removeItem(SESSION_KEY)}catch(e){}showAuth()}}
   function logout(){try{sessionStorage.removeItem(SESSION_KEY)}catch(e){}sessionUser=null;showAuth()}
-  function accountModal(){if(!sessionUser)return;modal('Minha conta','Acesso local neste navegador.',`<div class="report-row"><span>Operador</span><strong>${escapeHtml(sessionUser.name)}</strong></div><div class="report-row"><span>Usuário</span><strong>${escapeHtml(sessionUser.username)}</strong></div><div class="notice blue">${ico('info')}<span>Este login local foi preservado. Quando aberto pelo Gerencial, o compartilhamento online usa a sessão de sincronização gerenciada pelo próprio Gerencial, sem exigir uma nova conta no Supabase Authentication.</span></div>`,`<button class="btn btn-dark" id="logout-now">${ico('logout')} Sair do sistema</button>`);$('#logout-now').addEventListener('click',logout)}
+  function accountModal(){if(!sessionUser)return;modal('Minha conta','Acesso local neste navegador.',`<div class="report-row"><span>Operador</span><strong>${escapeHtml(sessionUser.name)}</strong></div><div class="report-row"><span>Usuário</span><strong>${escapeHtml(sessionUser.username)}</strong></div><div class="notice blue">${ico('info')}<span>Este login local foi preservado. Quando aberto pelo Gerencial, o compartilhamento online usa a mesma configuração Supabase, sem exigir uma nova conta no Supabase Authentication.</span></div>`,`<button class="btn btn-dark" id="logout-now">${ico('logout')} Sair do sistema</button>`);$('#logout-now').addEventListener('click',logout)}
   let db=loadData(),prefs=loadPrefs(),searchValue='',filterValue='all',modalState=null;
   if(!db.stores.find(s=>s.id===prefs.storeId))prefs.storeId=db.stores[0]?.id||'';
   const getStore=()=>db.stores.find(s=>s.id===prefs.storeId);
@@ -478,45 +482,39 @@
   function stockTotals(storeId,productId){const deposito=stockOf(storeId,'deposito',productId),salao=stockOf(storeId,'salao',productId),transito=transitOf(storeId,productId);return{deposito,salao,transito,total:deposito+salao+transito}}
   function totals(storeId){return db.products.reduce((a,p)=>{const s=stockTotals(storeId,p.id);a.deposito+=s.deposito;a.salao+=s.salao;a.transito+=s.transito;a.total+=s.total;if(s.total<=p.min)a.low++;return a},{deposito:0,salao:0,transito:0,total:0,low:0})}
   function savePrefs(){localStorage.setItem(PREF,JSON.stringify(prefs))}
-  // ESTOQUE AV V2.0 - Sincronização protegida usando a sessão JÁ EXISTENTE do Gerencial.
-  // Nenhuma conta Supabase Auth é criada, nenhum login visual é alterado.
-  // Chave publicável e service_role NUNCA são usados para gravar pelo navegador.
+  // ESTOQUE AV usa o mesmo projeto, chave pública e tabela Supabase do Gerencial.
+  // A linha própria evita misturar o estoque com os registros de outros módulos.
   const CLOUD_URL='https://euyrhkusnasgiueefldg.supabase.co';
-  const CLOUD_WORKSPACE='avenida',CLOUD_BACKUP=KEY+'_antes_nuvem_v20';
+  const CLOUD_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1eXJoa3VzbmFzZ2l1ZWVmbGRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzY0MTksImV4cCI6MjA5ODk1MjQxOX0.woI5Il3ObKrj8BJfdYz8DcUW08Jl5c458ykh1SrHYr4';
+  const ONLINE_TABLE='assistencia_gerencial',CLOUD_ROW_ID='estoque_av_compartilhado_v1';
+  const CLOUD_BACKUP=KEY+'_antes_nuvem_v20';
   const GERENCIAL_SESSION_KEY='adminGerencialSessaoV21Individual';
-  const BRIDGE_SESSION_KEY='estoque_av_bridge_session_v20';
-  const CLOUD_ENDPOINT=CLOUD_URL+'/functions/v1/estoque-av-sync';
-  const gerencialSessaoValida=()=>{try{const s=JSON.parse(sessionStorage.getItem(GERENCIAL_SESSION_KEY)||'null');return !!(s?.operador&&Number(s?.expiraEm)>Date.now())}catch{return false}};
-  let cloudEnabled=gerencialSessaoValida(),cloudReady=false,cloudBusy=false,cloudRevision=-1,cloudError='',cloudEmail='',cloudLastPull=0;
+  const stockClient=window.supabase?.createClient?window.supabase.createClient(CLOUD_URL,CLOUD_ANON_KEY,{
+    auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
+  }):null;
+  const gerencialSession=()=>{try{return JSON.parse(sessionStorage.getItem(GERENCIAL_SESSION_KEY)||'null')}catch{return null}};
+  const gerencialSessaoValida=()=>{const s=gerencialSession();return !!(s?.operador&&Number(s?.expiraEm)>Date.now())};
+  const gerencialPodeAcessarEstoque=()=>{
+    const s=gerencialSession(),operator=normaliseOperator(s?.operador),permissions=s?.permissoes||{};
+    return gerencialSessaoValida()&&(operator==='133'||(permissions.sistemaav!==false&&permissions.sistemaAvLinks?.estoque!==false));
+  };
+  let cloudEnabled=gerencialPodeAcessarEstoque(),cloudReady=false,cloudBusy=false,cloudUpdatedAt=null,cloudRowExists=false,cloudError='',cloudEmail='',cloudLastPull=0;
   let cloudPoll=null,cloudInitialising=false;
-  function cloudStatus(){return cloudEnabled?(cloudReady?'Nuvem sincronizada':cloudError?'Nuvem indisponível':'Conectando…'):'Modo local'}
+  function cloudStatus(){return cloudEnabled?(cloudReady?(cloudRowExists?'Nuvem sincronizada':'Nuvem pronta para o primeiro registro'):cloudError?'Nuvem indisponível':'Conectando…'):'Modo local'}
   function cloudStatusClass(){return cloudEnabled?(cloudReady?'live':cloudError?'error':'wait'):'wait'}
-  function bridgeSession(){
-    try{const s=JSON.parse(sessionStorage.getItem(BRIDGE_SESSION_KEY)||'null');
-      if(!s?.token||!s?.operator||Date.parse(s.expires_at)<=Date.now())return null;
-      return s;
-    }catch{return null}
-  }
-  async function bridgeApi(action,body={}){
-    if(!navigator.onLine)throw Error('Sem internet. Operação não enviada ao Supabase.');
-    const session=bridgeSession();
-    if(!session)throw Error('A sessão de sincronização do Gerencial não está disponível. Entre novamente no Gerencial após instalar a função estoque-av-sync.');
-    const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),25000);
-    try{
-      const response=await fetch(CLOUD_ENDPOINT,{method:'POST',mode:'cors',cache:'no-store',credentials:'omit',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({action,token:session.token,...body}),signal:controller.signal});
-      const data=await response.json().catch(()=>({}));
-      if(!response.ok||data?.ok===false){const err=Error(data?.error||'HTTP '+response.status);err.status=response.status;throw err}
-      return data;
-    }catch(err){
-      if(err.name==='AbortError')throw Error('Tempo de resposta do Supabase esgotado. Verifique a conexão antes de tentar novamente.');
-      throw err;
-    }finally{clearTimeout(timer)}
+  async function cloudReadRow(){
+    if(!stockClient)throw Error('A biblioteca Supabase não carregou. Verifique sua conexão e recarregue a página.');
+    if(!navigator.onLine)throw Error('Sem internet. A nuvem não foi consultada.');
+    const {data,error}=await stockClient.from(ONLINE_TABLE).select('dados,updated_at').eq('id',CLOUD_ROW_ID).maybeSingle();
+    if(error)throw error;
+    return data||null;
   }
   function cloudErrorMessage(error){
     const msg=String(error?.message||error||'Erro na conexão.');
-    if(/failed to fetch|fetch failed|not found|404|SERVICO_NAO_CONFIGURADO/i.test(msg))return 'A função estoque-av-sync não está publicada no projeto Supabase ou não pode ser acessada.';
-    if(/SESSAO_ESTOQUE|ACESSO_ESTOQUE_REVOGADO|CREDENCIAIS_OU_ACESSO_INVALIDOS/i.test(msg))return 'A sessão de sincronização não é mais válida. Entre novamente no Gerencial para renová-la.';
-    if(/CONFLITO_DE_VERSAO/i.test(msg))return 'Outro dispositivo atualizou os dados. Atualize e tente novamente.';
+    if(/CONFLITO_DE_VERSAO/i.test(msg))return 'Outro dispositivo atualizou o estoque. Os dados foram atualizados; confira e tente novamente.';
+    if(/failed to fetch|fetch failed|networkerror|timeout/i.test(msg))return 'Não foi possível acessar o Supabase. Verifique a conexão com a internet.';
+    if(/permission denied|row-level security|not allowed|401|403/i.test(msg))return 'O Supabase bloqueou o acesso. Confira as permissões já usadas pelo Gerencial.';
+    if(/assistencia_gerencial|schema cache|relation .* does not exist/i.test(msg))return 'A tabela assistencia_gerencial não está disponível neste projeto Supabase.';
     return msg;
   }
   function cloudValidate(data){
@@ -534,56 +532,52 @@
     }
     for(const t of data.transfers)assert(t.qty>=t.received+(t.cancelledQty||0),'Transferência com quantidades inconsistentes.');
   }
-  function cloudPersist(snapshot,revision,redraw=true){
+  function cloudPersist(snapshot,updatedAt,redraw=true){
     cloudValidate(snapshot);
-    db=structuredClone(snapshot);cloudRevision=Number(revision);cloudReady=true;cloudError='';cloudLastPull=Date.now();
+    db=structuredClone(snapshot);cloudUpdatedAt=updatedAt||null;cloudRowExists=true;cloudReady=true;cloudError='';cloudLastPull=Date.now();
     localStorage.setItem(KEY,JSON.stringify(db));
     if(!db.stores.some(store=>store.id===prefs.storeId)){prefs.storeId=db.stores[0]?.id||'';savePrefs()}
     if(redraw&&sessionUser)render();
   }
   async function cloudPull({quiet=false,preserveModal=false,force=false}={}){
+    if(!gerencialPodeAcessarEstoque()){cloudEnabled=false;cloudReady=false;cloudError='Entre no Gerencial com um usuário autorizado para sincronizar.';return false}
     if(!cloudEnabled||(cloudBusy&&!force)||!navigator.onLine)return false;
     try{
-      const data=await bridgeApi('load');
-      cloudPersist(data.state,data.revision,!preserveModal);
-      if(!quiet)toast('Dados atualizados a partir da nuvem.');return true;
+      const row=await cloudReadRow();
+      if(row)cloudPersist(row.dados,row.updated_at,!preserveModal);
+      else{cloudRowExists=false;cloudUpdatedAt=null;cloudReady=true;cloudError='';cloudLastPull=Date.now();if(sessionUser&&!preserveModal)render()}
+      if(!quiet&&row)toast('Dados atualizados a partir da nuvem.');
+      return true;
     }catch(err){cloudReady=false;cloudError=cloudErrorMessage(err);if(!quiet)toast(cloudError,true);if(sessionUser&&!preserveModal)render();return false}
   }
   async function cloudStart(){
-    if(gerencialSessaoValida())cloudEnabled=true;
-    if(!cloudEnabled||cloudInitialising)return;
+    if(!gerencialPodeAcessarEstoque()){cloudEnabled=false;cloudReady=false;cloudError='Entre no Gerencial com um usuário autorizado para sincronizar.';if(sessionUser)render();return}
+    cloudEnabled=true;
+    if(cloudInitialising)return;
     cloudInitialising=true;cloudReady=false;cloudError='';
     try{
-      const session=bridgeSession();
-      if(!session)throw Error('Aguardando sessão segura emitida pelo Gerencial. Se persistir, entre novamente no Gerencial após a instalação da função no Supabase.');
-      cloudEmail='Operador '+session.operator;
+      const session=gerencialSession();cloudEmail='Operador '+normaliseOperator(session?.operador);
       if(!localStorage.getItem(CLOUD_BACKUP))localStorage.setItem(CLOUD_BACKUP,JSON.stringify(db));
       const loaded=await cloudPull({quiet:true});
-      if(loaded){
-        const pending=await getPendingCommit();
-        if(pending){cloudBusy=true;try{await resolvePendingCommit(pending)}catch(error){cloudError=String(error?.message||error);console.error('Gravação pendente aguardando reconciliação:',error)}finally{cloudBusy=false}}
-      }
+      if(loaded){const pending=await getPendingCommit();if(pending){cloudBusy=true;try{await resolvePendingCommit(pending)}catch(error){cloudError=String(error?.message||error);console.error('Gravação pendente aguardando reconciliação:',error)}finally{cloudBusy=false}}}
     }catch(err){cloudReady=false;cloudError=cloudErrorMessage(err)}finally{cloudInitialising=false;if(sessionUser)render()}
   }
   function cloudConnectModal(){
-    modal('Sincronização com o Gerencial','Nenhum login adicional é necessário.',
-      `<div class="notice blue">${ico('shield')}<span>O ESTOQUE AV usa a sessão do Gerencial para acessar o Supabase. Você continua entrando normalmente no Gerencial e no Estoque, sem contas Supabase Auth.</span></div><p class="text-note" style="margin-top:14px">Situação: <strong>${escapeHtml(cloudStatus())}</strong></p><p class="text-note">${escapeHtml(cloudError||'Para sincronizar, acesse o Estoque pelo Gerencial publicado em HTTPS. A função estoque-av-sync precisa estar instalada.')}</p>`,
+    modal('Sincronização com o Gerencial','Nenhum login ou configuração adicional é necessário.',
+      `<div class="notice blue">${ico('shield')}<span>O ESTOQUE AV usa o mesmo projeto Supabase já configurado no Gerencial. Seu login atual e as contas locais do Estoque continuam iguais.</span></div><p class="text-note" style="margin-top:14px">Situação: <strong>${escapeHtml(cloudStatus())}</strong></p><p class="text-note">${escapeHtml(cloudError||'Entre no Gerencial com um usuário autorizado e verifique a conexão.')}</p>`,
       `<button class="btn btn-primary" id="cloud-connect-submit">${ico('repeat')} Verificar conexão</button>`);
-    $('#cloud-connect-submit').addEventListener('click',async()=>{if(!gerencialSessaoValida()){toast('Entre primeiro no Gerencial AV.',true);return}cloudEnabled=true;await cloudStart();if(cloudReady){closeModal();toast('Conexão confirmada!')}else toast(cloudError,true)});
+    $('#cloud-connect-submit').addEventListener('click',async()=>{if(!gerencialPodeAcessarEstoque()){toast('Entre no Gerencial com um usuário autorizado.',true);return}cloudEnabled=true;await cloudStart();if(cloudReady){closeModal();toast('Conexão confirmada!')}else toast(cloudError,true)});
   }
-  async function cloudDisconnect(){
-    toast('No Gerencial, a sincronização não pode ser desligada: isso evitaria registros isolados no navegador.',true);
-  }
-  function cloudMigrateLocal(){
-    if(!cloudReady||cloudRevision!==0||db.products.length||db.ledger.length||db.losses.length||db.receipts.length){toast('Importação inicial permitida somente em nuvem vazia, revisão 0. Use Backup e dados para outros casos.',true);return}
-    let local=null;
-    try{local=JSON.parse(localStorage.getItem(CLOUD_BACKUP)||'null')}catch{}
-    if(!local||!Array.isArray(local.products)||!Array.isArray(local.ledger)){toast('Não encontrei o backup local anterior à conexão. Exporte/restaure um JSON em Backup e dados.',true);return}
-    confirmDialog('Importar meus registros locais','Isso enviará o backup deste navegador à nuvem vazia. Garanta que ele seja a fonte correta e que não existam lançamentos feitos em outro dispositivo.',()=>{
-      void commit(target=>{for(const prop of ['stores','products','ledger','transfers','losses','inventories','receipts'])target[prop]=structuredClone(local[prop]||[])},'Registros locais migrados para o Supabase.')
+  function cloudDisconnect(){toast('A sincronização usa a sessão ativa do Gerencial e não pode ser desligada aqui.',true)}
+  async function cloudSendLocalBackup(){
+    if(!cloudReady||cloudRowExists){toast('O envio inicial só está disponível quando ainda não há estoque compartilhado na nuvem.',true);return}
+    let local=null;try{local=JSON.parse(localStorage.getItem(CLOUD_BACKUP)||'null')}catch{}
+    if(!local||!Array.isArray(local.products)||!Array.isArray(local.ledger)){toast('Não encontrei um backup local anterior à conexão. Exporte um JSON em Backup e dados.',true);return}
+    confirmDialog('Enviar estoque local para a nuvem','Isso publicará o backup deste navegador como o estoque compartilhado. Confirme que este é o aparelho com os registros corretos.',()=>{
+      void commit(target=>{for(const prop of ['stores','products','ledger','transfers','losses','inventories','receipts'])target[prop]=structuredClone(local[prop]||[])},'Estoque local enviado para o Supabase.');
     });
   }
-  function cloudForceRefresh(){if(!cloudEnabled){toast('Conecte a nuvem primeiro.',true);return}cloudPull()}
+  function cloudForceRefresh(){if(!cloudEnabled){toast('Entre no Gerencial para sincronizar.',true);return}cloudPull()}
   function cloudDisconnectAsk(){cloudDisconnect()}
   function cloudLocalCommit(mutate,success){
     try{const next=structuredClone(db);mutate(next);cloudValidate(next);localStorage.setItem(KEY,JSON.stringify(next));db=next;closeModal();render();toast(success||'Operação salva neste dispositivo (modo local).');return true}
@@ -635,41 +629,63 @@
       tx.onabort=()=>reject(tx.error||Error('Não foi possível encerrar o registro da gravação.'));
     });
   }
+  function stockConflictError(){const error=Error('CONFLITO_DE_VERSAO');error.code='ESTOQUE_CONFLICT';error.status=409;return error}
+  function isStockConflict(error){return error?.code==='ESTOQUE_CONFLICT'||Number(error?.status)===409||/CONFLITO_DE_VERSAO/i.test(error?.message||'')}
+  async function cloudWriteSnapshot(snapshot,expectedUpdatedAt,expectedRowExists){
+    cloudValidate(snapshot);
+    if(!stockClient)throw Error('A biblioteca Supabase não está disponível.');
+    const now=iso(),table=stockClient.from(ONLINE_TABLE);
+    let query;
+    if(expectedRowExists){
+      query=table.update({dados:snapshot,updated_at:now}).eq('id',CLOUD_ROW_ID);
+      query=expectedUpdatedAt?query.eq('updated_at',expectedUpdatedAt):query.is('updated_at',null);
+      query=query.select('dados,updated_at').maybeSingle();
+    }else query=table.insert({id:CLOUD_ROW_ID,dados:snapshot,updated_at:now}).select('dados,updated_at').maybeSingle();
+    const {data,error}=await query;
+    if(error){if(!expectedRowExists&&(error.code==='23505'||Number(error.status)===409))throw stockConflictError();throw error}
+    if(!data)throw stockConflictError();
+    return data;
+  }
+  const sameStockState=(a,b)=>{try{return JSON.stringify(a)===JSON.stringify(b)}catch{return false}};
   async function resolvePendingCommit(pending){
-    pending=pending||await getPendingCommit();
-    if(!pending)return true;
-    const session=bridgeSession();
-    if(!session||normaliseOperator(session.operator)!==normaliseOperator(pending.operator))throw Error('Há uma gravação pendente do operador '+String(pending.operator||'')+'. Entre novamente com esse operador para confirmar o resultado antes de continuar.');
-    let status;
-    try{status=await bridgeApi('operation_status',{operation_id:pending.operation_id,known_revision:pending.known_revision})}
-    catch(error){if(Number(error?.status)===400&&/ACAO_DESCONHECIDA/i.test(error.message||''))status={committed:false};else throw error}
-    if(status.committed){
-      const fresh=await cloudPull({quiet:true,preserveModal:true,force:true});
-      if(!fresh)throw Error('A gravação anterior consta no servidor, mas não foi possível atualizar os dados. Verifique a conexão antes de continuar.');
+    pending=pending||await getPendingCommit();if(!pending)return true;
+    const session=gerencialSession(),operator=normaliseOperator(session?.operador);
+    if(!gerencialPodeAcessarEstoque()||!operator||operator!==normaliseOperator(pending.operator))throw Error('Há uma gravação pendente de outro operador. Entre no Gerencial com esse usuário para confirmar o resultado antes de continuar.');
+    const fresh=await cloudPull({quiet:true,preserveModal:true,force:true});
+    if(!fresh)throw Error('Não foi possível consultar o Supabase para reconciliar uma gravação anterior.');
+    if(cloudRowExists&&sameStockState(db,pending.state)){
       await clearPendingCommit(pending.operation_id);
       toast('A gravação anterior foi confirmada. Confira os dados antes de repetir a operação.');
       return false;
     }
+    const hasBase=Object.prototype.hasOwnProperty.call(pending,'base_updated_at')&&Object.prototype.hasOwnProperty.call(pending,'base_row_exists');
+    if(!hasBase){
+      await clearPendingCommit(pending.operation_id);
+      toast('Uma gravação antiga não pôde ser confirmada automaticamente. Confira o estoque atualizado e registre novamente, se necessário.',true);
+      return false;
+    }
+    if(cloudUpdatedAt!==pending.base_updated_at||cloudRowExists!==pending.base_row_exists){
+      await clearPendingCommit(pending.operation_id);
+      toast('Outro dispositivo atualizou o estoque antes da confirmação. Os dados atuais foram carregados; confira e faça o lançamento novamente.',true);
+      return false;
+    }
     try{
-      const result=await bridgeApi('commit',{revision:pending.known_revision,known_revision:pending.known_revision,state:pending.state,operation_id:pending.operation_id,intent:pending.intent});
-      if(result.replayed){
-        const fresh=await cloudPull({quiet:true,preserveModal:true,force:true});
-        if(!fresh)throw Error('A gravação anterior foi confirmada, mas os dados atuais não puderam ser carregados.');
-      }else cloudPersist(pending.state,result.revision,false);
+      const saved=await cloudWriteSnapshot(pending.state,cloudUpdatedAt,cloudRowExists);
+      cloudPersist(saved.dados,saved.updated_at,false);
       await clearPendingCommit(pending.operation_id);
       toast('A gravação anterior foi reconciliada. Confira os dados antes de repetir a operação.');
       return false;
     }catch(error){
-      if(/CONFLITO_DE_VERSAO/i.test(error.message||'')){
-        const fresh=await cloudPull({quiet:true,preserveModal:true,force:true});
-        if(!fresh)throw Error('A gravação anterior não foi confirmada e os dados atuais não puderam ser carregados.');
+      if(isStockConflict(error)){
+        const updated=await cloudPull({quiet:true,preserveModal:true,force:true});
+        if(!updated)throw Error('A gravação anterior não foi confirmada e os dados atuais não puderam ser carregados.');
         await clearPendingCommit(pending.operation_id);
-        toast('A gravação anterior não foi aplicada porque outro dispositivo atualizou o estoque. Confira os dados e faça o lançamento novamente.',true);
+        toast('Outro dispositivo atualizou o estoque primeiro. Confira os dados e faça o lançamento novamente.',true);
         return false;
       }
-      if([400,403].includes(Number(error?.status))){
+      if(Number(error?.status)>=400&&Number(error?.status)<500){
         await clearPendingCommit(pending.operation_id);
-        toast('O servidor recusou a gravação pendente e não alterou o estoque: '+cloudErrorMessage(error),true);
+        toast('O Supabase recusou a gravação pendente: '+cloudErrorMessage(error),true);
         return false;
       }
       throw error;
@@ -677,31 +693,28 @@
   }
   async function cloudRemoteCommit(mutate,success,intent='operation'){
     if(cloudBusy){toast('Existe outra gravação em andamento. Aguarde a conclusão.',true);return false}
-    if(!cloudReady||!navigator.onLine){toast('Alteração NÃO gravada: a nuvem não está conectada. Verifique Configurações → Sincronização.',true);return false}
+    if(!gerencialPodeAcessarEstoque()||!cloudReady||!navigator.onLine){toast('Alteração NÃO gravada: entre no Gerencial e confirme a conexão com a nuvem.',true);return false}
     cloudBusy=true;
     const button=$('#modal-root .modal-foot .btn-primary, #modal-root .modal-foot .btn-danger');if(button)button.disabled=true;
     try{
       const pending=await getPendingCommit();
       if(pending){await resolvePendingCommit(pending);return false}
-      const session=bridgeSession();
-      if(!session?.operator)throw Error('A sessão do operador expirou. Entre novamente no Gerencial antes de gravar.');
-      const operationId=crypto.randomUUID();
+      const session=gerencialSession(),operator=normaliseOperator(session?.operador);
+      if(!operator)throw Error('A sessão do Gerencial expirou. Entre novamente antes de gravar.');
       for(let tries=0;tries<4;tries++){
         const next=structuredClone(db);mutate(next);cloudValidate(next);
-        await savePendingCommit({version:1,operation_id:operationId,operator:normaliseOperator(session.operator),known_revision:cloudRevision,intent,state:next,created_at:iso()});
+        const operationId=uid();
+        await savePendingCommit({version:2,operation_id:operationId,operator,base_updated_at:cloudUpdatedAt,base_row_exists:cloudRowExists,intent,state:next,created_at:iso()});
         try{
-          const data=await bridgeApi('commit',{revision:cloudRevision,known_revision:cloudRevision,state:next,operation_id:operationId,intent});
-          if(data.replayed){
-            // Idempotencia: o servidor ja processou o mesmo ID. Recarregar o estado verdadeiro.
-            const fresh=await cloudPull({quiet:true,preserveModal:true,force:true});
-            if(!fresh)throw Error('Operação registrada, mas houve falha ao obter o novo estado. Atualize a página.');
-          }else cloudPersist(next,data.revision,false);
+          const saved=await cloudWriteSnapshot(next,cloudUpdatedAt,cloudRowExists);
+          cloudPersist(saved.dados,saved.updated_at,false);
           await clearPendingCommit(operationId);
           closeModal();render();toast(success||'Operação salva e sincronizada na nuvem.');return true;
         }catch(error){
-          if(/CONFLITO_DE_VERSAO/i.test(error.message||'')){
+          if(isStockConflict(error)){
+            await clearPendingCommit(operationId);
             const fresh=await cloudPull({quiet:true,preserveModal:true,force:true});
-            if(!fresh)throw Error('Não foi possível atualizar dados após uma alteração de outro dispositivo.');
+            if(!fresh)throw Error('Não foi possível atualizar o estoque após uma alteração de outro dispositivo.');
             continue;
           }
           if(Number(error?.status)>=400&&Number(error?.status)<500)await clearPendingCommit(operationId);
@@ -709,13 +722,20 @@
         }
       }
       throw Error('Muitos lançamentos simultâneos. Atualize os dados e tente novamente.');
-    }catch(err){console.error(err);const status=Number(err?.status);const uncertain=!status||status>=500;toast(uncertain?'Não foi possível confirmar o resultado da gravação. O sistema guardou a operação para reconciliar com o servidor; não repita o lançamento agora.':'Operação NÃO gravada na nuvem: '+cloudErrorMessage(err),true);return false}
+    }catch(err){console.error(err);const status=Number(err?.status);const uncertain=!status||status>=500;toast(uncertain?'Não foi possível confirmar a gravação. O sistema guardou a operação para reconciliar com o Supabase; não repita o lançamento agora.':'Operação NÃO gravada na nuvem: '+cloudErrorMessage(err),true);return false}
     finally{cloudBusy=false;if(button?.isConnected)button.disabled=false}
   }
-  function commit(mutate,success,intent='operation'){if(gerencialSessaoValida())cloudEnabled=true;return cloudEnabled?cloudRemoteCommit(mutate,success,intent):cloudLocalCommit(mutate,success)}
+  function commit(mutate,success,intent='operation'){if(gerencialPodeAcessarEstoque())cloudEnabled=true;else cloudEnabled=false;return cloudEnabled?cloudRemoteCommit(mutate,success,intent):cloudLocalCommit(mutate,success)}
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cloudEnabled&&!cloudBusy)cloudPull({quiet:true,preserveModal:!!modalState})});
   window.addEventListener('online',()=>{if(cloudEnabled&&!cloudBusy)cloudPull({quiet:true,preserveModal:!!modalState})});
-  cloudPoll=setInterval(()=>{if(!cloudBusy&&!document.hidden){if(gerencialSessaoValida()&&!cloudEnabled)cloudEnabled=true;if(cloudEnabled&&!cloudReady&&bridgeSession()){cloudStart();return}if(cloudEnabled&&cloudReady&&Date.now()-cloudLastPull>12000)cloudPull({quiet:true,preserveModal:!!modalState})}},5000);
+  cloudPoll=setInterval(()=>{
+    if(cloudBusy||document.hidden)return;
+    const allowed=gerencialPodeAcessarEstoque();
+    if(!allowed&&cloudEnabled){cloudEnabled=false;cloudReady=false;cloudError='A sessão ou a permissão do Gerencial expirou.';if(sessionUser)render();return}
+    if(allowed&&!cloudEnabled){cloudEnabled=true;cloudStart();return}
+    if(cloudEnabled&&!cloudReady){cloudStart();return}
+    if(cloudEnabled&&cloudReady&&Date.now()-cloudLastPull>12000)cloudPull({quiet:true,preserveModal:!!modalState});
+  },5000);
 
   function assert(cond,message){if(!cond)throw Error(message)}
   function posInt(value,label='Quantidade'){const n=Number(value);assert(Number.isSafeInteger(n)&&n>0,`${label} deve ser um número inteiro maior que zero.`);return n}
@@ -830,95 +850,16 @@
     const tabs=`<nav class="settings-tabs" aria-label="Abas de configurações">${settingTabs.map(([id,name,icon])=>`<button type="button" class="settings-tab ${settingsTab===id?'active':''}" data-settings-tab="${id}" role="tab" aria-selected="${settingsTab===id?'true':'false'}">${ico(icon,17)} ${name}</button>`).join('')}</nav>`;
     let body='';
     if(settingsTab==='general')body=`<div class="cols-2 equal" style="margin-top:0"><section class="panel"><div class="panel-head"><strong>Preferências do sistema</strong>${ico('settings')}</div><div class="body-pad"><div class="report-row"><span>Conta conectada</span><button class="btn btn-small" data-action="accountModal">${ico('user',15)} ${escapeHtml(op())}</button></div><div class="report-row"><span>Tema do sistema</span><button class="btn btn-small" data-action="themeSwitch">${ico(prefs.theme==='dark'?'moon':'sun',15)} ${prefs.theme==='dark'?'Escuro':'Claro'} · Alterar tema</button></div><div class="report-row"><span>Unidade selecionada</span><strong>${escapeHtml(getStore()?.name||'—')}</strong></div></div></section><section class="panel"><div class="panel-head"><strong>Ambiente e acesso</strong>${ico('shield')}</div><div class="body-pad"><div class="report-row"><span>Tipo de conta</span><span class="chip ${isAdmin()?'yellow':'dark'}">${isAdmin()?'Administrador':'Operador'}</span></div><div class="report-row"><span>Registros</span><span class="chip">${cloudReady?'Supabase online':cloudEnabled?'Aguardando Gerencial':'Armazenamento local'}</span></div><div class="report-row"><span>Autenticação</span><span class="chip yellow">${cloudEnabled?'Gerencial (login preservado)':'Login local atual'}</span></div><p class="text-note" style="margin-top:16px">As preferências visuais acompanham o tema selecionado, inclusive na janela de leitura de código de barras.</p></div></section></div>`;
-    if(settingsTab==='sync')body=`<section class="panel"><div class="panel-head"><strong>Sincronização entre dispositivos</strong><span class="chip ${cloudReady?'green':cloudEnabled?'red':'yellow'}">${escapeHtml(cloudStatus())}</span></div><div class="cloud-panel"><p>Conecte o ESTOQUE AV ao mesmo projeto Supabase do Gerencial. Produtos, lojas, recebimentos, perdas e movimentações passam a compartilhar a mesma base para os usuários autorizados.</p><div class="notice ${cloudReady?'blue':''}">${ico(cloudReady?'check':'info')}<span>${cloudEnabled?(cloudReady?'Sincronizado. Os lançamentos exigem conexão e confirmação no servidor; mudanças de outros dispositivos são consultadas automaticamente.':escapeHtml(cloudError||'Aguardando conexão com o Supabase. Operações de gravação são bloqueadas enquanto a nuvem está indisponível.')):'Modo local: os registros NÃO são compartilhados. Abra o sistema pelo Gerencial com a ponte do Supabase instalada.'}</span></div><div class="report-row"><span>Projeto</span><strong>${escapeHtml(new URL(CLOUD_URL).hostname)}</strong></div><div class="report-row"><span>Conta online</span><strong>${escapeHtml(cloudEmail||'Não conectada')}</strong></div><div class="report-row"><span>Versão online</span><strong>${cloudReady?String(cloudRevision):'—'}</strong></div><div class="actions" style="margin-top:18px"><button type="button" class="btn btn-primary" data-action="cloudConnectModal">${ico('shield')} ${cloudEnabled?'Verificar conexão':'Verificar conexão'}</button>${cloudEnabled?`<button type="button" class="btn" data-action="cloudForceRefresh">${ico('repeat')} Atualizar dados</button><button type="button" class="btn" data-action="cloudMigrateLocal">${ico('upload')} Migrar backup local</button>`:''}</div><p class="text-note" style="margin-top:18px">A sincronização aproveita o login normal do Gerencial. Uma função protegida no Supabase valida a sessão. Não é necessário criar contas no Supabase Auth. Antes da primeira conexão, exporte um backup em Configurações → Backup e dados.</p></div></section>`;
+    if(settingsTab==='sync')body=`<section class="panel"><div class="panel-head"><strong>Sincronização entre dispositivos</strong><span class="chip ${cloudReady?'green':cloudEnabled?'red':'yellow'}">${escapeHtml(cloudStatus())}</span></div><div class="cloud-panel"><p>Conecte o ESTOQUE AV ao mesmo projeto Supabase do Gerencial. Produtos, lojas, recebimentos, perdas e movimentações passam a compartilhar a mesma base para os usuários autorizados.</p><div class="notice ${cloudReady?'blue':''}">${ico(cloudReady?'check':'info')}<span>${cloudEnabled?(cloudReady?'Sincronizado. Os lançamentos são confirmados pelo Supabase; mudanças de outros dispositivos são consultadas automaticamente.':escapeHtml(cloudError||'Aguardando conexão com o Supabase. Operações de gravação são bloqueadas enquanto a nuvem está indisponível.')):'Modo local: os registros NÃO são compartilhados. Abra o sistema pelo Gerencial com um usuário autorizado.'}</span></div><div class="report-row"><span>Projeto</span><strong>${escapeHtml(new URL(CLOUD_URL).hostname)}</strong></div><div class="report-row"><span>Conta online</span><strong>${escapeHtml(cloudEmail||'Não conectada')}</strong></div><div class="report-row"><span>Última atualização</span><strong>${cloudReady?(cloudUpdatedAt?dt(cloudUpdatedAt):'Sem registro'):'—'}</strong></div><div class="actions" style="margin-top:18px"><button type="button" class="btn btn-primary" data-action="cloudConnectModal">${ico('shield')} ${cloudEnabled?'Verificar conexão':'Verificar conexão'}</button>${cloudEnabled&&cloudReady?`<button type="button" class="btn" data-action="cloudForceRefresh">${ico('repeat')} Atualizar dados</button>${cloudRowExists?'':`<button type="button" class="btn" data-action="cloudSendLocalBackup">${ico('upload')} Enviar backup local</button>`}`:''}</div><p class="text-note" style="margin-top:18px">A sincronização usa o mesmo projeto Supabase do Gerencial, sem função Edge, SQL de instalação ou conta adicional. Não é necessário criar contas no Supabase Auth. Antes da primeira conexão, exporte um backup em Configurações → Backup e dados.</p></div></section>`;
     if(settingsTab==='users'){
       const all=accounts(),enabled=all.filter(a=>a.active),admins=enabled.filter(a=>a.role==='admin');
       body=`<div class="user-summary"><div class="mini"><span>Contas cadastradas</span><strong>${all.length}</strong></div><div class="mini"><span>Contas ativas</span><strong>${enabled.length}</strong></div><div class="mini"><span>Administradores ativos</span><strong>${admins.length}</strong></div></div><section class="panel"><div class="panel-head"><div><strong>Usuários com acesso</strong><p class="text-note" style="margin:5px 0 0">Crie, edite, bloqueie ou remova usuários deste navegador.</p></div>${isAdmin()?`<button class="btn btn-primary btn-small" data-action="userCreate">${ico('plus',16)} Novo usuário</button>`:''}</div><div class="user-list">${all.map(a=>`<div class="user-line"><div class="user-avatar">${escapeHtml(a.name.slice(0,2).toUpperCase())}</div><div class="user-detail"><strong>${escapeHtml(a.name)} ${a.id===sessionUser?.id?'<span class="chip yellow" style="margin-left:5px">Você</span>':''}</strong><small>@${escapeHtml(a.username)} · ${a.createdAt?dt(a.createdAt):'Conta antiga'}</small><div class="user-tags"><span class="chip ${a.role==='admin'?'yellow':'dark'}">${a.role==='admin'?'Administrador':'Operador'}</span><span class="chip ${a.active?'green':'red'}">${a.active?'Ativo':'Bloqueado'}</span></div></div>${isAdmin()?`<div class="user-actions"><button class="btn btn-small" data-action="userEdit" data-id="${escapeHtml(a.id)}" title="Editar usuário">${ico('edit',14)} Editar</button><button class="btn btn-small" data-action="userReset" data-id="${escapeHtml(a.id)}" title="Alterar senha">${ico('shield',14)} Senha</button>${a.id!==sessionUser?.id?`<button class="btn btn-small ${a.active?'btn-danger':''}" data-action="userToggle" data-id="${escapeHtml(a.id)}">${ico(a.active?'close':'check',13)} ${a.active?'Bloquear':'Ativar'}</button><button class="btn btn-small" data-action="userDelete" data-id="${escapeHtml(a.id)}" title="Excluir conta">${ico('trash',14)}</button>`:''}</div>`:''}</div>`).join('')}</div></section><div class="account-tip">${ico('info',18)} <span>${isAdmin()?'Os administradores podem criar contas e alterar o acesso; operadores não conseguem administrar usuários.':'Seu perfil é de operador. Somente administradores podem alterar usuários.'} <b>Este gerenciamento é local:</b> não cria usuários em outros celulares ou computadores, nem substitui as políticas de acesso de um servidor.</span></div>`;
     }
-    if(settingsTab==='users' && isAdmin())body+=`<section class="panel section-gap"><div class="panel-head"><div><strong>Migração segura de contas para o Supabase</strong><p class="text-note" style="margin:5px 0 0">Etapa 3: copiar contas locais com hashes protegidos, sem mudar o login atual.</p></div></div><div class="body-pad"><div class="notice blue">${ico('shield')}<span>A migração usa as contas deste navegador como referência inicial. Outros dispositivos podem possuir contas ou senhas diferentes. Confira antes de continuar; a sincronização das senhas ainda depende da Etapa 4.</span></div><div class="actions" style="margin-top:14px"><button class="btn btn-primary" data-action="accountMigrationModal">${ico('upload',16)} Preparar migração e testar login online</button></div></div></section>`;
     if(settingsTab==='backup')body=`<section class="panel"><div class="panel-head"><strong>Backup e recuperação dos registros</strong>${ico('shield')}</div><div class="body-pad"><p class="text-note">Exporte todos os registros operacionais, mercadorias, lojas, caminhões, perdas, inventários e fotos compactadas para um JSON.</p><div class="actions" style="margin:18px 0">${act('Exportar backup','exportBackup','download','btn-dark')}${act('Restaurar backup','importBackup','upload','')}</div><div class="notice blue">${ico('info')}<span>O arquivo de backup contém os registros operacionais. As credenciais dos usuários locais são gerenciadas separadamente neste navegador e não acompanham este backup.</span></div></div></section>`;
-    if(settingsTab==='about')body=`<section class="panel"><div class="panel-head"><strong>ESTOQUE AV — V2.0</strong><span class="chip">${cloudEnabled?'Supabase':'Local'} · HTML</span></div><div class="body-pad">${[['Cadastro e movimentações manuais','Ativo'],['Múltiplas lojas; depósito e salão','Ativo'],['Transferências com confirmação','Ativo'],['Recebimento de caminhões por categoria','Ativo'],['Perdas sem cadastro e baixas automáticas quando houver saldo','Ativo'],['Leitor contextual de 12 dígitos com tema automático','Ativo'],['Gerenciamento local de usuários','Ativo'],['Sincronização pelo Gerencial e função protegida',cloudReady?'Ativo':'Requer configuração']].map(([label,status])=>`<div class="report-row"><span>${label}</span><span class="chip ${status==='Ativo'?'green':'yellow'}">${status}</span></div>`).join('')}</div></section><div class="notice blue">${ico('info')}<span>As contas locais deste módulo continuam como antes e não são credenciais do Supabase. Quando usado pelo Gerencial com a ponte instalada, o servidor valida o operador e a permissão a cada leitura ou gravação; acessos somente locais permanecem limitados a este navegador.</span></div>`;
+    if(settingsTab==='about')body=`<section class="panel"><div class="panel-head"><strong>ESTOQUE AV — V2.2</strong><span class="chip">${cloudEnabled?'Supabase':'Local'} · HTML</span></div><div class="body-pad">${[['Cadastro e movimentações manuais','Ativo'],['Múltiplas lojas; depósito e salão','Ativo'],['Transferências com confirmação','Ativo'],['Recebimento de caminhões por categoria','Ativo'],['Perdas sem cadastro e baixas automáticas quando houver saldo','Ativo'],['Leitor contextual de 12 dígitos com tema automático','Ativo'],['Gerenciamento local de usuários','Ativo'],['Sincronização pelo Supabase do Gerencial',cloudReady?'Ativo':'Requer configuração']].map(([label,status])=>`<div class="report-row"><span>${label}</span><span class="chip ${status==='Ativo'?'green':'yellow'}">${status}</span></div>`).join('')}</div></section><div class="notice blue">${ico('info')}<span>As contas locais deste módulo continuam como antes e não são credenciais do Supabase. Quando há uma sessão autorizada do Gerencial, o Estoque grava na mesma tabela Supabase usada pelos demais módulos. As contas de acesso do Estoque permanecem neste navegador.</span></div>`;
     return pageHead('Configurações','Gerencie preferências, usuários, proteção dos registros e informações do sistema.')+tabs+`<section class="settings-content" role="tabpanel">${body}</section>`;
   }
   function setSettingsTab(tab){if(!settingTabs.some(x=>x[0]===tab))return;settingsTab=tab;if(prefs.page!=='settings'){setPage('settings');return}render()}
-  // Migração opcional, apenas uma vez, para a função SEPARADA estoque-av-accounts.
-  // Não altera o login legado, nem remove localStorage, nem salva o segredo no navegador.
-  function accountMigrationModal(){
-    if(!requireAdmin())return;
-    const existing=accounts();
-    const rows=existing.map(a=>({
-      id:a.id,username:a.username,name:a.name,role:a.role,active:a.active,
-      salt:a.salt,hash:a.hash
-    }));
-    const problems=[];
-    if(!rows.length||rows.length>200)problems.push('O número de contas deve estar entre 1 e 200.');
-    const ids=new Set(),names=new Set();
-    for(const a of rows){
-      if(typeof a.id!=='string'||!/^[a-zA-Z0-9_-]{6,128}$/.test(a.id))problems.push('Identificador de conta inválido.');
-      if(typeof a.username!=='string'||!/^[a-z0-9._-]{3,40}$/.test(a.username))problems.push('Há um login fora do padrão aceito.');
-      if(typeof a.name!=='string'||a.name.trim().length<2||a.name.trim().length>90)problems.push('Há um nome fora do padrão aceito.');
-      if(!['admin','operator'].includes(a.role)||typeof a.active!=='boolean')problems.push('Perfil de conta inválido.');
-      try{if(typeof a.salt!=='string'||fromB64(a.salt).length!==16||typeof a.hash!=='string'||fromB64(a.hash).length!==32)problems.push('Há uma conta sem hash PBKDF2 compatível.');}
-      catch(_){problems.push('Há uma conta com credenciais incompatíveis.');}
-      if(ids.has(a.id)||names.has(a.username))problems.push('Há identificadores ou logins duplicados.');
-      ids.add(a.id);names.add(a.username);
-    }
-    if(!rows.some(a=>a.role==='admin'&&a.active))problems.push('É necessário manter um administrador ativo.');
-    const validated=problems.length===0;
-    const summary=rows.map(a=>`<div class="report-row"><span>${escapeHtml(a.name)} (@${escapeHtml(a.username)})</span><span class="chip ${a.active?'green':'red'}">${a.role==='admin'?'Administrador':'Operador'} · ${a.active?'ativo':'bloqueado'}</span></div>`).join('');
-    const form=`<div class="notice ${validated?'blue':''}">${ico(validated?'info':'shield')}<span>${validated?'Revise os '+rows.length+' usuário(s) locais antes do envio. Nenhuma senha em texto será transferida.':'A lista atual contém problemas de compatibilidade: '+escapeHtml([...new Set(problems)].join(' '))}</span></div>
-      <div style="max-height:230px;overflow:auto;margin:12px 0">${summary}</div>
-      <div class="field"><label for="migration-secret">Segredo temporário criado em Edge Function Secrets (não compartilhe)</label><input id="migration-secret" type="password" minlength="32" autocomplete="off" placeholder="Cole o segredo de 32 ou mais caracteres"></div>
-      <label style="display:flex;gap:10px;align-items:flex-start;margin:14px 0;font-size:13px"><input type="checkbox" id="migration-confirm"><span>Confirmo que ESTE computador é a fonte principal das contas e compreendo que a migração não altera o login local até a atualização seguinte.</span></label>
-      <div id="migration-feedback" role="status" aria-live="polite" class="notice" style="display:none"></div>
-      <div class="field" style="margin-top:14px"><label for="migration-test-username">Testar uma conta migrada (login)</label><input id="migration-test-username" type="text" value="${escapeHtml(sessionUser?.username||'')}" autocomplete="username" placeholder="Login"></div>
-      <div class="field"><label for="migration-test-password">Senha atual dessa conta (somente para teste)</label><input id="migration-test-password" type="password" autocomplete="off" placeholder="Digite a senha atual"></div>
-      <p class="text-note">Após migrar, teste o login online aqui. O teste encerra a sessão imediatamente e não salva a senha digitada.</p>`;
-    modal('Migração de contas — Etapa 3','Não substitui sua tela de login nem a ponte atual do Estoque.',form,
-      `<button type="button" class="btn" id="migration-test">Testar login online</button><button type="button" class="btn btn-primary" id="migration-send" ${validated?'':'disabled'}>${ico('upload')} Migrar contas uma vez</button>`,true);
-    const endpoint=CLOUD_URL+'/functions/v1/estoque-av-accounts';
-    const state=$('#migration-feedback');
-    const report=(message,ok)=>{if(!state)return;state.style.display='block';state.className='notice '+(ok?'blue':'');state.textContent=message;};
-    const invoke=async body=>{
-      if(!navigator.onLine)throw Error('Sem conexão com a internet.');
-      const response=await fetch(endpoint,{method:'POST',mode:'cors',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-      let payload={};try{payload=await response.json()}catch(_){throw Error('Resposta inválida da função do Supabase (HTTP '+response.status+').')}
-      if(!response.ok||!payload.ok)throw Error((payload.error||'FALHA_NA_REQUISICAO')+' (HTTP '+response.status+').');
-      return payload;
-    };
-    $('#migration-send').addEventListener('click',async()=>{
-      if(!isAdmin())return;
-      const secretNode=$('#migration-secret'),secret=secretNode.value;
-      const send=$('#migration-send');
-      if(!validated)return report('Há dados de contas incompatíveis. Não foi enviado nenhum registro.',false);
-      if(secret.length<32)return report('Preencha o segredo temporário de pelo menos 32 caracteres definido no Supabase.',false);
-      if(!$('#migration-confirm').checked)return report('Confirme qual computador possui a lista de contas que deverá prevalecer.',false);
-      send.disabled=true;send.textContent='Enviando contas protegidas…';
-      try{
-        const result=await invoke({action:'bootstrap',bootstrap_secret:secret,accounts:rows});
-        report('Migração concluída: '+result.migrated+' conta(s) copiadas. Não apague contas locais. Teste o acesso centralizado abaixo, depois desative o segredo temporário no Supabase.',true);
-        send.textContent='Contas migradas';
-      }catch(err){
-        report('Não foi possível confirmar a migração: '+(err.message||'falha desconhecida')+'. Se houve falha de rede, verifique a contagem no Supabase antes de tentar novamente.',false);
-        send.disabled=false;send.textContent='Migrar contas uma vez';
-      }finally{secretNode.value='';}
-    });
-    $('#migration-test').addEventListener('click',async()=>{
-      const btn=$('#migration-test');
-      const username=$('#migration-test-username').value.trim().toLowerCase();
-      const passwordNode=$('#migration-test-password');
-      const password=passwordNode.value;
-      if(!username||!password)return report('Informe login e senha para testar a autenticação online.',false);
-      btn.disabled=true;btn.textContent='Testando autenticação…';
-      try{
-        const result=await invoke({action:'login',username,password});
-        try{await invoke({action:'logout',token:result.token})}
-        catch(_){/* A sessão vence automaticamente; o token jamais é salvo. */}
-        report('Teste concluído: a função central reconheceu @'+result.user.username+'. A tela de login ainda é local até a próxima atualização do HTML.',true);
-      }catch(err){report('Teste não passou: '+(err.message||'falha de conexão'),false)}
-      finally{passwordNode.value='';btn.disabled=false;btn.textContent='Testar login online';}
-    });
-  }
   function userCreate(){userEdit()}
   function userEdit(id){
     if(!requireAdmin())return;
@@ -1122,7 +1063,7 @@
     update();code.focus({preventScroll:true});
   }
 
-  const actionMap={cloudConnectModal,cloudMigrateLocal,cloudForceRefresh,cloudDisconnectAsk,accountMigrationModal,userCreate,userEdit,userReset,userToggle,userDelete,receiptModal,receiptDetail,exportReceipts,accountModal,productModal,productDetail,movementModal,transferModal,receiveModal,transferDetail,lossModal,lossDetail,inventoryNew,inventoryDetail,storeModal,operatorModal,exportProducts,exportMovement,exportLosses,exportBackup,importBackup,switchStore:id=>{prefs.storeId=id;savePrefs();render()},themeSwitch:()=>{prefs.theme=prefs.theme==='dark'?'light':'dark';savePrefs();render()},print:()=>window.print()};
+  const actionMap={cloudConnectModal,cloudSendLocalBackup,cloudForceRefresh,cloudDisconnectAsk,userCreate,userEdit,userReset,userToggle,userDelete,receiptModal,receiptDetail,exportReceipts,accountModal,productModal,productDetail,movementModal,transferModal,receiveModal,transferDetail,lossModal,lossDetail,inventoryNew,inventoryDetail,storeModal,operatorModal,exportProducts,exportMovement,exportLosses,exportBackup,importBackup,switchStore:id=>{prefs.storeId=id;savePrefs();render()},themeSwitch:()=>{prefs.theme=prefs.theme==='dark'?'light':'dark';savePrefs();render()},print:()=>window.print()};
   function bindContent(){const c=$('#content');c.querySelectorAll('[data-settings-tab]').forEach(button=>button.addEventListener('click',()=>setSettingsTab(button.dataset.settingsTab)));c.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>{const fn=actionMap[el.dataset.action];if(fn)fn(el.dataset.id)}));c.querySelectorAll('[data-page]').forEach(el=>el.addEventListener('click',()=>setPage(el.dataset.page)));const search=c.querySelector('#list-search');if(search){search.addEventListener('input',e=>{const value=e.target.value,pos=e.target.selectionStart;searchValue=value;const page=prefs.page;const rerender={products:productsPage,movement:movementPage,losses:lossesPage,receipts:receiptsPage}[page];if(rerender){c.innerHTML=rerender();bindContent();const inp=c.querySelector('#list-search');if(inp){inp.focus();inp.setSelectionRange(pos,pos)}}})}mountScannerIcons(c);const select=c.querySelector('#list-filter');if(select)select.addEventListener('change',e=>{filterValue=e.target.value;const page=prefs.page;const rerender={products:productsPage,movement:movementPage,losses:lossesPage,transfers:transfersPage,receipts:receiptsPage}[page];if(rerender){c.innerHTML=rerender();bindContent()}})}
   $('#overlay-mobile').addEventListener('click',()=>{$('#sidebar').classList.remove('open');$('#overlay-mobile').classList.remove('show')});window.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#scanner-root')?.firstElementChild)closeScanner();else if(e.key==='Escape'&&modalState)closeModal()});window.addEventListener('storage',e=>{if(e.key===ACCOUNTS_KEY){const own=accounts().find(a=>a.id===sessionUser?.id&&a.active);if(sessionUser&&!own){logout();toast('Seu acesso foi alterado em outra aba.',true)}else if(sessionUser)render()}if(e.key===KEY){if(!cloudEnabled){db=loadData();render();toast('Dados locais atualizados de outra aba.')}else if(!cloudBusy)cloudPull({quiet:true,preserveModal:!!modalState}) }});
   boot();

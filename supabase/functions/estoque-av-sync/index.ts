@@ -1,6 +1,10 @@
 /**
+ * OBSOLETA: ponte V2.0 antiga do Estoque. A sincronização atual usa diretamente a tabela
+ * assistencia_gerencial conforme LEIA-PRIMEIRO-ESTOQUE-V22.md. Não publique para a nova versão.
+ *
  * ESTOQUE AV V2.0 - Ponte Supabase Edge Function para o login legado do Gerencial.
- * Deploy: supabase functions deploy estoque-av-sync --no-verify-jwt
+ * Este arquivo é mantido somente como referência para instalações anteriores.
+ * Não publique para a versão atual do sistema.
  * Requer variaveis reservadas SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY, fornecidas pelo Supabase.
  * NUNCA colocar SERVICE_ROLE no HTML. O cliente envia as credenciais existentes UMA VEZ
  * apos login normal no Gerencial, sem criar usuario em Authentication.
