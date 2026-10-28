@@ -1,0 +1,33 @@
+{
+  "id": "./?app_id=avenida-estoque-pwa",
+  "name": "Estoque Avenida",
+  "short_name": "Estoque AV",
+  "description": "Sistema de controle de estoque da Avenida.",
+  "start_url": "./?app_id=avenida-estoque-pwa",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f6f8",
+  "theme_color": "#14171a",
+  "orientation": "any",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
