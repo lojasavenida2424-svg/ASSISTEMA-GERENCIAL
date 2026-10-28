@@ -31,5 +31,5 @@ const stock = fs.readFileSync(path.join(root, 'estoque/index.html'), 'utf8');
 assert.match(stock, /fiscal-wizard-modal[^}]*background:linear-gradient\(120deg,#14171a,#292f35\)/, 'Fiscalização usa o grafite do sistema');
 assert.match(stock, /fiscal-wizard-score[^}]*--progress/, 'Fiscalização mantém indicador visual de progresso');
 const resultSw = fs.readFileSync(path.join(root, 'resultados/sw-pwa.js'), 'utf8');
-assert.match(resultSw, /av-resultados-v104-icones-finais-20261028/, 'A versão do cache atualiza as capas do Resultado');
+assert.match(resultSw, /av-resultados-v105-icones-circulares-20261028/, 'A versão do cache atualiza as capas do Resultado');
 console.log('PASS — variantes baseadas na marca AV, arquivos PWA válidos e identidade do site preservada');
