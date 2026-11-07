@@ -15935,14 +15935,20 @@ async function salvarLinhaComConcorrencia(rowId, dadosLocais, dadosBase, tentati
     if(erroLeitura) throw erroLeitura;
 
     if(!atual){
+      /* insert impede que dois aparelhos em primeira gravação se sobrescrevam.
+         Se outro criar antes, a próxima volta relê e aplica a mesclagem CAS. */
       const agora=new Date().toISOString();
       const {data:criado,error:erroCriar}=await supabaseclient
         .from(ONLINE_TABLE)
-        .upsert({id:rowId,dados:local,updated_at:agora},{onConflict:'id'})
+        .insert({id:rowId,dados:local,updated_at:agora})
         .select('dados,updated_at')
         .maybeSingle();
-      if(erroCriar) throw erroCriar;
-      return cloneJSONSeguro(criado?.dados ?? local, local);
+      if(!erroCriar) return cloneJSONSeguro(criado?.dados ?? local, local);
+      if(erroCriar.code==='23505'){
+        await esperar(80*tentativa);
+        continue;
+      }
+      throw erroCriar;
     }
 
     const remoto=atual.dados && typeof atual.dados==='object' ? atual.dados : {};
@@ -16112,7 +16118,11 @@ async function salvarDadosUsuarioOnline(silencioso=false){
     const comunicacaoLocal=dadosComunicacaoDoDB(db);
     const baseComunicacao=valorBaseSync(COMMUNICATION_CACHE_KEY+'_base_sync',{});
     const comunicacaoSalva=await salvarLinhaComConcorrencia(COMMUNICATION_ROW_ID,comunicacaoLocal,baseComunicacao);
-    const compartilhadosSalvos=compartilhadosLocais;
+    // Escalas, equipe e acompanhamento são dados compartilhados. Não marque
+    // uma alteração como salva antes de persistir a linha compartilhada.
+    const compartilhadosSalvos=jsonIgual(compartilhadosLocais,baseCompartilhado)
+      ? cloneJSONSeguro(baseCompartilhado,{})
+      : await salvarLinhaComConcorrencia(SHARED_ROW_ID,compartilhadosLocais,baseCompartilhado);
     Object.assign(db,dadosComunicacaoDoDB(comunicacaoSalva));
     storageSetSeguro(COMMUNICATION_CACHE_KEY,dadosComunicacaoDoDB(db),{serializar:true,silencioso:true});
     storageSetSeguro(COMMUNICATION_CACHE_KEY+'_base_sync',dadosComunicacaoDoDB(db),{serializar:true,silencioso:true});

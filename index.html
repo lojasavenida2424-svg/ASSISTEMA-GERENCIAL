@@ -16216,17 +16216,23 @@ async function salvarLinhaComConcorrencia(rowId, dadosLocais, dadosBase, tentati
     if(erroLeitura) throw erroLeitura;
 
     if(!atual){
+      /* insert impede que dois aparelhos em primeira gravação se sobrescrevam.
+         Em conflito, a próxima tentativa relê a linha e aplica a mesclagem CAS. */
       const agora=new Date().toISOString();
       const {data:criado,error:erroCriar}=await comTimeout(
         supabaseclient
           .from(ONLINE_TABLE)
-          .upsert({id:rowId,dados:local,updated_at:agora},{onConflict:'id'})
+          .insert({id:rowId,dados:local,updated_at:agora})
           .select('dados,updated_at')
           .maybeSingle(),
         SUPABASE_OPERATION_TIMEOUT_MS
       );
-      if(erroCriar) throw erroCriar;
-      return cloneJSONSeguro(criado?.dados ?? local, local);
+      if(!erroCriar) return cloneJSONSeguro(criado?.dados ?? local, local);
+      if(erroCriar.code==='23505'){
+        await esperar(80*tentativa);
+        continue;
+      }
+      throw erroCriar;
     }
 
     const remoto=atual.dados && typeof atual.dados==='object' ? atual.dados : {};

@@ -9,6 +9,6 @@ assert.match(html,/async function login\(\)/,'Fluxo original de login encontrado
 assert.match(html,/carregarConfigGlobalOnline\(\{forcar:true\}\)/,'O login consulta a configuração oficial existente');
 assert.match(html,/usuarioGlobalPorOperador\(operadorInput\)/,'O operador segue validado pela lista existente');
 assert.match(html,/pass!==senhaConfigurada/,'A senha existente continua sendo respeitada');
-assert.match(guide,/mantém os logins já existentes/i,'A orientação informa o modo de compatibilidade');
-assert.match(guide,/Não execute .*SEGURANCA-GERENCIAL-CREDENCIAIS-RLS\.sql.*não é compatível/i,'A orientação impede uma política que bloqueie o login legado');
-console.log('PASS — login Gerencial existente e credenciais preservadas na recuperação V2.2');
+assert.match(guide,/Senha mínima de 3 caracteres/i,'A orientação preserva a regra atual de credenciais');
+assert.match(guide,/Esqueci a senha/i,'A orientação documenta a recuperação de acesso vigente');
+console.log('PASS — login Gerencial existente e credenciais atuais preservadas');
