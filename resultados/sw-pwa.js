@@ -1,4 +1,4 @@
-const CACHE_NAME = 'av-resultados-v104-icones-finais-20261028';
+const CACHE_NAME = 'av-resultados-v105-icones-circulares-20261028';
 const APP_SHELL = [
   './',
   './index.html',
