@@ -15140,7 +15140,7 @@ const departamentosLoja = [...new Set(Object.values(areasTarefaPorSetor).flat())
 // V52.19 — somente o operador 133 é indispensável ao Gerencial.
 // Os demais operadores, inclusive 139 e 144, são usuários comuns: podem receber ou perder acesso pelo painel do desenvolvedor.
 const usuariosOficiais = [
-  { nome:'JOAO PEDRO', operadorPadrao:'133', cargo:'VISUAL MERCHANDISING' }
+  { nome:'JOAO PEDRO DE OLIVEIRA SILVA', operadorPadrao:'133', cargo:'VISUAL MERCHANDISING' }
 ];
 
 const funcionariosPadrao = [
@@ -15733,7 +15733,12 @@ function normalizarConfigGlobal(raw){
     const op=normalizarOperador(of.operadorPadrao);
     let u=cfg.usuarios.find(x=>normalizarOperador(x.operador)===op);
     if(!u){ cfg.usuarios.push(base.usuarios.find(x=>x.operador===op)); }
-    else { u.nome=u.nome||of.nome; u.cargo=u.cargo||of.cargo; u.operador=op; u.senha=String(u.senha||senhaPorOperador(op)); u.matricula=u.matricula||`AV24-${String(Number(op)).padStart(4,'0')}`; u.credencialVersao=Math.max(1,Number(u.credencialVersao)||1); }
+    else {
+      // A configuração recebida do Supabase é a fonte oficial para TODOS os
+      // operadores. Nenhum perfil é completado por um registro local antigo.
+      u.nome=u.nome||of.nome;
+      u.cargo=u.cargo||of.cargo; u.operador=op; u.senha=String(u.senha||senhaPorOperador(op)); u.matricula=u.matricula||`AV24-${String(Number(op)).padStart(4,'0')}`; u.credencialVersao=Math.max(1,Number(u.credencialVersao)||1);
+    }
   });
   cfg.permissoes=cfg.permissoes||{};
   cfg.usuarios.forEach(u=>{
@@ -16895,9 +16900,11 @@ async function login(){
 
     setAppLoaderCheck('sync','checking','Carregando os dados principais da loja...');
     const dadosOk=await carregarDadosUsuarioOnline(operadorInput);
-    if(!dadosOk) setSyncStatus('ATENÇÃO • acesso liberado; sincronização será repetida','syncing');
+    // Nunca abrir o painel com cache local quando a base compartilhada não foi
+    // confirmada. Isso evita que o usuário trabalhe em dados desatualizados.
+    if(!dadosOk) throw new Error('Os dados compartilhados não foram confirmados pelo Supabase.');
     atualizarIdentidadeUsuarioAtual();
-    setAppLoaderCheck('sync',dadosOk?'success':'error',dadosOk?'Dados principais carregados do servidor.':'Sincronização parcial. Alguns dados podem não estar atualizados.');
+    setAppLoaderCheck('sync','success','Dados principais carregados do servidor.');
 
     setAppLoaderCheck('finalize','checking','Preparando o painel Gerencial...');
     initApp();
@@ -16906,7 +16913,7 @@ async function login(){
     atualizarStatusConexao();
     setAppLoaderCheck('finalize','success','Painel pronto para utilização.');
     const textEl=document.getElementById('appLoaderText');
-    if(textEl) textEl.textContent=dadosOk?'Tudo pronto. Abrindo o painel...':'Painel pronto, mas sincronização requer atenção.';
+    if(textEl) textEl.textContent='Tudo pronto. Abrindo o painel...';
     senhaInput.value='';
     await esperar(320);
 
@@ -17044,22 +17051,29 @@ async function atualizarIdentificacaoLogin(mostrar=false){
       estadoOperadorLogin('error',configOk?'Operador não autorizado. Confira o número informado.':'Não foi possível acessar o cadastro. Tente novamente.');
       return false;
     }
+    // Antes de liberar senha ou entrada, resolve o nome a partir das linhas
+    // oficiais do Supabase (configuração + cadastro compartilhado). O cache
+    // local não participa dessa confirmação de identidade.
+    estadoOperadorLogin('checking','Confirmando identificação no cadastro compartilhado...');
+    const nomeOficial=await obterNomeCompletoTelaLogin(operador,user);
+    if(seq!==loginPreviewConsultaSeq || normalizarOperador(input.value)!==operador) return false;
+    if(!nomeOficial){
+      bloquearSenhaAteVerificar();
+      preview.className='login-user-preview not-found';
+      preview.innerHTML=`<div><small>Identificação</small><b id="loginUserFullName">Não foi possível confirmar o nome</b><small>Verifique a conexão com o cadastro compartilhado.</small></div><span class="preview-operator">OP. ${escapeHTML(operador)}</span>`;
+      estadoOperadorLogin('error','A identificação oficial não foi confirmada.');
+      return false;
+    }
+    user.nome=nomeOficial;
     loginOperadorValidado=operador;
     const senha=document.getElementById('loginPass');
     const entrar=document.querySelector('#loginScreen .login-btn');
     if(senha){senha.disabled=false;senha.placeholder='Digite sua senha individual';}
     if(entrar) entrar.disabled=false;
     preview.className='login-user-preview';
-    const nomeLocal=nomeCompletoUsuarioPorOperadorLocal(operador,null,user)||user.nome||'Usuário autorizado';
-    preview.innerHTML=`<div><small>Operador autorizado</small><b id="loginUserFullName">${escapeHTML(nomeLocal)}</b><small>${escapeHTML(user.cargo||'')}</small></div><span class="preview-operator">OP. ${escapeHTML(operador)}</span>`;
+    preview.innerHTML=`<div><small>Operador autorizado</small><b id="loginUserFullName">${escapeHTML(nomeOficial)}</b><small>${escapeHTML(user.cargo||'')}</small></div><span class="preview-operator">OP. ${escapeHTML(operador)}</span>`;
     estadoOperadorLogin('valid','Operador autorizado. Você já pode digitar sua senha.');
     if(mostrar) senha?.focus();
-    // Expand the name without delaying permission or password entry.
-    Promise.resolve(obterNomeCompletoTelaLogin(operador,user)).then(nome=>{
-      if(!nome || seq!==loginPreviewConsultaSeq || loginOperadorValidado!==operador) return;
-      const label=document.getElementById('loginUserFullName');
-      if(label) label.textContent=nome;
-    }).catch(()=>{});
     return true;
   };
   if(mostrar) return revalidar();
@@ -17091,48 +17105,19 @@ async function trySession(){
     const operador=normalizarOperador(sessao?.operador);
     if(!operador || !Number.isFinite(Number(sessao?.expiraEm)) || Date.now()>=Number(sessao.expiraEm)) throw new Error('Sessão local inválida ou expirada.');
 
-    // Primeiro recupera o que estava salvo neste aparelho, inclusive exclusões pendentes.
-    const cacheUsuario=storageGetJSONSeguro(chaveLocalUsuario(operador),null);
-    if(cacheUsuario && typeof cacheUsuario==='object'){
-      db={...defaultDB(),...dadosIndividuaisDoDB(cacheUsuario)};
-      prepararDBCarregado();
-    }
-    const cacheCompartilhado=storageGetJSONSeguro(chaveCacheCompartilhado(),null);
-    if(cacheCompartilhado && typeof cacheCompartilhado==='object'){
-      aplicarDadosCompartilhados(cacheCompartilhado);
-      prepararDBCarregado();
-    }
-
     let user=null;
     const onlineCompleto=!!(navigator.onLine && supabaseclient);
-    if(onlineCompleto){
-      const configOk=await carregarConfigGlobalOnline();
-      if(!configOk) throw new Error('Não foi possível validar a sessão no servidor.');
-      if(!validarSessaoAtualContraConfig()) throw new Error('Sessão revogada ou credencial alterada.');
-      user=usuarioGlobalPorOperador(operador);
-    }else{
-      user={
-        nome:String(sessao.nome||`OPERADOR ${operador}`),
-        operador,
-        cargo:String(sessao.cargo||'USUÁRIO'),
-        matricula:String(sessao.matricula||''),
-        credencialVersao:Math.max(1,Number(sessao.credencialVersao)||1)
-      };
-      globalConfig=normalizarConfigGlobal({
-        usuarios:[user],
-        permissoes:{[operador]:cloneJSONSeguro(sessao.permissoes||permissoesPadrao(operador),{})}
-      });
-    }
+    if(!onlineCompleto) throw new Error('A sessão precisa confirmar os dados no Supabase antes de abrir o painel.');
+    const configOk=await carregarConfigGlobalOnline();
+    if(!configOk) throw new Error('Não foi possível validar a sessão no servidor.');
+    if(!validarSessaoAtualContraConfig()) throw new Error('Sessão revogada ou credencial alterada.');
+    user=usuarioGlobalPorOperador(operador);
     if(!user) throw new Error('Operador não autorizado.');
     usuarioAtual={...user};
     delete usuarioAtual.senha;
 
-    if(onlineCompleto){
-      const dadosOk=await carregarDadosUsuarioOnline(operador);
-      if(!dadosOk) setSyncStatus('ATENÇÃO • sessão restaurada; sincronização pendente','syncing');
-    }else{
-      setSyncStatus(navigator.onLine?'ATENÇÃO • módulo online indisponível; sessão em cache':'OFFLINE • sessão restaurada pelo cache','offline');
-    }
+    const dadosOk=await carregarDadosUsuarioOnline(operador);
+    if(!dadosOk) throw new Error('Os dados compartilhados não foram confirmados pelo Supabase.');
     agendarExpiracaoSessao();
     atualizarIdentidadeUsuarioAtual();
     return true;
@@ -23479,15 +23464,16 @@ window.addEventListener('load', async () => {
       oficial?.nomeCompleto,oficial?.nome
     );
   };
-  g.carregarDiretorioNomesLogin=async(forcar=false)=>{
+  g.carregarDiretorioNomesLogin=async(operador='',forcar=false)=>{
     if(g.__diretorioNomesLoginCarregado && !forcar) return true;
     if(g.__diretorioNomesLoginPromise && !forcar) return g.__diretorioNomesLoginPromise;
     const tarefa=(async()=>{
       if(typeof supabaseclient==='undefined'||!supabaseclient||typeof ONLINE_TABLE==='undefined'||typeof SHARED_ROW_ID==='undefined') return false;
+      const opAtual=typeof normalizarOperador==='function' ? normalizarOperador(operador) : String(operador||'').replace(/\D/g,'');
       const idsFonte=[
         SHARED_ROW_ID,
         typeof LEGACY_SHARED_ROW_ID!=='undefined' ? LEGACY_SHARED_ROW_ID : '',
-        'usuario_133',
+        opAtual ? `usuario_${opAtual}` : '',
         typeof GLOBAL_ROW_ID!=='undefined' ? GLOBAL_ROW_ID : ''
       ].filter((id,indice,lista)=>id && lista.indexOf(id)===indice);
       const consulta=supabaseclient.from(ONLINE_TABLE).select('id,dados').in('id',idsFonte);
@@ -23525,10 +23511,17 @@ window.addEventListener('load', async () => {
   g.nomeCompletoUsuarioPorOperadorAsync=async(operador,acesso=null)=>{
     const op=typeof normalizarOperador==='function'?normalizarOperador(operador):String(operador||'').replace(/\D/g,'');
     if(!op)return '';
-    const nomeLocalCompleto=g.nomeCompletoUsuarioPorOperadorLocal(operador,null,acesso);
-    try{await g.carregarDiretorioNomesLogin();}
+    // No login, usar exclusivamente os dados obtidos do Supabase. A sessão
+    // local pode estar velha e não pode identificar ou autorizar um operador.
+    const acessoOficial=((typeof globalConfig!=='undefined' ? globalConfig?.usuarios : [])||[])
+      .find(u=>(typeof normalizarOperador==='function'?normalizarOperador(u?.operador):String(u?.operador||'').replace(/\D/g,''))===op) || acesso;
+    try{await g.carregarDiretorioNomesLogin(op,true);}
     catch(e){console.warn('Não foi possível consultar o diretório completo no login:',e)}
-    return nomeLoginMaisCompleto(nomeCompletoLoginCache.get(op),acesso?.nomeCompleto,acesso?.nome,nomeLocalCompleto);
+    return nomeLoginMaisCompleto(
+      nomeCompletoLoginCache.get(op),
+      acessoOficial?.nomeCompleto,acessoOficial?.nome_completo,acessoOficial?.fullName,
+      [acessoOficial?.nome,acessoOficial?.sobrenome].filter(Boolean).join(' '),acessoOficial?.nome
+    );
   };
   g.bindLoginPreviewTabFullName=()=>{
     const user=$('loginUser');
