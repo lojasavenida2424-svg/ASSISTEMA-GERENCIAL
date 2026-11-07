@@ -14835,7 +14835,7 @@ const departamentosLoja = [...new Set(Object.values(areasTarefaPorSetor).flat())
 
 // O Gerencial administra os acessos: nunca reconstruir 139/144 após revogação.
 const usuariosOficiais = [
-  { nome:'JOAO PEDRO', operadorPadrao:'133', cargo:'VISUAL MERCHANDISING' }
+  { nome:'JOAO PEDRO DE OLIVEIRA SILVA', operadorPadrao:'133', cargo:'VISUAL MERCHANDISING' }
 ];
 
 const funcionariosPadrao = [
@@ -16305,7 +16305,8 @@ async function login(){
   err.textContent='';
   showAppLoader('Entrando no sistema','Validando acesso e carregando os dados da loja...');
   try{
-    await carregarConfigGlobalOnline();
+    const configOk=await carregarConfigGlobalOnline();
+    if(!configOk) throw new Error('Não foi possível confirmar os acessos no Supabase.');
     const user=usuarioGlobalPorOperador(operadorInput);
     if(!user){err.textContent='Operador não autorizado para acessar o sistema.';return;}
     if(senhaDoUsuario(operadorInput)!==pass){err.textContent='Senha incorreta.';return;}
@@ -16318,7 +16319,8 @@ async function login(){
       sessionStorage.setItem(SESSION_KEY,JSON.stringify(sessaoNova));
       registrarSessaoPrincipalCompartilhada();
     }
-    await carregarDadosUsuarioOnline(operadorInput);
+    const dadosOk=await carregarDadosUsuarioOnline(operadorInput);
+    if(!dadosOk) throw new Error('Os dados compartilhados não foram confirmados pelo Supabase.');
     atualizarIdentidadeUsuarioAtual();
     if(!loginComunicacao){
       await criarSessaoSophia(operadorInput, pass);
@@ -16365,14 +16367,21 @@ async function atualizarIdentificacaoLogin(mostrar = false){
    * somente usuários com autorização de acesso podem ter nome e cargo exibidos.
    * Funcionários cadastrados sem login não são identificados nesta tela.
    */
-  const autorizado =
-    usuarioGlobalPorOperador(operador) ||
-    (db.usuarios || []).find(
-      usuario => normalizarOperador(usuario.operador) === operador
-    );
+  if(!navigator.onLine || !supabaseclient){
+    preview.className = 'login-user-preview not-found';
+    preview.innerHTML = `<div><small>Identificação</small><b>Conexão indisponível</b><small>Conecte-se para confirmar o cadastro oficial.</small></div><span class="preview-operator">OP. ${escapeHTML(operador)}</span>`;
+    return;
+  }
+  const configOk=await carregarConfigGlobalOnline();
+  const autorizado = configOk ? usuarioGlobalPorOperador(operador) : null;
 
   if(autorizado){
-    const nome = await nomeCompletoUsuarioPorOperadorAsync(operador, autorizado) || autorizado.nome || 'Usuário autorizado';
+    const nome = await nomeCompletoUsuarioPorOperadorAsync(operador, autorizado);
+    if(!nome){
+      preview.className = 'login-user-preview not-found';
+      preview.innerHTML = `<div><small>Identificação</small><b>Nome não confirmado</b><small>Não foi possível confirmar o cadastro compartilhado.</small></div><span class="preview-operator">OP. ${escapeHTML(operador)}</span>`;
+      return;
+    }
     const cargo = autorizado.cargo || '';
 
     preview.className = 'login-user-preview';
@@ -31335,11 +31344,6 @@ function nomeCompletoUsuarioPorOperadorLocal(operador, ...extras){
 async function nomeCompletoUsuarioPorOperadorAsync(operador, autorizado = null){
   const op = normalizarOperador(operador);
   if(!op) return '';
-
-  let melhor = nomeCompletoUsuarioPorOperadorLocal(op, autorizado);
-
-  // Se já temos claramente um nome completo (3+ partes), ainda assim tentamos
-  // online uma única vez para garantir que a versão mais longa/oficial prevaleça.
   try{
     if(typeof supabaseclient !== 'undefined' && typeof ONLINE_TABLE !== 'undefined' && typeof SHARED_ROW_ID !== 'undefined'){
       const {data, error} = await supabaseclient
@@ -31348,28 +31352,23 @@ async function nomeCompletoUsuarioPorOperadorAsync(operador, autorizado = null){
         .eq('id', SHARED_ROW_ID)
         .maybeSingle();
 
-      if(!error && data?.dados){
-        try{
-          localStorage.setItem(`${STORAGE_KEY}_compartilhado`, JSON.stringify(data.dados));
-        }catch(_){}
-
-        const candidatos = coletarNomesCompletosCandidatos(op, [autorizado]);
-        (data.dados.funcionarios || []).forEach(f => {
-          if(normalizarOperador(f.operador) === op){
-            candidatos.push(f.nomeCompleto || '');
-            candidatos.push(f.nome || '');
-          }
-        });
-
-        melhor = escolherNomeMaisCompleto(candidatos) || melhor;
-        if(melhor) avLoginNomeCompletoCache.set(op, melhor);
-      }
+      if(error || !data?.dados) return '';
+      const acessoOficial=(globalConfig?.usuarios||[]).find(u=>normalizarOperador(u?.operador)===op)||autorizado;
+      const funcionario=(data.dados.funcionarios||[]).find(f=>normalizarOperador(f?.operador)===op);
+      const melhor=escolherNomeMaisCompleto([
+        funcionario?.nomeCompleto,funcionario?.nome_completo,funcionario?.fullName,
+        [funcionario?.nome,funcionario?.sobrenome].filter(Boolean).join(' '),funcionario?.nome,
+        acessoOficial?.nomeCompleto,acessoOficial?.nome_completo,acessoOficial?.fullName,
+        [acessoOficial?.nome,acessoOficial?.sobrenome].filter(Boolean).join(' '),acessoOficial?.nome
+      ]);
+      if(melhor) avLoginNomeCompletoCache.set(op, melhor);
+      return melhor;
     }
   }catch(err){
     console.warn('Não foi possível consultar o nome completo no cadastro compartilhado:', err);
   }
 
-  return melhor || autorizado?.nome || '';
+  return '';
 }
 </script>
 
